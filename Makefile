@@ -1,0 +1,2 @@
+runtest:
+	cargo test -- --nocapture
