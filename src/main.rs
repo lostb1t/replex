@@ -206,6 +206,7 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
                 let body_string = to_string(container, &content_type).await?;
                 let transformed_body = Body::from(body_string);
                 parts.headers.remove("content-length");
+                parts.headers.insert("x-plex-proxy", HeaderValue::from_static("true"));
                 let transformed_response = Response::from_parts(parts, transformed_body);
                 return Ok(transformed_response);
             }
@@ -220,7 +221,7 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
 
 #[tokio::main]
 async fn main() {
-    //let out_addr: SocketAddr = ([100, 91, 35, 113], 32400).into();
+    // TODO: support websockets
     let bind_addr = "0.0.0.0:3001";
     let addr: SocketAddr = bind_addr.parse().expect("Could not parse ip:port.");
 
