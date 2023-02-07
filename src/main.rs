@@ -104,23 +104,13 @@ impl PlexHttpClient {
 
 #[cached(time=360)]
 async fn get_custom_collections() -> Vec<MetaData> {
+    // TODO: Use hyper Client or hyper_reverse_proxy
     let client = HttpClientBuilder::default()
         .set_api_url("https://plex.sjoerdarendsen.dev")
         .set_x_plex_token("RrZN1WRwYYfao2cuiHs5".to_owned())
         .set_x_plex_client_identifier("etz23lqlxhsdinb7hv9uiu38".to_owned())
         .build()
         .expect("wut went wrong");
-
-    // let server = Server::new("https://plex.sjoerdarendsen.dev", client)
-    //     .await
-    //     .unwrap();
-    // let libraries = server.libraries();
-    // let library = if let Library::Movie(lib) = libraries.get(0).unwrap() {
-    //     lib
-    // } else {
-    //     panic!("Unexpected library type");
-    // };
-    // let collections = library.collections().await.unwrap();
 
     let movie_collection_container: MediaContainerWrapper<MediaContainer> = client
         .get("/library/sections/1/collections")
