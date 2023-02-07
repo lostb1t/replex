@@ -1133,6 +1133,7 @@ dependencies = [
  "plex-api",
  "pretty_assertions",
  "pretty_env_logger",
+ "quick-xml",
  "reqwest",
  "serde",
  "serde-xml-rs",
