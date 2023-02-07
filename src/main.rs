@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 // use serde_json::Result;
 use serde_xml_rs::from_str as from_xml_str;
 use serde_xml_rs::to_string as to_xml_str;
+use serde_xml_rs::from_reader as from_xml_reader;
 // use quick_xml::de::from_str as from_xml_str;
 // use quick_xml::se::to_string as to_xml_str;
 // use serde_xml_rs::from_reader
@@ -39,35 +40,25 @@ pub struct MetaData {
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 pub struct Hub {
-    // #[serde(rename = "@key")]
     key: String,
     hub_key: Option<String>,
-    // #[serde(rename = "@title")]
     title: String,
-    // #[serde(rename = "@hubIdentifier")]
     hub_identifier: String,
-    // #[serde(rename = "@context")]
     context: String,
-    // #[serde(rename = "@type")]
     r#type: String,
-    // #[serde(rename = "@size")]
     size: i32,
-    // #[serde(rename = "@more")]
     more: bool,
-    // #[serde(rename = "@style")]
     style: String,
     promoted: Option<bool>,
-    #[serde(rename = "Metadata")]
-    metadata: Option<Vec<MetaData>>,
+    // #[serde(rename = "Metadata")]
+    // metadata: Option<Vec<MetaData>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 pub struct MediaContainer {
-    // #[serde(rename = "@size")]
     pub size: Option<usize>,
-    // #[serde(rename = "@allowSync")]
     pub allow_sync: Option<bool>,
     pub identifier: Option<String>,
     #[serde(rename = "librarySectionID")]
@@ -76,10 +67,10 @@ pub struct MediaContainer {
     #[serde(rename = "librarySectionUUID")]
     pub library_section_uuid: Option<String>,
     #[serde(rename = "Hub")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub hub: Option<Vec<Hub>>,
-    // #[serde(default)]
-    // pub item: Option<Vec<Hub>>,
     #[serde(rename = "Metadata")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     metadata: Option<Vec<MetaData>>,
 }
 
@@ -178,7 +169,8 @@ enum ContentType {
 async fn body_to_string(body: Body) -> Result<String> {
     let body_bytes = hyper::body::to_bytes(body).await?;
     let string = String::from_utf8(body_bytes.to_vec())?;
-    // Ok(string.replace('\n', ""))
+    // return Ok(snailquote::unescape(&string).unwrap());
+    // return Ok(string.replace("\"",'\\\\\"'));
     Ok(string)
 }
 
@@ -189,17 +181,14 @@ async fn from_body(
 ) -> Result<MediaContainerWrapper<MediaContainer>> {
     // println!("original Response body: {:#?}", content_type);
     let body_string = body_to_string(body).await?;
+    //println!("original Response body: {:#?}", body_string);
+    // let body_string = std::fs::read_to_string("test/hubs2.xml").unwrap();
     // println!("original Response body: {:#?}", body_string);
     let result: MediaContainerWrapper<MediaContainer> = match content_type {
         ContentType::Json => serde_json::from_str(&body_string).unwrap(),
-        ContentType::Xml => {
-            //let fake = format!("<MediaContainerWrapper/>{}</MediaContainerWrapper>", body_string);
-            //println!("original Response body: {:#?}", fake);
-            let yup: MediaContainer = from_xml_str(&body_string).unwrap();
-            MediaContainerWrapper {
-                media_container: yup,
-            }
-        }
+        ContentType::Xml => MediaContainerWrapper {
+            media_container: from_xml_str(&body_string).unwrap(),
+        },
     };
     Ok(result)
 }
@@ -211,6 +200,7 @@ async fn to_string(
 ) -> Result<String> {
     match content_type {
         ContentType::Json => Ok(serde_json::to_string(&container).unwrap()),
+        // ContentType::Xml => Ok("".to_owned()),
         ContentType::Xml => Ok(to_xml_str(&container.media_container).unwrap()),
     }
 }
@@ -239,12 +229,15 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
     // println!("{:#?}", xml_string);
     match hyper_reverse_proxy::call(client_ip, "http://100.91.35.113:32400", req).await {
         Ok(resp) => {
+            // return Ok(resp);
             if uri.path().starts_with("/hubs/sections") && method == Method::GET {
                 let (mut parts, body) = resp.into_parts();
                 let content_type = get_content_type_from_headers(&parts.headers);
                 let mut container = from_body(body, &content_type).await?;
-
+                println!("original Response body: {:#?}", container);
                 container = patch_hubs(container, token).await;
+
+
                 let body_string = to_string(container, &content_type).await?;
                 let transformed_body = Body::from(body_string);
                 parts.headers.remove("content-length");

@@ -1,0 +1,757 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MediaContainer size="9" allowSync="1" identifier="com.plexapp.plugins.library" librarySectionID="3" librarySectionTitle="Shows" librarySectionUUID="dfc93cf1-4fc0-4d17-9003-a055f95fab16">
+<Hub hubKey="/library/metadata/205990,161431,134946,194850,132835,189242" key="/library/collections/240203/children" title="Trending" type="show" hubIdentifier="custom.collection.3.240203.240203" context="hub.custom.collection" size="6" more="1" style="shelf" promoted="1">
+<Directory ratingKey="205990" key="/library/metadata/205990/children" guid="plex://show/5e69c6f6874db7003e2dd59b" studio="HBO" type="show" title="The Last of Us" titleSort="Last of Us" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-MA" summary="20 years after modern civilization has been destroyed, Joel, a hardened survivor, is hired to smuggle Ellie, a 14-year-old girl, out of an oppressive quarantine zone. What starts as a small job soon becomes a brutal heartbreaking journey as they both must traverse the U.S. and depend on each other for survival." index="1" rating="9.4" audienceRating="9.4" lastViewedAt="1675436393" year="2023" tagline="When you&#39;re lost in the darkness, look for the light." thumb="/library/metadata/205990/thumb/1674785147" art="/library/metadata/205990/art/1674785147" duration="3600000" originallyAvailableAt="2023-01-15" leafCount="4" viewedLeafCount="0" childCount="1" addedAt="1673909812" updatedAt="1674785147" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/206005">
+<Genre tag="Adventure" />
+<Genre tag="Drama" />
+<Country tag="United States of America" />
+<Collection tag="Trending" />
+<Role tag="Pedro Pascal" />
+<Role tag="Bella Ramsey" />
+<Role tag="Anna Torv" />
+</Directory>
+<Directory ratingKey="161431" key="/library/metadata/161431/children" guid="plex://show/6220cd604a7f45ca0eca9821" studio="MTV Entertainment Studios" type="show" title="1923" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-MA" summary="Follow a new generation of the Dutton family during the early twentieth century when pandemics, historic drought, the end of Prohibition and the Great Depression all plague the mountain west, and the Duttons who call it home." index="1" rating="8.6" audienceRating="8.6" year="2022" thumb="/library/metadata/161431/thumb/1671369156" art="/library/metadata/161431/art/1671369156" duration="3600000" originallyAvailableAt="2022-12-18" leafCount="5" viewedLeafCount="0" childCount="1" addedAt="1671369129" updatedAt="1671369156" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/161443">
+<Genre tag="Drama" />
+<Genre tag="Western" />
+<Country tag="United States of America" />
+<Collection tag="Trending" />
+<Role tag="Harrison Ford" />
+<Role tag="Helen Mirren" />
+<Role tag="James Badge Dale" />
+</Directory>
+<Directory ratingKey="134946" key="/library/metadata/134946/children" guid="plex://show/5e269a91752e36003dd925b5" studio="MTV Entertainment Studios" type="show" title="Mayor of Kingstown" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-MA" summary="In a small Michigan town where the business of incarceration is the only thriving industry, the McClusky family are the power brokers between the police, criminals, inmates, prison guards and politicians in a city completely dependent on prisons and the prisoners they contain." index="1" rating="8.2" audienceRating="8.3" year="2021" thumb="/library/metadata/134946/thumb/1674785185" art="/library/metadata/134946/art/1674785185" theme="/library/metadata/134946/theme/1674785185" duration="3000000" originallyAvailableAt="2021-11-13" leafCount="14" viewedLeafCount="0" childCount="2" addedAt="1669517069" updatedAt="1674785185" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/134953">
+<Genre tag="Crime" />
+<Genre tag="Drama" />
+<Country tag="United States of America" />
+<Collection tag="Trending" />
+<Role tag="Jeremy Renner" />
+<Role tag="Dianne Wiest" />
+<Role tag="Hugh Dillon" />
+</Directory>
+<Directory ratingKey="194850" key="/library/metadata/194850/children" guid="plex://show/5d9c0845705e7a001e6d7801" studio="BBC" type="show" title="Happy Valley" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-MA" summary="Catherine Cawood is a no-nonsense police sergeant who heads up a team of officers in a rural Yorkshire valley. When a staged kidnapping spirals out of control, turning into a brutal series of crimes, Catherine finds herself involved in something significantly bigger than her rank, but unknowingly close to home." index="1" rating="8.5" audienceRating="8.5" year="2014" thumb="/library/metadata/194850/thumb/1673425563" art="/library/metadata/194850/art/1673425563" theme="/library/metadata/194850/theme/1673425563" duration="3540000" originallyAvailableAt="2014-04-29" leafCount="5" viewedLeafCount="0" childCount="1" addedAt="1673425539" updatedAt="1673425563" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/194866">
+<Genre tag="Drama" />
+<Genre tag="Crime" />
+<Country tag="United Kingdom" />
+<Collection tag="Trending" />
+<Role tag="Sarah Lancashire" />
+<Role tag="Siobhan Finneran" />
+<Role tag="James Norton" />
+</Directory>
+<Directory ratingKey="132835" key="/library/metadata/132835/children" guid="plex://show/5d9c086d2192ba001f310238" studio="Broadway Video" type="show" title="Saturday Night Live" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-14" summary="A late-night comedy show featuring several short skits, parodies of television commercials, a live guest band, and a pop-cultural guest host each week. Many of the SNL players have spun off successful independent comedy and/or movie careers from here." index="1" rating="8.0" audienceRating="8.0" year="1975" tagline="And now, from New York, the most dangerous city in America, it&#39;s Saturday Night Live. (seventh season)" thumb="/library/metadata/132835/thumb/1674699206" art="/library/metadata/132835/art/1674699206" theme="/library/metadata/132835/theme/1674699206" duration="4020000" originallyAvailableAt="1975-10-11" leafCount="320" viewedLeafCount="0" childCount="29" addedAt="1669489139" updatedAt="1674699206" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/132844">
+<Genre tag="Comedy" />
+<Genre tag="Music" />
+<Country tag="United States of America" />
+<Collection tag="Trending" />
+<Role tag="Kenan Thompson" />
+<Role tag="Darrell Hammond" />
+<Role tag="Seth Meyers" />
+</Directory>
+<Directory ratingKey="189242" key="/library/metadata/189242/children" guid="plex://show/61a89c7d76717656405c821f" studio="Gran Via Productions" type="show" title="Anne Rice&#39;s Mayfair Witches" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-MA" summary="The series will focus on an intuitive young neurosurgeon (Alexandra Daddario) who discovers that she is the unlikely heir to a family of witches. As she grapples with her newfound powers, she must contend with a sinister presence (Jack Huston) that has haunted her family for generations." index="1" rating="6.6" audienceRating="6.6" year="2023" thumb="/library/metadata/189242/thumb/1674784897" art="/library/metadata/189242/art/1674784897" duration="3600000" originallyAvailableAt="2023-01-05" leafCount="5" viewedLeafCount="0" childCount="1" addedAt="1673097186" updatedAt="1674784897" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/189259">
+<Genre tag="Fantasy" />
+<Genre tag="Horror" />
+<Country tag="United States of America" />
+<Collection tag="Trending" />
+<Role tag="Alexandra Daddario" />
+<Role tag="Tongayi Chirisa" />
+<Role tag="Jack Huston" />
+</Directory>
+</Hub>
+<Hub hubKey="/library/metadata/204234,169591,133403,143902,204150,184770" key="/library/collections/237064/children" title="Popular" type="show" hubIdentifier="custom.collection.3.237064.237064" context="hub.custom.collection" size="6" more="1" style="shelf" promoted="1">
+<Directory ratingKey="204234" key="/library/metadata/204234/children" guid="plex://show/5d9c086c46115600200aa2fe" studio="Generator Entertainment" type="show" title="Game of Thrones" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-MA" summary="In the mythical continent of Westeros, several powerful families fight for control of the Seven Kingdoms. As conflict erupts in the kingdoms of men, an ancient enemy rises once again to threaten them all. Meanwhile, the last heirs of a recently usurped dynasty plot to take back their homeland from across the Narrow Sea." index="1" rating="9.2" audienceRating="9.2" year="2011" tagline="Winter is coming." thumb="/library/metadata/204234/thumb/1673816951" art="/library/metadata/204234/art/1673816951" theme="/library/metadata/204234/theme/1673816951" duration="3600000" originallyAvailableAt="2011-04-16" leafCount="73" viewedLeafCount="0" childCount="8" addedAt="1673816896" updatedAt="1673816951" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/204263">
+<Genre tag="Action" />
+<Genre tag="Adventure" />
+<Country tag="United States of America" />
+<Collection tag="Popular" />
+<Role tag="Emilia Clarke" />
+<Role tag="Kit Harington" />
+<Role tag="Peter Dinklage" />
+</Directory>
+<Directory ratingKey="169591" key="/library/metadata/169591/children" guid="plex://show/5d9c083402391c001f583d09" studio="Gran Via Productions" type="show" title="Breaking Bad" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-MA" summary="When Walter White, a New Mexico chemistry teacher, is diagnosed with Stage III cancer and given a prognosis of only two years left to live. He becomes filled with a sense of fearlessness and an unrelenting desire to secure his family&#39;s financial future at any cost as he enters the dangerous world of drugs and crime." index="1" rating="9.5" audienceRating="9.5" year="2008" tagline="In the no-holds-barred world of Walt White, the end justifies the extreme. (season 2)" thumb="/library/metadata/169591/thumb/1671819106" art="/library/metadata/169591/art/1671819106" theme="/library/metadata/169591/theme/1671819106" duration="2700000" originallyAvailableAt="2008-01-20" leafCount="9" viewedLeafCount="0" childCount="1" addedAt="1671819080" updatedAt="1671819106" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/169614">
+<Genre tag="Drama" />
+<Genre tag="Crime" />
+<Country tag="United States of America" />
+<Collection tag="Popular" />
+<Role tag="Bryan Cranston" />
+<Role tag="Aaron Paul" />
+<Role tag="Anna Gunn" />
+</Directory>
+<Directory ratingKey="133403" key="/library/metadata/133403/children" guid="plex://show/5d9c07f7e98e47001eb03fc7" studio="Darkwoods Productions" type="show" title="The Walking Dead" titleSort="Walking Dead" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-MA" summary="Sheriff Deputy Rick Grimes gets shot and falls into a coma. When awoken he finds himself in a Zombie Apocalypse. Not knowing what to do he sets out to find his family, after he&#39;s done that, he gets connected to a group to become the leader. He takes charge and tries to help this group of people survive, find a place to live and get them food. This show is all about survival, the risks and the things you&#39;ll have to do to survive." index="1" rating="8.1" audienceRating="8.1" year="2010" tagline="Fight the dead. Fear the living." thumb="/library/metadata/133403/thumb/1669489830" art="/library/metadata/133403/art/1669489830" theme="/library/metadata/133403/theme/1669489830" duration="2520000" originallyAvailableAt="2010-10-31" leafCount="47" viewedLeafCount="0" childCount="3" addedAt="1669489820" updatedAt="1669489830" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/133410">
+<Genre tag="Drama" />
+<Genre tag="Horror" />
+<Country tag="United States of America" />
+<Collection tag="Popular" />
+<Collection tag="Trending" />
+<Role tag="Norman Reedus" />
+<Role tag="Melissa McBride" />
+<Role tag="Lauren Cohan" />
+</Directory>
+<Directory ratingKey="143902" key="/library/metadata/143902/children" guid="plex://show/5d9c07efe9d5a1001f4d5ec1" studio="21 Laps Entertainment" type="show" title="Stranger Things" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-14" summary="In a small town where everyone knows everyone, a peculiar incident starts a chain of events that leads to a child&#39;s disappearance, which begins to tear at the fabric of an otherwise-peaceful community. Dark government agencies and seemingly malevolent supernatural forces converge on the town, while a few of the locals begin to understand that more is going on than meets the eye." index="1" rating="8.7" audienceRating="8.7" year="2016" tagline="The world is turning upside down. (Season 1)" thumb="/library/metadata/143902/thumb/1670173889" art="/library/metadata/143902/art/1670173889" theme="/library/metadata/143902/theme/1670173889" duration="3000000" originallyAvailableAt="2016-07-15" leafCount="34" viewedLeafCount="0" childCount="4" addedAt="1670173856" updatedAt="1670173889" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/143927">
+<Genre tag="Drama" />
+<Genre tag="Mystery" />
+<Country tag="United States of America" />
+<Collection tag="Trending" />
+<Collection tag="Popular" />
+<Role tag="Winona Ryder" />
+<Role tag="David Harbour" />
+<Role tag="Millie Bobby Brown" />
+</Directory>
+<Directory ratingKey="204150" key="/library/metadata/204150/children" guid="plex://show/5d9c08452df347001e3ae964" studio="BBC Wales" type="show" title="Sherlock" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-14" summary="In this modernized version of the Conan Doyle characters, using his detective plots, Sherlock Holmes lives in early-21st-century London and acts more cocky towards Scotland Yard&#39;s detective inspector Lestrade because he&#39;s actually less confident. Doctor Watson is now a fairly young veteran of the Afghan war, less adoring and more active." index="1" rating="9.1" audienceRating="9.1" year="2010" tagline="The Game is On" thumb="/library/metadata/204150/thumb/1673816789" art="/library/metadata/204150/art/1673816789" theme="/library/metadata/204150/theme/1673816789" duration="5400000" originallyAvailableAt="2010-07-25" leafCount="12" viewedLeafCount="0" childCount="4" addedAt="1673816779" updatedAt="1673816789" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/204162">
+<Genre tag="Crime" />
+<Genre tag="Drama" />
+<Country tag="United Kingdom" />
+<Collection tag="Popular" />
+<Role tag="Benedict Cumberbatch" />
+<Role tag="Martin Freeman" />
+<Role tag="Una Stubbs" />
+</Directory>
+<Directory ratingKey="184770" key="/library/metadata/184770/children" guid="plex://show/5d9c086d2192ba001f3101c6" studio="Warner Bros. Television" type="show" title="Friends" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-14" summary="Ross Geller, Rachel Green, Monica Geller, Joey Tribbiani, Chandler Bing, and Phoebe Buffay are six twenty-somethings living in New York City. Over the course of 10 years and seasons, these friends go through life lessons, family, love, drama, friendship, and comedy." index="1" rating="8.9" audienceRating="8.9" year="1994" tagline="You can never have enough Friends!" thumb="/library/metadata/184770/thumb/1672827310" art="/library/metadata/184770/art/1672827310" theme="/library/metadata/184770/theme/1672827310" duration="1500000" originallyAvailableAt="1994-09-22" leafCount="234" viewedLeafCount="0" childCount="10" addedAt="1672827296" updatedAt="1672827310" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/184784">
+<Genre tag="Comedy" />
+<Genre tag="Romance" />
+<Country tag="United States of America" />
+<Collection tag="Popular" />
+<Collection tag="Trending" />
+<Role tag="Jennifer Aniston" />
+<Role tag="Courteney Cox" />
+<Role tag="Lisa Kudrow" />
+</Directory>
+</Hub>
+<Hub hubKey="/library/metadata/241434,241433,132459,133415,185830,132835" key="/hubs/home/recentlyAdded?type=2&amp;sectionID=3" title="Recently Added in Shows" type="mixed" hubIdentifier="tv.recentlyadded.3" context="hub.tv.recentlyadded" size="6" more="1" style="shelf">
+<Video ratingKey="241434" key="/library/metadata/241434" parentRatingKey="132785" grandparentRatingKey="37538" guid="plex://episode/63b0aa8593c31161f8bc6c54" parentGuid="plex://season/628237fc53119585f1525d26" grandparentGuid="plex://show/5d9c0819705e7a001e6d2a45" type="episode" title="02/05" grandparentKey="/library/metadata/37538" parentKey="/library/metadata/132785" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" grandparentTitle="60 Minutes" parentTitle="Season 55" contentRating="TV-PG" summary="" index="20" parentIndex="55" year="2023" thumb="/library/metadata/241434/thumb/1675696746" art="/library/metadata/37538/art/1674698541" grandparentThumb="/library/metadata/37538/thumb/1674698541" grandparentArt="/library/metadata/37538/art/1674698541" grandparentTheme="/library/metadata/37538/theme/1674698541" duration="2594525" originallyAvailableAt="2023-02-05" addedAt="1675696737" updatedAt="1675696746">
+<Media id="293505" duration="2594525" bitrate="3045" width="1920" height="1080" aspectRatio="1.78" audioChannels="2" audioCodec="aac" videoCodec="h264" videoResolution="1080" container="mkv" videoFrameRate="NTSC" audioProfile="lc" videoProfile="high">
+<Part id="295135" key="/library/parts/295135/1675663949/file.mkv" duration="2594525" file="/data/shows/60 Minutes (1968)/Season 55/60 Minutes - S55E20 - 02+05 [ WEBDL-1080p X264 AAC 2.0].mkv" size="987554702" audioProfile="lc" container="mkv" videoProfile="high">
+<Stream id="799765" streamType="1" default="1" codec="h264" index="0" bitrate="3045" bitDepth="8" chromaLocation="left" chromaSubsampling="4:2:0" codedHeight="1088" codedWidth="1920" colorPrimaries="bt709" colorRange="tv" colorSpace="bt709" colorTrc="bt709" frameRate="29.970" hasScalingMatrix="0" height="1080" level="40" profile="high" refFrames="4" scanType="progressive" width="1920" displayTitle="1080p (H.264)" extendedDisplayTitle="1080p (H.264)">
+</Stream>
+<Stream id="799766" streamType="2" selected="1" default="1" codec="aac" index="1" channels="2" bitrate="129" language="English" languageTag="en" languageCode="eng" audioChannelLayout="stereo" profile="lc" samplingRate="48000" displayTitle="English (AAC Stereo)" extendedDisplayTitle="English (AAC Stereo)">
+</Stream>
+<Stream id="799767" streamType="3" codec="srt" index="2" bitrate="0" language="English" languageTag="en" languageCode="eng" displayTitle="English (SRT)" extendedDisplayTitle="English (SRT)">
+</Stream>
+</Part>
+</Media>
+<Guid id="tvdb://9532307" />
+</Video>
+<Video ratingKey="241433" key="/library/metadata/241433" parentRatingKey="125660" grandparentRatingKey="125450" guid="plex://episode/63b460b5c3c662364e02ea91" parentGuid="plex://season/62f3bc2d23199d097c12f428" grandparentGuid="plex://show/5d9c086e46115600200aaad4" type="episode" title="Pavement" grandparentKey="/library/metadata/125450" parentKey="/library/metadata/125660" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" grandparentTitle="Austin City Limits" parentTitle="Season 48" contentRating="TV-PG" summary="Legendary alternative rock pioneers Pavement deliver modern rock highlights in a career-spanning hour. The veteran California band mark their thirtieth anniversary with a rare television performance." index="11" parentIndex="48" year="2023" thumb="/library/metadata/241433/thumb/1675696362" art="/library/metadata/125450/art/1674784910" grandparentThumb="/library/metadata/125450/thumb/1674784910" grandparentArt="/library/metadata/125450/art/1674784910" duration="3206369" originallyAvailableAt="2023-02-04" addedAt="1675696351" updatedAt="1675696362">
+<Media id="293504" duration="3206369" bitrate="6719" width="1920" height="1080" aspectRatio="1.78" audioChannels="2" audioCodec="aac" videoCodec="h264" videoResolution="1080" container="mkv" videoFrameRate="NTSC" audioProfile="lc" videoProfile="high">
+<Part id="295134" key="/library/parts/295134/1675643208/file.mkv" duration="3206369" file="/data/shows/Austin City Limits (1974)/Season 48/Austin City Limits - S48E11 - Pavement [ WEBDL-1080p H264 AAC 2.0].mkv" size="2693117041" audioProfile="lc" container="mkv" videoProfile="high">
+<Stream id="799762" streamType="1" default="1" codec="h264" index="0" bitrate="6719" bitDepth="8" chromaLocation="left" chromaSubsampling="4:2:0" codedHeight="1088" codedWidth="1920" colorPrimaries="bt709" colorRange="tv" colorSpace="bt709" colorTrc="bt709" frameRate="29.970" hasScalingMatrix="0" height="1080" level="40" profile="high" refFrames="4" scanType="progressive" width="1920" displayTitle="1080p (H.264)" extendedDisplayTitle="1080p (H.264)">
+</Stream>
+<Stream id="799763" streamType="2" selected="1" default="1" codec="aac" index="1" channels="2" bitrate="157" language="English" languageTag="en" languageCode="eng" audioChannelLayout="stereo" profile="lc" samplingRate="48000" displayTitle="English (AAC Stereo)" extendedDisplayTitle="English (AAC Stereo)">
+</Stream>
+<Stream id="799764" streamType="3" codec="srt" index="2" bitrate="0" language="English" languageTag="en" languageCode="eng" displayTitle="English (SRT)" extendedDisplayTitle="English (SRT)">
+</Stream>
+</Part>
+</Media>
+<Guid id="tmdb://4134920" />
+<Guid id="tvdb://9601704" />
+</Video>
+<Directory ratingKey="132459" key="/library/metadata/132459/children" guid="plex://show/5d9c0808705e7a001e6d0abc" studio="Warner Horizon Television" type="show" title="Queen Sugar" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-14" summary="Follows the life of three siblings, one of whom moves from Los Angeles to Louisiana, to claim a shared inheritance from their recently departed father - an 800-acre sugarcane farm." index="1" rating="7.8" audienceRating="7.8" year="2016" tagline="Risk. Romance. Reinvention." thumb="/library/metadata/132459/thumb/1669480565" art="/library/metadata/132459/art/1669480565" theme="/library/metadata/132459/theme/1669480565" duration="3600000" originallyAvailableAt="2016-09-06" leafCount="75" viewedLeafCount="0" childCount="6" addedAt="1675695747" updatedAt="1669480565" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/132468">
+<Genre id="18" filter="genre=18" tag="Drama" />
+<Country id="30931" filter="country=30931" tag="United States of America" />
+<Guid id="imdb://tt4419214" />
+<Guid id="tmdb://67679" />
+<Guid id="tvdb://314442" />
+<Rating image="imdb://image.rating" value="7.8" type="audience" />
+<Rating image="themoviedb://image.rating" value="7.9" type="audience" />
+<Role id="219686" filter="actor=219686" tag="Rutina Wesley" tagKey="5d7769c97a53e9001e6f064c" role="Nova Bordelon" thumb="https://metadata-static.plex.tv/2/people/20174736ca302b00a72c900c321a0487.jpg" />
+<Role id="211136" filter="actor=211136" tag="Dawn-Lyen Gardner" tagKey="63289651668de7e886fc851e" role="Charley Bordelon West" thumb="https://metadata-static.plex.tv/e/people/e5ffd5746fb27367e6a6822fae2f217e.jpg" />
+<Role id="57335" filter="actor=57335" tag="Kofi Siriboe" tagKey="5d77683b4de0ee001fccca07" role="Ralph Angel Bordelon" thumb="https://metadata-static.plex.tv/people/5d77683b4de0ee001fccca07.jpg" />
+<Role id="393865" filter="actor=393865" tag="Nicholas L. Ashe" tagKey="5d9c0808705e7a001e6d0b62" role="Micah West" thumb="https://metadata-static.plex.tv/people/5d9c0808705e7a001e6d0b62.jpg" />
+<Role id="77560" filter="actor=77560" tag="Dondre Whitfield" tagKey="5d77683b880197001ec94c1d" role="Remy Newell" thumb="https://metadata-static.plex.tv/9/people/903037e021cfa290a5bc62eee38b48d5.jpg" />
+<Role id="43336" filter="actor=43336" tag="Omar J. Dorsey" tagKey="5d776833999c64001ec2eee8" role="Hollywood Desonier" thumb="https://metadata-static.plex.tv/7/people/76d9035d784421aab8c509036395e870.jpg" />
+<Role id="153570" filter="actor=153570" tag="Greg Vaughan" tagKey="5d776842e6d55c002040f1c8" role="Calvin" thumb="https://metadata-static.plex.tv/7/people/7a16c349cac3059af9f60bfbca5e9406.jpg" />
+<Role id="165789" filter="actor=165789" tag="Tina Lifford" tagKey="5d77682b61141d001fb13eb1" role="Violet Bordelon" thumb="https://metadata-static.plex.tv/people/5d77682b61141d001fb13eb1.jpg" />
+<Role id="393866" filter="actor=393866" tag="Ethan Hutchison" tagKey="5fa02d463a9f04002ee08c81" role="Blue Bordelon" thumb="https://metadata-static.plex.tv/d/people/d42e3605629ac09abefe93f0ed531103.jpg" />
+<Role id="62443" filter="actor=62443" tag="Myles Truitt" tagKey="6323d37293de28374b30d28a" role="Ant" thumb="https://metadata-static.plex.tv/6/people/6a9838b917fa698be0df606b76f3faad.jpg" />
+<Role id="357953" filter="actor=357953" tag="Vivien Ng&#244;" tagKey="5d777062f617c9002019d913" role="Trinh Phan" thumb="https://metadata-static.plex.tv/people/5d777062f617c9002019d913.jpg" />
+<Role id="121763" filter="actor=121763" tag="Ty Doran" tagKey="5d9c08ea2192ba001f318718" role="Justin" thumb="https://metadata-static.plex.tv/people/5d9c08ea2192ba001f318718.jpg" />
+<Role id="65617" filter="actor=65617" tag="Tanyell Waivers" tagKey="5d776f0bad5437001f808ff9" role="Keke" thumb="https://metadata-static.plex.tv/d/people/d7bc14ed41e1db74d90e0fdbc1dce70b.jpg" />
+<Role id="46455" filter="actor=46455" tag="Travis Quentin" tagKey="5f09bab5c927d7004022df74" role="Handsome White Man" thumb="https://metadata-static.plex.tv/e/people/e82125c7fb8926991eccae491290cbc6.jpg" />
+<Role id="303723" filter="actor=303723" tag="Perris Drew" tagKey="5f40092dc63b480040dc4d4f" role="Terrence" thumb="https://metadata-static.plex.tv/7/people/7af8b2ea44ff422f30deef7543272aa2.jpg" />
+<Field locked="1" name="rating" />
+<Field locked="1" name="audienceRating" />
+<Location path="/data/shows/Queen Sugar (2016)" />
+</Directory>
+<Directory ratingKey="133415" key="/library/metadata/133415/children" guid="plex://show/5d9c07ec08fddd001f28e266" studio="CBS Studios" type="show" title="NCIS: Los Angeles" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-14" summary="The Naval Criminal Investigation Service&#39;s Office of Special Projects takes on the undercover work and the hard to crack cases in LA. Key agents are G. Callen and Sam Hanna, streets kids risen through the ranks." index="1" rating="6.8" audienceRating="6.8" year="2009" tagline="Meet your ancestors" thumb="/library/metadata/133415/thumb/1674785222" art="/library/metadata/133415/art/1674785222" theme="/library/metadata/133415/theme/1674785222" duration="2700000" originallyAvailableAt="2009-09-22" leafCount="294" viewedLeafCount="0" childCount="14" addedAt="1675695670" updatedAt="1674785222" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/133424">
+<Genre id="120" filter="genre=120" tag="Action" />
+<Genre id="18" filter="genre=18" tag="Drama" />
+<Genre id="20" filter="genre=20" tag="Mystery" />
+<Genre id="487" filter="genre=487" tag="Crime" />
+<Genre id="1619" filter="genre=1619" tag="Family" />
+<Genre id="275" filter="genre=275" tag="Adventure" />
+<Country id="30931" filter="country=30931" tag="United States of America" />
+<Guid id="imdb://tt1378167" />
+<Guid id="tmdb://17610" />
+<Guid id="tvdb://95441" />
+<Rating image="imdb://image.rating" value="6.8" type="audience" />
+<Rating image="themoviedb://image.rating" value="7.5" type="audience" />
+<Role id="109887" filter="actor=109887" tag="Chris O&#39;Donnell" tagKey="5d776826103a2d001f563f5d" role="G. Callen" thumb="https://metadata-static.plex.tv/1/people/156412d78de2d26f9683f08289fdb7b8.jpg" />
+<Role id="70556" filter="actor=70556" tag="LL Cool J" tagKey="5d77682e961905001eb929a4" role="Sam Hanna" thumb="https://metadata-static.plex.tv/3/people/3d9e2f6809cb070cb52d4e4323d9d589.jpg" />
+<Role id="442348" filter="actor=442348" tag="Daniela Ruah" tagKey="5d7768b4431c830024c13c2d" role="Kensi Blye" thumb="https://metadata-static.plex.tv/f/people/ff27effefd319da3e50f9a58d581c2ba.jpg" />
+<Role id="33743" filter="actor=33743" tag="Linda Hunt" tagKey="5d7768283c3c2a001fbcb5f6" role="Henrietta &#34;Hetty&#34; Lange" thumb="https://metadata-static.plex.tv/3/people/31b48f663e074328ac4fa839579b22a3.jpg" />
+<Role id="300066" filter="actor=300066" tag="Barrett Foa" tagKey="5d9c07ec08fddd001f28e2ba" role="Eric Beal" thumb="https://metadata-static.plex.tv/people/5d9c07ec08fddd001f28e2ba.jpg" />
+<Role id="170866" filter="actor=170866" tag="Eric Christian Olsen" tagKey="5d77682785719b001f3a0ed8" role="Marty Deeks" thumb="https://metadata-static.plex.tv/people/5d77682785719b001f3a0ed8.jpg" />
+<Role id="443709" filter="actor=443709" tag="Ren&#233;e Felice Smith" tagKey="5d776b5dad5437001f79cf40" role="Nell Jones" thumb="https://metadata-static.plex.tv/people/5d776b5dad5437001f79cf40.jpg" />
+<Role id="48557" filter="actor=48557" tag="Miguel Ferrer" tagKey="5d776827f54112001f5bbff8" role="Owen Granger" thumb="https://metadata-static.plex.tv/4/people/453457bc3d1d9692e85ff8e93c8be484.jpg" />
+<Role id="93276" filter="actor=93276" tag="Medalion Rahimi" tagKey="5d776b71594b2b001e6da489" role="Special Agent Fatima Namazi" thumb="https://metadata-static.plex.tv/people/5d776b71594b2b001e6da489.jpg" />
+<Role id="183839" filter="actor=183839" tag="Caleb Castille" tagKey="5d77702e96b655001fe900d3" role="Devin Roundtree" thumb="https://metadata-static.plex.tv/2/people/226f6fc5f59fb18d92f9d4d9e6624019.jpg" />
+<Role id="36643" filter="actor=36643" tag="Nia Long" tagKey="5d776827999c64001ec2c8cb" role="Shay Mosley" thumb="https://metadata-static.plex.tv/people/5d776827999c64001ec2c8cb.jpg" />
+<Role id="52561" filter="actor=52561" tag="Gerald McRaney" tagKey="5d77685d51dd69001fe0af70" role="Retired Navy Admiral Hollace Kilbride" thumb="https://metadata-static.plex.tv/4/people/4535fb23b58895e467c983e1a6f7eac6.jpg" />
+<Role id="395092" filter="actor=395092" tag="Peter Cambor" tagKey="5d776ad796b655001fdfb35a" role="Nate Getz" thumb="https://metadata-static.plex.tv/7/people/714fe4e4ffc81fcbe4e169681ae77a36.jpg" />
+<Role id="152282" filter="actor=152282" tag="Bar Paly" tagKey="5d77699cfb0d55001f52ae04" role="Anna Kolcheck" thumb="https://metadata-static.plex.tv/0/people/06a3db4d2ff91c72387dd0e7261473b3.jpg" />
+<Role id="73302" filter="actor=73302" tag="Adam Jamal Craig" tagKey="5d77688996b655001fdbafd4" role="Dominic Vail" thumb="https://metadata-static.plex.tv/people/5d77688996b655001fdbafd4.jpg" />
+<Role id="278896" filter="actor=278896" tag="Cindy Luna" tagKey="5d776e86ad5437001f7f8205" role="Martina" />
+<Role id="95753" filter="actor=95753" tag="Vyto Ruginis" tagKey="5d77682a7e9a3c0020c6b32f" role="Arkady Kolcheck" thumb="https://metadata-static.plex.tv/people/5d77682a7e9a3c0020c6b32f.jpg" />
+<Role id="122062" filter="actor=122062" tag="Andrea Bordeaux" tagKey="5d776ae396b655001fdfca25" role="Special Agent Harley Hidoko" thumb="https://metadata-static.plex.tv/c/people/c970ceb6c2d92c3a5568701abc80d409.jpg" />
+<Role id="81133" filter="actor=81133" tag="Erik Palladino" tagKey="5d77682de6d55c002040ba38" role="Vostanik Sabatino" thumb="https://metadata-static.plex.tv/9/people/9a578efa3ac72e1e6735968d66293733.jpg" />
+<Role id="165989" filter="actor=165989" tag="Elizabeth Bogush" tagKey="5d77684a7e9a3c0020c70211" role="Joelle Taylor" thumb="https://metadata-static.plex.tv/a/people/a29c1273c3f32369f2bb3bce7ed861c2.jpg" />
+<Role id="443710" filter="actor=443710" tag="Duncan Campbell" tagKey="6043a8d57e7bcf002cf25c58" role="NCIS Agent Castor" />
+<Role id="153501" filter="actor=153501" tag="Marsha Thomason" tagKey="5d776837880197001ec93abe" role="Nicole Dechamps" thumb="https://metadata-static.plex.tv/e/people/e0e9ea98d2ec58c9b1aabc238a27d0c6.jpg" />
+<Role id="71806" filter="actor=71806" tag="Claire Forlani" tagKey="5d77682685719b001f3a08e7" role="Lauren Hunter" thumb="https://metadata-static.plex.tv/3/people/326573403c7bfa02e82b4775ee753bab.jpg" />
+<Role id="162818" filter="actor=162818" tag="Jeff Kober" tagKey="5d77683261141d001fb14e8a" role="Harris Keane" thumb="https://metadata-static.plex.tv/people/5d77683261141d001fb14e8a.jpg" />
+<Role id="117288" filter="actor=117288" tag="Mercedes Mason" tagKey="5d7769717a53e9001e6e6b75" role="Talia Del Campo" thumb="https://metadata-static.plex.tv/6/people/664a20c5ed17e82c1c7bada2531b375d.jpg" />
+<Role id="166554" filter="actor=166554" tag="John M. Jackson" tagKey="5d7768288718ba001e3121c6" role="A.J. Chegwidden" thumb="https://metadata-static.plex.tv/0/people/0feb6ae9b855c0224b6dc708a4ec671a.jpg" />
+<Role id="443711" filter="actor=443711" tag="Anslem Richardson" tagKey="5d77688a594b2b001e68f165" role="Tahir Khaled" thumb="https://image.tmdb.org/t/p/original/gsnepFgvzWonmuRTTvUWxMIrMeZ.jpg" />
+<Role id="162248" filter="actor=162248" tag="Long Nguyen" tagKey="5d776850880197001ec9824f" role="Dang" thumb="https://metadata-static.plex.tv/4/people/47d61419d1c9e87cf8501e9dbdfadc65.jpg" />
+<Role id="166047" filter="actor=166047" tag="Pamela Reed" tagKey="5d77682954f42c001f8c2d71" role="Roberta Deeks" thumb="https://metadata-static.plex.tv/people/5d77682954f42c001f8c2d71.jpg" />
+<Role id="77288" filter="actor=77288" tag="Moon Bloodgood" tagKey="5d7768268718ba001e311c32" role="Katherine Casillas" thumb="https://metadata-static.plex.tv/6/people/688cc03a5079b9fba1c86b8ebbc922f4.jpg" />
+<Role id="76219" filter="actor=76219" tag="Kurt Yaeger" tagKey="5d7768a423d5a3001f4ef6cf" role="Sullivan" />
+<Role id="321889" filter="actor=321889" tag="Kayla Smith" tagKey="5d776c167a53e9001e739320" role="Kamran Hanna" thumb="https://metadata-static.plex.tv/9/people/9d3c9b3786f739c0b424e863f608747e.jpg" />
+<Role id="127915" filter="actor=127915" tag="Bill Goldberg" tagKey="5d77683285719b001f3a3219" role="Lance Hamilton" thumb="https://metadata-static.plex.tv/5/people/51a2178073a9beaa33aa947d66843d21.jpg" />
+<Role id="159961" filter="actor=159961" tag="Olesya Rulin" tagKey="5d776835961905001eb9422e" role="Zasha Gagarin" thumb="https://metadata-static.plex.tv/people/5d776835961905001eb9422e.jpg" />
+<Role id="51885" filter="actor=51885" tag="Karina Logue" tagKey="5d776827f54112001f5bc086" role="LAPD Detective Ellen Whiting" thumb="https://metadata-static.plex.tv/5/people/5864ade7e86746f6f9e1d4fe5f821c64.jpg" />
+<Role id="210813" filter="actor=210813" tag="Sammy Sheik" tagKey="5d77683ce6d55c002040e3e6" role="Ahmed Han Asakeem" thumb="https://metadata-static.plex.tv/people/5d77683ce6d55c002040e3e6.jpg" />
+<Role id="42405" filter="actor=42405" tag="Carl Lumbly" tagKey="5d77682ceb5d26001f1def0c" role="Charles Langston" thumb="https://metadata-static.plex.tv/people/5d77682ceb5d26001f1def0c.jpg" />
+<Role id="205962" filter="actor=205962" tag="Nicki Micheaux" tagKey="5d776841103a2d001f56ab2a" role="DOJ Special Agent Effie Carlson" thumb="https://metadata-static.plex.tv/people/5d776841103a2d001f56ab2a.jpg" />
+<Role id="161837" filter="actor=161837" tag="Kavi Ladnier" tagKey="5d776aa17a53e9001e70acb5" role="NCIS Reserve Agent Shyla Dahr" thumb="https://metadata-static.plex.tv/people/5d776aa17a53e9001e70acb5.jpg" />
+<Role id="334157" filter="actor=334157" tag="Beckett Gunderson" tagKey="5f3fd89ecae2c60042e951f5" role="Young Callen" />
+<Role id="53728" filter="actor=53728" tag="Eddie Shin" tagKey="5d776854eb5d26001f1e6a2b" role="Matthew Ogilvie" thumb="https://metadata-static.plex.tv/people/5d776854eb5d26001f1e6a2b.jpg" />
+<Role id="41175" filter="actor=41175" tag="Salvator Xuereb" tagKey="5d776825880197001ec9052e" role="Balinski / CIA Officer Randall Sharov" thumb="https://metadata-static.plex.tv/people/5d776825880197001ec9052e.jpg" />
+<Role id="437505" filter="actor=437505" tag="Laura Harring" tagKey="5d776829961905001eb91ae3" role="Julia Feldman" thumb="https://metadata-static.plex.tv/people/5d776829961905001eb91ae3.jpg" />
+<Role id="83153" filter="actor=83153" tag="Scott Grimes" tagKey="5d77682d103a2d001f565ced" role="Dave Flynn" thumb="https://metadata-static.plex.tv/3/people/373e201be4841e7a10022f2b6c43cace.jpg" />
+<Role id="211056" filter="actor=211056" tag="Jackson Hurst" tagKey="5d7768307e9a3c0020c6bd6a" role="Corbin Duggan" thumb="https://metadata-static.plex.tv/d/people/ddc188eb732d82ca56a4f5c0723932cb.jpg" />
+<Role id="43284" filter="actor=43284" tag="James Remar" tagKey="5d776825999c64001ec2bf71" role="Admiral Sterling Bridges" thumb="https://metadata-static.plex.tv/5/people/54b2d87fe726a66e910a5d872986cf46.jpg" />
+<Role id="145805" filter="actor=145805" tag="India de Beaufort" tagKey="5d776831103a2d001f566dfd" role="Alexandra Reynolds" thumb="https://metadata-static.plex.tv/9/people/942333caa76f627ce22bafb6469509e8.jpg" />
+<Role id="181650" filter="actor=181650" tag="Melise" tagKey="5d77683b6f4521001ea9d409" role="Jennifer Kim" thumb="https://metadata-static.plex.tv/people/5d77683b6f4521001ea9d409.jpg" />
+<Role id="75659" filter="actor=75659" tag="Alyssa Diaz" tagKey="5d776838151a60001f24e937" role="Jasmine Garcia" thumb="https://metadata-static.plex.tv/0/people/0a7561e4c22c2626e6eec87b37d01903.jpg" />
+<Role id="149851" filter="actor=149851" tag="Gil Birmingham" tagKey="5d776833eb5d26001f1e0247" role="Navy Captain Steven Douglas" thumb="https://metadata-static.plex.tv/people/5d776833eb5d26001f1e0247.jpg" />
+<Role id="162336" filter="actor=162336" tag="Don Wallace" tagKey="5d7768412e80df001ebdfc6a" role="Navy SEAL Senior Chief Frank Wallac" thumb="https://metadata-static.plex.tv/people/5d7768412e80df001ebdfc6a.jpg" />
+<Role id="157103" filter="actor=157103" tag="Catherine Bell" tagKey="5d7768264de0ee001fcc85d9" role="Sarah MacKenzie" thumb="https://image.tmdb.org/t/p/original/kNJpj79JHdbz1T8gaSBSdYJhMZq.jpg" />
+<Role id="115757" filter="actor=115757" tag="Tyler Poelle" tagKey="5d77685033f255001e852997" role="Corey" thumb="https://metadata-static.plex.tv/c/people/cd1f8d6a49197d08a3ae2b42ea84c8d3.jpg" />
+<Role id="72618" filter="actor=72618" tag="Ravil Isyanov" tagKey="5d7768244de0ee001fcc80ae" role="Anatoli Kirkin" thumb="https://metadata-static.plex.tv/people/5d7768244de0ee001fcc80ae.jpg" />
+<Role id="306373" filter="actor=306373" tag="Christopher Lambert" tagKey="5d77682e961905001eb92ca7" role="Marcel Janvier" thumb="https://metadata-static.plex.tv/7/people/7b2a0211c26824f99fc9439235c51363.jpg" />
+<Role id="39547" filter="actor=39547" tag="Richard Gant" tagKey="5d7768256f4521001ea989d0" role="Raymond Hanna" thumb="https://metadata-static.plex.tv/7/people/7bfd15f72fe23f1c34ffbc672245ecaa.jpg" />
+<Role id="76197" filter="actor=76197" tag="Natalia del Riego" tagKey="5e1625d910faa500400ce0fc" role="Rosa Reyes" thumb="https://metadata-static.plex.tv/people/5e1625d910faa500400ce0fc.jpg" />
+<Role id="67585" filter="actor=67585" tag="John Heard" tagKey="5d7768275af944001f1f6e82" role="Special Congressional Investigator Michael Thomas" thumb="https://metadata-static.plex.tv/0/people/0114dae36c163dbb37a6747842aad163.jpg" />
+<Role id="57886" filter="actor=57886" tag="JR Bourne" tagKey="5d7768327e9a3c0020c6c33a" role="" thumb="https://image.tmdb.org/t/p/original/ytic06VRha6addRGF7BSXXj9OkG.jpg" />
+<Role id="407051" filter="actor=407051" tag="Kinga Philipps" tagKey="5d776828961905001eb91720" role="" thumb="https://metadata-static.plex.tv/f/people/f113bbd5b62db8b1018c10ebb6cad126.jpg" />
+<Role id="148798" filter="actor=148798" tag="Matthew Atkinson" tagKey="62fb7ccb74382a3a22cd931a" role="Keith Stiger" thumb="https://metadata-static.plex.tv/2/people/2893935d425bb56bae334a5da7ec5630.jpg" />
+<Role id="35952" filter="actor=35952" tag="Uriah Shelton" tagKey="5d77683b7e9a3c0020c6dfe1" role="Finn" thumb="https://metadata-static.plex.tv/a/people/a0f7b777e6953a8aef01f001748b285f.jpg" />
+<Role id="57327" filter="actor=57327" tag="Corey Reynolds" tagKey="5d776827eb5d26001f1dd884" role="ATF Agent Duke Morgan" thumb="https://metadata-static.plex.tv/6/people/6603992ff88d1f141eb76297c2d80264.jpg" />
+<Role id="102894" filter="actor=102894" tag="Carlos Sanz" tagKey="5d77682b6f4521001ea99ec2" role="DEA Agent Mario Sanchez" thumb="https://metadata-static.plex.tv/9/people/9da010e05eaa4b5e120e31206c66c2b2.jpg" />
+<Role id="38009" filter="actor=38009" tag="Adam Bartley" tagKey="5d776c3df617c9002017f411" role="Carl Brown" thumb="https://metadata-static.plex.tv/4/people/4886fe8fec01e3855f7a68c63218c800.jpg" />
+<Role id="45488" filter="actor=45488" tag="Jeronimo Spinx" tagKey="5d77697096b655001fdcefe7" role="NCIS Agent Thompson" thumb="https://metadata-static.plex.tv/people/5d77697096b655001fdcefe7.jpg" />
+<Role id="443712" filter="actor=443712" tag="Ashley Spillers" tagKey="5d77696896b655001fdce08d" role="Sydney Jones" thumb="https://metadata-static.plex.tv/people/5d77696896b655001fdce08d.jpg" />
+<Role id="272841" filter="actor=272841" tag="Azie Tesfai" tagKey="5d77684d103a2d001f56c8c4" role="King" thumb="https://metadata-static.plex.tv/people/5d77684d103a2d001f56c8c4.jpg" />
+<Role id="226175" filter="actor=226175" tag="Lester Speight" tagKey="5d7768343c3c2a001fbcde63" role="Max &#39;Champ&#39; Champion" thumb="https://metadata-static.plex.tv/people/5d7768343c3c2a001fbcde63.jpg" />
+<Role id="109452" filter="actor=109452" tag="Gabriel Olds" tagKey="5d776845999c64001ec3249b" role="Spencer Allen" thumb="https://metadata-static.plex.tv/e/people/e239d1542ad14e364ca895be43f1c5af.jpg" />
+<Role id="168416" filter="actor=168416" tag="Erin Way" tagKey="5d7768e97a53e9001e6dc3cd" role="Agent Zoe Morris" thumb="https://metadata-static.plex.tv/people/5d7768e97a53e9001e6dc3cd.jpg" />
+<Role id="163262" filter="actor=163262" tag="Patrick St. Esprit" tagKey="5d77683554f42c001f8c4932" role="LAPD Lieutenant Roger Bates" thumb="https://metadata-static.plex.tv/4/people/4f2c80930ad9d315a6fa5b1527b85fd9.jpg" />
+<Role id="79478" filter="actor=79478" tag="Bobby Lee" tagKey="5d776835961905001eb9406d" role="Rio Syamsundin" thumb="https://metadata-static.plex.tv/d/people/db5cfd5a501c2be10400a059a006525b.jpg" />
+<Role id="272845" filter="actor=272845" tag="David James Elliott" tagKey="5d776844880197001ec9633b" role="Harmon Rabb Jr." thumb="https://metadata-static.plex.tv/people/5d776844880197001ec9633b.jpg" />
+<Role id="443713" filter="actor=443713" tag="Natassia Halabi" tagKey="5d776b7d7a53e9001e7275e2" role="Mossad Agent Eliana Sapir" thumb="https://metadata-static.plex.tv/b/people/be60ed61e9cb8babefc8e84e6efe98fa.jpg" />
+<Role id="49208" filter="actor=49208" tag="Dina Meyer" tagKey="5d776824151a60001f24a38e" role="Veronica Stephens" thumb="https://metadata-static.plex.tv/1/people/180aab03ce27558643f08dd1a5eaa889.jpg" />
+<Role id="108257" filter="actor=108257" tag="Daniel J. Travanti" tagKey="5d77682deb5d26001f1df28a" role="Garrison" thumb="https://metadata-static.plex.tv/people/5d77682deb5d26001f1df28a.jpg" />
+<Role id="90084" filter="actor=90084" tag="Nicky Endres" tagKey="5d7769eb51dd69001fe1d9a1" role="Kim" thumb="https://metadata-static.plex.tv/people/5d7769eb51dd69001fe1d9a1.jpg" />
+<Role id="41959" filter="actor=41959" tag="Sara Visser" tagKey="5d776cacad5437001f7c574b" role="Karen St. Pierre" thumb="https://metadata-static.plex.tv/5/people/56cad3d33639cf1b1159470e423d7972.jpg" />
+<Role id="41048" filter="actor=41048" tag="Gene Farber" tagKey="5d77686a374a5b001fec4fbc" role="Darius Reznikov" thumb="https://metadata-static.plex.tv/people/5d77686a374a5b001fec4fbc.jpg" />
+<Role id="167914" filter="actor=167914" tag="Kate Orsini" tagKey="5d77683da091de001f2e8f0b" role="FBI Agent Audrey Rush" thumb="https://metadata-static.plex.tv/people/5d77683da091de001f2e8f0b.jpg" />
+<Role id="332487" filter="actor=332487" tag="Guy Wilson" tagKey="62fb7cda443e060f7ad94645" role="Gunner&#39;s Mate Michael Skinner" thumb="https://metadata-static.plex.tv/1/people/10e496b97051390569d53bd56f9dfb08.jpg" />
+<Role id="50840" filter="actor=50840" tag="Fernanda Andrade" tagKey="5d77688a308bca002032cb99" role="Claudia Diaz" thumb="https://metadata-static.plex.tv/5/people/581de8714badd21358af0a5d39258b43.jpg" />
+<Role id="36497" filter="actor=36497" tag="Ali Olomi" tagKey="5d776bf096b655001fe20c85" role="Rafik Shahidi (Taliban Leader) / Insurgent" thumb="https://metadata-static.plex.tv/people/5d776bf096b655001fe20c85.jpg" />
+<Role id="41245" filter="actor=41245" tag="Matthew Bellows" tagKey="5d77689ffb0d55001f515abd" role="Navy Commander Brian James" thumb="https://metadata-static.plex.tv/c/people/c97b70d6263053be8356761c75a5bb71.jpg" />
+<Role id="151782" filter="actor=151782" tag="Juan Riedinger" tagKey="5d77682685719b001f3a0b17" role="Navy Chief Petty Officer Thomas Argento" thumb="https://metadata-static.plex.tv/people/5d77682685719b001f3a0b17.jpg" />
+<Role id="49867" filter="actor=49867" tag="Myk Watford" tagKey="5d7768313c3c2a001fbcd46a" role="Navy Petty Officer William Moffet" thumb="https://metadata-static.plex.tv/b/people/b3a3b1c3923f2cc9400da3e1b392ae4f.jpg" />
+<Role id="443714" filter="actor=443714" tag="Mariela Garriga" tagKey="5d7768bb96b655001fdc0540" role="Pietra Rey" thumb="https://image.tmdb.org/t/p/original/g2fo3I9XJR1e9V4DlMJ3pPb6WwT.jpg" />
+<Role id="153562" filter="actor=153562" tag="Allen Theosky Rowe" tagKey="5d7769d3fb0d55001f53152c" role="Jimmy Fang" thumb="https://metadata-static.plex.tv/7/people/7f232e503c867cb553d0c5c14cbd5e49.jpg" />
+<Role id="434385" filter="actor=434385" tag="Michael King" tagKey="5d776c8c594b2b001e6f687a" role="Logan Reynolds" thumb="https://metadata-static.plex.tv/people/5d776c8c594b2b001e6f687a.jpg" />
+<Role id="95737" filter="actor=95737" tag="Frank Military" tagKey="5d77682bf54112001f5bc4f1" role="Garikayi Mutambirwa" thumb="https://metadata-static.plex.tv/7/people/7cdb7bcf304ecf5c21169165030f2344.jpg" />
+<Role id="443715" filter="actor=443715" tag="Eugene Prokofiev" tagKey="5d776c8c594b2b001e6f6885" role="Oleg Barinov" thumb="https://metadata-static.plex.tv/7/people/792952f4ad5d0851cd264eae5795ad13.jpg" />
+<Role id="154967" filter="actor=154967" tag="Weronika Rosati" tagKey="5d77683d7e9a3c0020c6e65c" role="Vanya Leonova" thumb="https://metadata-static.plex.tv/people/5d77683d7e9a3c0020c6e65c.jpg" />
+<Role id="443716" filter="actor=443716" tag="Nika Khitrova" tagKey="5d776e5196b655001fe63556" role="Odessa Kedrova" thumb="https://image.tmdb.org/t/p/original/4ohscXHI68g6EdaIdVsvyRct5We.jpg" />
+<Role id="38126" filter="actor=38126" tag="Zack Duhame" tagKey="5d776833f59e58002189882c" role="Ali Durrani" thumb="https://metadata-static.plex.tv/people/5d776833f59e58002189882c.jpg" />
+<Role id="167734" filter="actor=167734" tag="Pauley Perrette" tagKey="5d776828a091de001f2e64a2" role="Abby Sciuto" thumb="https://metadata-static.plex.tv/people/5d776828a091de001f2e64a2.jpg" />
+<Role id="259307" filter="actor=259307" tag="Briana Marin" tagKey="5d7768b4431c830024c13b30" role="Supervisory Special Agent Aliyah De Leon" thumb="https://metadata-static.plex.tv/people/5d7768b4431c830024c13b30.jpg" />
+<Role id="214495" filter="actor=214495" tag="Ashwin Gore" tagKey="5d7769e3fb0d55001f5335b0" role="ONI Inspector General Akhil Ali" thumb="https://metadata-static.plex.tv/people/5d7769e3fb0d55001f5335b0.jpg" />
+<Role id="40172" filter="actor=40172" tag="Eugene Young" tagKey="5e163d6bfef2d4003e8a0761" role="Sang" thumb="https://metadata-static.plex.tv/c/people/c08d78bcd112ac448713eeb29e1cbdda.jpg" />
+<Role id="57381" filter="actor=57381" tag="Christine Horn" tagKey="5d7769e7f617c90020166738" role="Elliot Reynolds" thumb="https://metadata-static.plex.tv/people/5d7769e7f617c90020166738.jpg" />
+<Role id="443717" filter="actor=443717" tag="Samantha Gangal" tagKey="6323d268ab5cfaed4d872f17" role="Young Katya" />
+<Role id="152209" filter="actor=152209" tag="Milissa Sears" tagKey="5d776832880197001ec92ace" role="Leah Novak" thumb="https://metadata-static.plex.tv/a/people/a8b7eae33a93b7218700d592569b9f03.jpg" />
+<Role id="47933" filter="actor=47933" tag="Jere Burns" tagKey="5d77683385719b001f3a3290" role="Arnold Blume" thumb="https://metadata-static.plex.tv/c/people/cf5652d9bb29b906443089410ac0bac3.jpg" />
+<Role id="61183" filter="actor=61183" tag="Cyd Strittmatter" tagKey="5d7768263c3c2a001fbcadd2" role="Janice King" thumb="https://metadata-static.plex.tv/people/5d7768263c3c2a001fbcadd2.jpg" />
+<Role id="165428" filter="actor=165428" tag="Seidy L&#243;pez" tagKey="5d77682b61141d001fb13ee7" role="" thumb="https://metadata-static.plex.tv/people/5d77682b61141d001fb13ee7.jpg" />
+<Role id="147630" filter="actor=147630" tag="Chris Tardio" tagKey="5d776841880197001ec95c6c" role="" thumb="https://metadata-static.plex.tv/b/people/b6dba83ff651317de3e7c9609d6a122b.jpg" />
+<Role id="153419" filter="actor=153419" tag="Assaf Cohen" tagKey="5d77683385719b001f3a337b" role="" thumb="https://metadata-static.plex.tv/people/5d77683385719b001f3a337b.jpg" />
+<Role id="345408" filter="actor=345408" tag="Mathew St. Patrick" tagKey="5d77683a7e9a3c0020c6dc15" role="" thumb="https://metadata-static.plex.tv/6/people/6f15e752fe85cd7bd0d5efb00839ae31.jpg" />
+<Role id="163238" filter="actor=163238" tag="Monet Mazur" tagKey="5d7768282ec6b5001f6ba5c7" role="" thumb="https://metadata-static.plex.tv/9/people/9b3ab05eccdf786ed5485b5a5076cf50.jpg" />
+<Role id="73268" filter="actor=73268" tag="Charles Esten" tagKey="5d7768348718ba001e314504" role="" thumb="https://metadata-static.plex.tv/8/people/83bae756d2c55d7dc22aa398d4705dbc.jpg" />
+<Role id="109838" filter="actor=109838" tag="Rocky Carroll" tagKey="5d77682b999c64001ec2d650" role="" thumb="https://metadata-static.plex.tv/people/5d77682b999c64001ec2d650.jpg" />
+<Role id="117160" filter="actor=117160" tag="Paul James" tagKey="5d7768342ec6b5001f6bbdf5" role="" thumb="https://metadata-static.plex.tv/a/people/a22e2beb7eeba079e4127565751b4471.jpg" />
+<Role id="165397" filter="actor=165397" tag="Elizabeth Sung" tagKey="5d7768267228e5001f1dce46" role="Ming Lee" thumb="https://metadata-static.plex.tv/e/people/e850252092e1cd64d9b0fbdd985aa440.jpg" />
+<Role id="35610" filter="actor=35610" tag="Dichen Lachman" tagKey="5d77683c961905001eb95455" role="" thumb="https://metadata-static.plex.tv/people/5d77683c961905001eb95455.jpg" />
+<Role id="283562" filter="actor=283562" tag="Charlie O&#39;Donnell" tagKey="5d9c07fde98e47001eb04890" role="" />
+<Role id="170867" filter="actor=170867" tag="Parry Shen" tagKey="5d776842999c64001ec31caf" role="" thumb="https://metadata-static.plex.tv/2/people/26ff7bc9df1d94cb73d830f807f5c9b7.jpg" />
+<Role id="58783" filter="actor=58783" tag="Mac Brandt" tagKey="5d77685f5af944001f2010f4" role="" thumb="https://metadata-static.plex.tv/people/5d77685f5af944001f2010f4.jpg" />
+<Role id="161664" filter="actor=161664" tag="Dameon Clarke" tagKey="5d77682d7228e5001f1dd9bc" role="" thumb="https://metadata-static.plex.tv/people/5d77682d7228e5001f1dd9bc.jpg" />
+<Role id="47279" filter="actor=47279" tag="Isaiah Mustafa" tagKey="5d77688debdf2200209c23d9" role="" thumb="https://metadata-static.plex.tv/0/people/0687755a3e0c9ef47d7625fbaa052973.jpg" />
+<Role id="230025" filter="actor=230025" tag="Michael Ornstein" tagKey="5d77683054c0f0001f302e66" role="" thumb="https://metadata-static.plex.tv/people/5d77683054c0f0001f302e66.jpg" />
+<Role id="443718" filter="actor=443718" tag="Ariel Gade" tagKey="5d77682685719b001f3a0b01" role="" thumb="https://metadata-static.plex.tv/7/people/7eabd1219956c45e80fd3bbd0694f2fa.jpg" />
+<Role id="37403" filter="actor=37403" tag="Mark Rolston" tagKey="5d77682b7e9a3c0020c6b73b" role="" thumb="https://metadata-static.plex.tv/people/5d77682b7e9a3c0020c6b73b.jpg" />
+<Role id="71005" filter="actor=71005" tag="Michael Reilly Burke" tagKey="5d77684785719b001f3a717b" role="" thumb="https://metadata-static.plex.tv/people/5d77684785719b001f3a717b.jpg" />
+<Role id="266373" filter="actor=266373" tag="Ryan O&#39;Neal" tagKey="5d77682c103a2d001f565a40" role="" thumb="https://metadata-static.plex.tv/2/people/2ec90624c67b9864111c53b583ae64fa.jpg" />
+<Role id="151574" filter="actor=151574" tag="Henri Lubatti" tagKey="5d776842eb5d26001f1e3cbf" role="" thumb="https://metadata-static.plex.tv/6/people/686bf941430d684d10dd6f90f897e349.jpg" />
+<Role id="163675" filter="actor=163675" tag="John Lafayette" tagKey="5d7768337228e5001f1de4d4" role="" thumb="https://metadata-static.plex.tv/people/5d7768337228e5001f1de4d4.jpg" />
+<Role id="133748" filter="actor=133748" tag="Elaine Kao" tagKey="5d7768458718ba001e3179c0" role="Xue-Li" thumb="https://metadata-static.plex.tv/2/people/29ded03ace144d7634653abb42f25a16.jpg" />
+<Role id="166569" filter="actor=166569" tag="Scout Taylor-Compton" tagKey="5d77682ba091de001f2e6b48" role="" thumb="https://metadata-static.plex.tv/3/people/353ae11b4545f070fd630a78309276bc.jpg" />
+<Role id="154940" filter="actor=154940" tag="Michael Irby" tagKey="5d77682bf54112001f5bc4f0" role="" thumb="https://metadata-static.plex.tv/7/people/767c23288dbb5c64e30e6750c5b8fe98.jpg" />
+<Role id="43162" filter="actor=43162" tag="Maurice Compte" tagKey="5d7768303c3c2a001fbccfd0" role="" thumb="https://metadata-static.plex.tv/2/people/21d37cf0abf5b43e23124f36a2a5182e.jpg" />
+<Role id="161395" filter="actor=161395" tag="Dayo Ade" tagKey="5d77686dfb0d55001f50ff2e" role="" thumb="https://metadata-static.plex.tv/c/people/c3d1942844f04f9ca91dbc9fca9eecaf.jpg" />
+<Role id="57268" filter="actor=57268" tag="Julianna McCarthy" tagKey="5d776827151a60001f24ac1e" role="" />
+<Role id="166331" filter="actor=166331" tag="Kris Lemche" tagKey="5d7768317e9a3c0020c6c008" role="" thumb="https://metadata-static.plex.tv/people/5d7768317e9a3c0020c6c008.jpg" />
+<Role id="57923" filter="actor=57923" tag="Matt Battaglia" tagKey="5d776831999c64001ec2e90d" role="" thumb="https://metadata-static.plex.tv/a/people/af6c4c3f16d0f52afd691e7cf47f963a.jpg" />
+<Role id="83160" filter="actor=83160" tag="Kelly Hu" tagKey="5d7768267e9a3c0020c6a9f1" role="Lee Wuan Kai" thumb="https://metadata-static.plex.tv/9/people/9aea42eb970f07be06971b27c81ec1cf.jpg" />
+<Role id="69806" filter="actor=69806" tag="Alex Fernandez" tagKey="5d7768256f4521001ea98a08" role="" thumb="https://metadata-static.plex.tv/5/people/54715d5da166ca574f247f0f0d04c421.jpg" />
+<Role id="443719" filter="actor=443719" tag="Rachael Carpani" tagKey="5d77683d8718ba001e3165cf" role="" thumb="https://metadata-static.plex.tv/f/people/f1ac5c9c5569a6b3102dec12c5a5cd84.jpg" />
+<Role id="50856" filter="actor=50856" tag="Ray Stoney" tagKey="5d77683561141d001fb158a0" role="" thumb="https://metadata-static.plex.tv/people/5d77683561141d001fb158a0.jpg" />
+<Role id="42630" filter="actor=42630" tag="James Harvey Ward" tagKey="5d7768883ab0e7001f503dba" role="Vic Stearnard" thumb="https://metadata-static.plex.tv/people/5d7768883ab0e7001f503dba.jpg" />
+<Role id="48499" filter="actor=48499" tag="Helena Mattsson" tagKey="5d776835a091de001f2e7e53" role="" thumb="https://metadata-static.plex.tv/people/5d776835a091de001f2e7e53.jpg" />
+<Role id="42664" filter="actor=42664" tag="David Monahan" tagKey="5d776857103a2d001f56e5ab" role="" thumb="https://metadata-static.plex.tv/people/5d776857103a2d001f56e5ab.jpg" />
+<Role id="107509" filter="actor=107509" tag="Rodney Rowland" tagKey="5d7768334de0ee001fccae1c" role="" thumb="https://metadata-static.plex.tv/7/people/73cc356214c8ca9a9db9bc302260509d.jpg" />
+<Role id="59478" filter="actor=59478" tag="Kelvin Yu" tagKey="5d77683154c0f0001f302ff1" role="" thumb="https://metadata-static.plex.tv/c/people/c228d887a728152dda48a9d3299d438d.jpg" />
+<Role id="162800" filter="actor=162800" tag="Clare Carey" tagKey="5d77683385719b001f3a3298" role="" thumb="https://metadata-static.plex.tv/people/5d77683385719b001f3a3298.jpg" />
+<Role id="159927" filter="actor=159927" tag="Tyler Jacob Moore" tagKey="5d776a5a96b655001fdec286" role="" thumb="https://metadata-static.plex.tv/people/5d776a5a96b655001fdec286.jpg" />
+<Role id="299869" filter="actor=299869" tag="Andrew Connolly" tagKey="5d776834e6d55c002040cfb7" role="" thumb="https://metadata-static.plex.tv/people/5d776834e6d55c002040cfb7.jpg" />
+<Role id="53241" filter="actor=53241" tag="Lew Temple" tagKey="5d7768263c3c2a001fbcafd0" role="" thumb="https://metadata-static.plex.tv/0/people/00e7808013db7ed0faccf51a1116e83a.jpg" />
+<Role id="69795" filter="actor=69795" tag="Aaron Norvell" tagKey="5d776d84f617c900201898f0" role="" thumb="https://metadata-static.plex.tv/people/5d776d84f617c900201898f0.jpg" />
+<Role id="221011" filter="actor=221011" tag="Barry W. Levy" tagKey="5d776839151a60001f24ea3a" role="" thumb="https://metadata-static.plex.tv/4/people/43f54da6b13b33cb8d69dfa23fe8bcb7.jpg" />
+<Role id="201214" filter="actor=201214" tag="Gregory Scott Cummins" tagKey="5d776826999c64001ec2c37f" role="" thumb="https://metadata-static.plex.tv/7/people/74f802e0dbcc70a685b219414a274682.jpg" />
+<Role id="161791" filter="actor=161791" tag="Alaina Huffman" tagKey="5d77683c4de0ee001fcccef3" role="Serena Miller" thumb="https://metadata-static.plex.tv/9/people/92c5f7de5f8cb32d3b326743acdb8c48.jpg" />
+<Role id="57930" filter="actor=57930" tag="Shawn-Caulin Young" tagKey="5d776835961905001eb93e95" role="Papa Legba / Justin Stewart" thumb="https://metadata-static.plex.tv/people/5d776835961905001eb93e95.jpg" />
+<Role id="259629" filter="actor=259629" tag="Michael Buonomo" tagKey="5d7768b3431c830024c1392e" role="Marine" thumb="https://metadata-static.plex.tv/people/5d7768b3431c830024c1392e.jpg" />
+<Role id="153621" filter="actor=153621" tag="Roberto &#39;Sanz&#39; Sanchez" tagKey="5d7768275af944001f1f6ac8" role="" thumb="https://metadata-static.plex.tv/0/people/091c935635355a5b5553ccffee805ba1.jpg" />
+<Role id="165744" filter="actor=165744" tag="Alex Carter" tagKey="5d77682b7e9a3c0020c6b75b" role="Frank Kouris" thumb="https://metadata-static.plex.tv/0/people/0b99f47f9a8cca28c0fa944bedec7cdc.jpg" />
+<Role id="394722" filter="actor=394722" tag="William Shockley" tagKey="5d776833961905001eb93792" role="Rand Palmer" thumb="https://metadata-static.plex.tv/0/people/0480e2d903817bb687d162d1db444115.jpg" />
+<Role id="77528" filter="actor=77528" tag="Tamlyn Tomita" tagKey="5d7768256f4521001ea9899c" role="Homeland Security Agent Shana Rollins" thumb="https://metadata-static.plex.tv/0/people/014a2336a624aea6ec0af73700ac8e83.jpg" />
+<Role id="229868" filter="actor=229868" tag="Shaun Duke" tagKey="5d776831103a2d001f566b38" role="Manager" />
+<Role id="50660" filter="actor=50660" tag="Rocky Abou-Sakher" tagKey="5d776abffb0d55001f54fb99" role="Man (Antonis Cosse/Elias Minas)" thumb="https://metadata-static.plex.tv/people/5d776abffb0d55001f54fb99.jpg" />
+<Role id="443720" filter="actor=443720" tag="Charlie Wilson" tagKey="5f403d9e1ae710004107d4cf" role="Boy" />
+<Role id="137694" filter="actor=137694" tag="Felix Ryan" tagKey="5d7768b91999bc0020dcf3a3" role="Danny Levian" thumb="https://metadata-static.plex.tv/3/people/369e440ef35569799f96f1cd9a9bddf1.jpg" />
+<Role id="161852" filter="actor=161852" tag="Meagan Tandy" tagKey="5d77687d6f4521001eaa9477" role="Sierra Fisher" thumb="https://metadata-static.plex.tv/d/people/d894a1f4908483cc6b7cb416c788c0fe.jpg" />
+<Role id="272483" filter="actor=272483" tag="Arienne Mandi" tagKey="5d776c0296b655001fe22fc4" role="Catalina Diaz" thumb="https://metadata-static.plex.tv/c/people/c17a9cd0d4facf39b182e7e48b08f1f0.jpg" />
+<Role id="166741" filter="actor=166741" tag="Wynn Everett" tagKey="5d7768316f4521001ea9b48f" role="Ariel Drewett" thumb="https://metadata-static.plex.tv/people/5d7768316f4521001ea9b48f.jpg" />
+<Role id="162389" filter="actor=162389" tag="Matthew Del Negro" tagKey="5d776846e6d55c002040fcae" role="" thumb="https://metadata-static.plex.tv/people/5d776846e6d55c002040fcae.jpg" />
+<Role id="161537" filter="actor=161537" tag="Manny Montana" tagKey="5d7769ec96b655001fdddf2d" role="Diego Salazar" thumb="https://metadata-static.plex.tv/c/people/caabea10e84abdc82718b7d610c56281.jpg" />
+<Role id="45129" filter="actor=45129" tag="Danny Trejo" tagKey="5d77682861141d001fb137a9" role="Tuhon" thumb="https://metadata-static.plex.tv/d/people/dde32fb458445a12087dbcf444de477a.jpg" />
+<Role id="57272" filter="actor=57272" tag="Anthony Ruivivar" tagKey="5d776827151a60001f24ac21" role="Mark Ruiz" thumb="https://metadata-static.plex.tv/people/5d776827151a60001f24ac21.jpg" />
+<Role id="68058" filter="actor=68058" tag="Scott Michael Morgan" tagKey="5d776833e6d55c002040cb41" role="Wilson Rowe" thumb="https://metadata-static.plex.tv/people/5d776833e6d55c002040cb41.jpg" />
+<Role id="116431" filter="actor=116431" tag="Becca Tobin" tagKey="5d776d77f617c90020189422" role="Blaze Talcott" thumb="https://metadata-static.plex.tv/people/5d776d77f617c90020189422.jpg" />
+<Role id="186505" filter="actor=186505" tag="Kristen Ariza" tagKey="5d77697123d5a3001f4f7e39" role="Jessica Peyton" thumb="https://metadata-static.plex.tv/d/people/de4233a67e7d8b5e5b627e04b5d5c8b8.jpg" />
+<Role id="38179" filter="actor=38179" tag="Chris Gann" tagKey="5d7768315af944001f1f9134" role="Deputy U.S. Marshal Anthony Howard" thumb="https://metadata-static.plex.tv/people/5d7768315af944001f1f9134.jpg" />
+<Role id="71217" filter="actor=71217" tag="Pej Vahdat" tagKey="5d7768368718ba001e314b50" role="Rameesh Nayam-Singh" thumb="https://metadata-static.plex.tv/people/5d7768368718ba001e314b50.jpg" />
+<Role id="69231" filter="actor=69231" tag="Daniel Henney" tagKey="5d77682b3c3c2a001fbcc35b" role="Paul Angelo" thumb="https://metadata-static.plex.tv/b/people/b1c665a5d874a155fbce68e4b42b0b8b.jpg" />
+<Role id="164789" filter="actor=164789" tag="Nick Puga" tagKey="5d776d2047dd6e001f6f0518" role="Dex Stevenson" thumb="https://metadata-static.plex.tv/7/people/733fac3544c4165028b46aa651225e74.jpg" />
+<Role id="161530" filter="actor=161530" tag="Sean Marquette" tagKey="5d7768342ec6b5001f6bbd9f" role="Ed Mosker" thumb="https://metadata-static.plex.tv/people/5d7768342ec6b5001f6bbd9f.jpg" />
+<Role id="166516" filter="actor=166516" tag="Rosalie Ward" tagKey="5d776864fb0d55001f50f36e" role="Julie King" />
+<Role id="353695" filter="actor=353695" tag="Lisa Maley" tagKey="5d776c9a9ab544002151886f" role="Chen / Shu Chen" thumb="https://metadata-static.plex.tv/people/5d776c9a9ab544002151886f.jpg" />
+<Role id="416574" filter="actor=416574" tag="Lee Hudson" tagKey="5d776c1a7a53e9001e739d08" role="Ricky" />
+<Role id="77331" filter="actor=77331" tag="Sam Adegoke" tagKey="5de03e3b5269bc001e581e9b" role="Junior Sancho" thumb="https://metadata-static.plex.tv/c/people/c270ee7fe730d3b8c3f1727dc3f5243d.jpg" />
+<Role id="135686" filter="actor=135686" tag="Michelle Ang" tagKey="5d77683985719b001f3a4a61" role="Malee Vipada" thumb="https://metadata-static.plex.tv/2/people/28ca13b24ff6f407691395dd0f616a39.jpg" />
+<Role id="92189" filter="actor=92189" tag="Joel Johnstone" tagKey="5d776a3f51dd69001fe215ab" role="Gregory Jenkins" thumb="https://metadata-static.plex.tv/people/5d776a3f51dd69001fe215ab.jpg" />
+<Role id="443721" filter="actor=443721" tag="Josh Crotty" tagKey="5d776a897a53e9001e707fc4" role="Brent Williams" thumb="https://metadata-static.plex.tv/people/5d776a897a53e9001e707fc4.jpg" />
+<Role id="141179" filter="actor=141179" tag="Juan Javier Cardenas" tagKey="5d77706cad5437001f821dcf" role="Ricardo Pena" thumb="https://metadata-static.plex.tv/people/5d77706cad5437001f821dcf.jpg" />
+<Role id="381751" filter="actor=381751" tag="Barbara Keegan" tagKey="6323a9c4ba31707eca64c7d2" role="Mrs. Jones" thumb="https://metadata-static.plex.tv/9/people/99306e0238c454f1ef0690d328734604.jpg" />
+<Role id="443722" filter="actor=443722" tag="Zachary Hinrichs" tagKey="5e164980d92d86003d36368a" role="Cooper" thumb="https://metadata-static.plex.tv/people/5e164980d92d86003d36368a.jpg" />
+<Role id="46148" filter="actor=46148" tag="Caleel Harris" tagKey="5d7768ac431c830024c128d3" role="Cooper" thumb="https://metadata-static.plex.tv/people/5d7768ac431c830024c128d3.jpg" />
+<Role id="365328" filter="actor=365328" tag="Connor Weil" tagKey="5d77698b96b655001fdd1ad7" role="Navy Lieutenant Warren Miller" thumb="https://metadata-static.plex.tv/people/5d77698b96b655001fdd1ad7.jpg" />
+<Role id="164140" filter="actor=164140" tag="Micky Shiloah" tagKey="5d776b9d51dd69001fe32373" role="Resident" thumb="https://metadata-static.plex.tv/people/5d776b9d51dd69001fe32373.jpg" />
+<Role id="240191" filter="actor=240191" tag="Amy Holt" tagKey="5d77687f61141d001fb1c0ab" role="Assistant" thumb="https://metadata-static.plex.tv/people/5d77687f61141d001fb1c0ab.jpg" />
+<Role id="443723" filter="actor=443723" tag="Skye McDonald" tagKey="5d776b9447dd6e001f6e0b23" role="Bikini Girl" thumb="https://metadata-static.plex.tv/9/people/9f34949a5f0d61a542e4175c7e478c07.jpg" />
+<Role id="48928" filter="actor=48928" tag="Joseph D. Reitman" tagKey="5d77682b8718ba001e3128aa" role="" thumb="https://metadata-static.plex.tv/3/people/366d0c5acccf2b3c84158947513f73e3.jpg" />
+<Role id="57824" filter="actor=57824" tag="Stephen Oyoung" tagKey="5d7768861999bc0020dc7e9a" role="Navy Commander James Miyazaki" thumb="https://metadata-static.plex.tv/1/people/12991c9d6993a468c0ff674a2b292996.jpg" />
+<Role id="159969" filter="actor=159969" tag="Jack Griffo" tagKey="5d776a817a53e9001e7072dd" role="McKenna" thumb="https://metadata-static.plex.tv/people/5d776a817a53e9001e7072dd.jpg" />
+<Role id="235236" filter="actor=235236" tag="Ben Weber" tagKey="5d77683e5af944001f1fbd63" role="NSA Analyst Bruce Carter" thumb="https://metadata-static.plex.tv/1/people/1c9bd5d46f26b53213986eb3151ded72.jpg" />
+<Role id="162047" filter="actor=162047" tag="Ashley Jones" tagKey="5d7768373c3c2a001fbcec68" role="NSA Analyst Jolene Townsend" thumb="https://metadata-static.plex.tv/b/people/b5e8229b1d299e34086463f01f335458.jpg" />
+<Role id="42988" filter="actor=42988" tag="Jed Rees" tagKey="5d77682985719b001f3a1302" role="NSA Analyst Gary Dill" thumb="https://metadata-static.plex.tv/5/people/57ffa924c683ce4692763570345df038.jpg" />
+<Role id="71744" filter="actor=71744" tag="Scott Caan" tagKey="5d7768243c3c2a001fbca971" role="Danny Williams" thumb="https://metadata-static.plex.tv/people/5d7768243c3c2a001fbca971.jpg" />
+<Role id="35833" filter="actor=35833" tag="Daniel Dae Kim" tagKey="5d776828a091de001f2e6398" role="Chin Ho Kelly" thumb="https://metadata-static.plex.tv/people/5d776828a091de001f2e6398.jpg" />
+<Role id="191634" filter="actor=191634" tag="Gretchen Palmer" tagKey="5d77682785719b001f3a0e97" role="Heather Wilson" thumb="https://metadata-static.plex.tv/8/people/8772c3aea3f0dcfd521824e0507d3c68.jpg" />
+<Label id="688833" filter="label=688833" tag="Most Watched This Week" />
+<Label id="688869" filter="label=688869" tag="Trending" />
+<Field locked="1" name="rating" />
+<Field locked="1" name="collection" />
+<Field locked="1" name="label" />
+<Field locked="1" name="audienceRating" />
+<Location path="/data/shows/NCIS - Los Angeles (2009)" />
+</Directory>
+<Directory ratingKey="185830" key="/library/metadata/185830/children" parentRatingKey="133173" guid="plex://season/602e716391bd55002cf9305a" parentGuid="plex://show/5d9c08d146115600200ad2be" parentStudio="CBS Studios" type="season" title="Season 2" parentKey="/library/metadata/133173" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" parentTitle="S.W.A.T. (2017)" summary="" index="2" parentIndex="1" parentYear="2017" thumb="/library/metadata/185830/thumb/1672830622" art="/library/metadata/133173/art/1674785301" parentThumb="/library/metadata/133173/thumb/1674785301" parentTheme="/library/metadata/133173/theme/1674785301" leafCount="23" viewedLeafCount="0" addedAt="1675695345" updatedAt="1672830622">
+<Guid id="tvdb://771264" />
+</Directory>
+<Directory ratingKey="132835" key="/library/metadata/132835/children" guid="plex://show/5d9c086d2192ba001f310238" studio="Broadway Video" type="show" title="Saturday Night Live" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-14" summary="A late-night comedy show featuring several short skits, parodies of television commercials, a live guest band, and a pop-cultural guest host each week. Many of the SNL players have spun off successful independent comedy and/or movie careers from here." index="1" rating="8.0" audienceRating="8.0" year="1975" tagline="And now, from New York, the most dangerous city in America, it&#39;s Saturday Night Live. (seventh season)" thumb="/library/metadata/132835/thumb/1674699206" art="/library/metadata/132835/art/1674699206" theme="/library/metadata/132835/theme/1674699206" duration="4020000" originallyAvailableAt="1975-10-11" leafCount="320" viewedLeafCount="0" childCount="29" addedAt="1675695230" updatedAt="1674699206" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/132844">
+<Genre id="731" filter="genre=731" tag="Comedy" />
+<Genre id="662" filter="genre=662" tag="Music" />
+<Genre id="79704" filter="genre=79704" tag="News" />
+<Country id="30931" filter="country=30931" tag="United States of America" />
+<Guid id="imdb://tt0072562" />
+<Guid id="tmdb://1667" />
+<Guid id="tvdb://76177" />
+<Rating image="imdb://image.rating" value="8.0" type="audience" />
+<Rating image="themoviedb://image.rating" value="6.9" type="audience" />
+<Collection id="755895" filter="collection=755895" tag="Trending" guid="collection://54d4ee93-81be-4293-a430-05ceee5cbaa8" />
+<Role id="46496" filter="actor=46496" tag="Kenan Thompson" tagKey="5d7768254de0ee001fcc84f4" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d7768254de0ee001fcc84f4.jpg" />
+<Role id="136370" filter="actor=136370" tag="Darrell Hammond" tagKey="5d77682d103a2d001f565eab" role="Gov. Arnold Schwarzenegger (uncredited)" thumb="https://metadata-static.plex.tv/e/people/ed3e0b160ab5651d8a5a355624ad8bb7.jpg" />
+<Role id="140966" filter="actor=140966" tag="Seth Meyers" tagKey="5d776833103a2d001f56728c" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/a/people/a3936fec87378656a785a21b24bd088c.jpg" />
+<Role id="41773" filter="actor=41773" tag="Colin Jost" tagKey="5d776ab1ad5437001f785e11" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/0/people/07ee2327f124b19e1c1324bccf9a4422.jpg" />
+<Role id="45620" filter="actor=45620" tag="Cecily Strong" tagKey="5d77687b23d5a3001f4ecda0" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/2/people/2720838b6a67e729bf0000eb1e2f8781.jpg" />
+<Role id="55703" filter="actor=55703" tag="Bobby Moynihan" tagKey="5d77683bf54112001f5be2ac" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d77683bf54112001f5be2ac.jpg" />
+<Role id="48925" filter="actor=48925" tag="Fred Armisen" tagKey="5d77682b8a7581001f12c40e" role="Self / Various" thumb="https://metadata-static.plex.tv/a/people/adfd91a32bcfacc1ebe3aa9f33c76da4.jpg" />
+<Role id="88046" filter="actor=88046" tag="Aidy Bryant" tagKey="5d77690e47dd6e001f6c28d8" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d77690e47dd6e001f6c28d8.jpg" />
+<Role id="40467" filter="actor=40467" tag="Kate McKinnon" tagKey="5d77687b23d5a3001f4ecd9e" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/1/people/134ed4b2880072f984d1010e9be5d708.jpg" />
+<Role id="189560" filter="actor=189560" tag="Kyle Mooney" tagKey="5d776aa17a53e9001e70acc8" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d776aa17a53e9001e70acc8.jpg" />
+<Role id="73345" filter="actor=73345" tag="Tim Meadows" tagKey="5d776831961905001eb931bc" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d776831961905001eb931bc.jpg" />
+<Role id="88047" filter="actor=88047" tag="Michael Che" tagKey="5d776b0796b655001fe01763" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/9/people/98d600e6f966c92571fb0b76e1e24b00.jpg" />
+<Role id="197788" filter="actor=197788" tag="Kevin Nealon" tagKey="5d7768346f4521001ea9bdb6" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/e/people/e939035f53cfaef91315a07657cc3bc4.jpg" />
+<Role id="39581" filter="actor=39581" tag="Beck Bennett" tagKey="5d776a92594b2b001e6bfd5e" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d776a92594b2b001e6bfd5e.jpg" />
+<Role id="33529" filter="actor=33529" tag="Pete Davidson" tagKey="5d776adf96b655001fdfc19a" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/1/people/1e2a080de46c5dced86e83855e86164e.jpg" />
+<Role id="40661" filter="actor=40661" tag="Jason Sudeikis" tagKey="5d776832151a60001f24d33b" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/5/people/5432c0c0cb9cfd658381d618d2b3de60.jpg" />
+<Role id="34549" filter="actor=34549" tag="Bill Hader" tagKey="5d77682ae6d55c002040b598" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/8/people/8dd3b73135f484f778f6b75b5cd2af90.jpg" />
+<Role id="40660" filter="actor=40660" tag="Will Forte" tagKey="5d7768322ec6b5001f6bb737" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d7768322ec6b5001f6bb737.jpg" />
+<Role id="63536" filter="actor=63536" tag="Phil Hartman" tagKey="5d7768285af944001f1f71b0" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d7768285af944001f1f71b0.jpg" />
+<Role id="39112" filter="actor=39112" tag="Vanessa Bayer" tagKey="5d7768f3fb0d55001f51dd87" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/c/people/cfcc982c089c73209954bc1db644a154.jpg" />
+<Role id="40669" filter="actor=40669" tag="Maya Rudolph" tagKey="5d7768285af944001f1f6f17" role="Michelle Obama (uncredited)" thumb="https://metadata-static.plex.tv/c/people/c2cbc8762f9529734313d1e4b8ada197.jpg" />
+<Role id="41738" filter="actor=41738" tag="Tracy Morgan" tagKey="5d776832103a2d001f5670e2" role="Self (uncredited)" thumb="https://metadata-static.plex.tv/2/people/27fc897b0ace7537ceb547b607f8dc96.jpg" />
+<Role id="50217" filter="actor=50217" tag="Will Ferrell" tagKey="5d7768283c3c2a001fbcb627" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/f/people/f5dad099ee1874bb3755d30a4f8581db.jpg" />
+<Role id="79480" filter="actor=79480" tag="Chris Kattan" tagKey="5d7768377e9a3c0020c6d269" role="Michael Gelman (uncredited)" thumb="https://metadata-static.plex.tv/people/5d7768377e9a3c0020c6d269.jpg" />
+<Role id="40401" filter="actor=40401" tag="Mike Myers" tagKey="5d7768283c3c2a001fbcb643" role="Self - Host" thumb="https://metadata-static.plex.tv/people/5d7768283c3c2a001fbcb643.jpg" />
+<Role id="54494" filter="actor=54494" tag="Horatio Sanz" tagKey="5d77682a4de0ee001fcc95c2" role="Elton John (uncredited)" thumb="https://metadata-static.plex.tv/people/5d77682a4de0ee001fcc95c2.jpg" />
+<Role id="47562" filter="actor=47562" tag="Andy Samberg" tagKey="5d7768382ec6b5001f6bc60f" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/6/people/629aaf68ec6f27328b96044a7cff5522.jpg" />
+<Role id="60068" filter="actor=60068" tag="Amy Poehler" tagKey="5d7768283c3c2a001fbcb646" role="Weekend Update Anchor / Self (uncredited)" thumb="https://metadata-static.plex.tv/1/people/18765728340bb1a61891f5caa27a4276.jpg" />
+<Role id="50455" filter="actor=50455" tag="Mikey Day" tagKey="5d77684ee870fd001f19dcbb" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/e/people/e0e66111df446e6c02d73afdadd4e4e2.jpg" />
+<Role id="55702" filter="actor=55702" tag="Dana Carvey" tagKey="5d77683554f42c001f8c484d" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/9/people/99e008b17f2678713e37b1ee27d484d7.jpg" />
+<Role id="33424" filter="actor=33424" tag="Tina Fey" tagKey="5d7768322ec6b5001f6bb736" role="Gov. Sarah Palin (uncredited)" thumb="https://metadata-static.plex.tv/8/people/8f798da5aef0bd8c644248302f4c155b.jpg" />
+<Role id="54496" filter="actor=54496" tag="Alex Moffat" tagKey="5d776b7247dd6e001f6df4e8" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d776b7247dd6e001f6df4e8.jpg" />
+<Role id="54473" filter="actor=54473" tag="Melissa Villase&#241;or" tagKey="5d776c5423d5a3001f51a494" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d776c5423d5a3001f51a494.jpg" />
+<Role id="39109" filter="actor=39109" tag="Kristen Wiig" tagKey="5d776831961905001eb931bb" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/c/people/cc559657f6d94100702bb10aa4ad152d.jpg" />
+<Role id="47564" filter="actor=47564" tag="Molly Shannon" tagKey="5d77682b999c64001ec2d4e0" role="Self - Host / Various / Sally O&#39;Malley / Jeannie Darcy" thumb="https://metadata-static.plex.tv/1/people/173d39bed5f77decd59b5f49fb298b58.jpg" />
+<Role id="71112" filter="actor=71112" tag="Ana Gasteyer" tagKey="5d77682e880197001ec92347" role="Martha Stewart (uncredited)" thumb="https://metadata-static.plex.tv/d/people/dc048573feaf2e752f659bb812259837.jpg" />
+<Role id="46149" filter="actor=46149" tag="Chris Parnell" tagKey="5d776831961905001eb931c3" role="Jim Lehrer (uncredited)" thumb="https://metadata-static.plex.tv/9/people/917a8096803de041aedcdb66dbfcdb65.jpg" />
+<Role id="123558" filter="actor=123558" tag="Heidi Gardner" tagKey="5d776c4647dd6e001f6e909b" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/e/people/ef59c169078d3d5c8cfdd8342c262a66.jpg" />
+<Role id="232049" filter="actor=232049" tag="Victoria Jackson" tagKey="5d77682de6d55c002040b967" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d77682de6d55c002040b967.jpg" />
+<Role id="68911" filter="actor=68911" tag="Dennis Miller" tagKey="5d776832151a60001f24d33a" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/b/people/b326456507ac8065d56a4096b9d07b92.jpg" />
+<Role id="125131" filter="actor=125131" tag="Jon Lovitz" tagKey="5d77682b999c64001ec2d67f" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d77682b999c64001ec2d67f.jpg" />
+<Role id="41737" filter="actor=41737" tag="Leslie Jones" tagKey="5d776838e6d55c002040db41" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/3/people/3b4fb09dca43e61bdb6277317a1db6b8.jpg" />
+<Role id="46513" filter="actor=46513" tag="Laraine Newman" tagKey="5d776827151a60001f24ab0d" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/a/people/ac5c05f838fad7f00e8f8524e1b08d97.jpg" />
+<Role id="369487" filter="actor=369487" tag="Gilda Radner" tagKey="5d7768305af944001f1f8b21" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d7768305af944001f1f8b21.jpg" />
+<Role id="56681" filter="actor=56681" tag="Jane Curtin" tagKey="5d7768328718ba001e313faa" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/6/people/6f527156fac3e254cbf255a5b5fa22a7.jpg" />
+<Role id="38082" filter="actor=38082" tag="Garrett Morris" tagKey="5d77683b4de0ee001fccca03" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d77683b4de0ee001fccca03.jpg" />
+<Role id="79856" filter="actor=79856" tag="Jimmy Fallon" tagKey="5d776829e6d55c002040b364" role="Barry Gibb (uncredited)" thumb="https://metadata-static.plex.tv/0/people/033f959ddc903d1434605410096a2dcc.jpg" />
+<Role id="49301" filter="actor=49301" tag="Chris Redd" tagKey="5d776ba4fb0d55001f56e45c" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d776ba4fb0d55001f56e45c.jpg" />
+<Role id="83156" filter="actor=83156" tag="Norm Macdonald" tagKey="5d7768294de0ee001fcc92ef" role="Self - Host / Various / Larry King / Clint Eastwood" thumb="https://metadata-static.plex.tv/9/people/9a404d337ecc0e279c41c15160c26378.jpg" />
+<Role id="50459" filter="actor=50459" tag="Rachel Dratch" tagKey="5d776836f59e580021898c00" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/a/people/a5fed32203b273f72afab9fdaa25f5b4.jpg" />
+<Role id="47563" filter="actor=47563" tag="David Spade" tagKey="5d77683185719b001f3a2b63" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d77683185719b001f3a2b63.jpg" />
+<Role id="272063" filter="actor=272063" tag="Chris Farley" tagKey="5d77683485719b001f3a36fc" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/5/people/55893dd3cad61c7af370204599411495.jpg" />
+<Role id="68980" filter="actor=68980" tag="Cheri Oteri" tagKey="5d7768253c3c2a001fbcac1c" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d7768253c3c2a001fbcac1c.jpg" />
+<Role id="369488" filter="actor=369488" tag="Jan Hooks" tagKey="5d776826999c64001ec2c37b" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d776826999c64001ec2c37b.jpg" />
+<Role id="369489" filter="actor=369489" tag="Ego Nwodim" tagKey="5d776bc6ad5437001f7a9aa6" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d776bc6ad5437001f7a9aa6.jpg" />
+<Role id="57599" filter="actor=57599" tag="Nora Dunn" tagKey="5d7768264de0ee001fcc85db" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/e/people/e1530f7aae50f9469ffd0e29145bcd87.jpg" />
+<Role id="34780" filter="actor=34780" tag="Dan Aykroyd" tagKey="5d7768258718ba001e311674" role="Self - Host" thumb="https://metadata-static.plex.tv/1/people/16872a21eccea262145b86c69fbf9424.jpg" />
+<Role id="40305" filter="actor=40305" tag="John Belushi" tagKey="5d776826961905001eb91141" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d776826961905001eb91141.jpg" />
+<Role id="37272" filter="actor=37272" tag="Nasim Pedrad" tagKey="5d77689a594b2b001e6909b7" role="Various" thumb="https://metadata-static.plex.tv/9/people/93b3a0b2f7819ae0749ed9daeaee789b.jpg" />
+<Role id="127166" filter="actor=127166" tag="Sasheer Zamata" tagKey="5d776af6594b2b001e6cacb6" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/a/people/adc8295cda52bfb71e7145df8c85961d.jpg" />
+<Role id="52684" filter="actor=52684" tag="Taran Killam" tagKey="5d7768386f4521001ea9caff" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/4/people/4df841a028942eeb22b501300ec34697.jpg" />
+<Role id="100140" filter="actor=100140" tag="Jay Pharoah" tagKey="5d77699d7a53e9001e6eb150" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/2/people/2844d10e2b2d385cd7867d3816d1ea6e.jpg" />
+<Role id="47561" filter="actor=47561" tag="Adam Sandler" tagKey="5d77682aeb5d26001f1de575" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/7/people/76d450ae863fb252667b6c8f45c876e9.jpg" />
+<Role id="55680" filter="actor=55680" tag="Ellen Cleghorne" tagKey="5d7768278a7581001f12be92" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/6/people/6f2b3d8bd7553d65b50d02e08c7213af.jpg" />
+<Role id="369490" filter="actor=369490" tag="Colin Quinn" tagKey="5d7768335af944001f1f962e" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/9/people/9d0a4754fddb3ad7b2d8e9bc89e86042.jpg" />
+<Role id="260229" filter="actor=260229" tag="Mary Gross" tagKey="5d77682c54c0f0001f3025e2" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d77682c54c0f0001f3025e2.jpg" />
+<Role id="369491" filter="actor=369491" tag="Tim Kazurinsky" tagKey="5d77683b880197001ec9498b" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/f/people/fa90da4536cd84e38d25068556220b93.jpg" />
+<Role id="338433" filter="actor=338433" tag="Joe Piscopo" tagKey="5d7768408a7581001f12edcf" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/0/people/061f2b32fa2fb1aa8de4862e91c09985.jpg" />
+<Role id="41735" filter="actor=41735" tag="Eddie Murphy" tagKey="5d776825999c64001ec2bf6e" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/7/people/7c184b09c654e495b7c7850108dd608a.jpg" />
+<Role id="35694" filter="actor=35694" tag="Bowen Yang" tagKey="5d776c0e7a53e9001e738307" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/d/people/dc36bafa29b16ff157cd685683750858.jpg" />
+<Role id="363838" filter="actor=363838" tag="Chloe Fineman" tagKey="5e164b9191c2030041227a8a" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/8/people/88af79c6c6141095ae93ca12f6dbc321.jpg" />
+<Role id="79440" filter="actor=79440" tag="Abby Elliott" tagKey="5d77689a594b2b001e6909b1" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/d/people/d75c9b1a988875683f8558782ca91412.jpg" />
+<Role id="34779" filter="actor=34779" tag="Bill Murray" tagKey="5d776825151a60001f24a402" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/4/people/42fb90cf6683953e71203d145ba120bc.jpg" />
+<Role id="55240" filter="actor=55240" tag="Chris Rock" tagKey="5d776825eb5d26001f1dd1c0" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/e/people/ea1f616abfef8875e39b1b43d725b1c9.jpg" />
+<Role id="299591" filter="actor=299591" tag="Jim Breuer" tagKey="5d77683161141d001fb14ba3" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d77683161141d001fb14ba3.jpg" />
+<Role id="369492" filter="actor=369492" tag="Jeff Richards" tagKey="5d776e94594b2b001e727dee" role="Self - Various Characters" />
+<Role id="122357" filter="actor=122357" tag="Finesse Mitchell" tagKey="5d77683661141d001fb15ac8" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d77683661141d001fb15ac8.jpg" />
+<Role id="366778" filter="actor=366778" tag="Robin Duke" tagKey="5d77682761141d001fb1360d" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/0/people/098d4c0f0626dbb4797c03ff5e3284b3.jpg" />
+<Role id="39992" filter="actor=39992" tag="Julia Louis-Dreyfus" tagKey="5d7768275af944001f1f6ec8" role="Self - Host / Various / Robin Anton" thumb="https://metadata-static.plex.tv/4/people/4876e6724400778eff550417cf336045.jpg" />
+<Role id="369493" filter="actor=369493" tag="Gary Kroeger" tagKey="5d776891f617c90020155616" role="Self - Various Characters" />
+<Role id="79487" filter="actor=79487" tag="Melanie Hutsell" tagKey="5d77689851dd69001fe0e883" role="Various" thumb="https://metadata-static.plex.tv/people/5d77689851dd69001fe0e883.jpg" />
+<Role id="369494" filter="actor=369494" tag="Andrew Dismukes" tagKey="5e165180188587003d057214" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/1/people/132ad8a1d3fcf431566d09de3a289e3c.jpg" />
+<Role id="88050" filter="actor=88050" tag="Punkie Johnson" tagKey="5e16568c316a39003efa253d" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/6/people/6351b4d3b5e02ee94a59e142bbc63e2d.jpg" />
+<Role id="274306" filter="actor=274306" tag="Mark McKinney" tagKey="5d776830961905001eb92fb3" role="Various" thumb="https://metadata-static.plex.tv/9/people/9b45b314998068832153d2b72eb752c1.jpg" />
+<Role id="43145" filter="actor=43145" tag="Rob Schneider" tagKey="5d776828eb5d26001f1ddbbc" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d776828eb5d26001f1ddbbc.jpg" />
+<Role id="60150" filter="actor=60150" tag="Julia Sweeney" tagKey="5d776827103a2d001f56462e" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/f/people/f383298670a5e9582a47ff3b2930343c.jpg" />
+<Role id="96564" filter="actor=96564" tag="Jay Mohr" tagKey="5d77682861141d001fb13821" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/4/people/459f7ec3ff1c7d6f6ac1a23108b44d54.jpg" />
+<Role id="369495" filter="actor=369495" tag="Brad Hall" tagKey="5d77683485719b001f3a3665" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d77683485719b001f3a3665.jpg" />
+<Role id="94487" filter="actor=94487" tag="Jim Belushi" tagKey="5d776828a091de001f2e6419" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d776828a091de001f2e6419.jpg" />
+<Role id="89592" filter="actor=89592" tag="Chevy Chase" tagKey="5d77682ba091de001f2e6b72" role="Weekend Update Special Anchor (uncredited)" thumb="https://metadata-static.plex.tv/e/people/e74bd548f5f8a09f88448cee67c1c339.jpg" />
+<Role id="154672" filter="actor=154672" tag="James Austin Johnson" tagKey="63231f81ac57c78b96ad7771" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/f/people/f85533c1fa947e7500a870eaec2a4f39.jpg" />
+<Role id="87783" filter="actor=87783" tag="Sarah Sherman" tagKey="5e166c3c1493cd003f11247a" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/2/people/2b452dba0a5b263d3d0a4457dfb392b7.jpg" />
+<Role id="39421" filter="actor=39421" tag="Alec Baldwin" tagKey="5d7768263c3c2a001fbcafff" role="Donald Trump (uncredited)" thumb="https://metadata-static.plex.tv/people/5d7768263c3c2a001fbcafff.jpg" />
+<Role id="72069" filter="actor=72069" tag="Michael McKean" tagKey="5d77682b3c3c2a001fbcc341" role="Various" thumb="https://metadata-static.plex.tv/9/people/99b56cebcb9d1281d4b3e8b6b2360ab4.jpg" />
+<Role id="701679" filter="actor=701679" tag="Luke Null" tagKey="638f4fab81e552ba61c530dd" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/5/people/5b3c3f706197f0c7b506e30e7f2b6494.jpg" />
+<Role id="35456" filter="actor=35456" tag="Jenny Slate" tagKey="5d776896431c830024c100cd" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/c/people/c79d9256b2f4bdb7d5e8348baf6aec99.jpg" />
+<Role id="369497" filter="actor=369497" tag="Walter Williams" tagKey="5d776b6047dd6e001f6de7af" role="Mr. Bill / Mr. Hands / Spot (voice) (uncredited)" />
+<Role id="37109" filter="actor=37109" tag="Martin Short" tagKey="5d7768255af944001f1f63cd" role="Bartender (uncredited)" thumb="https://metadata-static.plex.tv/5/people/5affff4ffb85f9371bdc953d82d0976e.jpg" />
+<Role id="228996" filter="actor=228996" tag="Aristotle Athiras" tagKey="5d776ae3ad5437001f78bea0" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/0/people/048e3cb9cf8281839703ae6fef85facf.jpg" />
+<Role id="184323" filter="actor=184323" tag="Brooks Wheelan" tagKey="5d776b8ead5437001f7a32ce" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/7/people/7184517958ff89d511f87253eb13ab2c.jpg" />
+<Role id="45645" filter="actor=45645" tag="John Milhiser" tagKey="5d77687b23d5a3001f4ecdae" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/7/people/746649d056301dc5f5a09e69bff1accc.jpg" />
+<Role id="40662" filter="actor=40662" tag="Michael Patrick O&#39;Brien" tagKey="5d77705296b655001fe93745" role="Self - Various Characters" thumb="https://image.tmdb.org/t/p/original/uIGjJAOiGDf0tfPHQcltnbnoe0Z.jpg" />
+<Role id="369498" filter="actor=369498" tag="No&#235;l Wells" tagKey="5d7768fef617c9002015bb2d" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d7768fef617c9002015bb2d.jpg" />
+<Role id="99875" filter="actor=99875" tag="Jon Rudnitsky" tagKey="5d776bdcfb0d55001f575532" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d776bdcfb0d55001f575532.jpg" />
+<Role id="37604" filter="actor=37604" tag="Tim Robinson" tagKey="5e163db54c78f7003e7fd2a1" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5e163db54c78f7003e7fd2a1.jpg" />
+<Role id="73270" filter="actor=73270" tag="Nancy Carell" tagKey="5d7768313c3c2a001fbcd53e" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d7768313c3c2a001fbcd53e.jpg" />
+<Role id="33153" filter="actor=33153" tag="Sarah Silverman" tagKey="5d776826999c64001ec2c60b" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/0/people/0561ea3ce157735d2d2869ab3df602a1.jpg" />
+<Role id="149486" filter="actor=149486" tag="Brian Doyle-Murray" tagKey="5d77682761141d001fb13609" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/7/people/764f85352666866768ac3425bf9c4984.jpg" />
+<Role id="79344" filter="actor=79344" tag="Chris Elliott" tagKey="5d776826999c64001ec2c608" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/3/people/3af5fcf40c0d8a892c3a3b803026296b.jpg" />
+<Role id="73262" filter="actor=73262" tag="David Koechner" tagKey="5d7768254de0ee001fcc8502" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d7768254de0ee001fcc8502.jpg" />
+<Role id="60169" filter="actor=60169" tag="Christine Ebersole" tagKey="5d776825151a60001f24a6cb" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/a/people/a164bfc05b3e03265296f305e755d6ce.jpg" />
+<Role id="67998" filter="actor=67998" tag="Siobhan Fallon Hogan" tagKey="5d7768254de0ee001fcc81b8" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/6/people/635fa4745681f86a1150b30ae0d7d283.jpg" />
+<Role id="188652" filter="actor=188652" tag="Laura Kightlinger" tagKey="5d7768333c3c2a001fbcdb62" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d7768333c3c2a001fbcdb62.jpg" />
+<Role id="369499" filter="actor=369499" tag="Lauren Holt" tagKey="5e62465a93f43c003cbccdd1" role="Self - Various Characters" />
+<Role id="70172" filter="actor=70172" tag="Billy Crystal" tagKey="5d776827151a60001f24aaf2" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/c/people/cef0151687c040169ba02be8c9f93cb9.jpg" />
+<Role id="47947" filter="actor=47947" tag="Randy Quaid" tagKey="5d776825eb5d26001f1dd129" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/f/people/f9949674fe8b2a542f75f45ffceb9232.jpg" />
+<Role id="48229" filter="actor=48229" tag="Joan Cusack" tagKey="5d77682661141d001fb13587" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/a/people/a6a498b63242acc91d75a4ee700545fc.jpg" />
+<Role id="42501" filter="actor=42501" tag="Anthony Michael Hall" tagKey="5d77682585719b001f3a055a" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/5/people/57fe6e788320a84d6b70f7b8eebc55be.jpg" />
+<Role id="33798" filter="actor=33798" tag="Robert Downey Jr." tagKey="5d776825880197001ec90514" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/5/people/550f70e5cf5e7f17641d9174c81937e3.jpg" />
+<Role id="95288" filter="actor=95288" tag="Danitra Vance" tagKey="6328b16fccfb7cf0626630fc" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/d/people/d06f1b43ba29655e6dde3b4442157464.jpg" />
+<Role id="115311" filter="actor=115311" tag="Terry Sweeney" tagKey="5d7768a81999bc0020dcca44" role="Self - Various Characters" />
+<Role id="369500" filter="actor=369500" tag="Christopher Guest" tagKey="5d7768288718ba001e3121c2" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/9/people/924cf0ac8d33609df97501427dd91a09.jpg" />
+<Role id="157531" filter="actor=157531" tag="Rich Hall" tagKey="5d77688e7e5fa10020bf1c25" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/4/people/4ad3fa7df22ae242001d0517f1c892e8.jpg" />
+<Role id="318787" filter="actor=318787" tag="Pamela Stephenson" tagKey="5d776833103a2d001f567458" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/1/people/1fb75261a983d3142027f0319a0be17d.jpg" />
+<Role id="81356" filter="actor=81356" tag="Denny Dillon" tagKey="5d776826eb5d26001f1dd57e" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/people/5d776826eb5d26001f1dd57e.jpg" />
+<Role id="66004" filter="actor=66004" tag="Steve Martin" tagKey="5d77682a3c3c2a001fbcbd29" role="Self - Host / Various" thumb="https://metadata-static.plex.tv/2/people/2ead9cda51827e333d7577197b9f14ed.jpg" />
+<Role id="37588" filter="actor=37588" tag="Jorma Taccone" tagKey="5d77683d61141d001fb16775" role="Guy in &#39;Young Chuck Norris&#39; sketch (uncredited)" thumb="https://metadata-static.plex.tv/8/people/82446f30b386fbb1a4dc105f25c90619.jpg" />
+<Role id="79479" filter="actor=79479" tag="Gilbert Gottfried" tagKey="5d776825eb5d26001f1dd1c1" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/0/people/0c10dd999315740f2317b714e199d276.jpg" />
+<Role id="202398" filter="actor=202398" tag="Gail Matthius" tagKey="5d776868e6d55c002041270c" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/a/people/a8334328819c56d1c41faf1b63242d09.jpg" />
+<Role id="369501" filter="actor=369501" tag="Ann Risley" tagKey="5d776898431c830024c102d0" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/4/people/4f3b92498ffb5975cdddb56301b68d50.jpg" />
+<Role id="96287" filter="actor=96287" tag="Janeane Garofalo" tagKey="5d77682aeb5d26001f1de52b" role="Various" thumb="https://metadata-static.plex.tv/2/people/2af797dc97c4c46907da420f59280a91.jpg" />
+<Role id="369502" filter="actor=369502" tag="Beth Cahill" tagKey="5d7769aead5437001f764b9d" role="Pam / Spectator" />
+<Role id="369503" filter="actor=369503" tag="Marcello Hernandez" tagKey="633c20a612709f3bebce9a61" role="Self - Various Characters" />
+<Role id="369504" filter="actor=369504" tag="Molly Kearney" tagKey="633c20a630569b9c6a6d0625" role="Self - Various Characters" />
+<Role id="369505" filter="actor=369505" tag="Michael Longfellow" tagKey="633c20a565a0896c9905c95c" role="Self - Various Characters" />
+<Role id="701680" filter="actor=701680" tag="Devon Walker" tagKey="5ec4192d37cda30040907a7a" role="Self - Various Characters" thumb="https://metadata-static.plex.tv/7/people/7c0395caaefb4fd0b3df0f6dc788515a.jpg" />
+<Role id="36452" filter="actor=36452" tag="John Goodman" tagKey="5d776825961905001eb909bc" role="Self - Host" thumb="https://metadata-static.plex.tv/8/people/89709a731f4e6cc65bb8fc16800a1141.jpg" />
+<Role id="68979" filter="actor=68979" tag="Justin Timberlake" tagKey="5d7768283c3c2a001fbcb645" role="Self - Special Guest (uncredited)" thumb="https://metadata-static.plex.tv/people/5d7768283c3c2a001fbcb645.jpg" />
+<Role id="36692" filter="actor=36692" tag="Robert De Niro" tagKey="5d776824961905001eb90984" role="Robert Mueller (uncredited)" thumb="https://metadata-static.plex.tv/3/people/391b330454d8713896ab8a2834ae052a.jpg" />
+<Role id="58329" filter="actor=58329" tag="Ben Stiller" tagKey="5d776826999c64001ec2c606" role="Michael Cohen (uncredited)" thumb="https://metadata-static.plex.tv/people/5d776826999c64001ec2c606.jpg" />
+<Role id="88901" filter="actor=88901" tag="Paul Simon" tagKey="5d776827103a2d001f5645f4" role="Self - Musical Guest" thumb="https://metadata-static.plex.tv/people/5d776827103a2d001f5645f4.jpg" />
+<Role id="43796" filter="actor=43796" tag="Albert Brooks" tagKey="5d776824961905001eb90968" role="Interviewer (segment &#39;The Impossible Truth&#39;) (voice)" thumb="https://metadata-static.plex.tv/9/people/9d7a9a575cecc346b04142f04948d1d7.jpg" />
+<Role id="188695" filter="actor=188695" tag="Buck Henry" tagKey="5d776827151a60001f24ab1e" role="Self - Host / Various" thumb="https://metadata-static.plex.tv/e/people/e2f4a1a80ce150cab27ac68ab10b7588.jpg" />
+<Role id="33793" filter="actor=33793" tag="Scarlett Johansson" tagKey="5d776825151a60001f24a403" role="Self - Host / Various" thumb="https://metadata-static.plex.tv/0/people/082c24f8e9a2f35b66da7123f9bc4119.jpg" />
+<Role id="34053" filter="actor=34053" tag="Tom Hanks" tagKey="5d77682654f42c001f8c2650" role="Self - Host / Various" thumb="https://metadata-static.plex.tv/9/people/9652fd086a3251814d8531567c2c5fb1.jpg" />
+<Role id="317731" filter="actor=317731" tag="Andy Kaufman" tagKey="5d77685f6f4521001eaa400c" role="Self - Stand-up Act" thumb="https://metadata-static.plex.tv/people/5d77685f6f4521001eaa400c.jpg" />
+<Role id="69434" filter="actor=69434" tag="Drew Barrymore" tagKey="5d776825103a2d001f563c09" role="Self (uncredited)" thumb="https://metadata-static.plex.tv/7/people/768b3b5860550cfa39cbf1611ffe3669.jpg" />
+<Role id="56520" filter="actor=56520" tag="John Mulaney" tagKey="5d77689c374a5b001fecaa9b" role="Self - Host / Various" thumb="https://metadata-static.plex.tv/2/people/2a62fbf1e9095abd412db1da6b756005.jpg" />
+<Role id="161748" filter="actor=161748" tag="Adam Levine" tagKey="5d7768783ab0e7001f5021ae" role="Self (uncredited)" thumb="https://metadata-static.plex.tv/0/people/0f203ca50681b6ce85c8d0111df28577.jpg" />
+<Role id="53076" filter="actor=53076" tag="Elliott Gould" tagKey="5d7768243c3c2a001fbca974" role="Self - Host / Herb Goodman / Various" thumb="https://metadata-static.plex.tv/e/people/e81515df26614917b8a4a00f46f7b848.jpg" />
+<Role id="37392" filter="actor=37392" tag="James Franco" tagKey="5d7768268718ba001e311be9" role="Self - Host / Various" thumb="https://metadata-static.plex.tv/f/people/fbcc92ed2802a171532d664ad235bf11.jpg" />
+<Role id="88048" filter="actor=88048" tag="Lorne Michaels" tagKey="5d7768322ec6b5001f6bb735" role="Self (uncredited)" thumb="https://metadata-static.plex.tv/c/people/c2507c46ecaaf04dc0f83134a4f5ae83.jpg" />
+<Role id="369507" filter="actor=369507" tag="Michael Davis" tagKey="5d77698c47dd6e001f6c6e70" role="Self" thumb="https://metadata-static.plex.tv/people/5d77698c47dd6e001f6c6e70.jpg" />
+<Role id="40567" filter="actor=40567" tag="Candice Bergen" tagKey="5d7768282ec6b5001f6ba680" role="Self - Host / Various" thumb="https://metadata-static.plex.tv/4/people/4e071d95fce4fa454e17a0f290407abb.jpg" />
+<Role id="47211" filter="actor=47211" tag="Cameron Diaz" tagKey="5d776826999c64001ec2c607" role="Self (uncredited)" thumb="https://metadata-static.plex.tv/8/people/86ba80fe2c9ed54509f89aad5ce10232.jpg" />
+<Role id="34776" filter="actor=34776" tag="Paul Rudd" tagKey="5d77682685719b001f3a0b81" role="Self - Host" thumb="https://metadata-static.plex.tv/people/5d77682685719b001f3a0b81.jpg" />
+<Role id="51961" filter="actor=51961" tag="Taylor Swift" tagKey="5d7768615af944001f20162e" role="Self - Musical Guest" thumb="https://metadata-static.plex.tv/f/people/fa5d89969f5a8d4db62272a602927a89.jpg" />
+<Role id="88042" filter="actor=88042" tag="Kanye West" tagKey="5d7768258718ba001e311937" role="Self - Musical Guest" thumb="https://metadata-static.plex.tv/0/people/0dc24c70fd4e7ad4143a1b4e7699e670.jpg" />
+<Role id="43029" filter="actor=43029" tag="Michael Palin" tagKey="5d776826a091de001f2e60e2" role="Self - Host / Various" thumb="https://metadata-static.plex.tv/5/people/5a91501ded7a90a35ccd5273ec1282b6.jpg" />
+<Role id="320144" filter="actor=320144" tag="Sam Kinison" tagKey="5d77683e961905001eb95a9d" role="Self - Special Guest" thumb="https://metadata-static.plex.tv/people/5d77683e961905001eb95a9d.jpg" />
+<Role id="34207" filter="actor=34207" tag="Woody Harrelson" tagKey="5d776825880197001ec90512" role="Self - Host" thumb="https://metadata-static.plex.tv/6/people/699e2b0b88ffa22632ffea75df75bd8b.jpg" />
+<Role id="123498" filter="actor=123498" tag="John Lutz" tagKey="5d77686d6f4521001eaa679c" role="George F. Smoot (uncredited)" thumb="https://metadata-static.plex.tv/people/5d77686d6f4521001eaa679c.jpg" />
+<Role id="53069" filter="actor=53069" tag="Rihanna" tagKey="5d7768366f4521001ea9c6f0" role="Self - Musical Guest" thumb="https://metadata-static.plex.tv/0/people/030dc93fe9a53ef1d781720ab6f5f9bc.jpg" />
+<Role id="139987" filter="actor=139987" tag="Larry David" tagKey="5d77683b961905001eb951ea" role="Bernie Sanders (uncredited)" thumb="https://metadata-static.plex.tv/people/5d77683b961905001eb951ea.jpg" />
+<Role id="43830" filter="actor=43830" tag="Danny DeVito" tagKey="5d7768255af944001f1f63cc" role="Self - Host / Louie DePalma / Passenger / Bill Hoskins / Willie" thumb="https://metadata-static.plex.tv/d/people/d2671f629f68c900d263f63312df0f9a.jpg" />
+<Role id="34661" filter="actor=34661" tag="Harry Styles" tagKey="5d77695afb0d55001f523858" role="Self - Musical Guest" thumb="https://metadata-static.plex.tv/e/people/e3cad2c8f85c7872dec11d7768a4637d.jpg" />
+<Role id="46644" filter="actor=46644" tag="Miley Cyrus" tagKey="5d7768273c3c2a001fbcb266" role="Self - Musical Guest" thumb="https://metadata-static.plex.tv/d/people/d0bd9a041aa687f43b293d7c7c2d6d78.jpg" />
+<Role id="49541" filter="actor=49541" tag="Christopher Walken" tagKey="5d776826999c64001ec2c375" role="Self - Host / Various / Walter / Colonel Angus / Vic Lester" thumb="https://metadata-static.plex.tv/e/people/e62e39db3259b6f667965210af06df08.jpg" />
+<Role id="88893" filter="actor=88893" tag="Gwen Stefani" tagKey="5d77682b85719b001f3a1b8d" role="Self - Musical Guest" thumb="https://metadata-static.plex.tv/5/people/52016d03b8e204c46fc9c687588b8599.jpg" />
+<Role id="86953" filter="actor=86953" tag="Jay-Z" tagKey="5d77683af59e58002189949f" role="Self - Musical Guest" thumb="https://metadata-static.plex.tv/people/5d77683af59e58002189949f.jpg" />
+<Role id="345173" filter="actor=345173" tag="Bonnie Raitt" tagKey="5d7768412e80df001ebdfdbe" role="Self - Musical Guest" thumb="https://metadata-static.plex.tv/people/5d7768412e80df001ebdfdbe.jpg" />
+<Role id="369508" filter="actor=369508" tag="Billy Joel" tagKey="5d77683861141d001fb15f73" role="Self - Musical Guest" thumb="https://metadata-static.plex.tv/people/5d77683861141d001fb15f73.jpg" />
+<Role id="369509" filter="actor=369509" tag="Joel Hodgson" tagKey="5d7768378a7581001f12d96d" role="Self - Special Guest" thumb="https://metadata-static.plex.tv/people/5d7768378a7581001f12d96d.jpg" />
+<Role id="34157" filter="actor=34157" tag="Matt Damon" tagKey="5d7768243c3c2a001fbca96c" role="Self - Host" thumb="https://metadata-static.plex.tv/7/people/7d14e0a69913d60e073ecfb53593afb2.jpg" />
+<Role id="68978" filter="actor=68978" tag="Eric Idle" tagKey="5d776827880197001ec90a47" role="Self - Host / Various" thumb="https://metadata-static.plex.tv/a/people/ab0fda561013975259f0a7b9806a5005.jpg" />
+<Role id="272040" filter="actor=272040" tag="Steven Wright" tagKey="5d776825880197001ec9051f" role="Self (uncredited)" thumb="https://metadata-static.plex.tv/people/5d776825880197001ec9051f.jpg" />
+<Role id="342143" filter="actor=342143" tag="Ed Koch" tagKey="5d77682b6f4521001ea9a1b8" role="Self (uncredited)" thumb="https://metadata-static.plex.tv/people/5d77682b6f4521001ea9a1b8.jpg" />
+<Role id="50440" filter="actor=50440" tag="Chance the Rapper" tagKey="5d776a49ad5437001f77893f" role="Self - Musical Guest" thumb="https://metadata-static.plex.tv/people/5d776a49ad5437001f77893f.jpg" />
+<Role id="95300" filter="actor=95300" tag="Teller" tagKey="5d77683d85719b001f3a535e" role="Self - Special Guest" thumb="https://metadata-static.plex.tv/people/5d77683d85719b001f3a535e.jpg" />
+<Role id="37579" filter="actor=37579" tag="Seth Rogen" tagKey="5d776825103a2d001f563c1e" role="Self - Host / Various" thumb="https://metadata-static.plex.tv/7/people/7b5fec30e35eac363240e8b5e4d3c4ab.jpg" />
+<Role id="369510" filter="actor=369510" tag="Art Garfunkel" tagKey="5d776835880197001ec934b2" role="Self (uncredited)" thumb="https://metadata-static.plex.tv/people/5d776835880197001ec934b2.jpg" />
+<Role id="33266" filter="actor=33266" tag="Dwayne Johnson" tagKey="5d77682b6f4521001ea99f61" role="Self - Host / The Scorpion King / Bigfoot" thumb="https://metadata-static.plex.tv/0/people/0740957f34be813b907cc513a4cffe6d.jpg" />
+<Role id="42612" filter="actor=42612" tag="Anne Hathaway" tagKey="5d776825eb5d26001f1dd128" role="Self (uncredited)" thumb="https://metadata-static.plex.tv/7/people/7d58a9b21d871ab4503a5d5d55fc0ace.jpg" />
+<Role id="244436" filter="actor=244436" tag="Morwenna Banks" tagKey="5d7768348718ba001e314281" role="Various" thumb="https://metadata-static.plex.tv/people/5d7768348718ba001e314281.jpg" />
+<Role id="88039" filter="actor=88039" tag="Amy Schumer" tagKey="5d7768d347dd6e001f6bf284" role="Amy Schumer (uncredited)" thumb="https://metadata-static.plex.tv/b/people/b762830c6e90854cde0bc940745678e2.jpg" />
+<Role id="34714" filter="actor=34714" tag="Halsey" tagKey="5d776b8c96b655001fe14900" role="Self - Musical Guest" thumb="https://metadata-static.plex.tv/7/people/79bcde1e6bbd05b0b604a8372b929060.jpg" />
+<Role id="64131" filter="actor=64131" tag="Paul McCartney" tagKey="5d77682854c0f0001f301f4e" role="Self - Musical Guest / Monty" thumb="https://metadata-static.plex.tv/e/people/ea808c1366f01d22a6c6b3edbc8d937a.jpg" />
+<Role id="56712" filter="actor=56712" tag="Lady Gaga" tagKey="5d7768254de0ee001fcc8155" role="Self - Musical Guest" thumb="https://metadata-static.plex.tv/6/people/65662726dd655e5e274ed8b40d1c1635.jpg" />
+<Role id="188484" filter="actor=188484" tag="Edwin Newman" tagKey="5d776b0a7a53e9001e717e9f" role="Self - Host / Various" />
+<Role id="142486" filter="actor=142486" tag="Niall Horan" tagKey="5d77695afb0d55001f523856" role="Self - Musical Guest" thumb="https://metadata-static.plex.tv/people/5d77695afb0d55001f523856.jpg" />
+<Role id="369511" filter="actor=369511" tag="Leon Redbone" tagKey="5d776836f59e580021898bd8" role="Self - Musical Guest" thumb="https://metadata-static.plex.tv/people/5d776836f59e580021898bd8.jpg" />
+<Role id="139950" filter="actor=139950" tag="Bruce Springsteen" tagKey="5d77682661141d001fb13594" role="Self - Musical Guest" thumb="https://metadata-static.plex.tv/6/people/6105503040dbd1423ea0704fc1d3793b.jpg" />
+<Role id="107540" filter="actor=107540" tag="Eminem" tagKey="5d776826e6d55c002040af8f" role="Self - Musical Guest" thumb="https://metadata-static.plex.tv/e/people/ebd5d44a86e32c54e9d3b38aba527509.jpg" />
+<Role id="34855" filter="actor=34855" tag="Jack Black" tagKey="5d7768255af944001f1f63d8" role="Self - Musical Guest" thumb="https://metadata-static.plex.tv/people/5d7768255af944001f1f63d8.jpg" />
+<Role id="43300" filter="actor=43300" tag="Jonah Hill" tagKey="5d77682c151a60001f24bdac" role="Self - Host / Various" thumb="https://metadata-static.plex.tv/a/people/a2212c517e657d15e0bc803449646482.jpg" />
+<Role id="122237" filter="actor=122237" tag="Mick Jagger" tagKey="5d776826e6d55c002040afd0" role="Self (uncredited)" thumb="https://metadata-static.plex.tv/4/people/4654db7b533b0bc841aac8a5bf6b4e3f.jpg" />
+<Role id="369512" filter="actor=369512" tag="Ralph Nader" tagKey="5d776875eb5d26001f1ec47f" role="Self (uncredited)" thumb="https://metadata-static.plex.tv/people/5d776875eb5d26001f1ec47f.jpg" />
+<Role id="123150" filter="actor=123150" tag="Kyle Gass" tagKey="5d77682b8a7581001f12c408" role="Self (uncredited)" thumb="https://metadata-static.plex.tv/f/people/f30096e3e0309a1d37185b49ae88d497.jpg" />
+<Role id="34160" filter="actor=34160" tag="Ben Affleck" tagKey="5d776825151a60001f24a3e2" role="Self - Host / Various / Donnie Bartalotti / Donnie G." thumb="https://metadata-static.plex.tv/f/people/fc9006aa8fbd0c9f58f688f46d8beec7.jpg" />
+<Role id="47224" filter="actor=47224" tag="Lindsay Lohan" tagKey="5d77682ee6d55c002040be3f" role="Self - Host / Various / Jessica Simpson" thumb="https://metadata-static.plex.tv/7/people/7f21c003c5e82a448e7617fa263b1891.jpg" />
+<Label id="688833" filter="label=688833" tag="Most Watched This Week" />
+<Field locked="1" name="rating" />
+<Field locked="1" name="collection" />
+<Field locked="1" name="label" />
+<Field locked="1" name="audienceRating" />
+<Location path="/data/shows/Saturday Night Live (1975)" />
+</Directory>
+</Hub>
+<Hub key="/library/sections/3/all?type=2&amp;lastViewedAt&lt;=-6w&amp;lastViewedAt&gt;=-5y&amp;unwatchedLeaves=1&amp;viewCount&gt;=1" title="Rediscover" type="show" hubIdentifier="tv.rediscover.3" context="hub.tv.rediscover" size="0" more="0" random="1" style="shelf">
+</Hub>
+<Hub hubKey="/library/metadata/194000,193999,193998,205566,193997,216602" key="/library/sections/3/all?type=4&amp;sort=originallyAvailableAt:desc" title="Recently Released Episodes" type="episode" hubIdentifier="tv.recentlyaired.3" context="hub.tv.recentlyaired" size="6" more="1" style="shelf">
+<Video ratingKey="194000" key="/library/metadata/194000" parentRatingKey="190529" grandparentRatingKey="146167" guid="plex://episode/639808d3e1f9f237b0834d1d" parentGuid="plex://season/63914a14212b5a73caf40632" grandparentGuid="plex://show/5d9c084bba6eb9001fba032a" type="episode" title="The Serpent Within" titleSort="Serpent Within" grandparentKey="/library/metadata/146167" parentKey="/library/metadata/190529" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" grandparentTitle="Father Brown (2013)" parentTitle="Season 10" contentRating="TV-PG" summary="Sullivan&#8217;s dream of leaving Kembleford is scuppered when he is arrested for receiving stolen goods." index="10" parentIndex="10" year="2023" thumb="/library/metadata/194000/thumb/1674698749" art="/library/metadata/146167/art/1674698744" grandparentThumb="/library/metadata/146167/thumb/1674698744" grandparentArt="/library/metadata/146167/art/1674698744" grandparentTheme="/library/metadata/146167/theme/1674698744" duration="2671040" originallyAvailableAt="2023-03-10" addedAt="1673284174" updatedAt="1674698749">
+<Media id="247815" duration="2671040" bitrate="5571" width="1920" height="1080" aspectRatio="1.78" audioChannels="2" audioCodec="aac" videoCodec="h264" videoResolution="1080" container="mkv" audioProfile="lc" videoProfile="high">
+<Part id="249445" key="/library/parts/249445/1673247449/file.mkv" duration="2671040" file="/data/shows/Father Brown (2013)/Season 10/Father Brown 2013 - S10E10 - The Serpent Within [1080p.iP.WEB-DL.AAC2.0.H.264 WEBDL-1080p H264 AAC 2.0].mkv" size="1859880369" audioProfile="lc" container="mkv" videoProfile="high" />
+</Media>
+</Video>
+<Video ratingKey="193999" key="/library/metadata/193999" parentRatingKey="190529" grandparentRatingKey="146167" guid="plex://episode/639808d3e1f9f237b0834d19" parentGuid="plex://season/63914a14212b5a73caf40632" grandparentGuid="plex://show/5d9c084bba6eb9001fba032a" type="episode" title="The Wheels of Wrath" titleSort="Wheels of Wrath" grandparentKey="/library/metadata/146167" parentKey="/library/metadata/190529" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" grandparentTitle="Father Brown (2013)" parentTitle="Season 10" contentRating="TV-PG" summary="Rock &#39;n&#39; roll reaches Kembleford when a group of bikers cause outrage and excitement in equal measure." index="9" parentIndex="10" year="2023" thumb="/library/metadata/193999/thumb/1674698749" art="/library/metadata/146167/art/1674698744" grandparentThumb="/library/metadata/146167/thumb/1674698744" grandparentArt="/library/metadata/146167/art/1674698744" grandparentTheme="/library/metadata/146167/theme/1674698744" duration="2647040" originallyAvailableAt="2023-03-03" addedAt="1673284173" updatedAt="1674698749">
+<Media id="247814" duration="2647040" bitrate="5854" width="1920" height="1080" aspectRatio="1.78" audioChannels="2" audioCodec="aac" videoCodec="h264" videoResolution="1080" container="mkv" audioProfile="lc" videoProfile="high">
+<Part id="249444" key="/library/parts/249444/1673247294/file.mkv" duration="2647040" file="/data/shows/Father Brown (2013)/Season 10/Father Brown 2013 - S10E09 - The Wheels of Wrath [1080p.iP.WEB-DL.AAC2.0.H.264 WEBDL-1080p H264 AAC 2.0].mkv" size="1936958339" audioProfile="lc" container="mkv" videoProfile="high" />
+</Media>
+</Video>
+<Video ratingKey="193998" key="/library/metadata/193998" parentRatingKey="190529" grandparentRatingKey="146167" guid="plex://episode/639808d3e1f9f237b0834d01" parentGuid="plex://season/63914a14212b5a73caf40632" grandparentGuid="plex://show/5d9c084bba6eb9001fba032a" type="episode" title="The Sands of Time" titleSort="Sands of Time" grandparentKey="/library/metadata/146167" parentKey="/library/metadata/190529" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" grandparentTitle="Father Brown (2013)" parentTitle="Season 10" contentRating="TV-PG" summary="Brenda finds love at the home of a clock collector but has she fallen for a killer?" index="8" parentIndex="10" year="2023" thumb="/library/metadata/193998/thumb/1674698749" art="/library/metadata/146167/art/1674698744" grandparentThumb="/library/metadata/146167/thumb/1674698744" grandparentArt="/library/metadata/146167/art/1674698744" grandparentTheme="/library/metadata/146167/theme/1674698744" duration="2670040" originallyAvailableAt="2023-02-24" addedAt="1673284172" updatedAt="1674698749">
+<Media id="247813" duration="2670040" bitrate="5178" width="1920" height="1080" aspectRatio="1.78" audioChannels="2" audioCodec="aac" videoCodec="h264" videoResolution="1080" container="mkv" audioProfile="lc" videoProfile="high">
+<Part id="249443" key="/library/parts/249443/1673247125/file.mkv" duration="2670040" file="/data/shows/Father Brown (2013)/Season 10/Father Brown 2013 - S10E08 - The Sands of Time [1080p.iP.WEB-DL.AAC2.0.H.264 WEBDL-1080p H264 AAC 2.0].mkv" size="1728160074" audioProfile="lc" container="mkv" videoProfile="high" />
+</Media>
+</Video>
+<Video ratingKey="205566" key="/library/metadata/205566" parentRatingKey="205560" grandparentRatingKey="126767" guid="plex://episode/63c102e7efa01f380c2e0f36" parentGuid="plex://season/627e38d798ad2248287b2a52" grandparentGuid="plex://show/5d9c083b705e7a001e6d6ab0" type="episode" title="School Play" grandparentKey="/library/metadata/126767" parentKey="/library/metadata/205560" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" grandparentTitle="Bad Education" parentTitle="Season 4" contentRating="TV-MA" summary="Stephen wants to turn the school play into a showcase for his talents to impress an agent, but Hoburn has more sinister plans to use it as a way of closing the school down." index="6" parentIndex="4" year="2023" thumb="/library/metadata/205566/thumb/1674698612" art="/library/metadata/126767/art/1674698598" grandparentThumb="/library/metadata/126767/thumb/1674698598" grandparentArt="/library/metadata/126767/art/1674698598" grandparentTheme="/library/metadata/126767/theme/1674698598" duration="1740920" originallyAvailableAt="2023-02-19" addedAt="1673822167" updatedAt="1674698612">
+<Media id="258891" duration="1740920" bitrate="7879" width="1920" height="1080" aspectRatio="1.78" audioChannels="2" audioCodec="aac" videoCodec="h264" videoResolution="1080" container="mkv" audioProfile="lc" videoProfile="high">
+<Part id="260521" key="/library/parts/260521/1673800878/file.mkv" duration="1740920" file="/data/shows/Bad Education (2012)/Season 4/Bad Education - S04E06 - School Play [1080p.IP.WEB-DL.H264 WEBDL-1080p H264 AAC 2.0].mkv" size="1714511862" audioProfile="lc" container="mkv" videoProfile="high" />
+</Media>
+</Video>
+<Video ratingKey="193997" key="/library/metadata/193997" parentRatingKey="190529" grandparentRatingKey="146167" guid="plex://episode/639808d3e1f9f237b0834d00" parentGuid="plex://season/63914a14212b5a73caf40632" grandparentGuid="plex://show/5d9c084bba6eb9001fba032a" type="episode" title="The Show Must Go On" titleSort="Show Must Go On" grandparentKey="/library/metadata/146167" parentKey="/library/metadata/190529" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" grandparentTitle="Father Brown (2013)" parentTitle="Season 10" contentRating="TV-PG" summary="Father Brown discovers there&#8217;s more drama offstage than on in the latest production by the Kembleford Players." index="7" parentIndex="10" year="2023" thumb="/library/metadata/193997/thumb/1674698749" art="/library/metadata/146167/art/1674698744" grandparentThumb="/library/metadata/146167/thumb/1674698744" grandparentArt="/library/metadata/146167/art/1674698744" grandparentTheme="/library/metadata/146167/theme/1674698744" duration="2664040" originallyAvailableAt="2023-02-17" addedAt="1673284171" updatedAt="1674698749">
+<Media id="247812" duration="2664040" bitrate="5136" width="1920" height="1080" aspectRatio="1.78" audioChannels="2" audioCodec="aac" videoCodec="h264" videoResolution="1080" container="mkv" audioProfile="lc" videoProfile="high">
+<Part id="249442" key="/library/parts/249442/1673246981/file.mkv" duration="2664040" file="/data/shows/Father Brown (2013)/Season 10/Father Brown 2013 - S10E07 - The Show Must Go On [1080p.iP.WEB-DL.AAC2.0.H.264 WEBDL-1080p H264 AAC 2.0].mkv" size="1710322091" audioProfile="lc" container="mkv" videoProfile="high" />
+</Media>
+</Video>
+<Video ratingKey="216602" key="/library/metadata/216602" parentRatingKey="213716" grandparentRatingKey="213715" guid="plex://episode/63c35ce35c139cabf0e586c1" parentGuid="plex://season/606f090afd5297002c11cbb8" grandparentGuid="plex://show/5d9c08e84eefaa001f5e501f" type="episode" title="High Notes" grandparentKey="/library/metadata/213715" parentKey="/library/metadata/213716" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" grandparentTitle="Most Expensivest" parentTitle="Season 4" contentRating="TV-PG" summary="Seeking out expensive musical collections, meeting legends and the instruments that defined their careers; with special guests Joe Banamassa, Hit-Boy and Angelo Moore." index="1" parentIndex="4" year="2023" thumb="/library/metadata/216602/thumb/1674699010" art="/library/metadata/213715/art/1674373824" grandparentThumb="/library/metadata/213715/thumb/1674373824" grandparentArt="/library/metadata/213715/art/1674373824" duration="1358122" originallyAvailableAt="2023-02-13" addedAt="1674468823" updatedAt="1674699010">
+<Media id="269520" duration="1358122" bitrate="3882" width="1920" height="1080" aspectRatio="1.78" audioChannels="2" audioCodec="aac" videoCodec="h264" videoResolution="1080" container="mkv" videoFrameRate="24p" audioProfile="lc" videoProfile="high">
+<Part id="271150" key="/library/parts/271150/1588948970/file.mkv" duration="1358122" file="/data/shows/Most Expensivest/Season 04/Most Expensivest - S04E01 - Richie Rich [h264-WEBDL-1080p Proper AAC-2.0].mkv" size="659103942" audioProfile="lc" container="mkv" videoProfile="high" />
+</Media>
+</Video>
+</Hub>
+<Hub hubKey="/library/metadata/205992" key="/hubs/sections/3/continueWatching/items" title="Continue Watching" type="episode" hubIdentifier="tv.inprogress.3" context="hub.tv.inprogress" size="1" more="0" style="shelf">
+<Video ratingKey="205992" key="/library/metadata/205992" parentRatingKey="205991" grandparentRatingKey="205990" guid="plex://episode/5e7218eb388dc2003e4495ac" grandparentGuid="plex://show/5e69c6f6874db7003e2dd59b" type="episode" title="When You&#39;re Lost in the Darkness" grandparentKey="/library/metadata/205990" parentKey="/library/metadata/205991" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" grandparentTitle="The Last of Us" parentTitle="Season 1" contentRating="TV-MA" summary="2003. As a parasitic fungal outbreak begins to ravage the country and the world, Joel Miller attempts to escape the escalating chaos with his daughter and brother. Twenty years later, a now hardened Joel and his partner Tess fight to survive under a totalitarian regime, while the insurgent Fireflies harbor a teenage girl with a unique gift." index="1" parentIndex="1" audienceRating="8.6" viewOffset="461000" lastViewedAt="1675436393" year="2023" thumb="/library/metadata/205992/thumb/1675691475" art="/library/metadata/205990/art/1674785147" grandparentThumb="/library/metadata/205990/thumb/1674785147" grandparentArt="/library/metadata/205990/art/1674785147" duration="4847328" originallyAvailableAt="2023-01-15" addedAt="1673909812" updatedAt="1675691475" audienceRatingImage="themoviedb://image.rating" chapterSource="media">
+<Media id="259290" duration="4847328" bitrate="9005" width="1920" height="1080" aspectRatio="1.78" audioChannels="6" audioCodec="eac3" videoCodec="h264" videoResolution="1080" container="mkv" videoFrameRate="24p" videoProfile="high">
+<Part id="260920" key="/library/parts/260920/1673839793/file.mkv" duration="4847328" file="/data/shows/The Last of Us (2023)/Season 1/The Last of Us - S01E01 - When You&#39;re Lost in the Darkness [1080p.HMAX.WEB-DL.DDP5.1.Atmos.H.264 WEBDL-1080p X264 EAC3 Atmos 5.1].mkv" size="5456112002" container="mkv" videoProfile="high" />
+</Media>
+<Director tag="Craig Mazin" />
+<Writer tag="Craig Mazin" />
+<Writer tag="Neil Druckmann" />
+<Role tag="Merle Dandridge" />
+<Role tag="John Hannah" />
+<Role tag="Josh Brener" />
+</Video>
+</Hub>
+<Hub hubKey="/library/metadata/134708,125793,144193,123204,211356,231561" key="/library/sections/3/all?type=2&amp;viewedOrInProgressLeafCount=0" title="Start Watching" type="show" hubIdentifier="tv.startwatching.3" context="hub.tv.startwatching" size="6" more="1" random="1" style="shelf">
+<Directory ratingKey="134708" key="/library/metadata/134708/children" guid="plex://show/60902f2c8f483f002d2825b6" studio="Gullane Entretenimento" type="show" title="The King of TV" titleSort="King of TV" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" originalTitle="O Rei da TV" summary="1988. Diagnosed with a serious ailment that could bring an end to his career in front of the cameras, Brazilian TV presenter Silvio Santos looks back on his journey to becoming one of the biggest presenters in all of Brazil." index="1" rating="7.8" audienceRating="7.8" year="2022" thumb="/library/metadata/134708/thumb/1669516660" art="/library/metadata/134708/art/1669516660" duration="2760000" originallyAvailableAt="2022-10-19" leafCount="8" viewedLeafCount="0" childCount="1" addedAt="1669516609" updatedAt="1669516660" audienceRatingImage="themoviedb://image.rating">
+<Genre tag="Biography" />
+<Genre tag="Drama" />
+<Country tag="Brazil" />
+<Role tag="Mariano Mattos Martins" />
+<Role tag="Jos&#233; Rubens Chach&#225;" />
+<Role tag="Leona Cavalli" />
+</Directory>
+<Directory ratingKey="125793" key="/library/metadata/125793/children" guid="plex://show/61b0cd57a0f20043841d07ae" studio="Tin Can Island" type="show" title="Australia with Julia Bradbury" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" summary="Julia sets off to discover Australia&#39;s extraordinary story. Traveling from the heart of Australia&#39;s red desert to the edge of the continent she discovers bustling cities and historic outback towns, hard working cattle stations and idyllic sandy beaches." index="1" rating="7.8" audienceRating="7.8" year="2019" thumb="/library/metadata/125793/thumb/1669308081" art="/library/metadata/125793/art/1669308081" duration="1320000" originallyAvailableAt="2019-02-14" leafCount="8" viewedLeafCount="0" childCount="1" addedAt="1669308045" updatedAt="1669308081">
+<Genre tag="Documentary" />
+<Genre tag="Reality" />
+<Country tag="United Kingdom" />
+<Role tag="Julia Bradbury" />
+</Directory>
+<Directory ratingKey="144193" key="/library/metadata/144193/children" guid="plex://show/5f9075bce418e5002ec263ac" studio="Lucasfilm Ltd." type="show" title="Willow" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-14" summary="20 years after vanquishing the wicked queen Bavmorda, the sorcerer Willow Ufgood leads a group of misfits on a dangerous rescue mission into the unknown." index="1" rating="5.5" audienceRating="5.5" year="2022" thumb="/library/metadata/144193/thumb/1670174424" art="/library/metadata/144193/art/1670174424" duration="3000000" originallyAvailableAt="2022-11-30" leafCount="8" viewedLeafCount="0" childCount="1" addedAt="1670174402" updatedAt="1670174424" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/144204">
+<Genre tag="Fantasy" />
+<Genre tag="Action" />
+<Country tag="United States of America" />
+<Role tag="Warwick Davis" />
+<Role tag="Dempsey Bryk" />
+<Role tag="Ellie Bamber" />
+</Directory>
+<Directory ratingKey="123204" key="/library/metadata/123204/children" guid="plex://show/5d9c090f2df347001e3bc3bb" studio="Caracol" type="show" title="Always a Witch" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" originalTitle="Siempre Bruja" contentRating="TV-14" summary="A time-traveling witch from the 17th century escapes death and finds herself in modern-day Cartagena." index="1" rating="6.3" audienceRating="6.3" year="2019" thumb="/library/metadata/123204/thumb/1669229004" art="/library/metadata/123204/art/1669229004" duration="2400000" originallyAvailableAt="2019-01-01" leafCount="18" viewedLeafCount="0" childCount="2" addedAt="1669228924" updatedAt="1669229004" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/123230">
+<Genre tag="Drama" />
+<Genre tag="Fantasy" />
+<Country tag="Colombia" />
+<Role tag="Angely Gaviria" />
+<Role tag="Sebasti&#225;n Eslava" />
+<Role tag="Carlos Quintero" />
+</Directory>
+<Directory ratingKey="211356" key="/library/metadata/211356/children" guid="plex://show/5d9c0875705e7a001e6ddf35" studio="Warner Bros. Television" type="show" title="George Lopez" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-PG" summary="Comedian George Lopez stars as a Los Angeles manufacturing plant manager attempting to deal with his wacky family along with random mishaps." index="1" rating="6.8" audienceRating="6.8" year="2002" tagline="Family is forever. Sanity is only temporary." thumb="/library/metadata/211356/thumb/1674278725" art="/library/metadata/211356/art/1674278725" theme="/library/metadata/211356/theme/1674278725" duration="1800000" originallyAvailableAt="2002-03-27" leafCount="90" viewedLeafCount="0" childCount="5" addedAt="1674278627" updatedAt="1674278725" audienceRatingImage="themoviedb://image.rating">
+<Genre tag="Comedy" />
+<Genre tag="Drama" />
+<Country tag="United States of America" />
+<Role tag="George Lopez" />
+<Role tag="Constance Marie" />
+<Role tag="Luis Armand Garcia" />
+</Directory>
+<Directory ratingKey="231561" key="/library/metadata/231561/children" guid="plex://show/5d9c07fe2192ba001f3042a3" studio="Alan Landsburg Productions" type="show" title="In Search of..." librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="Not Rated" summary="Leonard Nimoy hosted this quasi-documentary television show which portrayed unusual natural phenomena and &#39;investigated&#39; the paranormal. Its style of interspersing &#39;talking heads&#39; with sensationalistic video segments may have been the forerunner of &#39;info-tainment.&#39;" index="1" audienceRating="8.3" year="1977" tagline="Question the answers." thumb="/library/metadata/231561/thumb/1675037690" art="/library/metadata/231561/art/1675037690" theme="/library/metadata/231561/theme/1675037690" duration="1800000" originallyAvailableAt="1977-04-17" leafCount="48" viewedLeafCount="0" childCount="3" addedAt="1675037629" updatedAt="1675037690" audienceRatingImage="themoviedb://image.rating">
+<Genre tag="Documentary" />
+<Genre tag="Science Fiction" />
+<Country tag="United States of America" />
+<Role tag="Leonard Nimoy" />
+</Directory>
+</Hub>
+<Hub hubKey="/library/metadata/183131,131690,198703,148813,202209,145782" key="/library/sections/3/all?type=2&amp;unwatchedLeaves=1&amp;audienceRating&gt;=7.0&amp;sort=audienceRating:desc" title="Top Rated TV" type="show" hubIdentifier="tv.toprated.3" context="hub.tv.toprated" size="6" more="1" random="1" style="shelf">
+<Directory ratingKey="183131" key="/library/metadata/183131/children" guid="plex://show/60c1e4c72b2d98002c15c644" studio="GBH" type="show" title="Mysteries of Mental Illness" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" summary="The attempts across generations to unravel the mysteries of mental illness, including its causes and treatments." index="1" rating="7.7" audienceRating="7.7" year="2021" thumb="/library/metadata/183131/thumb/1672710275" art="/library/metadata/183131/art/1672710275" duration="3600000" originallyAvailableAt="2021-06-22" leafCount="1" viewedLeafCount="0" childCount="1" addedAt="1672710244" updatedAt="1672710275" audienceRatingImage="themoviedb://image.rating">
+<Genre tag="Documentary" />
+<Genre tag="Mini-Series" />
+</Directory>
+<Directory ratingKey="131690" key="/library/metadata/131690/children" guid="plex://show/5d9c08fb2192ba001f3198af" studio="RadicalMedia" type="show" title="Bobby Kennedy for President" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-MA" summary="This four-part documentary series weaves together rare and exclusive footage of attorney general, U.S. senator, and presidential candidate Robert F. Kennedy in the 1960s." index="1" rating="8.2" audienceRating="8.2" year="2018" thumb="/library/metadata/131690/thumb/1669430660" art="/library/metadata/131690/art/1669430660" duration="3600000" originallyAvailableAt="2018-04-27" leafCount="4" viewedLeafCount="0" childCount="1" addedAt="1669430619" updatedAt="1669430660" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/131713">
+<Genre tag="Documentary" />
+<Genre tag="Biography" />
+<Country tag="United States of America" />
+<Role tag="Robert F. Kennedy" />
+<Role tag="John F. Kennedy" />
+<Role tag="John Lewis" />
+</Directory>
+<Directory ratingKey="198703" key="/library/metadata/198703/children" guid="plex://show/5f6c8592cbb26700423123c2" studio="Lightbox Entertainment" type="show" title="Hip Hop Uncovered" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-MA" summary="The power brokers who operate from the shadows of hip hop." index="1" rating="7.5" audienceRating="7.5" year="2021" thumb="/library/metadata/198703/thumb/1673538648" art="/library/metadata/198703/art/1673538648" duration="3240000" originallyAvailableAt="2021-02-12" leafCount="6" viewedLeafCount="0" childCount="1" addedAt="1673538601" updatedAt="1673538648" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/198728">
+<Genre tag="Documentary" />
+<Genre tag="Music" />
+<Country tag="United States of America" />
+<Role tag="Eugene &#34;Big U&#34; Henley" />
+<Role tag="Bimmy" />
+<Role tag="Deb Antney" />
+</Directory>
+<Directory ratingKey="148813" key="/library/metadata/148813/children" guid="plex://show/5d9c084affd9ef001e9910cc" studio="Lovely Day" type="show" title="Grantchester" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-14" summary="A Cambridgeshire clergyman finds himself investigating a series of mysterious wrongdoings in his small village of Grantchester." index="1" rating="7.9" audienceRating="7.9" year="2014" thumb="/library/metadata/148813/thumb/1670502027" art="/library/metadata/148813/art/1670502027" theme="/library/metadata/148813/theme/1670502027" duration="2760000" originallyAvailableAt="2014-10-06" leafCount="38" viewedLeafCount="0" childCount="6" addedAt="1670501985" updatedAt="1670502027" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/148833">
+<Genre tag="Mystery" />
+<Genre tag="Crime" />
+<Country tag="United Kingdom" />
+<Role tag="Robson Green" />
+<Role tag="Al Weaver" />
+<Role tag="Tessa Peake-Jones" />
+</Directory>
+<Directory ratingKey="202209" key="/library/metadata/202209/children" guid="plex://show/5d9c086c02391c001f5891bf" studio="CBS Studios" type="show" title="Elementary" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" contentRating="TV-14" summary="A modern-day drama about a crime-solving duo that cracks the NYPD&#39;s most impossible cases. Following his fall from grace in London and a stint in rehab, eccentric Sherlock escapes to Manhattan where his wealthy father forces him to live with his worst nightmare - a sober companion, Dr. Watson." index="1" rating="7.9" audienceRating="7.9" year="2012" tagline="New Holmes. New Watson. New York. (season 1)" thumb="/library/metadata/202209/thumb/1673724052" art="/library/metadata/202209/art/1673724052" theme="/library/metadata/202209/theme/1673724052" duration="2580000" originallyAvailableAt="2012-09-27" leafCount="22" viewedLeafCount="0" childCount="1" addedAt="1673723994" updatedAt="1673724052" audienceRatingImage="themoviedb://image.rating" primaryExtraKey="/library/metadata/202239">
+<Genre tag="Drama" />
+<Genre tag="Mystery" />
+<Country tag="United States of America" />
+<Collection tag="Popular" />
+<Role tag="Jonny Lee Miller" />
+<Role tag="Lucy Liu" />
+<Role tag="Jon Michael Hill" />
+</Directory>
+<Directory ratingKey="145782" key="/library/metadata/145782/children" guid="plex://show/5d9c07ecba2e21001f18c660" studio="Sky" type="show" title="The Caf&#233;" titleSort="Cafe" librarySectionTitle="Shows" librarySectionID="3" librarySectionKey="/library/sections/3" summary="A cafe in Weston-super-Mare run by generational trio Mary, Carol and Sarah." index="1" rating="7.8" audienceRating="7.8" year="2011" thumb="/library/metadata/145782/thumb/1670318745" art="/library/metadata/145782/art/1670318745" duration="1380000" originallyAvailableAt="2011-11-22" leafCount="14" viewedLeafCount="0" childCount="2" addedAt="1670318688" updatedAt="1670318745" audienceRatingImage="themoviedb://image.rating">
+<Genre tag="Comedy" />
+<Country tag="United Kingdom" />
+<Role tag="Michelle Terry" />
+<Role tag="Ellie Haddington" />
+<Role tag="June Watson" />
+</Directory>
+</Hub>
+<Hub key="/library/sections/3/all?sort=lastViewedAt:desc&amp;unwatched=0&amp;viewOffset=0&amp;type=4" title="Recently Played Episodes" type="episode" hubIdentifier="tv.recentlyviewed.3" context="hub.tv.recentlyviewed" size="0" more="0" style="shelf">
+</Hub>
+</MediaContainer>
