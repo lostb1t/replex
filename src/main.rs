@@ -4,8 +4,7 @@ use http::{HeaderMap, HeaderValue};
 use cached::proc_macro::cached;
 
 // #[macro_use] extern crate log;
-use http::{uri::PathAndQuery, Uri};
-use plex_api::{HttpClient, HttpClientBuilder};
+use plex_api::{ HttpClientBuilder};
 use serde::{Deserialize, Serialize};
 // use serde_json::Result;
 use serde_xml_rs::from_str as from_xml_str;
@@ -79,28 +78,28 @@ pub struct MediaContainerWrapper<T> {
 }
 
 
-struct PlexHttpClient {
-    pub api_url: String,
-    pub x_plex_client_identifier: String,
-    pub x_plex_token: String,
-}
+// struct PlexHttpClient {
+//     pub api_url: String,
+//     pub x_plex_client_identifier: String,
+//     pub x_plex_token: String,
+// }
 
-impl PlexHttpClient {
-    fn get(path: String) -> () {
+// impl PlexHttpClient {
+//     fn get(path: String) -> () {
 
-        //let json: MediaContainerWrapper<MediaContainer> = reqwest::get("http://httpbin.org/ip")?.json()?;
-    }
+//         //let json: MediaContainerWrapper<MediaContainer> = reqwest::get("http://httpbin.org/ip")?.json()?;
+//     }
 
-    // pub fn set_api_url(self, api_url: String) -> Self
-    // {
-    //     Self {
-    //         client: self.client.and_then(move |mut client| {
-    //             client.api_url = Uri::try_from(api_url).map_err(Into::into)?;
-    //             Ok(client)
-    //         }),
-    //     }
-    // }
-}
+//     // pub fn set_api_url(self, api_url: String) -> Self
+//     // {
+//     //     Self {
+//     //         client: self.client.and_then(move |mut client| {
+//     //             client.api_url = Uri::try_from(api_url).map_err(Into::into)?;
+//     //             Ok(client)
+//     //         }),
+//     //     }
+//     // }
+// }
 
 #[cached(time=360)]
 async fn get_custom_collections() -> Vec<MetaData> {
@@ -142,15 +141,15 @@ fn get_content_type_from_headers(headers: &HeaderMap<HeaderValue>) -> ContentTyp
     //     .unwrap();
     let content_type = headers.get("content-type").unwrap().to_str().unwrap();
     match content_type {
-        "application/json" => ContentType::JSON,
-        "text/xml;charset=utf-8" => ContentType::XML,
-        _ => ContentType::XML,
+        "application/json" => ContentType::Json,
+        "text/xml;charset=utf-8" => ContentType::Xml,
+        _ => ContentType::Xml,
     }
 }
 
 enum ContentType {
-    JSON,
-    XML,
+    Json,
+    Xml,
 }
 
 async fn body_to_string(body: Body) -> Result<String> {
@@ -167,8 +166,8 @@ async fn from_body(
     let body_string = body_to_string(body).await?;
 
     let result: MediaContainerWrapper<MediaContainer> = match content_type {
-        ContentType::JSON => serde_json::from_str(&body_string).unwrap(),
-        ContentType::XML => from_xml_str(&body_string).unwrap(),
+        ContentType::Json => serde_json::from_str(&body_string).unwrap(),
+        ContentType::Xml => from_xml_str(&body_string).unwrap(),
     };
     Ok(result)
 }
@@ -179,8 +178,8 @@ async fn to_string(
     content_type: &ContentType,
 ) -> Result<String> {
     match content_type {
-        ContentType::JSON => Ok(serde_json::to_string(&container).unwrap()),
-        ContentType::XML => Ok(to_xml_str(&container).unwrap()),
+        ContentType::Json => Ok(serde_json::to_string(&container).unwrap()),
+        ContentType::Xml => Ok(to_xml_str(&container).unwrap()),
     }
 }
 
@@ -199,7 +198,7 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
 
     match hyper_reverse_proxy::call(client_ip, "http://100.91.35.113:32400", req).await {
         Ok(resp) => {
-            if uri.path().starts_with("/hubs") {
+            if uri.path().starts_with("/hubs/sections") {
                 let (mut parts, body) = resp.into_parts();
                 let content_type = get_content_type_from_headers(&parts.headers);
                 let mut container = from_body(body, &content_type).await?;
@@ -222,12 +221,12 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
 #[tokio::main]
 async fn main() {
     //let out_addr: SocketAddr = ([100, 91, 35, 113], 32400).into();
-    let bind_addr = "127.0.0.1:3001";
+    let bind_addr = "0.0.0.0:3001";
     let addr: SocketAddr = bind_addr.parse().expect("Could not parse ip:port.");
 
     let make_svc = make_service_fn(|conn: &AddrStream| {
         let remote_addr = conn.remote_addr().ip();
-        async move { Ok::<_, Infallible>(service_fn(move |mut req| handle(remote_addr, req))) }
+        async move { Ok::<_, Infallible>(service_fn(move |req| handle(remote_addr, req))) }
     });
 
     let server = Server::bind(&addr).serve(make_svc);
