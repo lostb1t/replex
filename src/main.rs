@@ -1,6 +1,8 @@
 extern crate pretty_env_logger;
 use anyhow::Result;
 use http::{HeaderMap, HeaderValue};
+use cached::proc_macro::cached;
+
 // #[macro_use] extern crate log;
 use http::{uri::PathAndQuery, Uri};
 use plex_api::{HttpClient, HttpClientBuilder};
@@ -15,49 +17,7 @@ use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Request, Response, Server, StatusCode};
 use std::net::IpAddr;
 use std::{convert::Infallible, net::SocketAddr};
-// use simple_proxy::middlewares::Logger;
-// use simple_proxy::{Environment, SimpleProxy};
 
-// // use crate::middleware::Cors;
-// use plex_proxy::middleware::Cors;
-// use plex_proxy::proxy::proxy;
-
-// type Metadata struct {
-// 	RatingKey             string       `json:"ratingKey"`
-// 	Key                   string       `json:"key"`
-// 	GUID                  string       `json:"guid"`
-// 	AltGUIDs              []AltGUID    `json:"Guid,omitempty"`
-// 	Studio                string       `json:"studio"`
-// 	Type                  string       `json:"type"`
-// 	Title                 string       `json:"title"`
-// 	LibrarySectionTitle   string       `json:"librarySectionTitle"`
-// 	LibrarySectionID      int          `json:"librarySectionID"`
-// 	LibrarySectionKey     string       `json:"librarySectionKey"`
-// 	OriginalTitle         string       `json:"originalTitle,omitempty"`
-// 	ContentRating         string       `json:"contentRating"`
-// 	Rating                float64      `json:"rating"`
-// 	Ratings               []Rating     `json:"Rating,omitempty"`
-// 	AudienceRating        float64      `json:"audienceRating"`
-// 	Year                  int          `json:"year"`
-// 	Tagline               string       `json:"tagline"`
-// 	Thumb                 string       `json:"thumb"`
-// 	Art                   string       `json:"art"`
-// 	Duration              int          `json:"duration"`
-// 	OriginallyAvailableAt string       `json:"originallyAvailableAt"`
-// 	AddedAt               int          `json:"addedAt"`
-// 	UpdatedAt             int          `json:"updatedAt"`
-// 	AudienceRatingImage   string       `json:"audienceRatingImage"`
-// 	ChapterSource         string       `json:"chapterSource,omitempty"`
-// 	Media                 []Media      `json:"Media"`
-// 	Genre                 []Genre      `json:"Genre"`
-// 	Director              []Director   `json:"Director"`
-// 	Writer                []Writer     `json:"Writer"`
-// 	Country               []Country    `json:"Country"`
-// 	Collection            []Collection `json:"Collection"`
-// 	Role                  []Role       `json:"Role"`
-// 	PrimaryExtraKey       string       `json:"primaryExtraKey,omitempty"`
-// 	TitleSort             string       `json:"titleSort,omitempty"`
-// }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
@@ -118,30 +78,6 @@ pub struct MediaContainerWrapper<T> {
     pub media_container: T,
 }
 
-// impl MediaContainerWrapper<MediaContainer> {
-
-// }
-
-// impl Json for MediaContainerWrapper<MediaContainer> {
-// }
-
-// impl Point {
-//     fn as_json(&self)-> String {
-//         return serde_json::to_string(&self).unwrap()
-//     }
-
-//     fn from_json(s: &str)-> Self {
-//         return serde_json::from_str(s).unwrap()
-//     }
-// }
-
-// #[derive(Debug, Deserialize, Clone)]
-// #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
-// #[serde(rename_all = "camelCase")]
-// pub struct MediaContainerWrapper<T> {
-//     #[serde(rename = "MediaContainer")]
-//     pub media_container: T,
-// }
 
 struct PlexHttpClient {
     pub api_url: String,
@@ -166,6 +102,7 @@ impl PlexHttpClient {
     // }
 }
 
+#[cached(time=360)]
 async fn get_custom_collections() -> Vec<MetaData> {
     let client = HttpClientBuilder::default()
         .set_api_url("https://plex.sjoerdarendsen.dev")
@@ -196,142 +133,13 @@ async fn get_custom_collections() -> Vec<MetaData> {
         .await
         .unwrap();
 
-    let collections = [
+    [
         show_collection_container.media_container.metadata.unwrap(),
         movie_collection_container.media_container.metadata.unwrap(),
     ]
-    .concat();
-    // println!("{:#?}", collections);
-
-    collections
+    .concat()
 }
 
-// #[derive(Debug, Clone)]
-// pub struct Config();
-// #[tokio::main]
-// async fn main() {
-//     // let args = Cli::from_args();
-
-//     let mut proxy = SimpleProxy::new(3005, Environment::Development);
-//     let logger = Logger::new();
-//     let cors = Cors::new();
-//     // let router = Router::new(&Config());
-
-//     // Order matters
-//     // proxy.add_middleware(Box::new(router));
-//     proxy.add_middleware(Box::new(logger));
-//     proxy.add_middleware(Box::new(cors));
-
-//     // Start proxy
-//     let _ = proxy.run().await;
-// }
-
-// #[tokio::main]
-// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-//     let addr = SocketAddr::from(([100, 91, 35, 113], 32400));
-
-//     let listener = TcpListener::bind(addr).await?;
-//     println!("Listening on http://{}", addr);
-
-//     loop {
-//         let (stream, _) = listener.accept().await?;
-
-//         tokio::task::spawn(async move {
-//             if let Err(err) = http1::Builder::new()
-//                 .preserve_header_case(true)
-//                 .title_case_headers(true)
-//                 .serve_connection(stream, service_fn(proxy))
-//                 .with_upgrades()
-//                 .await
-//             {
-//                 println!("Failed to serve connection: {:?}", err);
-//             }
-//         });
-//     }
-// }
-
-// #[tokio::main]
-// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-//     pretty_env_logger::init();
-
-//     let in_addr: SocketAddr = ([127, 0, 0, 1], 3001).into();
-//     let out_addr: SocketAddr = ([100, 91, 35, 113], 32400).into();
-
-//     let out_addr_clone = out_addr.clone();
-
-//     let listener = TcpListener::bind(in_addr).await?;
-
-//     println!("Listening on http://{}", in_addr);
-//     println!("Proxying on http://{}", out_addr);
-
-//     loop {
-//         let (stream, _) = listener.accept().await?;
-
-//         let service = service_fn(move |mut req| {
-//             let uri_string = format!(
-//                 "http://{}{}",
-//                 out_addr_clone,
-//                 req.uri()
-//                     .path_and_query()
-//                     .map(|x| x.as_str())
-//                     .unwrap_or("/")
-//             );
-//             // println!("{:#?}", req.uri().path());
-//             let path = req.uri().path();
-//             let uri = uri_string.parse().unwrap();
-
-//             let mut is_hubs = false;
-//             if req.uri().path().starts_with("/hubs") {
-//                 is_hubs = true;
-//             }
-
-//             *req.uri_mut() = uri;
-
-//             let host = req.uri().host().expect("uri has no host");
-//             let port = req.uri().port_u16().unwrap_or(80);
-//             let addr = format!("{}:{}", host, port);
-//             // let addr = format!("plex.sjoerdarendsen.dev:443");
-
-//             async move {
-//                 let client_stream = TcpStream::connect(addr).await.unwrap();
-
-//                 let (mut sender, conn) =
-//                     hyper::client::conn::http1::handshake(client_stream).await?;
-//                 tokio::task::spawn(async move {
-//                     if let Err(err) = conn.await {
-//                         println!("Connection failed: {:?}", err);
-//                     }
-//                 });
-
-//                 let response = sender.send_request(req).await;
-
-//                 if is_hubs {
-//                     // if let Some(content_type) = response?.headers().get("content-type") {
-//                     //     println!("{:#?}", content_type);
-
-//                     // }
-
-//                 }
-
-//                 response
-//             }
-//         });
-
-//         tokio::task::spawn(async move {
-//             if let Err(err) = http1::Builder::new()
-//                 .serve_connection(stream, service)
-//                 .await
-//             {
-//                 println!("Failed to servce connection: {:?}", err);
-//             }
-//         });
-//     }
-// }
-
-// fn debug_request(req: Request<Body>) -> Result<Response<Body>, Infallible> {
-//     let body_str = format!("{:?}", req);
-//     Ok(Response::new(Body::from(body_str)))
-// }
 
 // fn get_content_type_from_response(resp: &Response<Body>) -> ContentType {
 fn get_content_type_from_headers(headers: &HeaderMap<HeaderValue>) -> ContentType {
@@ -358,7 +166,6 @@ enum ContentType {
 async fn body_to_string(body: Body) -> Result<String> {
     let body_bytes = hyper::body::to_bytes(body).await?;
     let string = String::from_utf8(body_bytes.to_vec())?;
-    //let string = String::from_utf8(body_bytes.to_vec()).unwrap();
     Ok(string)
 }
 
@@ -367,16 +174,6 @@ async fn from_body(
     body: Body,
     content_type: &ContentType,
 ) -> Result<MediaContainerWrapper<MediaContainer>> {
-    //let content_type = get_content_type_from_response(&resp);
-    // println!("{:#?}", resp);
-    // Get the response body bytes.
-    // let body_bytes = hyper::body::to_bytes(resp).await?;
-    // //let body_bytes = hyper::body::to_bytes(resp.body_mut()).await.unwrap();
-    // // println!("{:#?}", body_bytes);
-    // // Convert the body bytes to utf-8
-    // let body = String::from_utf8(body_bytes.to_vec()).unwrap();
-
-    //let body = String::from_utf8(body_bytes.into_iter().collect()).unwrap();
     let body_string = body_to_string(body).await?;
 
     let result: MediaContainerWrapper<MediaContainer> = match content_type {
@@ -397,21 +194,12 @@ async fn to_string(
     }
 }
 
-// fn copy_headers(headers: &HeaderMap<HeaderValue>) -> HeaderMap<HeaderValue> {
-//     let mut result = HeaderMap::new();
-//     for (k, v) in headers.iter() {
-//         if !is_hop_header(k.as_str()) {
-//             result.insert(k.clone(), v.clone());
-//         }
-//     }
-//     result
-// }
 
-fn create_proxied_response(mut resp: Response<Body>, body: Body) -> Response<Body> {
-    // *response.headers_mut() = remove_hop_headers(response.headers());
-    *resp.body_mut() = body;
-    resp
-}
+// fn create_proxied_response(mut resp: Response<Body>, body: Body) -> Response<Body> {
+//     // *response.headers_mut() = remove_hop_headers(response.headers());
+//     *resp.body_mut() = body;
+//     resp
+// }
 
 async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Body>> {
     // Default is gzip. Dont want that
@@ -464,56 +252,31 @@ async fn main() {
 async fn patch_hubs(
     mut container: MediaContainerWrapper<MediaContainer>,
 ) -> MediaContainerWrapper<MediaContainer> {
-    // println!("Hello, world!");
-
-    // let result = match application_type.as_str() {
-    //     // Match a single value
-    //     "json" => serde_json::from_str(&s),
-    //     // Match several values
-    //     "xml" => serde_json::from_str(&s),
-    //     _ => Ok(Err("err")),
-    // };
-
-    // let mut result: MediaContainerWrapper<MediaContainer> = serde_json::from_str(&s).unwrap();
     if container.media_container.hub.is_none() {
         // nothing todo
         return container;
     }
 
-    let hub_collections = container.media_container.hub.unwrap();
-    // return hub_collections
-    println!("{:#?}", hub_collections.len());
+    let collections = container.media_container.hub.unwrap();
+    // println!("{:#?}", hub_collections.len());
 
     let custom_collections = get_custom_collections().await;
 
     let custom_collections_keys: Vec<String> =
         custom_collections.iter().map(|c| c.key.clone()).collect();
 
-    let new_collections: Vec<Hub> = hub_collections
+    let new_collections: Vec<Hub> = collections
         .into_iter()
         .filter(|c| {
             c.context != "hub.custom.collection" || custom_collections_keys.contains(&c.key)
         })
         .collect();
     
-    println!("{:#?}", new_collections.len());
-    // let allowed_collection_keys: Vec<_> = allowed_collections
-    //     .iter()
-    //     .map(|c| String::from(c.key.clone()))
-    //     .collect();
-
-    // let new_collections: Vec<MetaData> = hub_collections
-    //     .into_iter()
-    //     .filter(|c| allowed_collection_keys.contains(&c.key))
-    //     .collect();
-
     // println!("{:#?}", new_collections.len());
+
     let size = new_collections.len();
     container.media_container.hub = Some(new_collections);
     container.media_container.size = size;
-    // println!("{:#?}", collection_keys);
-    //serde_json::from_str(&json_string).unwrap();
-    // let remotes = response.json::<serde_json::Value>().await?;
     container
 }
 
