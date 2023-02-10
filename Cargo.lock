@@ -1121,6 +1121,7 @@ checksum = "6ac9a59f73473f1b8d852421e59e64809f025994837ef743615c6d0c5b305160"
 [[package]]
 name = "plex-api"
 version = "0.0.5"
+source = "git+https://github.com/andrey-yantsen/plex-api.rs#8a60275405de02bf58ef68d58e43b7b73128e6b5"
 dependencies = [
  "enum_dispatch",
  "futures",
@@ -1162,6 +1163,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
+ "url",
  "yaserde",
  "yaserde_derive",
 ]

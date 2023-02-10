@@ -1,175 +1,24 @@
 extern crate pretty_env_logger;
 use anyhow::Result;
 use cached::proc_macro::cached;
-use derive_more::{Add, Display, From, Into};
 use http::Method;
 use http::{HeaderMap, HeaderValue};
 
 // #[macro_use] extern crate log;
 use plex_api::HttpClientBuilder;
 
-use serde::{Deserialize, Serialize};
-// use serde_json::Result;
-// use serde_xml_rs::from_reader as from_xml_reader;
-// use serde_xml_rs::from_str as from_xml_str;
-// use serde_xml_rs::to_string as to_xml_str;
-// use quick_xml::de::from_str as from_xml_str;
-// use quick_xml::se::to_string as to_xml_str;
-
 use yaserde::de::from_str as from_xml_str;
 use yaserde::ser::to_string as to_xml_str;
-// use yaserde::de::from_str;
 
 use hyper::server::conn::AddrStream;
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Request, Response, Server, StatusCode};
-use std::future::Future;
+use std::collections::HashMap;
 use std::net::IpAddr;
 use std::{convert::Infallible, net::SocketAddr};
 
-// use plex_proxy::xml::*;
-// use plex_proxy::models::*;
 use plex_proxy::models::*;
 
-// #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-// #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
-// #[serde(rename_all = "camelCase")]
-// pub struct MetaData {
-//     rating_key: String,
-//     key: String,
-//     guid: String,
-//     r#type: String,
-//     title: String,
-//     thumb: String,
-//     art: Option<String>,
-//     year: Option<i32>,
-//     promoted: Option<bool>,
-// }
-
-// #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-// #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
-// #[serde(rename_all = "camelCase")]
-// // #[serde(flatten)]
-// pub struct Hub {
-//     #[serde(rename = "@key")]
-//     key: String,
-//     #[serde(rename = "@hubKey")]
-//     hub_key: Option<String>,
-//     #[serde(rename = "@title")]
-//     title: String,
-//     #[serde(rename = "@hubIdentifier")]
-//     hub_identifier: String,
-//     #[serde(rename = "@context")]
-//     context: String,
-//     #[serde(rename = "@type")]
-//     r#type: String,
-//     #[serde(rename = "@size")]
-//     size: i32,
-//     #[serde(rename = "@more")]
-//     more: bool,
-//     #[serde(rename = "@style")]
-//     style: String,
-//     #[serde(rename = "@promoted")]
-//     promoted: Option<bool>,
-// }
-
-// #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-// #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
-// #[serde(rename_all = "camelCase")]
-// pub struct MediaContainer {
-//     pub size: Option<usize>,
-//     pub allow_sync: Option<bool>,
-//     pub identifier: Option<String>,
-//     #[serde(rename = "librarySectionID")]
-//     pub library_section_id: Option<u32>,
-//     pub library_section_title: Option<String>,
-//     #[serde(rename = "librarySectionUUID")]
-//     pub library_section_uuid: Option<String>,
-//     // #[serde(skip_serializing_if = "Option::is_none")]
-//     #[serde(rename = "Hub", default)]
-//     pub hubs: Vec<Hub>,
-//     // #[serde(rename = "Metadata")]
-//     // #[serde(skip_serializing_if = "Option::is_none")]
-//     // pub metadata: Option<Vec<MetaData>>,
-// }
-
-// #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-// #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
-// #[serde(rename_all = "camelCase")]
-// pub struct MediaContainerWrapper<T> {
-//     #[serde(rename = "MediaContainer")]
-//     // #[serde(rename="$value")]
-//     pub media_container: T,
-// }
-
-// struct PlexHttpClient {
-//     pub api_url: String,
-//     pub x_plex_client_identifier: String,
-//     pub x_plex_token: String,
-// }
-
-// impl PlexHttpClient {
-//     fn get(path: String) -> () {
-
-//         //let json: MediaContainerWrapper<MediaContainer> = reqwest::get("http://httpbin.org/ip")?.json()?;
-//     }
-
-//     // pub fn set_api_url(self, api_url: String) -> Self
-//     // {
-//     //     Self {
-//     //         client: self.client.and_then(move |mut client| {
-//     //             client.api_url = Uri::try_from(api_url).map_err(Into::into)?;
-//     //             Ok(client)
-//     //         }),
-//     //     }
-//     // }
-// }
-
-// #[cached(time = 360)]
-// async fn get_custom_collections(token: String) -> Vec<MetaData> {
-//     let client = HttpClientBuilder::default()
-//         .set_api_url("https://plex.sjoerdarendsen.dev")
-//         .set_x_plex_token(token)
-//         //.set_x_plex_client_identifier("etz23lqlxhsdinb7hv9uiu38".to_owned())
-//         .build()
-//         .expect("wut went wrong");
-
-//     client.
-
-//     let movie_collection_container: MediaContainerWrapper<MediaContainer> = client
-//         .get("/library/sections/1/collections")
-//         .json()
-//         .await
-//         .unwrap();
-//     let show_collection_container: MediaContainerWrapper<MediaContainer> = client
-//         .get("/library/sections/3/collections")
-//         .json()
-//         .await
-//         .unwrap();
-
-//     [
-//         show_collection_container.media_container.metadata.unwrap(),
-//         movie_collection_container.media_container.metadata.unwrap(),
-//     ]
-//     .concat()
-// }
-
-// struct GenericCollection<T> {
-//     plex_api::Collection<T>: plex_api::Collection<T>
-//     // collection: plex_api::Collection<T>,
-//     // r#type: plex_api::Item
-// }
-
-// #[derive(PartialEq, From)]
-// struct GenericCollection(plex_api::Item);
-// // #[cached(time = 360)]
-// // async fn get_library(server: plex_api::Server) -> Result<plex_api::Library> {
-
-// // }
-
-// async fn get_library_collections(library: plex_api::Library) {}
-
-// #[cached(time = 360, convert = r#"{ make_server_key(server) }"#)]
 
 async fn get_collections(server: plex_api::Server) -> Result<Vec<MetaData>> {
     // let mut collections: Vec<GenericCollection<plex_api::Item>> = vec![];
@@ -307,26 +156,30 @@ async fn to_string(
     }
 }
 
-// fn create_proxied_response(mut resp: Response<Body>, body: Body) -> Response<Body> {
-//     // *response.headers_mut() = remove_hop_headers(response.headers());
-//     *resp.body_mut() = body;
-//     resp
-// }
-
 fn create_client_from_request(req: &Request<Body>) -> Result<plex_api::HttpClient> {
     let headers = req.headers();
-    let token = headers
-        .get("x-plex-token")
-        .unwrap()
-        .to_str()
-        .unwrap()
-        .to_string();
-    let client_identifier = headers
-        .get("x-plex-client-identifier")
-        .unwrap()
-        .to_str()
-        .unwrap()
-        .to_string();
+
+    // TODO: lowercase the keys
+    let params: HashMap<String, String> = req
+        .uri()
+        .query()
+        .map(|v| {
+            url::form_urlencoded::parse(v.as_bytes())
+                .into_owned()
+                .collect()
+        })
+        .unwrap_or_else(HashMap::new);
+
+    // TODO: make this a generic function ( get_value or something )
+    let token: String = match headers.get("x-plex-token") {
+        None => params.get("X-Plex-Token").unwrap().to_string(),
+        Some(value) => value.to_str().unwrap().to_string(),
+    };
+
+    let client_identifier: String = match headers.get("x-plex-client-identifier") {
+        None => params.get("X-Plex-Client-Identifier").unwrap().to_string(),
+        Some(value) => value.to_str().unwrap().to_string(),
+    };
 
     let client = HttpClientBuilder::default()
         .set_api_url("https://plex.sjoerdarendsen.dev")
@@ -355,23 +208,8 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
     // println!("Proxy req: {:#?}", req);
     let uri = req.uri_mut().to_owned();
     let method = req.method_mut().to_owned();
-    // let token = req
-    //     .headers()
-    //     .get("x-plex-token")
-    //     .unwrap()
-    //     .to_str()
-    //     .unwrap()
-    //     .to_string();
-    // let xml_string = std::fs::read_to_string("test/hubs.xml").unwrap();
-    // println!("{:#?}", xml_string);
-    // tes_client_from_request(&req);
     let client = create_client_from_request(&req).expect("huha");
-    // let movie_collection_container: MediaContainerWrapper<MediaContainer> = client
-    //     .get("/hubs/sections/1")
-    //     .json()
-    //     .await
-    //     .unwrap();
-    // println!("{:#?}", movie_collection_container);
+
     match hyper_reverse_proxy::call(client_ip, "http://100.91.35.113:32400", req).await {
         Ok(resp) => {
             // return Ok(resp);
@@ -414,7 +252,7 @@ async fn main() {
 
     let make_svc = make_service_fn(|conn: &AddrStream| {
         let remote_addr = conn.remote_addr().ip();
-        async move { Ok::<_, Infallible>(service_fn(move |mut req| handle(remote_addr, req))) }
+        async move { Ok::<_, Infallible>(service_fn(move |req| handle(remote_addr, req))) }
     });
 
     let server = Server::bind(&addr).serve(make_svc);

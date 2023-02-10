@@ -23,6 +23,8 @@ pub struct MetaData {
     #[yaserde(attribute)]
     #[yaserde(rename = "librarySectionTitle")]
     pub library_section_title: Option<String>,
+    #[yaserde(rename = "type")]
+    #[yaserde(attribute)]
     pub r#type: String,
     #[yaserde(attribute)]
     pub title: String,
@@ -74,6 +76,10 @@ pub struct Hub {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Directory")]
     directory: Vec<MetaData>,   // only avaiable in XML
+    #[serde(rename = "Video", default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[yaserde(rename = "Video")]
+    video: Vec<MetaData>,   // again only xml, but its the same as directory and metadata
 }
 
 
