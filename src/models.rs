@@ -29,14 +29,18 @@ pub struct MetaData {
     #[yaserde(attribute)]
     pub title: String,
     #[yaserde(attribute)]
-    pub summary: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub summary: Option<String>,
     #[yaserde(attribute)]
     pub thumb: String,
     #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub art: Option<String>,
     #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub year: Option<i32>,
     #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub promoted: Option<bool>,
 }
 
