@@ -190,6 +190,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "convert_case"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6245d59a3e82a7fc217c5828a6692dbc6dfb63a0c8c90495621f7b9d79704a0e"
+
+[[package]]
 name = "core-foundation"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -331,6 +337,19 @@ checksum = "7618812407e9402654622dd402b0a89dff9ba93badd6540781526117b92aab7e"
 dependencies = [
  "darling_core",
  "quote",
+ "syn",
+]
+
+[[package]]
+name = "derive_more"
+version = "0.99.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4fb810d30a7c1953f91334de7244731fc3f3c10d7fe163338a35b9f640960321"
+dependencies = [
+ "convert_case",
+ "proc-macro2",
+ "quote",
+ "rustc_version",
  "syn",
 ]
 
@@ -564,6 +583,12 @@ name = "hashbrown"
 version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "43a3c133739dddd0d2990f9a4bdf8eb4b21ef50e4851ca85ab661199821d510e"
+
+[[package]]
+name = "heck"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "95505c38b4572b2d910cecb0281560f54b440a19336cbbcb27bf6ce6adc6f5a8"
 
 [[package]]
 name = "hermit-abi"
@@ -1096,7 +1121,6 @@ checksum = "6ac9a59f73473f1b8d852421e59e64809f025994837ef743615c6d0c5b305160"
 [[package]]
 name = "plex-api"
 version = "0.0.5"
-source = "git+https://github.com/andrey-yantsen/plex-api.rs#94da373d0b6bb57536844b0447678910200389ff"
 dependencies = [
  "enum_dispatch",
  "futures",
@@ -1126,6 +1150,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "cached",
+ "derive_more",
  "http",
  "hyper",
  "hyper-reverse-proxy",
@@ -1133,13 +1158,12 @@ dependencies = [
  "plex-api",
  "pretty_assertions",
  "pretty_env_logger",
- "quick-xml",
  "reqwest",
  "serde",
- "serde-xml-rs",
  "serde_json",
- "snailquote",
  "tokio",
+ "yaserde",
+ "yaserde_derive",
 ]
 
 [[package]]
@@ -1285,6 +1309,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustc_version"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bfa0f585226d2e68097d4f95d113b15b83a82e819ab25717ec0590d9584ef366"
+dependencies = [
+ "semver",
+]
+
+[[package]]
 name = "ryu"
 version = "1.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1335,6 +1368,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "semver"
+version = "1.0.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "58bc9567378fc7690d6b2addae4e60ac2eeea07becb2c64b9f218b53865cba2a"
+
+[[package]]
 name = "serde"
 version = "1.0.152"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1352,18 +1391,6 @@ dependencies = [
  "chrono",
  "serde",
  "serde_json",
-]
-
-[[package]]
-name = "serde-xml-rs"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb3aa78ecda1ebc9ec9847d5d3aba7d618823446a049ba2491940506da6e2782"
-dependencies = [
- "log",
- "serde",
- "thiserror",
- "xml-rs",
 ]
 
 [[package]]
@@ -1482,16 +1509,6 @@ name = "smallvec"
 version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a507befe795404456341dfab10cef66ead4c041f62b8b11bbb92bffe5d0953e0"
-
-[[package]]
-name = "snailquote"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec62a949bda7f15800481a711909f946e1204f2460f89210eaf7f57730f88f86"
-dependencies = [
- "thiserror",
- "unicode_categories",
-]
 
 [[package]]
 name = "socket2"
@@ -1760,12 +1777,6 @@ name = "unicode-width"
 version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c0edd1e5b14653f783770bce4a4dabb4a5108a5370a5f5d8cfe8710c361f6c8b"
-
-[[package]]
-name = "unicode_categories"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "39ec24b3121d976906ece63c9daad25b85969647682eee313cb5779fdd69e14e"
 
 [[package]]
 name = "url"
@@ -2039,3 +2050,27 @@ name = "yansi"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09041cd90cf85f7f8b2df60c646f853b7f535ce68f85244eb6731cf89fa498ec"
+
+[[package]]
+name = "yaserde"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4bf52af554a50b866aaad63d7eabd6fca298db3dfe49afd50b7ba5a33dfa0582"
+dependencies = [
+ "log",
+ "xml-rs",
+]
+
+[[package]]
+name = "yaserde_derive"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ab8bd5c76eebb8380b26833d30abddbdd885b00dd06178412e0d51d5bfc221f"
+dependencies = [
+ "heck",
+ "log",
+ "proc-macro2",
+ "quote",
+ "syn",
+ "xml-rs",
+]
