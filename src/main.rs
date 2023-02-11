@@ -1,4 +1,6 @@
 extern crate pretty_env_logger;
+#[macro_use]
+extern crate tracing;
 use anyhow::Result;
 use cached::proc_macro::cached;
 use http::Method;
@@ -250,6 +252,8 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
 
 #[tokio::main]
 async fn main() {
+    pretty_env_logger::init();
+
     // TODO: support websockets
     let bind_addr = "0.0.0.0:3001";
     let addr: SocketAddr = bind_addr.parse().expect("Could not parse ip:port.");
@@ -262,7 +266,7 @@ async fn main() {
     let server = Server::bind(&addr).serve(make_svc);
 
     println!("Running server on {:?}", addr);
-
+    debug!("started");
     if let Err(e) = server.await {
         eprintln!("server error: {}", e);
     }
