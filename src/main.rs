@@ -157,6 +157,7 @@ async fn to_string(
 }
 
 fn create_client_from_request(req: &Request<Body>) -> Result<plex_api::HttpClient> {
+// fn create_client_from_request(req: Request<Body>) -> Result<plex_api::HttpClient> {
     let headers = req.headers();
 
     // TODO: lowercase the keys
@@ -205,15 +206,18 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
     // Default is gzip. Dont want that
     req.headers_mut()
         .insert("Accept-Encoding", HeaderValue::from_static("identity"));
+    
+    // let headers = req.headers();
     // println!("Proxy req: {:#?}", req);
+    // let client = create_client_from_request(&req).expect("huha");
+    let disable = req.headers().get("x-plex-proxy-disable").is_some();
     let uri = req.uri_mut().to_owned();
     let method = req.method_mut().to_owned();
-    let client = create_client_from_request(&req).expect("huha");
-
+    let client = create_client_from_request(&req).expect("Expected client");
+    
     match hyper_reverse_proxy::call(client_ip, "http://100.91.35.113:32400", req).await {
         Ok(resp) => {
-            // return Ok(resp);
-            if uri.path().starts_with("/hubs") && method == Method::GET {
+            if uri.path().starts_with("/hubs") && method == Method::GET && !disable {
                 let (mut parts, body) = resp.into_parts();
                 let content_type = get_content_type_from_headers(&parts.headers);
                 let mut container = from_body(body, &content_type).await?;
