@@ -100,7 +100,7 @@ async fn get_collections(server: &plex_api::Server) -> Result<Vec<MetaData>> {
     //  let collections = library.collections().await.unwrap();
 }
 
-#[cached(time = 360, key = "String", convert = r#"{ server.client().x_plex_token().to_string() }"#)]
+#[cached(time = 720, key = "String", convert = r#"{ server.client().x_plex_token().to_string() }"#)]
 async fn get_cached_collections(server: &plex_api::Server) -> Vec<MetaData> {
     get_collections(&server).await.unwrap()
 }
@@ -254,7 +254,7 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
         Ok(resp) => {
             // let client = create_client_from_request(&req_copy).expect("Expected client");
             if uri.path().starts_with("/hubs")
-                && !uri.path().ends_with("/manage")
+                && !uri.path().contains("/manage")
                 && method == Method::GET
                 && !disable
             {
@@ -352,7 +352,7 @@ async fn clone_req(mut req: &Request<Body>) -> Request<Body> {
 }
 
 // TODO: Enable cache
-// #[cached(time = 360, key = "String", convert = r#"{ server.client().x_plex_token().to_string() }"#)]
+// #[cached(time = 720, key = "String", convert = r#"{ req.headers().get("x-plex-token).unwrap().to_string() }"#)]
 async fn get_promoted_hubs(
     client_ip: IpAddr,
     mut req: Request<Body>,
