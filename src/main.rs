@@ -351,6 +351,8 @@ async fn clone_req(mut req: &Request<Body>) -> Request<Body> {
     request
 }
 
+// TODO: Enable cache
+// #[cached(time = 360, key = "String", convert = r#"{ server.client().x_plex_token().to_string() }"#)]
 async fn get_promoted_hubs(
     client_ip: IpAddr,
     mut req: Request<Body>,
@@ -401,6 +403,8 @@ async fn mangle_hubs_promoted(
     // let mut mangled_collections = collections;
     // mangled_collections[0].r#type = "mixed".to_string();
     // dbg!(&content_directory_id);
+
+    // TODO: Dont make this hardcoded just get the first value of pinnedContentDirectoryID
     if content_directory_id == "1" {
         container = get_promoted_hubs(client_ip, req).await?;
     } else {
