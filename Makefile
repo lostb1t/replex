@@ -9,3 +9,5 @@ build-docker:
 
 push-docker:
 	docker push ghcr.io/sarendsen/plex_proxy:latest
+
+release: build-docker push-docker

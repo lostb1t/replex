@@ -3,26 +3,39 @@ extern crate pretty_env_logger;
 extern crate tracing;
 use anyhow::Result;
 use cached::proc_macro::cached;
+use http::header::HOST;
 use http::Method;
 use http::{HeaderMap, HeaderValue};
 
 // #[macro_use] extern crate log;
 use plex_api::HttpClientBuilder;
 
+use url::Host;
 use yaserde::de::from_str as from_xml_str;
 use yaserde::ser::to_string as to_xml_str;
 
+use hyper;
 use hyper::server::conn::AddrStream;
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Request, Response, Server, StatusCode};
+use hyper_reverse_proxy::ReverseProxy;
+use hyper_trust_dns::{RustlsHttpsConnector, TrustDnsHttpConnector, TrustDnsResolver};
 use std::collections::HashMap;
 use std::net::IpAddr;
+use std::str::FromStr;
 use std::{convert::Infallible, net::SocketAddr};
 
 use plex_proxy::models::*;
 
+lazy_static::lazy_static! {
+    static ref PROXY_CLIENT: ReverseProxy<TrustDnsHttpConnector> = {
+        ReverseProxy::new(
+            hyper::Client::builder().build::<_, hyper::Body>(TrustDnsResolver::default().into_http_connector()),
+        )
+    };
+}
 
-async fn get_collections(server: plex_api::Server) -> Result<Vec<MetaData>> {
+async fn get_collections(server: &plex_api::Server) -> Result<Vec<MetaData>> {
     // let mut collections: Vec<GenericCollection<plex_api::Item>> = vec![];
     let mut collections = vec![];
     for library in server.libraries() {
@@ -87,13 +100,9 @@ async fn get_collections(server: plex_api::Server) -> Result<Vec<MetaData>> {
     //  let collections = library.collections().await.unwrap();
 }
 
-#[cached(
-    time = 360,
-    key = "String",
-    convert = r#"{ server.client().x_plex_token().to_string() }"#
-)]
-async fn get_cached_collections(server: plex_api::Server) -> Vec<MetaData> {
-    get_collections(server).await.unwrap()
+#[cached(time = 360, key = "String", convert = r#"{ server.client().x_plex_token().to_string() }"#)]
+async fn get_cached_collections(server: &plex_api::Server) -> Vec<MetaData> {
+    get_collections(&server).await.unwrap()
 }
 
 // fn get_content_type_from_response(resp: &Response<Body>) -> ContentType {
@@ -119,6 +128,7 @@ enum ContentType {
     Xml,
 }
 
+// TODO: Make this traits of the Hub struct
 async fn body_to_string(body: Body) -> Result<String> {
     let body_bytes = hyper::body::to_bytes(body).await?;
     let string = String::from_utf8(body_bytes.to_vec())?;
@@ -139,11 +149,17 @@ async fn from_body(
     // println!("original Response body: {:#?}", body_string);
     let result: MediaContainerWrapper<MediaContainer> = match content_type {
         ContentType::Json => serde_json::from_str(&body_string).unwrap(),
-        ContentType::Xml => MediaContainerWrapper {
-            media_container: from_xml_str(&body_string).unwrap(),
-        },
+        ContentType::Xml => {
+            MediaContainerWrapper { media_container: from_xml_str(&body_string).unwrap() }
+        }
     };
     Ok(result)
+}
+
+async fn from_response(resp: Response<Body>) -> Result<MediaContainerWrapper<MediaContainer>> {
+    let (parts, body) = resp.into_parts();
+    let content_type = get_content_type_from_headers(&parts.headers);
+    from_body(body, &content_type).await
 }
 
 // https://stackoverflow.com/questions/73514727/return-a-hyperbody-of-serdevalue
@@ -158,33 +174,36 @@ async fn to_string(
     }
 }
 
-fn create_client_from_request(req: &Request<Body>) -> Result<plex_api::HttpClient> {
-// fn create_client_from_request(req: Request<Body>) -> Result<plex_api::HttpClient> {
+fn get_header_or_param(name: String, req: &Request<Body>) -> Option<String> {
+    // fn create_client_from_request(req: Request<Body>) -> Result<plex_api::HttpClient> {
     let headers = req.headers();
+    // dbg!(req.uri().to_string());
+    let params: HashMap<String, String> =
+        url::form_urlencoded::parse(req.uri().query().unwrap().as_bytes())
+            .into_owned()
+            .map(|v| (v.0.to_lowercase(), v.1))
+            .collect();
 
-    // TODO: lowercase the keys
-    let params: HashMap<String, String> = req
-        .uri()
-        .query()
-        .map(|v| {
-            url::form_urlencoded::parse(v.as_bytes())
-                .into_owned()
-                .collect()
-        })
-        .unwrap_or_else(HashMap::new);
+    // dbg!(&params);
+    let name = name.to_lowercase();
+    let val: Option<String> = match headers.get(&name) {
+        None => params.get(&name).cloned(),
+        Some(value) => Some(value.to_str().unwrap().to_string()),
+    };
+    val
+}
 
+fn create_client_from_request(mut req: &Request<Body>) -> Result<plex_api::HttpClient> {
     // TODO: make this a generic function ( get_value or something )
-    let token: String = match headers.get("x-plex-token") {
-        None => params.get("X-Plex-Token").unwrap().to_string(),
-        Some(value) => value.to_str().unwrap().to_string(),
-    };
+    let token: String = get_header_or_param("x-plex-token".to_string(), &req).unwrap();
+    let client_identifier: String =
+        get_header_or_param("x-plex-client-identifier".to_string(), &req).unwrap();
+    // let client_identifier: String = match headers.get("x-plex-client-identifier") {
+    //     None => params.get("X-Plex-Client-Identifier").unwrap().to_string(),
+    //     Some(value) => value.to_str().unwrap().to_string(),
+    // };
 
-    let client_identifier: String = match headers.get("x-plex-client-identifier") {
-        None => params.get("X-Plex-Client-Identifier").unwrap().to_string(),
-        Some(value) => value.to_str().unwrap().to_string(),
-    };
-
-    let client = HttpClientBuilder::default()
+    let mut client = HttpClientBuilder::default()
         .set_api_url("https://plex.sjoerdarendsen.dev")
         .set_x_plex_token(token)
         .set_x_plex_client_identifier(client_identifier)
@@ -205,36 +224,90 @@ async fn get_server(client: plex_api::HttpClient) -> Result<plex_api::Server> {
 
 // TODO: Handle erors. Dont propagate here
 async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Body>> {
+    // TODO: Strip tokens from logging
+    debug!("Proxy {:#?}", req);
+
     // Default is gzip. Dont want that
-    req.headers_mut()
-        .insert("Accept-Encoding", HeaderValue::from_static("identity"));
-    
-    // let headers = req.headers();
-    // println!("Proxy req: {:#?}", req);
-    // let client = create_client_from_request(&req).expect("huha");
+    req.headers_mut().insert("Accept-Encoding", HeaderValue::from_static("identity"));
+
+    // http 1 has no host so get from headers
+    let host = req.headers_mut().get(HOST).unwrap().to_owned();
+    let uri_parts = req.uri().clone().into_parts();
+    let authority: http::uri::Authority = host.to_str().unwrap().parse().unwrap();
+    *req.uri_mut() = hyper::Uri::builder()
+        // .scheme(uri_parts.scheme.unwrap())
+        .scheme("http") // dafuq is scheme emprty from original?
+        .authority(authority)
+        .path_and_query(uri_parts.path_and_query.unwrap())
+        .build()
+        .unwrap();
+
     let disable = req.headers().get("x-plex-proxy-disable").is_some();
+    let content_directory_id = get_header_or_param("contentDirectoryID".to_string(), &req);
     let uri = req.uri_mut().to_owned();
     let method = req.method_mut().to_owned();
+    let req_copy = clone_req(&req).await;
     let client = create_client_from_request(&req).expect("Expected client");
-    
-    match hyper_reverse_proxy::call(client_ip, "http://100.91.35.113:32400", req).await {
+    // let client = create_client_from_request(&req).expect("Expected client");
+    // thumb
+    match PROXY_CLIENT.call(client_ip, "http://100.91.35.113:32400", req).await {
         Ok(resp) => {
-            if uri.path().starts_with("/hubs") && method == Method::GET && !disable {
+            // let client = create_client_from_request(&req_copy).expect("Expected client");
+            if uri.path().starts_with("/hubs")
+                && !uri.path().ends_with("/manage")
+                && method == Method::GET
+                && !disable
+            {
+                debug!("Mangling request");
+
                 let (mut parts, body) = resp.into_parts();
                 let content_type = get_content_type_from_headers(&parts.headers);
                 let mut container = from_body(body, &content_type).await?;
-                // println!("original Response body: {:#?}", container);
 
                 let server = get_server(client).await?;
+                container = mangle_hubs_permissions(container, &server).await.expect("mmm");
 
-                container = patch_hubs(container, server).await.expect("mmm");
-                // println!("sup");
+                // TODO: Move to own function
+                if uri.path().starts_with("/hubs/promoted") {
+                    let content_directory_id =
+                        content_directory_id.expect("Expected contentDirectoryID to be set");
+                    // let r =
+                    //     mangle_hubs_promoted(container, req_copy, client_ip, content_directory_id)
+                    //         .await;
+                    // if let Ok(r) =
+                    //     mangle_hubs_promoted(container, req_copy, client_ip, content_directory_id)
+                    //         .await
+                    // {
+                    //     let container = r;
+                    // } else {
+                    //     error!("error mangle_hubs_promoted");
+                    // }
+                    // let container = match mangle_hubs_promoted(container, req_copy, client_ip, content_directory_id).await {
+                    //     Ok(v) => v,
+                    //     Err(e) => {
+                    //         error!("{:#?}", e);
+                    //         container
+                    //     }
+                    // };
+                    container =
+                        mangle_hubs_promoted(container, req_copy, client_ip, content_directory_id)
+                            .await
+                            .expect("something wrong");
+
+                    // match r {
+                    //     Ok(v) => container = v,
+                    //     Err(e) => println!("Error {}", e),
+                    // }
+                    // container =
+                    //     mangle_hubs_promoted(container, req_copy, client_ip, content_directory_id)
+                    //         .await
+                    //         .unwrap_or_default();
+                }
+
                 let body_string = to_string(container, &content_type).await?;
                 let transformed_body = Body::from(body_string);
                 parts.headers.remove("content-length");
-                parts
-                    .headers
-                    .insert("x-plex-proxy", HeaderValue::from_static("true"));
+                parts.headers.insert("x-plex-proxy", HeaderValue::from_static("true"));
                 let transformed_response = Response::from_parts(parts, transformed_body);
 
                 // println!("transformed Response: {:#?}", transformed_response);
@@ -248,6 +321,132 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
             .body(Body::empty())
             .unwrap()),
     }
+}
+
+struct MixedPrmotedHub {}
+
+async fn remove_param(req: Request<Body>, param: String) -> Request<Body> {
+    let (mut parts, body) = req.into_parts();
+    let uri: &http::Uri = &parts.uri;
+    let url = url::Url::parse(&uri.to_string()).unwrap();
+    let query = url
+        .query_pairs()
+        .filter(|(name, _)| name.ne(&param));
+
+    let mut url = url.clone();
+    url.query_pairs_mut()
+        .clear()
+        .extend_pairs(query);
+    let uri = hyper::Uri::from_str(&url.to_string()).unwrap();
+    let mut request = Request::from_parts(parts, body);
+    *request.uri_mut() = uri;
+    request
+}
+
+async fn clone_req(mut req: &Request<Body>) -> Request<Body> {
+    let mut request = Request::new(Body::empty());
+    *request.headers_mut() = req.headers().clone();
+    *request.uri_mut() = req.uri().clone();
+    *request.method_mut() = req.method().clone();
+    request
+}
+
+async fn get_promoted_hubs(
+    client_ip: IpAddr,
+    mut req: Request<Body>,
+) -> Result<MediaContainerWrapper<MediaContainer>> {
+    // async fn get_promoted_hubs(server: &Request<Body>) {
+    // let mut resp: MediaContainerWrapper<MediaContainer> = server
+    // .client()
+    // .get(format!("/hubs/promoted", library.id()))
+    // .json()
+    // .await?;
+    debug!("Getting promoted hubs");
+    let req = remove_param(req, "contentDirectoryID".to_owned()).await;
+    // req.headers_mut().remove("contentDirectoryID");
+    trace!("Proxy call {:#?}", req);
+    let mut resp = PROXY_CLIENT.call(client_ip, "http://100.91.35.113:32400", req).await.unwrap();
+    trace!("Got {:#?}", resp);
+    // client = create_client_from_request("");
+    // let hubs = from_response(resp);
+    from_response(resp).await
+    // match hyper_reverse_proxy::call(client_ip, "http://100.91.35.113:32400", req).await {
+    //     Ok(resp) => return vec![],
+    //     Err(error) => error
+    // }
+}
+
+async fn mangle_hubs_promoted(
+    mut container: MediaContainerWrapper<MediaContainer>,
+    req: Request<Body>,
+    client_ip: IpAddr,
+    content_directory_id: String,
+) -> Result<MediaContainerWrapper<MediaContainer>> {
+    // if config is mangle bla bla
+    // let custom_collections = get_cached_collections(server).await;
+    // if container.
+
+    // pinnedContentDirectoryID: 1,6,3,2
+
+    let collections = container.media_container.hub;
+    // let mix_collections: Vec<Hub> = collections
+    //     .into_iter()
+    //     .filter(|c| {
+    //         c.context != "hub.custom.collection" || custom_collections_keys.contains(&c.key)
+    //     })
+    //     .collect();
+    // .iter()
+    // .filter(|x| x.id == 20)
+    // .next();
+    // let mut mangled_collections = collections;
+    // mangled_collections[0].r#type = "mixed".to_string();
+    // dbg!(&content_directory_id);
+    if content_directory_id == "1" {
+        container = get_promoted_hubs(client_ip, req).await?;
+    } else {
+        container.media_container.hub = vec![];
+    }
+
+    // lets get everything into
+
+    let size = container.media_container.hub.len();
+    // container.media_container.hub = mangled_collections;
+    container.media_container.size = Some(size.try_into().unwrap());
+    trace!("mangled promoted container {:#?}", container);
+    Ok(container)
+}
+
+// TODO: Should take request_containers and allowed_containers. Getting containers should be done in parent
+async fn mangle_hubs_permissions(
+    mut container: MediaContainerWrapper<MediaContainer>,
+    server: &plex_api::Server,
+) -> Result<MediaContainerWrapper<MediaContainer>> {
+    // if container.media_container.hub.is_none() {
+    //     // nothing todo
+    //     return container;
+    // }
+
+    let collections = container.media_container.hub;
+    // println!("{:#?}", hub_collections.len());
+
+    let custom_collections = get_cached_collections(&server).await;
+
+    let custom_collections_keys: Vec<String> =
+        custom_collections.iter().map(|c| c.key.clone()).collect();
+
+    let new_collections: Vec<Hub> = collections
+        .into_iter()
+        .filter(|c| {
+            c.context != "hub.custom.collection" || custom_collections_keys.contains(&c.key)
+        })
+        .collect();
+
+    // println!("{:#?}", new_collections.len());
+
+    let size = new_collections.len();
+    container.media_container.hub = new_collections;
+    container.media_container.size = Some(size.try_into().unwrap());
+    Ok(container)
 }
 
 #[tokio::main]
@@ -270,38 +469,6 @@ async fn main() {
     if let Err(e) = server.await {
         eprintln!("server error: {}", e);
     }
-}
-
-async fn patch_hubs(
-    mut container: MediaContainerWrapper<MediaContainer>,
-    server: plex_api::Server,
-) -> Result<MediaContainerWrapper<MediaContainer>> {
-    // if container.media_container.hub.is_none() {
-    //     // nothing todo
-    //     return container;
-    // }
-
-    let collections = container.media_container.hub;
-    // println!("{:#?}", hub_collections.len());
-
-    let custom_collections = get_cached_collections(server).await;
-
-    let custom_collections_keys: Vec<String> =
-        custom_collections.iter().map(|c| c.key.clone()).collect();
-
-    let new_collections: Vec<Hub> = collections
-        .into_iter()
-        .filter(|c| {
-            c.context != "hub.custom.collection" || custom_collections_keys.contains(&c.key)
-        })
-        .collect();
-
-    // println!("{:#?}", new_collections.len());
-
-    let size = new_collections.len();
-    container.media_container.hub = new_collections;
-    container.media_container.size = Some(size.try_into().unwrap());
-    Ok(container)
 }
 
 #[cfg(test)]
