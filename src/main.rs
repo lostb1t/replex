@@ -178,11 +178,20 @@ fn get_header_or_param(name: String, req: &Request<Body>) -> Option<String> {
     // fn create_client_from_request(req: Request<Body>) -> Result<plex_api::HttpClient> {
     let headers = req.headers();
     // dbg!(req.uri().to_string());
-    let params: HashMap<String, String> =
-        url::form_urlencoded::parse(req.uri().query().unwrap().as_bytes())
+    // let params: HashMap<String, String> = HashMap::new();
+
+    let params: HashMap<String, String> = match req.uri().query() {
+        Some(v) => url::form_urlencoded::parse(v.as_bytes())
             .into_owned()
             .map(|v| (v.0.to_lowercase(), v.1))
-            .collect();
+            .collect(),
+        None => HashMap::new(),
+    };
+    // let params: HashMap<String, String> =
+    //     url::form_urlencoded::parse(req.uri().query().unwrap().as_bytes())
+    //         .into_owned()
+    //         .map(|v| (v.0.to_lowercase(), v.1))
+    //         .collect();
 
     // dbg!(&params);
     let name = name.to_lowercase();
@@ -243,16 +252,12 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
         .unwrap();
 
     let disable = req.headers().get("x-plex-proxy-disable").is_some();
-    let content_directory_id = get_header_or_param("contentDirectoryID".to_string(), &req);
     let uri = req.uri_mut().to_owned();
     let method = req.method_mut().to_owned();
     let req_copy = clone_req(&req).await;
-    let client = create_client_from_request(&req).expect("Expected client");
-    // let client = create_client_from_request(&req).expect("Expected client");
-    // thumb
+
     match PROXY_CLIENT.call(client_ip, "http://100.91.35.113:32400", req).await {
         Ok(resp) => {
-            // let client = create_client_from_request(&req_copy).expect("Expected client");
             if uri.path().starts_with("/hubs")
                 && !uri.path().contains("/manage")
                 && method == Method::GET
@@ -260,6 +265,7 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
             {
                 debug!("Mangling request");
 
+                let client = create_client_from_request(&req_copy).expect("Expected client");
                 let (mut parts, body) = resp.into_parts();
                 let content_type = get_content_type_from_headers(&parts.headers);
                 let mut container = from_body(body, &content_type).await?;
@@ -270,38 +276,12 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
                 // TODO: Move to own function
                 if uri.path().starts_with("/hubs/promoted") {
                     let content_directory_id =
-                        content_directory_id.expect("Expected contentDirectoryID to be set");
-                    // let r =
-                    //     mangle_hubs_promoted(container, req_copy, client_ip, content_directory_id)
-                    //         .await;
-                    // if let Ok(r) =
-                    //     mangle_hubs_promoted(container, req_copy, client_ip, content_directory_id)
-                    //         .await
-                    // {
-                    //     let container = r;
-                    // } else {
-                    //     error!("error mangle_hubs_promoted");
-                    // }
-                    // let container = match mangle_hubs_promoted(container, req_copy, client_ip, content_directory_id).await {
-                    //     Ok(v) => v,
-                    //     Err(e) => {
-                    //         error!("{:#?}", e);
-                    //         container
-                    //     }
-                    // };
+                        get_header_or_param("contentDirectoryID".to_string(), &req_copy)
+                            .expect("Expected contentDirectoryID to be set");
                     container =
                         mangle_hubs_promoted(container, req_copy, client_ip, content_directory_id)
                             .await
                             .expect("something wrong");
-
-                    // match r {
-                    //     Ok(v) => container = v,
-                    //     Err(e) => println!("Error {}", e),
-                    // }
-                    // container =
-                    //     mangle_hubs_promoted(container, req_copy, client_ip, content_directory_id)
-                    //         .await
-                    //         .unwrap_or_default();
                 }
 
                 let body_string = to_string(container, &content_type).await?;
@@ -329,14 +309,10 @@ async fn remove_param(req: Request<Body>, param: String) -> Request<Body> {
     let (mut parts, body) = req.into_parts();
     let uri: &http::Uri = &parts.uri;
     let url = url::Url::parse(&uri.to_string()).unwrap();
-    let query = url
-        .query_pairs()
-        .filter(|(name, _)| name.ne(&param));
+    let query = url.query_pairs().filter(|(name, _)| name.ne(&param));
 
     let mut url = url.clone();
-    url.query_pairs_mut()
-        .clear()
-        .extend_pairs(query);
+    url.query_pairs_mut().clear().extend_pairs(query);
     let uri = hyper::Uri::from_str(&url.to_string()).unwrap();
     let mut request = Request::from_parts(parts, body);
     *request.uri_mut() = uri;
@@ -352,7 +328,7 @@ async fn clone_req(mut req: &Request<Body>) -> Request<Body> {
 }
 
 // TODO: Enable cache
-// #[cached(time = 720, key = "String", convert = r#"{ req.headers().get("x-plex-token).unwrap().to_string() }"#)]
+// #[cached(time = 720, key = "String", convert = r#"{ req.headers().get("x-plex-token").unwrap().to_string() }"#)]
 async fn get_promoted_hubs(
     client_ip: IpAddr,
     mut req: Request<Body>,
