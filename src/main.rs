@@ -270,8 +270,6 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
                 let content_type = get_content_type_from_headers(&parts.headers);
                 let mut container = from_body(body, &content_type).await?;
 
-                let server = get_server(client).await?;
-                container = mangle_hubs_permissions(container, &server).await.expect("mmm");
 
                 // TODO: Move to own function
                 if uri.path().starts_with("/hubs/promoted") {
@@ -283,6 +281,9 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
                             .await
                             .expect("something wrong");
                 }
+
+                let server = get_server(client).await?;
+                container = mangle_hubs_permissions(container, &server).await.expect("mmm");
 
                 let body_string = to_string(container, &content_type).await?;
                 let transformed_body = Body::from(body_string);

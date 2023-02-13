@@ -32,7 +32,8 @@ pub struct MetaData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub summary: Option<String>,
     #[yaserde(attribute)]
-    pub thumb: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub thumb: Option<String>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub art: Option<String>,
