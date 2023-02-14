@@ -536,6 +536,10 @@ async fn mangle_hubs_promoted(
     // container.media_container.hub = mangled_collections;
     let size = new_collections.len();
     //container.media_container.hub = movies;
+    // container.media_container.library_section_id = Some("home".to_string());
+    container.media_container.library_section_id = None;
+    container.media_container.library_section_title = None;
+    container.media_container.library_section_uuid = None;
     container.media_container.size = Some(size.try_into().unwrap());
     // trace!("mangled promoted container {:#?}", container);
     container.media_container.hub = new_collections;

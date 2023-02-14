@@ -184,13 +184,16 @@ pub struct MediaContainer {
     #[serde(rename = "librarySectionID")]
     #[yaserde(rename = "librarySectionID")]
     #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub library_section_id: Option<u32>,
     #[yaserde(attribute)]
     #[yaserde(rename = "librarySectionTitle")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub library_section_title: Option<String>,
     #[serde(rename = "librarySectionUUID")]
     #[yaserde(rename = "librarySectionUUID")]
     #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub library_section_uuid: Option<String>,
     #[serde(rename = "Hub", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
