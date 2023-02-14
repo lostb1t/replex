@@ -515,14 +515,12 @@ async fn mangle_hubs_promoted(
             //     new_collections[v].metadata = vec![new_collections[v].metadata.clone(), hub.metadata].into_iter().kmerge().collect::<Vec<MetaData>>();
             // }
             Some(v) => {
-                // let c = new_collections[v].metadata.clone();
+                let c = new_collections[v].get_children();
                 // let h = hub.metadata;
-                new_collections[v].metadata = new_collections[v]
-                    .metadata
-                    .clone()
+                new_collections[v].set_children(c
                     .into_iter()
-                    .interleave(hub.metadata)
-                    .collect::<Vec<MetaData>>();
+                    .interleave(hub.get_children())
+                    .collect::<Vec<MetaData>>());
             }
             None => new_collections.push(hub),
         }

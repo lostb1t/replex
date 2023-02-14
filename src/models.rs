@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
     YaDeserialize,
     YaSerialize,
     Default,
-    PartialOrd
+    PartialOrd,
 )]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
@@ -135,6 +135,30 @@ pub struct Hub {
     video: Vec<MetaData>, // again only xml, but its the same as directory and metadata
 }
 
+impl Hub {
+    // as there are 3 diff names for it
+    pub fn set_children(&mut self, value: Vec<MetaData>) {
+        if !self.metadata.is_empty() {
+            self.metadata = value;
+        } else if !self.directory.is_empty() {
+            self.directory = value;
+        } else if !self.video.is_empty() {
+            self.video = value;
+        };
+    }
+
+    pub fn get_children(&mut self) -> Vec<MetaData> {
+        if !self.metadata.is_empty() {
+            return self.metadata.clone();
+        } else if !self.directory.is_empty() {
+            return self.directory.clone();
+        } else if !self.video.is_empty() {
+            return self.video.clone();
+        };
+        vec![]
+    }
+}
+
 #[derive(
     Debug,
     Serialize,
@@ -178,7 +202,7 @@ pub struct MediaContainer {
 }
 
 impl MediaContainer {
-    pub fn set_type(&mut self, value : String) {
+    pub fn set_type(&mut self, value: String) {
         for hub in &mut self.hub {
             hub.r#type = value.clone();
         }
