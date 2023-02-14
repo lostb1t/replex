@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 // use yaserde_derive::{YaDeserialize, YaSerialize};
 
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, YaDeserialize, YaSerialize)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, YaDeserialize, YaSerialize, Default)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 pub struct MetaData {
@@ -14,6 +14,42 @@ pub struct MetaData {
     pub key: String,
     #[yaserde(attribute)]
     pub guid: String,
+    #[yaserde(attribute)]
+    pub title: String,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub thumb: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub art: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "parentKey")]
+    pub parent_key: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "grandparentRatingKey")]
+    pub grandparent_rating_key: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "grandparentKey")]
+    pub grandparent_key: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "grandparentGuid")]
+    pub grandparent_guid: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "grandparentTitle")]
+    pub grandparent_title: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "grandparentThumb")]
+    pub grandparent_thumb: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "grandparentArt")]
+    pub grandparent_art: Option<String>,
     #[yaserde(attribute)]
     #[yaserde(rename = "type")]
     #[serde(rename = "librarySectionID")]
@@ -27,16 +63,8 @@ pub struct MetaData {
     #[yaserde(attribute)]
     pub r#type: String,
     #[yaserde(attribute)]
-    pub title: String,
-    #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub summary: Option<String>,
-    #[yaserde(attribute)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub thumb: Option<String>,
-    #[yaserde(attribute)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub art: Option<String>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub year: Option<i32>,
@@ -45,7 +73,7 @@ pub struct MetaData {
     pub promoted: Option<bool>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, YaDeserialize, YaSerialize)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, YaDeserialize, YaSerialize, Default)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 // #[display("{key}")]
@@ -88,7 +116,7 @@ pub struct Hub {
 }
 
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, YaDeserialize, YaSerialize)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, YaDeserialize, YaSerialize, Default)]
 // #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 #[yaserde(root = "MediaContainer")]
@@ -126,7 +154,7 @@ pub struct MediaContainer {
 //     }
 // }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Default)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 pub struct MediaContainerWrapper<T> {

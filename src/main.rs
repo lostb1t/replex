@@ -6,6 +6,9 @@ use cached::proc_macro::cached;
 use http::header::HOST;
 use http::Method;
 use http::{HeaderMap, HeaderValue};
+use std::str::FromStr;
+use strum_macros::Display as EnumDisplay;
+use strum_macros::EnumString;
 
 // #[macro_use] extern crate log;
 use plex_api::HttpClientBuilder;
@@ -22,7 +25,6 @@ use hyper_reverse_proxy::ReverseProxy;
 use hyper_trust_dns::{RustlsHttpsConnector, TrustDnsHttpConnector, TrustDnsResolver};
 use std::collections::HashMap;
 use std::net::IpAddr;
-use std::str::FromStr;
 use std::{convert::Infallible, net::SocketAddr};
 
 use plex_proxy::models::*;
@@ -107,14 +109,19 @@ async fn get_cached_collections(server: &plex_api::Server) -> Vec<MetaData> {
 
 // fn get_content_type_from_response(resp: &Response<Body>) -> ContentType {
 fn get_content_type_from_headers(headers: &HeaderMap<HeaderValue>) -> ContentType {
-    //let wut = resp.headers().get("content-type").unwrap().
-    // let content_type = resp
-    //     .headers()
-    //     .get("content-type")
-    //     .unwrap()
-    //     .to_str()
-    //     .unwrap();
-    let content_type = headers.get("content-type").unwrap().to_str().unwrap();
+    let default_header_value = HeaderValue::from_static("text/xml;charset=utf-8");
+    let accept_header = headers.get("accept");
+    let content_type_header = headers.get("content-type");
+
+    let content_type = if content_type_header.is_some() {
+        content_type_header.unwrap()
+    } else if accept_header.is_some() {
+        accept_header.unwrap()
+    } else {
+        &default_header_value
+    }.to_str().unwrap();
+
+    // let content_type = headers.get("content-type").unwrap_or(&default_header_value).to_str().unwrap();
     match content_type {
         "application/json" => ContentType::Json,
         "text/xml;charset=utf-8" => ContentType::Xml,
@@ -122,9 +129,11 @@ fn get_content_type_from_headers(headers: &HeaderMap<HeaderValue>) -> ContentTyp
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, EnumString, EnumDisplay)]
 enum ContentType {
+    #[strum(serialize = "application/json")]
     Json,
+    #[strum(serialize = "text/xml;charset=utf-8")]
     Xml,
 }
 
@@ -256,52 +265,139 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
     let method = req.method_mut().to_owned();
     let req_copy = clone_req(&req).await;
 
-    match PROXY_CLIENT.call(client_ip, "http://100.91.35.113:32400", req).await {
-        Ok(resp) => {
-            if uri.path().starts_with("/hubs")
-                && !uri.path().contains("/manage")
-                && method == Method::GET
-                && !disable
-            {
-                debug!("Mangling request");
+    // if !uri.path().starts_with("/hubs/promoted") {
+    //     let mut resp = match PROXY_CLIENT.call(client_ip, "http://100.91.35.113:32400", req).await {
+    //         Ok(resp) => resp,
+    //         Err(_error) => Response::builder()
+    //             .status(StatusCode::INTERNAL_SERVER_ERROR)
+    //             .body(Body::empty())
+    //             .unwrap(),
+    //     };
+    // }
 
-                let client = create_client_from_request(&req_copy).expect("Expected client");
-                let (mut parts, body) = resp.into_parts();
-                let content_type = get_content_type_from_headers(&parts.headers);
-                let mut container = from_body(body, &content_type).await?;
+    if uri.path().starts_with("/hubs")
+        && !uri.path().contains("/manage")
+        && method == Method::GET
+        && !disable
+    {
+        debug!("Mangling request");
 
+        // let (mut parts, body) = resp.into_parts();
+        // let (mut parts, body) = resp.into_parts();
+        let content_type = get_content_type_from_headers(req.headers_mut());
+        let client = create_client_from_request(&req_copy).expect("Expected client");
 
-                // TODO: Move to own function
-                if uri.path().starts_with("/hubs/promoted") {
-                    let content_directory_id =
-                        get_header_or_param("contentDirectoryID".to_string(), &req_copy)
-                            .expect("Expected contentDirectoryID to be set");
-                    container =
-                        mangle_hubs_promoted(container, req_copy, client_ip, content_directory_id)
-                            .await
-                            .expect("something wrong");
-                }
+        let mut container = MediaContainerWrapper::default();
+        let mut resp: Response<Body> = Response::default();
+        // let (mut parts, body) = resp.into_parts();
+        // let mut resp: Response<Body>;
+        // TODO: Move to own function
+        if uri.path().starts_with("/hubs/promoted") {
+            let content_directory_id =
+                get_header_or_param("contentDirectoryID".to_string(), &req_copy)
+                    .expect("Expected contentDirectoryID to be set");
 
-                let server = get_server(client).await?;
-                container = mangle_hubs_permissions(container, &server).await.expect("mmm");
+            container = mangle_hubs_promoted(req_copy, client_ip, content_directory_id)
+                .await
+                .expect("something wrong");
+            // let mut resp = Response::builder()
+            // .status(StatusCode::INTERNAL_SERVER_ERROR)
+            // .body(Body::empty())
+            // .unwrap();
+            // build custom reponse
+            //resp.headers_mut().insert("x-plex-proxy", HeaderValue::from_static("true"));
+            // resp.headers_mut().extend_one(HeaderValue::from_static("true"));
+            let resp = Response::builder()
+                .status(StatusCode::OK)
+                // .header("content-rtpe", value)
+                .body(Body::empty())
+                .unwrap();
+        } else {
+            let resp = match PROXY_CLIENT.call(client_ip, "http://100.91.35.113:32400", req).await {
+                Ok(resp) => resp,
+                Err(_error) => Response::builder()
+                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .body(Body::empty())
+                    .unwrap(),
+            };
 
-                let body_string = to_string(container, &content_type).await?;
-                let transformed_body = Body::from(body_string);
-                parts.headers.remove("content-length");
-                parts.headers.insert("x-plex-proxy", HeaderValue::from_static("true"));
-                let transformed_response = Response::from_parts(parts, transformed_body);
-
-                // println!("transformed Response: {:#?}", transformed_response);
-                // println!("----------");
-                return Ok(transformed_response);
-            }
-            Ok(resp)
+            // let mut container = from_body(body, &content_type).await?;
+            container = from_response(resp).await?;
         }
-        Err(_error) => Ok(Response::builder()
-            .status(StatusCode::INTERNAL_SERVER_ERROR)
-            .body(Body::empty())
-            .unwrap()),
+
+        let server = get_server(client).await?;
+        container = mangle_hubs_permissions(container, &server).await.expect("mmm");
+
+        let body_string = to_string(container, &content_type).await?;
+        let transformed_body = Body::from(body_string);
+        let (mut parts, _) = resp.into_parts();
+        parts.headers.remove("content-length");
+        parts.headers.insert("x-plex-proxy", HeaderValue::from_static("true"));
+        parts.headers.insert(http::header::CONTENT_TYPE, content_type.to_string().parse().unwrap());
+        let transformed_response = Response::from_parts(parts, transformed_body);
+
+        // println!("transformed Response: {:#?}", transformed_response);
+        // println!("----------");
+        return Ok(transformed_response);
     }
+    Ok(PROXY_CLIENT.call(client_ip, "http://100.91.35.113:32400", req).await.unwrap())
+    // this should never happen but k
+    // Ok(Response::builder().status(StatusCode::INTERNAL_SERVER_ERROR).body(Body::empty()).unwrap())
+
+    // if !uri.path().starts_with("/hubs/promoted") {
+    //     let mut resp = match PROXY_CLIENT.call(client_ip, "http://100.91.35.113:32400", req).await {
+    //         Ok(resp) => resp,
+    //         Err(_error) => Response::builder()
+    //             .status(StatusCode::INTERNAL_SERVER_ERROR)
+    //             .body(Body::empty())
+    //             .unwrap(),
+    //     };
+    // }
+
+    // match PROXY_CLIENT.call(client_ip, "http://100.91.35.113:32400", req).await {
+    //     Ok(resp) => {
+    //         if uri.path().starts_with("/hubs")
+    //             && !uri.path().contains("/manage")
+    //             && method == Method::GET
+    //             && !disable
+    //         {
+    //             debug!("Mangling request");
+
+    //             let client = create_client_from_request(&req_copy).expect("Expected client");
+    //             let (mut parts, body) = resp.into_parts();
+    //             let content_type = get_content_type_from_headers(&parts.headers);
+    //             let mut container = from_body(body, &content_type).await?;
+
+    //             // TODO: Move to own function
+    //             if uri.path().starts_with("/hubs/promoted") {
+    //                 let content_directory_id =
+    //                     get_header_or_param("contentDirectoryID".to_string(), &req_copy)
+    //                         .expect("Expected contentDirectoryID to be set");
+    //                 container = mangle_hubs_promoted(req_copy, client_ip, content_directory_id)
+    //                     .await
+    //                     .expect("something wrong");
+    //             }
+
+    //             let server = get_server(client).await?;
+    //             container = mangle_hubs_permissions(container, &server).await.expect("mmm");
+
+    //             let body_string = to_string(container, &content_type).await?;
+    //             let transformed_body = Body::from(body_string);
+    //             parts.headers.remove("content-length");
+    //             parts.headers.insert("x-plex-proxy", HeaderValue::from_static("true"));
+    //             let transformed_response = Response::from_parts(parts, transformed_body);
+
+    //             // println!("transformed Response: {:#?}", transformed_response);
+    //             // println!("----------");
+    //             return Ok(transformed_response);
+    //         }
+    //         Ok(resp)
+    //     }
+    //     Err(_error) => Ok(Response::builder()
+    //         .status(StatusCode::INTERNAL_SERVER_ERROR)
+    //         .body(Body::empty())
+    //         .unwrap()),
+    // }
 }
 
 struct MixedPrmotedHub {}
@@ -356,7 +452,6 @@ async fn get_promoted_hubs(
 }
 
 async fn mangle_hubs_promoted(
-    mut container: MediaContainerWrapper<MediaContainer>,
     req: Request<Body>,
     client_ip: IpAddr,
     content_directory_id: String,
@@ -366,8 +461,6 @@ async fn mangle_hubs_promoted(
     // if container.
 
     // pinnedContentDirectoryID: 1,6,3,2
-
-    let collections = container.media_container.hub;
     // let mix_collections: Vec<Hub> = collections
     //     .into_iter()
     //     .filter(|c| {
@@ -382,10 +475,9 @@ async fn mangle_hubs_promoted(
     // dbg!(&content_directory_id);
 
     // TODO: Dont make this hardcoded just get the first value of pinnedContentDirectoryID
+    let mut container = MediaContainerWrapper::default();
     if content_directory_id == "1" {
         container = get_promoted_hubs(client_ip, req).await?;
-    } else {
-        container.media_container.hub = vec![];
     }
 
     // lets get everything into
