@@ -2,8 +2,17 @@ use serde::{Deserialize, Serialize};
 // use parse_display::{Display, FromStr};
 // use yaserde_derive::{YaDeserialize, YaSerialize};
 
-
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, YaDeserialize, YaSerialize, Default)]
+#[derive(
+    Debug,
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    YaDeserialize,
+    YaSerialize,
+    Default,
+)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 pub struct MetaData {
@@ -73,7 +82,17 @@ pub struct MetaData {
     pub promoted: Option<bool>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, YaDeserialize, YaSerialize, Default)]
+#[derive(
+    Debug,
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    YaDeserialize,
+    YaSerialize,
+    Default,
+)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 // #[display("{key}")]
@@ -108,15 +127,24 @@ pub struct Hub {
     #[serde(rename = "Directory", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Directory")]
-    directory: Vec<MetaData>,   // only avaiable in XML
+    directory: Vec<MetaData>, // only avaiable in XML
     #[serde(rename = "Video", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Video")]
-    video: Vec<MetaData>,   // again only xml, but its the same as directory and metadata
+    video: Vec<MetaData>, // again only xml, but its the same as directory and metadata
 }
 
-
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, YaDeserialize, YaSerialize, Default)]
+#[derive(
+    Debug,
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    YaDeserialize,
+    YaSerialize,
+    Default,
+)]
 // #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 #[yaserde(root = "MediaContainer")]
