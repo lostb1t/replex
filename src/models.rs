@@ -12,6 +12,7 @@ use serde::{Deserialize, Serialize};
     YaDeserialize,
     YaSerialize,
     Default,
+    PartialOrd
 )]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
@@ -123,7 +124,7 @@ pub struct Hub {
     #[serde(rename = "Metadata", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Metadata")]
-    metadata: Vec<MetaData>,
+    pub metadata: Vec<MetaData>,
     #[serde(rename = "Directory", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Directory")]
@@ -174,6 +175,14 @@ pub struct MediaContainer {
     #[serde(rename = "Metadata", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub metadata: Vec<MetaData>,
+}
+
+impl MediaContainer {
+    pub fn set_type(&mut self, value : String) {
+        for hub in &mut self.hub {
+            hub.r#type = value.clone();
+        }
+    }
 }
 
 // impl MediaContainer {

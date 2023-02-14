@@ -6,6 +6,7 @@ use cached::proc_macro::cached;
 use http::header::HOST;
 use http::Method;
 use http::{HeaderMap, HeaderValue};
+use itertools::Itertools;
 use std::str::FromStr;
 use strum_macros::Display as EnumDisplay;
 use strum_macros::EnumString;
@@ -420,41 +421,126 @@ async fn get_promoted_hubs(
     // }
 }
 
+// async fn mangle_hubs_promoted(
+//     req: Request<Body>,
+//     client_ip: IpAddr,
+//     content_directory_id: String,
+// ) -> Result<MediaContainerWrapper<MediaContainer>> {
+//     // if config is mangle bla bla
+//     // let custom_collections = get_cached_collections(server).await;
+//     // if container.
+
+//     // pinnedContentDirectoryID: 1,6,3,2
+//     // let mix_collections: Vec<Hub> = collections
+//     //     .into_iter()
+//     //     .filter(|c| {
+//     //         c.context != "hub.custom.collection" || custom_collections_keys.contains(&c.key)
+//     //     })
+//     //     .collect();
+//     // .iter()
+//     // .filter(|x| x.id == 20)
+//     // .next();
+//     // let mut mangled_collections = collections;
+//     // mangled_collections[0].r#type = "mixed".to_string();
+//     // dbg!(&content_directory_id);
+
+//     // TODO: Dont make this hardcoded just get the first value of pinnedContentDirectoryID
+//     let mut container = MediaContainerWrapper::default();
+//     if content_directory_id == "1" {
+//         container = get_promoted_hubs(client_ip, req).await?;
+//     }
+
+//     // lets get everything into
+
+//     let size = container.media_container.hub.len();
+//     // container.media_container.hub = mangled_collections;
+//     container.media_container.size = Some(size.try_into().unwrap());
+//     trace!("mangled promoted container {:#?}", container);
+//     Ok(container)
+// }
+
 async fn mangle_hubs_promoted(
     req: Request<Body>,
     client_ip: IpAddr,
     content_directory_id: String,
 ) -> Result<MediaContainerWrapper<MediaContainer>> {
-    // if config is mangle bla bla
-    // let custom_collections = get_cached_collections(server).await;
-    // if container.
-
-    // pinnedContentDirectoryID: 1,6,3,2
-    // let mix_collections: Vec<Hub> = collections
-    //     .into_iter()
-    //     .filter(|c| {
-    //         c.context != "hub.custom.collection" || custom_collections_keys.contains(&c.key)
-    //     })
-    //     .collect();
-    // .iter()
-    // .filter(|x| x.id == 20)
-    // .next();
-    // let mut mangled_collections = collections;
-    // mangled_collections[0].r#type = "mixed".to_string();
-    // dbg!(&content_directory_id);
-
     // TODO: Dont make this hardcoded just get the first value of pinnedContentDirectoryID
-    let mut container = MediaContainerWrapper::default();
+    let mut container: MediaContainerWrapper<MediaContainer> =
+        MediaContainerWrapper::default();
     if content_directory_id == "1" {
         container = get_promoted_hubs(client_ip, req).await?;
     }
 
-    // lets get everything into
+    // for hub in &container.media_container.hub {
+    //     for item in hub.metadata {
+    //         dbg!(item);
+    //     }
+    //     // dbg!(hub);
+    // }
 
-    let size = container.media_container.hub.len();
+    let collections = container.media_container.hub;
+    // let new_collections: Vec<Hub> = collections.clone();
+    let mut new_collections: Vec<Hub> = vec![];
+    // let movies: Vec<Hub> = collections
+    //     .iter()
+    //     .filter(|c| {
+    //         c.r#type != "movie"
+    //     })
+    //     .cloned().collect();
+    // let shows: Vec<Hub> = collections
+    //     .iter()
+    //     .filter(|c| {
+    //         c.r#type != "movie"
+    //     })
+    //     .cloned().collect();
+
+    for mut hub in collections {
+        // if hub.r#type == "movie":
+        // let c = new_collections.iter().filter(|v| v.title == hub.title);
+        let p = new_collections.iter().position(|v| v.title == hub.title);
+        // if Some(p) {
+        //     new_collections[p]
+        // }
+        hub.r#type = "mixed".to_string();
+        match p {
+            //Some(v) => new_collections[v].metadata.extend(hub.metadata),
+            // Some(v) => {
+            //     let c = new_collections[v].metadata.clone();
+            //     let h = hub.metadata;
+            //     new_collections[v].metadata = c.into_iter().merge(h.into_iter()).collect::<Vec<MetaData>>();
+            // }
+            // Some(v) => {
+            //     // let c = new_collections[v].metadata.clone();
+            //     // let h = hub.metadata;
+            //     new_collections[v].metadata = vec![new_collections[v].metadata.clone(), hub.metadata].into_iter().kmerge().collect::<Vec<MetaData>>();
+            // }
+            Some(v) => {
+                // let c = new_collections[v].metadata.clone();
+                // let h = hub.metadata;
+                new_collections[v].metadata = new_collections[v]
+                    .metadata
+                    .clone()
+                    .into_iter()
+                    .interleave(hub.metadata)
+                    .collect::<Vec<MetaData>>();
+            }
+            None => new_collections.push(hub),
+        }
+        // for item in hub.metadata {
+        //     dbg!(item);
+        // }
+    }
+    //container.media_container.set_type("mixed".to_owned());
+    // dbg!(&movies);
+    // lets get everything into
+    // collections = collections.set_metadata_type("mixed".to_owned());
+
     // container.media_container.hub = mangled_collections;
+    let size = new_collections.len();
+    //container.media_container.hub = movies;
     container.media_container.size = Some(size.try_into().unwrap());
-    trace!("mangled promoted container {:#?}", container);
+    // trace!("mangled promoted container {:#?}", container);
+    container.media_container.hub = new_collections;
     Ok(container)
 }
 
