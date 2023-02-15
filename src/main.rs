@@ -277,7 +277,8 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
     let mut resp_headers = HeaderMap::new();
     // let (req_parts, _) = req_copy.into_parts();
 
-    if uri.path().starts_with("/hubs")
+    if (uri.path().starts_with("/hubs/promoted")
+        || uri.path().starts_with("/hubs/sections"))
         && !uri.path().contains("/manage")
         && method == Method::GET
         && !disable
@@ -299,6 +300,7 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
         }
         // let origin_header = req_copy.headers().get("Origin");
 
+        let server = get_server(client).await?;
         let mut container = MediaContainerWrapper::default();
         let mut resp: Response<Body> = Response::default();
 
@@ -311,13 +313,16 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
             container = mangle_hubs_promoted(req_copy, client_ip, content_directory_id)
                 .await
                 .expect("something wrong");
+            container = mangle_hubs_permissions(container, &server)
+                .await
+                .expect("mmm");
 
             let resp = Response::builder()
                 .status(StatusCode::OK)
                 // .header("content-rtpe", value)
                 .body(Body::empty())
                 .unwrap();
-        } else {
+        } else if uri.path().starts_with("/hubs/sections") {
             let resp = match PROXY_CLIENT
                 .call(client_ip, "http://100.91.35.113:32400", req)
                 .await
@@ -331,12 +336,26 @@ async fn handle(client_ip: IpAddr, mut req: Request<Body>) -> Result<Response<Bo
 
             // let mut container = from_body(body, &content_type).await?;
             container = from_response(resp).await?;
-        }
 
-        let server = get_server(client).await?;
-        container = mangle_hubs_permissions(container, &server)
-            .await
-            .expect("mmm");
+            container = mangle_hubs_permissions(container, &server)
+                .await
+                .expect("mmm");
+        }
+        // } else {
+        //     let resp = match PROXY_CLIENT
+        //         .call(client_ip, "http://100.91.35.113:32400", req)
+        //         .await
+        //     {
+        //         Ok(resp) => resp,
+        //         Err(_error) => Response::builder()
+        //             .status(StatusCode::INTERNAL_SERVER_ERROR)
+        //             .body(Body::empty())
+        //             .unwrap(),
+        //     };
+
+        //     // let mut container = from_body(body, &content_type).await?;
+        //     container = from_response(resp).await?;
+        // }
 
         let body_string = to_string(container, &content_type).await?;
         let transformed_body = Body::from(body_string);
@@ -517,10 +536,11 @@ async fn mangle_hubs_promoted(
             Some(v) => {
                 let c = new_collections[v].get_children();
                 // let h = hub.metadata;
-                new_collections[v].set_children(c
-                    .into_iter()
-                    .interleave(hub.get_children())
-                    .collect::<Vec<MetaData>>());
+                new_collections[v].set_children(
+                    c.into_iter()
+                        .interleave(hub.get_children())
+                        .collect::<Vec<MetaData>>(),
+                );
             }
             None => new_collections.push(hub),
         }
@@ -556,6 +576,7 @@ async fn mangle_hubs_permissions(
     //     return container;
     // }
 
+    // TODO: Use get and set children
     let collections = container.media_container.hub;
     // println!("{:#?}", hub_collections.len());
 
