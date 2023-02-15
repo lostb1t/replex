@@ -16,7 +16,6 @@ use std::error::Error as StdError;
 use std::{error::Error, net::SocketAddr};
 
 
-
 type Client = ProxyClient<HttpConnector, Body>;
 // type Client = hyper::client::Client<HttpConnector, Body>;
 
