@@ -47,17 +47,6 @@ async fn default_handler(
     State(client): State<Client>,
     mut req: Request<Body>,
 ) -> Response<Body> {
-    // let path = req.uri().path();
-    // let path_query = req
-    //     .uri()
-    //     .path_and_query()
-    //     .map(|v| v.as_str())
-    //     .unwrap_or(path);
-
-    // let uri = format!("http://100.91.35.113:32400{}", path_query);
-    // dbg!(&uri);
-    // *req.uri_mut() = Uri::try_from(uri).unwrap();
-
     client.proxy_request(req).await.unwrap()
 }
 
@@ -65,16 +54,6 @@ async fn handler_hubs_promoted(
     State(client): State<Client>,
     mut req: Request<Body>,
 ) -> Response<Body> {
-    // let path = req.uri().path();
-    // let path_query = req
-    //     .uri()
-    //     .path_and_query()
-    //     .map(|v| v.as_str())
-    //     .unwrap_or(path);
-    // dbg!(client.proxy_req());
-    // let uri = format!("http://100.91.35.113:32400{}", path_query);
-    // *req.uri_mut() = Uri::try_from(uri).unwrap();
-
     client.proxy_request(req).await.unwrap()
 }
 
