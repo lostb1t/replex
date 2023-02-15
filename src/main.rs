@@ -5,10 +5,38 @@ use axum::{
     extract::State,
     http::{uri::Uri, Request, Response},
     routing::get,
-    Router,
+    Router, body::HttpBody,
 };
 use hyper::{client::HttpConnector, Body};
-use std::net::SocketAddr;
+use hyper::client::connect::Connect;
+use std::{net::SocketAddr, error::Error};
+use plex_proxy::models::*;
+use std::error::Error as StdError;
+
+// trait ProxyRequest: hyper::client::Client {
+trait ProxyRequest {
+    // fn proxy_req(&self) -> hyper::client::ResponseFuture;
+    fn proxy_req(&self) -> String;
+
+}
+
+impl<C, B> ProxyRequest for hyper::client::Client<C, B> {
+    fn proxy_req(&self) -> String {
+        dbg!("yup").to_string()
+    }
+}
+// impl Summary for NewsArticle {
+// impl<C, B> hyper::client::Client<C, B>
+// where
+//     C: Connect + Clone + Send + Sync + 'static,
+//     B: HttpBody + Send + 'static,
+//     B::Data: Send,
+//     B::Error: Into<Box<dyn StdError + Send + Sync>>,
+// {
+//     fn summarize(&self) -> String {
+//         format!("{}, by {} ({})", self.headline, self.author, self.location)
+//     }
+// }
 
 type Client = hyper::client::Client<HttpConnector, Body>;
 
@@ -60,9 +88,8 @@ async fn handler_hubs_promoted(
         .path_and_query()
         .map(|v| v.as_str())
         .unwrap_or(path);
-
+    dbg!(client.proxy_req());
     let uri = format!("http://100.91.35.113:32400{}", path_query);
-    dbg!("PROMOTED");
     *req.uri_mut() = Uri::try_from(uri).unwrap();
 
     client.request(req).await.unwrap()
