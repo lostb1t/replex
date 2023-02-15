@@ -4,3 +4,4 @@ extern crate derive_more;
 extern crate tracing;
 
 pub mod models;
+pub mod client;
