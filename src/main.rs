@@ -22,7 +22,7 @@ type Client = hyper::client::Client<HttpConnector, Body>;
 async fn main() {
     // tokio::spawn(server());
     // let bla = Client::new();
-    let client = Proxy {
+    let proxy = Proxy {
         host: "http://100.91.35.113:32400".to_string(),
         client: Client::new(),
     };
@@ -31,7 +31,7 @@ async fn main() {
         .route("/hubs/promoted", get(handler_hubs_promoted))
         .route("/*path", get(default_handler)) // catchall
         .route("/", get(default_handler))
-        .with_state(client);
+        .with_state(proxy);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 4000));
     println!("reverse proxy listening on {}", addr);
