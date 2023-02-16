@@ -12,6 +12,8 @@ use hyper::client::connect::Connect;
 use hyper::{client::HttpConnector, Body};
 use plex_proxy::models::*;
 use plex_proxy::proxy::*;
+use plex_proxy::utils::*;
+use std::collections::HashMap;
 use std::error::Error as StdError;
 use std::{error::Error, net::SocketAddr};
 
@@ -20,6 +22,7 @@ type Client = hyper::client::Client<HttpConnector, Body>;
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::fmt::init();
     // tokio::spawn(server());
     // let bla = Client::new();
     let proxy = Proxy {
@@ -50,18 +53,9 @@ async fn default_handler(
 
 async fn handler_hubs_promoted(
     State(proxy): State<Proxy>,
+    // axum::extract::Query(mut params): axum::extract::Query<HashMap<String, String>>,
     mut req: Request<Body>,
 ) -> Response<Body> {
+    req = remove_param(req, "contentDirectoryID");
     proxy.request(req).await.unwrap()
-}
-
-async fn server() {
-    let app = Router::new().route("/", get(|| async { "Hello, world!" }));
-
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    println!("server listening on {}", addr);
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
 }

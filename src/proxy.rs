@@ -1,3 +1,4 @@
+use tracing::{debug, trace, warn};
 use anyhow::Result;
 use axum::{
     body::HttpBody,
@@ -10,7 +11,7 @@ use hyper::client::connect::Connect;
 use hyper::{client::HttpConnector, Body};
 use std::error::Error as StdError;
 use std::{error::Error, net::SocketAddr};
-
+use crate::models::*;
 
 #[derive(Debug)]
 pub struct Proxy {
@@ -33,9 +34,31 @@ impl Proxy
         self.client.request(req)
         // dbg!("yup").to_string()
     }
+
+    // pub async fn get_promoted_hubs(
+    //     &self,
+    //     mut req: Request<Body>,
+    // ) -> Result<MediaContainerWrapper<MediaContainer>> {
+    //     let uri = format!("{}{}", self.host, "/hubs/promoted");
+    //     *req.uri_mut() = Uri::try_from(uri).unwrap();
+    //     let mut resp = self.client.request(req).await?;
+    //     // trace!("Got {:#?}", resp);
+    //     // from_response(resp).await
+    //     // debug!("Getting promoted hubs");
+    //     // let req = remove_param(req, "contentDirectoryID".to_owned()).await;
+    //     // // req.headers_mut().remove("contentDirectoryID");
+    //     // trace!("Proxy call {:#?}", req);
+    //     // let mut resp = PROXY_CLIENT
+    //     //     .call(client_ip, "http://100.91.35.113:32400", req)
+    //     //     .await
+    //     //     .unwrap();
+    //     // trace!("Got {:#?}", resp);
+    //     // from_response(resp).await
+    // }
+
 }
 
-impl Clone for  Proxy {
+impl Clone for Proxy {
     fn clone(&self) -> Proxy {
         Proxy {
             client: self.client.clone(),

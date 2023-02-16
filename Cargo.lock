@@ -1244,6 +1244,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "pathetic"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed9c672fd61cdb1257e09b5dffc20bb26721c6e7d60ed5af0fe38dc31a1c81a5"
+dependencies = [
+ "once_cell",
+ "url",
+]
+
+[[package]]
 name = "percent-encoding"
 version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1328,6 +1338,7 @@ dependencies = [
  "hyper-trust-dns",
  "itertools",
  "lazy_static",
+ "pathetic",
  "plex-api",
  "pretty_assertions",
  "pretty_env_logger",
