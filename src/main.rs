@@ -11,21 +11,20 @@ use axum::{
 use hyper::client::connect::Connect;
 use hyper::{client::HttpConnector, Body};
 use plex_proxy::models::*;
-use plex_proxy::client::*;
+use plex_proxy::proxy::*;
 use std::error::Error as StdError;
 use std::{error::Error, net::SocketAddr};
 
 
-type Client = ProxyClient<HttpConnector, Body>;
-// type Client = hyper::client::Client<HttpConnector, Body>;
+type Client = hyper::client::Client<HttpConnector, Body>;
 
 #[tokio::main]
 async fn main() {
     // tokio::spawn(server());
     // let bla = Client::new();
-    let client = ProxyClient {
+    let client = Proxy {
         host: "http://100.91.35.113:32400".to_string(),
-        client: hyper::client::Client::new(),
+        client: Client::new(),
     };
 
     let app = Router::new()
@@ -43,17 +42,17 @@ async fn main() {
 }
 
 async fn default_handler(
-    State(client): State<Client>,
+    State(proxy): State<Proxy>,
     mut req: Request<Body>,
 ) -> Response<Body> {
-    client.proxy_request(req).await.unwrap()
+    proxy.request(req).await.unwrap()
 }
 
 async fn handler_hubs_promoted(
-    State(client): State<Client>,
+    State(proxy): State<Proxy>,
     mut req: Request<Body>,
 ) -> Response<Body> {
-    client.proxy_request(req).await.unwrap()
+    proxy.request(req).await.unwrap()
 }
 
 async fn server() {
