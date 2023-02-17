@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-
+use tracing::{debug};
 use axum::{
     body::HttpBody,
     response::{IntoResponse, Response},
@@ -244,6 +244,7 @@ pub struct MediaContainerWrapper<T> {
 impl MediaContainerWrapper<MediaContainer> {
 
     pub async fn fix_permissions(mut self, proxy: &Proxy) -> Self {
+        debug!("Fixing hub permissions");
         let collections = self.media_container.hub;
         // println!("{:#?}", hub_collections.len());
     

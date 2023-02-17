@@ -24,6 +24,9 @@ use plex_proxy::models::*;
 use plex_proxy::proxy::*;
 
 use plex_proxy::utils::*;
+use tower_http::cors::AllowOrigin;
+use tower_http::cors::Any;
+use tower_http::cors::CorsLayer;
 
 use std::{net::SocketAddr};
 use tower::ServiceBuilder;
@@ -55,9 +58,13 @@ async fn main() {
         .route("/*path", get(default_handler)) // catchall
         .route("/", get(default_handler))
         .with_state(proxy)
-        .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()));
+        .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
+        .layer(
+            CorsLayer::new()
+            .allow_origin(AllowOrigin::mirror_request()) // TODO: Limit to https://app.plex.tv
+        );
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], 4000));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3001));
     println!("reverse proxy listening on {}", addr);
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
