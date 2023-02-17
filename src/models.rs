@@ -1,4 +1,21 @@
 use serde::{Deserialize, Serialize};
+use http::header::{self, HeaderMap, HeaderValue};
+use axum::{
+    body::HttpBody,
+    extract::State,
+    http::{uri::Uri, Request},
+    response::{IntoResponse, Response},
+    // response::{IntoResponse, Response},
+    routing::get,
+    Json,
+    Router,
+};
+use hyper::Body;
+use crate::utils::*;
+use crate::xml::*;
+use crate::proxy::*;
+use yaserde::YaSerialize;
+use yaserde::YaDeserialize;
 // use parse_display::{Display, FromStr};
 // use yaserde_derive::{YaDeserialize, YaSerialize};
 
@@ -225,5 +242,107 @@ pub struct MediaContainerWrapper<T> {
     #[serde(rename = "MediaContainer")]
     // #[serde(rename="$value")]
     pub media_container: T,
+    #[serde(skip_serializing, skip_deserializing)]
+    pub content_type: ContentType
 }
+
+impl MediaContainerWrapper<MediaContainer> {
+
+    pub async fn fix_permissions(mut self, proxy: &Proxy) -> Self {
+        let collections = self.media_container.hub;
+        // println!("{:#?}", hub_collections.len());
+    
+        let custom_collections = get_cached_collections(proxy).await;
+    
+        let custom_collections_keys: Vec<String> =
+            custom_collections.iter().map(|c| c.key.clone()).collect();
+    
+        let new_collections: Vec<Hub> = collections
+            .into_iter()
+            .filter(|c| {
+                c.context != "hub.custom.collection"
+                    || custom_collections_keys.contains(&c.key)
+            })
+            .collect();
+    
+        // println!("{:#?}", new_collections.len());
+    
+        let size = new_collections.len();
+        self.media_container.hub = new_collections;
+        self.media_container.size = Some(size.try_into().unwrap());
+        self       
+    }
+}
+
+// async fn mangle_hubs_permissions(
+//     mut container: MediaContainerWrapper<MediaContainer>,
+//     server: &plex_api::Server,
+// ) -> Result<MediaContainerWrapper<MediaContainer>> {
+//     // if container.media_container.hub.is_none() {
+//     //     // nothing todo
+//     //     return container;
+//     // }
+
+//     // TODO: Use get and set children
+//     let collections = container.media_container.hub;
+//     // println!("{:#?}", hub_collections.len());
+
+//     let custom_collections = get_cached_collections(&server).await;
+
+//     let custom_collections_keys: Vec<String> =
+//         custom_collections.iter().map(|c| c.key.clone()).collect();
+
+//     let new_collections: Vec<Hub> = collections
+//         .into_iter()
+//         .filter(|c| {
+//             c.context != "hub.custom.collection"
+//                 || custom_collections_keys.contains(&c.key)
+//         })
+//         .collect();
+
+//     // println!("{:#?}", new_collections.len());
+
+//     let size = new_collections.len();
+//     container.media_container.hub = new_collections;
+//     container.media_container.size = Some(size.try_into().unwrap());
+//     Ok(container)
+// }
+
+impl<T> IntoResponse for MediaContainerWrapper<T>
+where
+    T: Serialize + YaDeserialize + YaSerialize,
+{
+    fn into_response(self) -> Response {
+        match self.content_type {
+            ContentType::Json => Json(self).into_response(),
+            ContentType::Xml => Xml(self.media_container).into_response(),
+        }
+    }
+}
+
+
+// pub trait FromResponse {
+//     /// Init self
+//     fn from_response(self) -> Self;
+// }
+
+// impl FromResponse for Response<Body>
+// {
+//     fn into_response(self) -> Self {
+//         // Self {
+
+//         // }
+//     }
+// }
+
+// impl MediaContainerWrapper<T> {
+// impl<T: Display> MediaContainerWrapper<T> {
+//     fn from_response(&self) {
+
+//     }
+// }
+
+// impl Default for MediaContainerWrapper<T> {
+//     fn default() -> Self {media_container: T,  content_type: ContentType::Xml}
+// }
 

@@ -1,4 +1,5 @@
-use tracing::{debug, trace, warn};
+use crate::models::*;
+use crate::utils::*;
 use anyhow::Result;
 use axum::{
     body::HttpBody,
@@ -7,20 +8,88 @@ use axum::{
     routing::get,
     Router,
 };
+// use crate::axum::http::{uri::Uri, Request, Response};
+use cached::proc_macro::cached;
+use http::HeaderValue;
 use hyper::client::connect::Connect;
 use hyper::{client::HttpConnector, Body};
 use std::error::Error as StdError;
 use std::{error::Error, net::SocketAddr};
-use crate::models::*;
+use tracing::{debug, trace, warn};
+use std::any::Any;
+use std::convert::{TryFrom};
+use std::fmt;
+
+
+// struct MyRequest<T>(Request<T>);
+// // pub struct Request<T> {
+// //     head: Parts,
+// //     body: T,
+// // }
+
+// impl<T: fmt::Debug> fmt::Debug for Request<T> {
+//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         self.0
+//     }
+// }
+
+
 
 #[derive(Debug)]
 pub struct Proxy {
     pub client: hyper::client::Client<hyper::client::HttpConnector, Body>,
     pub host: String,
+    // pub headers: 
+    pub plex_api: Option<plex_api::Server>,
+    // pub req: MyRequest<Body>,
 }
 
-impl Proxy
-{
+impl Proxy {
+    // pub fn set_x_plex_token(self, token: String) {
+
+    // }
+    // pub fn clone_for_req(&self) -> Self {
+    //     Proxy {
+    //         client: self.client.clone(),
+    //         host: self.host.clone(),
+    //         plex_api: self.plex_api.clone()
+    //     }
+    // }
+
+    pub async fn set_plex_api_from_request(&mut self, req: &Request<Body>) -> &mut Self {
+        let plex_client = create_client_from_request(req).unwrap();
+        let plex_api = plex_api::Server::new("http://100.91.35.113:32400", plex_client)
+            .await
+            .unwrap();
+
+        // self.req = request;
+        self.plex_api = Some(plex_api);
+        self
+    }
+
+    // pub async fn set_headers(&mut self, req: Request<Body>) -> &mut Self {
+    //     let plex_client = create_client_from_request(&req).unwrap();
+    //     let plex_api = plex_api::Server::new("http://100.91.35.113:32400", plex_client)
+    //         .await
+    //         .unwrap();
+
+    //     let (mut parts, _) = req.into_parts();
+    //     let mut request = Request::from_parts(parts, Body::empty());
+
+    //     self.req = request;
+    //     self.plex_api = plex_api;
+    //     self
+    // }
+
+    pub fn get_x_plex_token(&self) -> String {
+        // dbg!(&self.plex_api);
+        self.plex_api.as_ref().unwrap().client().x_plex_token().to_string()
+    }
+
+    // pub fn proxy(&self) -> hyper::client::ResponseFuture {
+    //     self.request(self.req)
+    // }
+
     pub fn request(&self, mut req: Request<Body>) -> hyper::client::ResponseFuture {
         let path = req.uri().path();
         let path_query = req
@@ -29,10 +98,33 @@ impl Proxy
             .map(|v| v.as_str())
             .unwrap_or(path);
         let uri = format!("{}{}", self.host, path_query);
+
+        // Default is gzip. Dont want that
+        req.headers_mut()
+            .insert("Accept-Encoding", HeaderValue::from_static("identity"));
+
         // dbg!(&uri);
         *req.uri_mut() = Uri::try_from(uri).unwrap();
         self.client.request(req)
-        // dbg!("yup").to_string()
+    }
+
+    async fn get_collections(&self) -> Result<Vec<MetaData>> {
+        // let plex_client = create_client_from_request(&req).unwrap();
+        // let plex_api = plex_api::Server::new("http://100.91.35.113:32400", plex_client).await.unwrap();
+        let mut collections = vec![];
+        let api = self.plex_api.clone().unwrap();
+        for library in api.libraries() {
+            // library.media
+
+            let mut resp: MediaContainerWrapper<MediaContainer> = api
+                .client()
+                .get(format!("/library/sections/{}/collections", library.id()))
+                .json()
+                .await?;
+            collections.append(&mut resp.media_container.metadata);
+        }
+        // println!("no cache");
+        Ok(collections)
     }
 
     // pub async fn get_promoted_hubs(
@@ -55,17 +147,36 @@ impl Proxy
     //     // trace!("Got {:#?}", resp);
     //     // from_response(resp).await
     // }
-
 }
+
 
 impl Clone for Proxy {
     fn clone(&self) -> Proxy {
+        // let (mut parts, _) = self.req.into_parts();
+        // let mut request = Request::from_parts(parts, Body::empty());
+
         Proxy {
             client: self.client.clone(),
             host: self.host.clone(),
+            plex_api: self.plex_api.clone(),
+            // req: self.req.clone(),
         }
     }
 }
+
+
+
+#[cached(
+    time = 720,
+    key = "String",
+    convert = r#"{ proxy.get_x_plex_token() }"#
+)]
+pub async fn get_cached_collections(proxy: &Proxy) -> Vec<MetaData> {
+    proxy.get_collections().await.unwrap()
+}
+// pub async fn get_cached_collections(proxy: &Proxy) -> Vec<MetaData> {
+//     proxy.get_collections().await
+// }
 
 // #[derive(Debug)]
 // pub struct ProxyClient<C, B = Body> {
