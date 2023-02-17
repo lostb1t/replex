@@ -95,8 +95,15 @@ async fn get_hubs_promoted(
     mut req: Request<Body>,
 ) -> MediaContainerWrapper<MediaContainer> {
     let dir_id = get_header_or_param("contentDirectoryID".to_owned(), &req).unwrap();
+    let pinned_id_header = get_header_or_param("pinnedContentDirectoryID".to_owned(), &req).unwrap();
+    let pinned_ids: Vec<&str> =
+        pinned_id_header
+            .split(',')
+            .collect();
+    // dbg!(pinned_ids);
+    //pinnedContentDirectoryID
 
-    if dir_id != "1" {
+    if dir_id != pinned_ids[0] { // We only fill the first one.
         let content_type = get_content_type(req);
         return MediaContainerWrapper {
             media_container: MediaContainer::default(),
