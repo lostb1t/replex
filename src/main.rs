@@ -92,9 +92,7 @@ async fn get_hubs_sections(
 
 async fn get_hubs_promoted(
     State(mut proxy): State<Proxy>,
-    // axum::extract::Query(mut params): axum::extract::Query<HashMap<String, String>>,
     mut req: Request<Body>,
-    // headers: HeaderMap
 ) -> MediaContainerWrapper<MediaContainer> {
     let dir_id = get_header_or_param("contentDirectoryID".to_owned(), &req).unwrap();
 
