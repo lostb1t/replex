@@ -2,12 +2,9 @@
 extern crate tracing;
 #[macro_use]
 extern crate axum_core;
-use anyhow::Result;
-use axum::response::IntoResponse;
+
+
 use axum::{
-    body::HttpBody,
-    // body::Bytes,
-    extract,
     extract::State,
     // http::{uri::Uri, Request, Response},
     routing::get,
@@ -19,18 +16,16 @@ use axum::{
 //     extract::{rejection::*, FromRequest},
 //     BoxError,
 // };
-use http::{uri::Uri, Request, Response};
-use hyper::client::connect::Connect;
+use http::{Request, Response};
+
 use hyper::{client::HttpConnector, Body};
-use plex_api::HttpClientBuilder;
+
 use plex_proxy::models::*;
 use plex_proxy::proxy::*;
-use plex_proxy::response::*;
+
 use plex_proxy::utils::*;
-use reqwest::RequestBuilder;
-use std::collections::HashMap;
-use std::error::Error as StdError;
-use std::{error::Error, net::SocketAddr};
+
+use std::{net::SocketAddr};
 use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
 
@@ -72,7 +67,7 @@ async fn main() {
 
 async fn default_handler(
     State(proxy): State<Proxy>,
-    mut req: Request<Body>,
+    req: Request<Body>,
 ) -> Response<Body> {
     // proxy.set_request(req);
     proxy.request(req).await.unwrap()

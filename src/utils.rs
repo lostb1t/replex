@@ -1,23 +1,19 @@
 extern crate tracing;
 use anyhow::Result;
 use axum::{
-    body::HttpBody,
-    extract::State,
     http::{uri::Uri, HeaderMap, HeaderValue, Request, Response},
-    routing::get,
-    Router,
 };
-use serde::{Deserialize, Serialize};
+
 // use http::{HeaderMap, HeaderValue};
-use hyper::{client::HttpConnector, Body};
+use hyper::{Body};
 use strum_macros::Display as EnumDisplay;
 use strum_macros::EnumString;
-use yaserde::de::from_str as from_xml_str;
+
 use yaserde::ser::to_string as to_xml_str;
-use axum_core;
-use bytes::Bytes;
-use bytes::{Buf, BufMut};
-use http_body::{Body as httpBody};
+
+
+
+
 use plex_api::HttpClientBuilder;
 use std::collections::HashMap;
 
@@ -74,12 +70,12 @@ pub fn get_content_type_from_headers(headers: &HeaderMap<HeaderValue>) -> Conten
 }
 
 pub fn get_content_type(req: Request<Body>) -> ContentType {
-    let (parts, body) = req.into_parts();
+    let (parts, _body) = req.into_parts();
     get_content_type_from_headers(&parts.headers)
 }
 
 // TODO: Make this traits of the Hub struct
-pub async fn body_to_string(mut body: Body) -> Result<String> {
+pub async fn body_to_string(body: Body) -> Result<String> {
     // dbg!(&body.boxed());
     // dbg!(&body);
     let body_bytes = hyper::body::to_bytes(body).await?;
@@ -131,7 +127,7 @@ pub async fn from_body(
 pub async fn from_response(
     resp: Response<Body>,
 ) -> Result<MediaContainerWrapper<MediaContainer>> {
-    let (parts, mut body) = resp.into_parts();
+    let (parts, body) = resp.into_parts();
     // let f = body.to_bytes();
     // let r = to_bytes(body).await.unwrap();
     // dbg!(r);
@@ -189,7 +185,7 @@ pub fn create_client_from_request(req: &Request<Body>) -> Result<plex_api::HttpC
     //     Some(value) => value.to_str().unwrap().to_string(),
     // };
 
-    let mut client = HttpClientBuilder::default()
+    let client = HttpClientBuilder::default()
         .set_api_url("https://plex.sjoerdarendsen.dev")
         .set_x_plex_token(token)
         .set_x_plex_client_identifier(client_identifier)

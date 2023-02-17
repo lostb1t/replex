@@ -1,14 +1,7 @@
 use axum::{
-    body::HttpBody,
-    extract::State,
-    http::{uri::Uri, Request},
     response::{IntoResponse, Response},
-    // response::{IntoResponse, Response},
-    routing::get,
-    Json,
-    Router,
 };
-use axum_core::body;
+
 use axum_core::extract::rejection::BytesRejection;
 use http::StatusCode;
 use thiserror::Error;
@@ -35,8 +28,8 @@ impl axum::response::IntoResponse for XmlRejection {
         // };
         let code = match self {
             // e @ XmlRejection::InvalidXMLBody(_) => StatusCode::UNPROCESSABLE_ENTITY,
-            e @ XmlRejection::MissingXMLContentType => StatusCode::UNSUPPORTED_MEDIA_TYPE,
-            XmlRejection::BytesRejection(e) => StatusCode::UNPROCESSABLE_ENTITY,
+            _e @ XmlRejection::MissingXMLContentType => StatusCode::UNSUPPORTED_MEDIA_TYPE,
+            XmlRejection::BytesRejection(_e) => StatusCode::UNPROCESSABLE_ENTITY,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
 
