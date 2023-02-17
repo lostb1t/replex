@@ -3,7 +3,7 @@ extern crate tracing;
 #[macro_use]
 extern crate axum_core;
 
-
+use axum::response::IntoResponse;
 use axum::{
     extract::State,
     // http::{uri::Uri, Request, Response},
@@ -28,7 +28,7 @@ use tower_http::cors::AllowOrigin;
 use tower_http::cors::Any;
 use tower_http::cors::CorsLayer;
 
-use std::{net::SocketAddr};
+use std::net::SocketAddr;
 use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
 
@@ -60,8 +60,7 @@ async fn main() {
         .with_state(proxy)
         .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
         .layer(
-            CorsLayer::new()
-            .allow_origin(AllowOrigin::mirror_request()) // TODO: Limit to https://app.plex.tv
+            CorsLayer::new().allow_origin(AllowOrigin::mirror_request()), // TODO: Limit to https://app.plex.tv
         );
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3001));
@@ -95,13 +94,25 @@ async fn get_hubs_promoted(
     State(mut proxy): State<Proxy>,
     // axum::extract::Query(mut params): axum::extract::Query<HashMap<String, String>>,
     mut req: Request<Body>,
+    // headers: HeaderMap
 ) -> MediaContainerWrapper<MediaContainer> {
+    let dir_id = get_header_or_param("contentDirectoryID".to_owned(), &req).unwrap();
+
+    if dir_id != "1" {
+        let content_type = get_content_type(req);
+        return MediaContainerWrapper {
+            media_container: MediaContainer::default(),
+            content_type,
+        };
+    }
+
     req = remove_param(req, "contentDirectoryID");
     proxy.set_plex_api_from_request(&req).await;
 
     let resp = proxy.request(req).await.unwrap();
     let mut container = from_response(resp).await.unwrap();
     container = container.fix_permissions(&proxy).await;
+    container = container.mangle_hubs_promoted().await;
     container
 }
 

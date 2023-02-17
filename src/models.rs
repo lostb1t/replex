@@ -5,6 +5,7 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
+use itertools::Itertools;
 
 use crate::utils::*;
 use crate::xml::*;
@@ -242,6 +243,93 @@ pub struct MediaContainerWrapper<T> {
 }
 
 impl MediaContainerWrapper<MediaContainer> {
+
+    pub async fn mangle_hubs_promoted(
+        mut self
+    ) -> Self {
+        // TODO: Dont make this hardcoded just get the first value of pinnedContentDirectoryID
+        // let mut container: MediaContainerWrapper<MediaContainer> =
+        //     MediaContainerWrapper::default();
+
+        // if content_directory_id == "1" {
+        //     container = get_promoted_hubs(client_ip, req).await?;
+        // }
+    
+        // for hub in &container.media_container.hub {
+        //     for item in hub.metadata {
+        //         dbg!(item);
+        //     }
+        //     // dbg!(hub);
+        // }
+    
+        let collections = self.media_container.hub;
+        // let new_collections: Vec<Hub> = collections.clone();
+        let mut new_collections: Vec<Hub> = vec![];
+        // let movies: Vec<Hub> = collections
+        //     .iter()
+        //     .filter(|c| {
+        //         c.r#type != "movie"
+        //     })
+        //     .cloned().collect();
+        // let shows: Vec<Hub> = collections
+        //     .iter()
+        //     .filter(|c| {
+        //         c.r#type != "movie"
+        //     })
+        //     .cloned().collect();
+    
+        for mut hub in collections {
+            // if hub.r#type == "movie":
+            // let c = new_collections.iter().filter(|v| v.title == hub.title);
+            let p = new_collections.iter().position(|v| v.title == hub.title);
+            // if Some(p) {
+            //     new_collections[p]
+            // }
+            hub.r#type = "mixed".to_string();
+            match p {
+                //Some(v) => new_collections[v].metadata.extend(hub.metadata),
+                // Some(v) => {
+                //     let c = new_collections[v].metadata.clone();
+                //     let h = hub.metadata;
+                //     new_collections[v].metadata = c.into_iter().merge(h.into_iter()).collect::<Vec<MetaData>>();
+                // }
+                // Some(v) => {
+                //     // let c = new_collections[v].metadata.clone();
+                //     // let h = hub.metadata;
+                //     new_collections[v].metadata = vec![new_collections[v].metadata.clone(), hub.metadata].into_iter().kmerge().collect::<Vec<MetaData>>();
+                // }
+                Some(v) => {
+                    let c = new_collections[v].get_children();
+                    // let h = hub.metadata;
+                    new_collections[v].set_children(
+                        c.into_iter()
+                            .interleave(hub.get_children())
+                            .collect::<Vec<MetaData>>(),
+                    );
+                }
+                None => new_collections.push(hub),
+            }
+            // for item in hub.metadata {
+            //     dbg!(item);
+            // }
+        }
+        //container.media_container.set_type("mixed".to_owned());
+        // dbg!(&movies);
+        // lets get everything into
+        // collections = collections.set_metadata_type("mixed".to_owned());
+    
+        // container.media_container.hub = mangled_collections;
+        let size = new_collections.len();
+        //container.media_container.hub = movies;
+        // container.media_container.library_section_id = Some("home".to_string());
+        self.media_container.library_section_id = None;
+        self.media_container.library_section_title = None;
+        self.media_container.library_section_uuid = None;
+        self.media_container.size = Some(size.try_into().unwrap());
+        // trace!("mangled promoted container {:#?}", container);
+        self.media_container.hub = new_collections;
+        self
+    }
 
     pub async fn fix_permissions(mut self, proxy: &Proxy) -> Self {
         debug!("Fixing hub permissions");
