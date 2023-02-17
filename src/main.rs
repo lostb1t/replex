@@ -110,7 +110,7 @@ async fn get_hubs_promoted(
     let resp = proxy.request(req).await.unwrap();
     let mut container = from_response(resp).await.unwrap();
     container = container.fix_permissions(&proxy).await;
-    container = container.mangle_hubs_promoted().await;
+    container = container.make_mixed().await;
     container
 }
 

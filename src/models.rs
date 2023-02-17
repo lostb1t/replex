@@ -244,7 +244,7 @@ pub struct MediaContainerWrapper<T> {
 
 impl MediaContainerWrapper<MediaContainer> {
 
-    pub async fn mangle_hubs_promoted(
+    pub async fn make_mixed(
         mut self
     ) -> Self {
         // TODO: Dont make this hardcoded just get the first value of pinnedContentDirectoryID
