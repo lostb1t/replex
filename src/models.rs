@@ -278,6 +278,8 @@ impl MediaContainer {
             self.metadata = value;
         } else if !self.hub.is_empty() {
             self.hub = value;
+        } else if !self.video.is_empty() {
+            self.video = value;
         };
     }
 
@@ -286,9 +288,12 @@ impl MediaContainer {
             return self.metadata.clone();
         } else if !self.hub.is_empty() {
             return self.hub.clone();
+        } else if !self.video.is_empty() {
+            return self.video.clone();
         };
         vec![]
     }
+    // pub fn children_type()
 }
 
 // impl MediaContainer {

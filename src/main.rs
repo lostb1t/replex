@@ -10,6 +10,7 @@ use axum::{
     extract::TypedHeader,
     // http::{uri::Uri, Request, Response},
     routing::get,
+    routing::put,
     Router,
 };
 use axum::headers::ContentType as HContentType;
@@ -54,13 +55,14 @@ async fn main() {
 
     let app = Router::new()
         .route("/hubs/promoted", get(get_hubs_promoted))
+        // .route("/hubs/sections/:id/*path", get(default_handler))
         .route("/hubs/sections/:id", get(get_hubs_sections))
-        .route("/hubs/sections/:id/*path", get(default_handler))
         .route(
             "/hubs/library/collections/:ids/children",
             get(get_collections_children),
         )
-        .route("/*path", get(default_handler)) // catchall
+        .route("/*path", get(default_handler))
+        .route("/*path", put(default_handler))
         .route("/", get(default_handler))
         .with_state(proxy)
         .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
@@ -144,24 +146,30 @@ async fn get_collections_children(
     let plex = PlexClient::from(&req);
 
     let mut children: Vec<MetaData> = vec![];
+    
     for id in collection_ids {
         let mut c = plex.get_collection_children(id).await.unwrap();
+        // dbg!(&c.media_container.children());
         match children.is_empty() {
             False => {
                 children = children.into_iter()
                 .interleave(c.media_container.children())
                 .collect::<Vec<MetaData>>();
             }
-            True => children.append(&mut c.media_container.children()),
+            True => {
+
+                children.append(&mut c.media_container.children())
+            },
         }
         // children.append(&mut c.media_container.children())
     }
+    
     let mut container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
     // dbg!(req.headers().get("Accept").unwrap());
     container.content_type = get_content_type_from_headers(req.headers());
-    dbg!(&container.content_type);
+    // dbg!(&container.content_type);
     let size = children.len();
-    container.media_container.metadata = children;
+    container.media_container.set_children(children);
     container.media_container.size = Some(size.try_into().unwrap());
     // container = container.make_mixed();
     container
