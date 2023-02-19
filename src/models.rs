@@ -41,6 +41,7 @@ pub struct MetaData {
     #[yaserde(attribute)]
     pub key: String,
     #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub guid: Option<String>,
     #[yaserde(attribute)]
     pub title: String,
@@ -83,9 +84,11 @@ pub struct MetaData {
     #[serde(rename = "librarySectionID")]
     #[yaserde(rename = "librarySectionID")]
     #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub library_section_id: Option<u32>,
     #[yaserde(attribute)]
     #[yaserde(rename = "librarySectionTitle")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub library_section_title: Option<String>,
     #[yaserde(rename = "type")]
     #[yaserde(attribute)]
@@ -102,6 +105,20 @@ pub struct MetaData {
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub context: Option<String>,
+    #[yaserde(attribute)]
+    #[yaserde(rename = "hubKey")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hub_key: Option<String>,
+    #[yaserde(attribute)]
+    #[yaserde(rename = "hubIdentifier")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hub_identifier: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub more: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(attribute)]
+    pub style: Option<String>,
     // pub context: String,
     #[serde(rename = "Metadata", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
