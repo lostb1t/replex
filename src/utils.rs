@@ -175,23 +175,23 @@ pub fn get_header_or_param(name: String, req: &Request<Body>) -> Option<String> 
     val
 }
 
-pub fn create_client_from_request(req: &Request<Body>) -> Result<plex_api::HttpClient> {
-    // TODO: make this a generic function ( get_value or something )
-    let token: String = get_header_or_param("x-plex-token".to_string(), req).unwrap();
-    let client_identifier: String =
-        get_header_or_param("x-plex-client-identifier".to_string(), req).unwrap();
-    // let client_identifier: String = match headers.get("x-plex-client-identifier") {
-    //     None => params.get("X-Plex-Client-Identifier").unwrap().to_string(),
-    //     Some(value) => value.to_str().unwrap().to_string(),
-    // };
+// pub fn create_client_from_request(req: &Request<Body>) -> Result<plex_api::HttpClient> {
+//     // TODO: make this a generic function ( get_value or something )
+//     let token: String = get_header_or_param("x-plex-token".to_string(), req).unwrap();
+//     let client_identifier: String =
+//         get_header_or_param("x-plex-client-identifier".to_string(), req).unwrap();
+//     // let client_identifier: String = match headers.get("x-plex-client-identifier") {
+//     //     None => params.get("X-Plex-Client-Identifier").unwrap().to_string(),
+//     //     Some(value) => value.to_str().unwrap().to_string(),
+//     // };
 
-    let client = HttpClientBuilder::default()
-        .set_api_url("https://plex.sjoerdarendsen.dev")
-        .set_x_plex_token(token)
-        .set_x_plex_client_identifier(client_identifier)
-        .build()?;
-    Ok(client)
-}
+//     let client = HttpClientBuilder::default()
+//         .set_api_url("https://plex.sjoerdarendsen.dev")
+//         .set_x_plex_token(token)
+//         .set_x_plex_client_identifier(client_identifier)
+//         .build()?;
+//     Ok(client)
+// }
 // async fn to_bytes<T>(body: T) -> Result<Bytes, T::Error>
 // where
 //     T: httpBody,

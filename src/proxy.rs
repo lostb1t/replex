@@ -36,7 +36,7 @@ pub struct Proxy {
     pub client: hyper::client::Client<hyper::client::HttpConnector, Body>,
     pub host: String,
     // pub headers: 
-    pub plex_api: Option<plex_api::Server>,
+    // pub plex_api: Option<plex_api::Server>,
     // pub req: MyRequest<Body>,
 }
 
@@ -52,16 +52,16 @@ impl Proxy {
     //     }
     // }
 
-    pub async fn set_plex_api_from_request(&mut self, req: &Request<Body>) -> &mut Self {
-        let plex_client = create_client_from_request(req).unwrap();
-        let plex_api = plex_api::Server::new("http://100.91.35.113:32400", plex_client)
-            .await
-            .unwrap();
+    // pub async fn set_plex_api_from_request(&mut self, req: &Request<Body>) -> &mut Self {
+    //     let plex_client = create_client_from_request(req).unwrap();
+    //     let plex_api = plex_api::Server::new("http://100.91.35.113:32400", plex_client)
+    //         .await
+    //         .unwrap();
 
-        // self.req = request;
-        self.plex_api = Some(plex_api);
-        self
-    }
+    //     // self.req = request;
+    //     self.plex_api = Some(plex_api);
+    //     self
+    // }
 
     // pub async fn set_headers(&mut self, req: Request<Body>) -> &mut Self {
     //     let plex_client = create_client_from_request(&req).unwrap();
@@ -77,10 +77,10 @@ impl Proxy {
     //     self
     // }
 
-    pub fn get_x_plex_token(&self) -> String {
-        // dbg!(&self.plex_api);
-        self.plex_api.as_ref().unwrap().client().x_plex_token().to_string()
-    }
+    // pub fn get_x_plex_token(&self) -> String {
+    //     // dbg!(&self.plex_api);
+    //     self.plex_api.as_ref().unwrap().client().x_plex_token().to_string()
+    // }
 
     // pub fn proxy(&self) -> hyper::client::ResponseFuture {
     //     self.request(self.req)
@@ -104,24 +104,24 @@ impl Proxy {
         self.client.request(req)
     }
 
-    async fn get_collections(&self) -> Result<Vec<MetaData>> {
-        // let plex_client = create_client_from_request(&req).unwrap();
-        // let plex_api = plex_api::Server::new("http://100.91.35.113:32400", plex_client).await.unwrap();
-        let mut collections = vec![];
-        let api = self.plex_api.clone().unwrap();
-        for library in api.libraries() {
-            // library.media
+    // async fn get_collections(&self) -> Result<Vec<MetaData>> {
+    //     // let plex_client = create_client_from_request(&req).unwrap();
+    //     // let plex_api = plex_api::Server::new("http://100.91.35.113:32400", plex_client).await.unwrap();
+    //     let mut collections = vec![];
+    //     let api = self.plex_api.clone().unwrap();
+    //     for library in api.libraries() {
+    //         // library.media
 
-            let mut resp: MediaContainerWrapper<MediaContainer> = api
-                .client()
-                .get(format!("/library/sections/{}/collections", library.id()))
-                .json()
-                .await?;
-            collections.append(&mut resp.media_container.metadata);
-        }
-        // println!("no cache");
-        Ok(collections)
-    }
+    //         let mut resp: MediaContainerWrapper<MediaContainer> = api
+    //             .client()
+    //             .get(format!("/library/sections/{}/collections", library.id()))
+    //             .json()
+    //             .await?;
+    //         collections.append(&mut resp.media_container.metadata);
+    //     }
+    //     // println!("no cache");
+    //     Ok(collections)
+    // }
 
     // pub async fn get_promoted_hubs(
     //     &self,
@@ -154,7 +154,7 @@ impl Clone for Proxy {
         Proxy {
             client: self.client.clone(),
             host: self.host.clone(),
-            plex_api: self.plex_api.clone(),
+            // plex_api: self.plex_api.clone(),
             // req: self.req.clone(),
         }
     }
@@ -162,14 +162,14 @@ impl Clone for Proxy {
 
 
 
-#[cached(
-    time = 720,
-    key = "String",
-    convert = r#"{ proxy.get_x_plex_token() }"#
-)]
-pub async fn get_cached_collections(proxy: &Proxy) -> Vec<MetaData> {
-    proxy.get_collections().await.unwrap()
-}
+// #[cached(
+//     time = 720,
+//     key = "String",
+//     convert = r#"{ proxy.get_x_plex_token() }"#
+// )]
+// pub async fn get_cached_collections(proxy: &Proxy) -> Vec<MetaData> {
+//     proxy.get_collections().await.unwrap()
+// }
 // pub async fn get_cached_collections(proxy: &Proxy) -> Vec<MetaData> {
 //     proxy.get_collections().await
 // }
