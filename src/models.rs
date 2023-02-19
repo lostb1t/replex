@@ -4,12 +4,12 @@ use crate::utils::*;
 use crate::xml::*;
 use anyhow::Result;
 use async_trait::async_trait;
+use axum::headers::ContentType as HContentType;
 use axum::{
     body::HttpBody,
     response::{IntoResponse, Response},
     Json,
 };
-use axum::headers::ContentType as HContentType;
 use cached::proc_macro::cached;
 use hyper::Body;
 use itertools::Itertools;
@@ -312,8 +312,15 @@ impl FromResponse<Response<Body>> for MediaContainerWrapper<MediaContainer> {
 // }
 
 // TODO: Merge hub keys when mixed
-fn merge_keys(key_left: String, key_right: String) {
+fn merge_children_keys(mut key_left: String, mut key_right: String) -> String {
+    key_left = key_left.replace("/plex_proxy/library/collections/", "");
+    key_left = key_left.replace("/library/collections/", "");
+    key_left = key_left.replace("/children", "");
+    key_right = key_right.replace("/plex_proxy/library/collections/", "");
+    key_right = key_right.replace("/library/collections/", "");
+    key_right = key_right.replace("/children", "");
 
+    format!("/plex_proxy/library/collections/{},{}/children", key_right, key_left)
 }
 
 impl MediaContainerWrapper<MediaContainer> {
@@ -341,6 +348,8 @@ impl MediaContainerWrapper<MediaContainer> {
             hub.r#type = "mixed".to_string();
             match p {
                 Some(v) => {
+                    new_collections[v].key =
+                        merge_children_keys(new_collections[v].key.clone(), hub.key.clone());
                     let c = new_collections[v].children();
                     // let h = hub.metadata;
                     new_collections[v].set_children(
