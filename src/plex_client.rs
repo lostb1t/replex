@@ -126,6 +126,16 @@ impl PlexClient {
         Ok(container.media_container.children())
     }
 
+    pub async fn get_collection_children(&self, id: u32) -> Result<MediaContainerWrapper<MediaContainer>> {
+        let mut resp = self
+            .get(format!("/library/collections/{}/children", id))
+            .await
+            .unwrap();;
+        let mut container: MediaContainerWrapper<MediaContainer> =
+            from_response(resp).await.unwrap();
+        Ok(container)
+    }
+
     pub async fn get_item_by_key(
         self,
         key: String,

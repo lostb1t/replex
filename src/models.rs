@@ -3,12 +3,15 @@ use crate::proxy::*;
 use crate::utils::*;
 use crate::xml::*;
 use anyhow::Result;
+use async_trait::async_trait;
 use axum::{
     body::HttpBody,
     response::{IntoResponse, Response},
     Json,
 };
+use axum::headers::ContentType as HContentType;
 use cached::proc_macro::cached;
+use hyper::Body;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use tracing::debug;
@@ -268,7 +271,55 @@ pub struct MediaContainerWrapper<T> {
     pub content_type: ContentType,
 }
 
+#[async_trait]
+pub trait FromResponse<T>: Sized {
+    async fn from_response(resp: T) -> Result<Self>;
+}
+
+// #[async_trait]
+// impl<T, R> FromResponse<R> for MediaContainerWrapper<T>
+// where
+//     T: MediaContainer,
+//     R: Response<Body>,
+// {
+//     async fn from_response(resp: Response<Body>) -> Self {
+//         from_response(resp).await.unwrap()
+//     }
+// }
+
+// pub type Container = MediaContainerWrapper<MediaContainer>;
+
+#[async_trait]
+impl FromResponse<Response<Body>> for MediaContainerWrapper<MediaContainer> {
+    async fn from_response(resp: Response<Body>) -> Result<MediaContainerWrapper<MediaContainer>> {
+        let res = from_response(resp).await?;
+        Ok(res)
+    }
+}
+
+// #[async_trait]
+// impl FromResponse for MediaContainerWrapper<MediaContainer> {
+//     async fn from_response(resp: Response<Body>) -> Self {
+//         from_response(resp).await.unwrap()
+//     }
+// }
+
+// #[async_trait]
+// impl From<Response<Body>> for MediaContainerWrapper<MediaContainer> {
+//     async fn from_response(resp: Response<Body>) -> Self {
+//         from_response(resp).await.unwrap()
+//     }
+// }
+
 impl MediaContainerWrapper<MediaContainer> {
+    // pub fn set_content_type(&mut self, content_type: &http::HeaderValue) {
+    //     // let b = HContentType::json();
+    //     if content_type == HContentType::json() {
+    //         self.content_type = ContentType::Json
+    //     } else {
+    //         self.content_type = ContentType::Xml
+    //     }
+    // }
     pub fn make_mixed(mut self) -> Self {
         // if !self.metadata.is_empty() {
         //     let collections = self.media_container.hub;
@@ -278,6 +329,9 @@ impl MediaContainerWrapper<MediaContainer> {
         let collections = self.media_container.children();
         let mut new_collections: Vec<MetaData> = vec![];
         for mut hub in collections {
+            // if hub.context.is_none() { // not an collection or
+            //     continue
+            // }
             let p = new_collections.iter().position(|v| v.title == hub.title);
             hub.r#type = "mixed".to_string();
             match p {
@@ -317,16 +371,13 @@ impl MediaContainerWrapper<MediaContainer> {
                 continue;
             }
             let section_id = hub.metadata[0].library_section_id.unwrap();
-            if processed_section_ids.contains(&section_id)  {
+            if processed_section_ids.contains(&section_id) {
                 continue;
             }
 
             processed_section_ids.push(section_id);
             // TODO: Use join to join these async requests
-            let mut c = plex
-                .get_section_collections(section_id)
-                .await
-                .unwrap();
+            let mut c = plex.get_section_collections(section_id).await.unwrap();
             // dbg!(&c);
             custom_collections.append(&mut c);
         }
@@ -334,12 +385,13 @@ impl MediaContainerWrapper<MediaContainer> {
 
         let custom_collections_keys: Vec<String> =
             custom_collections.iter().map(|c| c.key.clone()).collect();
-        
+
         // let slice = &collections[..];
         let new_collections: Vec<MetaData> = collections
             .into_iter()
             .filter(|c| {
-                c.context.clone().unwrap() != "hub.custom.collection" || custom_collections_keys.contains(&c.key)
+                c.context.clone().unwrap() != "hub.custom.collection"
+                    || custom_collections_keys.contains(&c.key)
             })
             .collect();
 

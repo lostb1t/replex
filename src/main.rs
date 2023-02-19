@@ -7,10 +7,13 @@ use axum::response::IntoResponse;
 use axum::{
     extract::Path,
     extract::State,
+    extract::TypedHeader,
     // http::{uri::Uri, Request, Response},
     routing::get,
     Router,
 };
+use axum::headers::ContentType as HContentType;
+// use axum::headers::ContentType;
 use cached::proc_macro::cached;
 // use bytes::Bytes;
 // use crate::{
@@ -22,6 +25,7 @@ use http::{Request, Response};
 
 use hyper::{client::HttpConnector, Body};
 
+use itertools::Itertools;
 use plex_proxy::models::*;
 use plex_proxy::plex_client::*;
 use plex_proxy::proxy::*;
@@ -83,6 +87,8 @@ async fn get_hubs_sections(
     // let resp = proxy.request(req).await.unwrap();
     let plex = PlexClient::from(&req);
     let resp = proxy.request(req).await.unwrap();
+    // let container =
+    //     MediaContainerWrapper::<MediaContainer>::from_response(proxy.request(req).await.unwrap()).unwrap();
     let mut container = from_response(resp).await.unwrap();
     container = container.fix_permissions(plex).await;
     container
@@ -108,7 +114,7 @@ async fn get_hubs_promoted(
     let pinned_ids: Vec<&str> = pinned_id_header.split(',').collect();
     // dbg!(pinned_ids);
     //pinnedContentDirectoryID
-    
+
     if dir_id != pinned_ids[0] {
         // We only fill the first one.
         //let content_type = get_content_type(req);
@@ -133,32 +139,30 @@ async fn get_collections_children(
     req: Request<Body>,
 ) -> MediaContainerWrapper<MediaContainer> {
     let collection_ids: Vec<u32> = ids.split(',').map(|v| v.parse().unwrap()).collect();
-    // proxy.set_plex_api_from_request(&req).await;
+    let plex = PlexClient::from(&req);
 
-    // proxy.request(req);
-    //let test = proxy.plex_api.unwrap().item_by_id(collection_ids[0]).await.unwrap();
-    // dbg!(test);
-    // let mut container = MediaContainerWrapper::default();
-    // for id in collection_ids {
-    //     let collection_container = proxy
-    //         .get_collection_items(id, &req)
-    //         .await
-    //         .unwrap();
-    //     // container.merge(collection_container);
-    // }
-    // let collection_container = proxy
-    // .get_collection_items(collection_ids[0], req)
-    // .await
-    // .unwrap();
-    // let path = req.uri().path();
-    // dbg!(&container);
-    // container
-    MediaContainerWrapper::default()
-    // for id in collection_ids {
-
-    // let resp = proxy.request(req).await.unwrap();
-    // let container = from_response(resp).await.unwrap();
-    // container.fix_permissions(&proxy).await
+    let mut children: Vec<MetaData> = vec![];
+    for id in collection_ids {
+        let mut c = plex.get_collection_children(id).await.unwrap();
+        match children.is_empty() {
+            False => {
+                children = children.into_iter()
+                .interleave(c.media_container.children())
+                .collect::<Vec<MetaData>>();
+            }
+            True => children.append(&mut c.media_container.children()),
+        }
+        // children.append(&mut c.media_container.children())
+    }
+    let mut container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
+    // dbg!(req.headers().get("Accept").unwrap());
+    container.content_type = get_content_type_from_headers(req.headers());
+    dbg!(&container.content_type);
+    let size = children.len();
+    container.media_container.metadata = children;
+    container.media_container.size = Some(size.try_into().unwrap());
+    // container = container.make_mixed();
+    container
 }
 
 // impl Clone for Request<T> {
