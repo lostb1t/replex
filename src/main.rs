@@ -55,8 +55,9 @@ async fn main() {
     let app = Router::new()
         .route("/hubs/promoted", get(get_hubs_promoted))
         .route("/hubs/sections/:id", get(get_hubs_sections))
+        .route("/hubs/sections/:id/*path", get(default_handler))
         .route(
-            "/plex_proxy/library/collections/:ids/children",
+            "/hubs/library/collections/:ids/children",
             get(get_collections_children),
         )
         .route("/*path", get(default_handler)) // catchall
@@ -127,7 +128,8 @@ async fn get_hubs_promoted(
     // TODO: This one can be cached globally for everybody (make sure to exclude continue watching)
     let resp = proxy.request(req).await.unwrap();
     let mut container = from_response(resp).await.unwrap();
-    container.media_container.metadata = vec![];
+    
+    // container.media_container.metadata = vec![];
     // dbg!(&container);
     container = container.fix_permissions(plex).await;
     container.make_mixed()

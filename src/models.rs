@@ -107,16 +107,36 @@ pub struct MetaData {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Metadata")]
     pub metadata: Vec<MetaData>,
+    #[serde(rename = "Directory", default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[yaserde(rename = "Directory")]
+    pub directory: Vec<MetaData>, // only avaiable in XML
+    #[serde(rename = "Video", default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[yaserde(rename = "Video")]
+    pub video: Vec<MetaData>, // again only xml, but its the same as directory and metadata
 }
 
 impl MetaData {
-    // as there are 3 diff names for it
     pub fn set_children(&mut self, value: Vec<MetaData>) {
-        self.metadata = value;
+        if !self.metadata.is_empty() {
+            self.metadata = value;
+        } else if !self.directory.is_empty() {
+            self.directory = value;
+        } else if !self.video.is_empty() {
+            self.video = value;
+        };
     }
 
     pub fn children(&mut self) -> Vec<MetaData> {
-        return self.metadata.clone();
+        if !self.metadata.is_empty() {
+            return self.metadata.clone();
+        } else if !self.directory.is_empty() {
+            return self.directory.clone();
+        } else if !self.video.is_empty() {
+            return self.video.clone();
+        };
+        vec![]
     }
 }
 
@@ -313,14 +333,14 @@ impl FromResponse<Response<Body>> for MediaContainerWrapper<MediaContainer> {
 
 // TODO: Merge hub keys when mixed
 fn merge_children_keys(mut key_left: String, mut key_right: String) -> String {
-    key_left = key_left.replace("/plex_proxy/library/collections/", "");
+    key_left = key_left.replace("/hubs/library/collections/", "");
     key_left = key_left.replace("/library/collections/", "");
     key_left = key_left.replace("/children", "");
-    key_right = key_right.replace("/plex_proxy/library/collections/", "");
+    key_right = key_right.replace("/hubs/library/collections/", "");
     key_right = key_right.replace("/library/collections/", "");
     key_right = key_right.replace("/children", "");
 
-    format!("/plex_proxy/library/collections/{},{}/children", key_right, key_left)
+    format!("/hubs/library/collections/{},{}/children", key_right, key_left)
 }
 
 impl MediaContainerWrapper<MediaContainer> {
@@ -338,6 +358,7 @@ impl MediaContainerWrapper<MediaContainer> {
         // } else if !self.hub.is_empty() {
         // }
         // let collections = self.media_container.get_children();
+        
         let collections = self.media_container.children();
         let mut new_collections: Vec<MetaData> = vec![];
         for mut hub in collections {
@@ -367,7 +388,7 @@ impl MediaContainerWrapper<MediaContainer> {
         self.media_container.library_section_uuid = None;
         self.media_container.size = Some(size.try_into().unwrap());
         // trace!("mangled promoted container {:#?}", container);
-        self.media_container.hub = new_collections;
+        self.media_container.set_children(new_collections);
         self
     }
 
@@ -382,6 +403,7 @@ impl MediaContainerWrapper<MediaContainer> {
             // dbg!(&hub);
             // dbg!("yp");
             if hub.metadata.is_empty() {
+                // debug!("metadata is empty");
                 continue;
             }
             let section_id = hub.metadata[0].library_section_id.unwrap();
