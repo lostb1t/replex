@@ -5,7 +5,7 @@ use axum::http::{uri::Uri, Request};
 // use crate::axum::http::{uri::Uri, Request, Response};
 use cached::proc_macro::cached;
 use http::HeaderValue;
-
+use crate::settings::*;
 use http::Response;
 use hyper::client::HttpConnector;
 use hyper::Body;
@@ -16,7 +16,7 @@ type HttpClient = hyper::client::Client<HttpConnector, Body>;
 #[derive(Debug, Clone)]
 pub struct PlexClient {
     pub http_client: HttpClient,
-    pub host: String,
+    pub host: String, // TODO: Dont think this suppsoed to be here. Should be higher up
 
     pub content_type: ContentType,
 
@@ -154,7 +154,8 @@ impl From<&Request<Body>> for PlexClient {
     fn from(req: &Request<Body>) -> Self {
         Self {
             http_client: HttpClient::new(),
-            host: "http://100.91.35.113:32400".to_string(),
+            // host: "http://100.91.35.113:32400".to_string(),
+            host: SETTINGS.read().unwrap().get::<String>("host").unwrap(),
             x_plex_token: get_header_or_param("x-plex-token".to_string(), &req)
                 .expect("Expected to have an token in header or query"),
             x_plex_client_identifier: get_header_or_param(

@@ -12,6 +12,7 @@ use axum::{
 };
 use cached::proc_macro::cached;
 use hyper::Body;
+use hyper::client::HttpConnector;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use tracing::debug;
@@ -19,6 +20,18 @@ use yaserde::YaDeserialize;
 use yaserde::YaSerialize;
 // use parse_display::{Display, FromStr};
 // use yaserde_derive::{YaDeserialize, YaSerialize};
+
+
+#[derive(
+    Debug,
+    Clone,
+)]
+pub struct App {
+    proxy: Proxy,
+    plex: PlexClient
+}
+
+pub type HttpClient = hyper::client::Client<HttpConnector, Body>;
 
 #[derive(
     Debug,

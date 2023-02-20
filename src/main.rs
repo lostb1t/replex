@@ -31,6 +31,7 @@ use httplex::plex_client::*;
 use httplex::proxy::*;
 use httplex::url::*;
 use httplex::utils::*;
+use httplex::settings::*;
 use itertools::Itertools;
 use tower_http::cors::AllowOrigin;
 use tower_http::cors::Any;
@@ -39,8 +40,6 @@ use tower_http::cors::CorsLayer;
 use std::net::SocketAddr;
 use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
-
-type Client = hyper::client::Client<HttpConnector, Body>;
 
 #[tokio::main]
 async fn main() {
@@ -67,11 +66,8 @@ async fn main() {
     //     .layer(
     //         CorsLayer::new().allow_origin(AllowOrigin::mirror_request()), // TODO: Limit to https://app.plex.tv
     //     );
-
-    let proxy = Proxy {
-        host: "http://100.91.35.113:32400".to_string(),
-        client: Client::new(),
-    };
+    // let app = App::default();
+    let proxy = Proxy::default();
     let addr = SocketAddr::from(([0, 0, 0, 0], 3001));
     println!("reverse proxy listening on {}", addr);
     axum::Server::bind(&addr)
@@ -226,6 +222,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_main_router() {
+        // println!("property: {}", SETTINGS.read().unwrap().get::<i32>("property").unwrap());
+
+        
+        
         let mock_server = MockServer::start();
         let file_path = "test/fixtures/hubs_sections_6.json";
         let path = format!("{}/6", PLEX_HUBS_SECTIONS);
@@ -237,11 +237,9 @@ mod tests {
                 .body_from_file(file_path);
         });
 
-        let proxy = Proxy {
-            host: mock_server.base_url(),
-            client: Client::new(),
-        };
-    
+        // SETTINGS.set("host", mock_server.base_url()).unwrap();
+        SETTINGS.write().unwrap().set("host", mock_server.base_url()).unwrap();
+        let proxy = Proxy::default();
 
         let mut router = router(proxy);
 

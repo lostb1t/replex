@@ -1,21 +1,15 @@
 use crate::models::*;
 use crate::utils::*;
 use anyhow::Result;
-use axum::{
-    http::{uri::Uri, Request},
-};
+use axum::http::{uri::Uri, Request};
 // use crate::axum::http::{uri::Uri, Request, Response};
+use crate::models::*;
+use crate::settings::*;
 use cached::proc_macro::cached;
 use http::HeaderValue;
+use hyper::Body;
 
-use hyper::{Body};
-
-
-
-
-use std::convert::{TryFrom};
-
-
+use std::convert::TryFrom;
 
 // struct MyRequest<T>(Request<T>);
 // // pub struct Request<T> {
@@ -29,13 +23,11 @@ use std::convert::{TryFrom};
 //     }
 // }
 
-
-
 #[derive(Debug)]
 pub struct Proxy {
     pub client: hyper::client::Client<hyper::client::HttpConnector, Body>,
     pub host: String,
-    // pub headers: 
+    // pub headers:
     // pub plex_api: Option<plex_api::Server>,
     // pub req: MyRequest<Body>,
 }
@@ -145,6 +137,14 @@ impl Proxy {
     // }
 }
 
+impl Default for Proxy {
+    fn default() -> Self {
+        Self {
+            host: SETTINGS.read().unwrap().get::<String>("host").unwrap(),
+            client: HttpClient::new(),
+        }
+    }
+}
 
 impl Clone for Proxy {
     fn clone(&self) -> Proxy {
@@ -159,8 +159,6 @@ impl Clone for Proxy {
         }
     }
 }
-
-
 
 // #[cached(
 //     time = 720,
