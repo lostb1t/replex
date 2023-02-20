@@ -29,9 +29,9 @@ use hyper::{client::HttpConnector, Body};
 use httplex::models::*;
 use httplex::plex_client::*;
 use httplex::proxy::*;
+use httplex::settings::*;
 use httplex::url::*;
 use httplex::utils::*;
-use httplex::settings::*;
 use itertools::Itertools;
 use tower_http::cors::AllowOrigin;
 use tower_http::cors::Any;
@@ -115,16 +115,19 @@ async fn get_hubs_sections(
     // proxy.set_plex_api_from_request(&req).await;
     // let resp = proxy.request(req).await.unwrap();
     // dbg!(&req.content_type);
+    // dbg!("YOOOOOO");
     let plex = PlexClient::from(&req);
-    dbg!(&plex.content_type);
+    // dbg!(&plex.content_type);
     let resp = proxy.request(req).await.unwrap();
-    dbg!(&resp.headers());
+    // dbg!(&resp.headers());
     // let container =
     //     MediaContainerWrapper::<MediaContainer>::from_response(proxy.request(req).await.unwrap()).unwrap();
     let mut container = from_response(resp).await.unwrap();
-    dbg!(&container.content_type);
-    container = container.fix_permissions(plex).await;
+    
+    // container = container.fix_permissions(plex).await;
+    // dbg!(&container);
     container
+    // MediaContainerWrapper::default()
 }
 
 // fn bla(req: Request<Body>) -> String {
@@ -217,32 +220,36 @@ mod tests {
     use axum::http::StatusCode;
     use axum_test_helper::TestClient;
     use httpmock::prelude::*;
-    use std::fs;
     use pretty_assertions::assert_eq;
+    use assert_json_diff::assert_json_eq;
+    extern crate jsonxf;
+    use std::fs;
 
     #[tokio::test]
     async fn test_main_router() {
         // println!("property: {}", SETTINGS.read().unwrap().get::<i32>("property").unwrap());
 
-        
-        
         let mock_server = MockServer::start();
         let file_path = "test/fixtures/hubs_sections_6.json";
         let path = format!("{}/6", PLEX_HUBS_SECTIONS);
         let m = mock_server.mock(|when, then| {
-            when.method(GET).path(&path);
-            // .header("X-Plex-Token", "fixture_auth_token");
+            when.method(GET)
+                .path(&path)
+                .header("X-Plex-Token", "fakeID");
             then.status(200)
-                .header("Content-Type", "application/json")
+                .header("content-type", "application/json")
                 .body_from_file(file_path);
         });
 
-        // SETTINGS.set("host", mock_server.base_url()).unwrap();
-        SETTINGS.write().unwrap().set("host", mock_server.base_url()).unwrap();
+        SETTINGS
+            .write()
+            .unwrap()
+            .set("host", mock_server.base_url())
+            .unwrap();
+
         let proxy = Proxy::default();
-
         let mut router = router(proxy);
-
+        // dbg!("everything stup");
         let client = TestClient::new(router);
         let res = client
             .get(&path)
@@ -252,9 +259,14 @@ mod tests {
             .send()
             .await;
         assert_eq!(res.status(), StatusCode::OK);
+        // dbg!("everything stup");
+        let result = res.text().await;
+        let sup = jsonxf::pretty_print(&result).unwrap();
 
         let contents =
             fs::read_to_string(file_path).expect("Should have been able to read the file");
-        assert_eq!(res.text().await, contents);
+
+        assert_eq!(jsonxf::pretty_print(&result).unwrap(), contents);
+        // assert_json_eq!(sup, contents);
     }
 }

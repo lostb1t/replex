@@ -97,18 +97,18 @@ pub async fn from_body(
 
     // dbg!(&body);
     // let body_string = body_to_string(body).await?;
-
+    
     // let bytes = hyper::body::to_bytes(response.into_body()).await?
     let bytes = hyper::body::to_bytes(body).await?;
+    // let string = String::from_utf8(bytes.to_vec())?;
+    // dbg!(&string);
     // bytes = EventReader::new(bytes.strip_prefix(UTF8_BOM).unwrap_or(bytes));
     // dbg!(&bytes);
     // yaserde::de::from_r
     let result: MediaContainerWrapper<MediaContainer> = match content_type {
         ContentType::Json => {
             // let mut c: MediaContainerWrapper<MediaContainer> =
-            //     serde_json::from_str(&body_string).unwrap();
-            // let mut c: MediaContainerWrapper<MediaContainer> =
-                // serde_json::from_slice(&bytes).unwrap();
+            //     serde_json::from_str(&string).unwrap();
             let mut c: MediaContainerWrapper<MediaContainer> =
                 serde_json::from_reader(&*bytes).unwrap();
             c.content_type = ContentType::Json;
