@@ -1,5 +1,5 @@
 [package]
-name = "plex_proxy"
+name = "httplex"
 version = "0.1.0"
 edition = "2021"
 
@@ -18,7 +18,7 @@ serde_json = "1.0.92"
 hyper = { version = "0.14.24", features = ["full"] }
 tokio = { version = "1.25.0", features = ["full"] }
 lazy_static = "1.4.0"
-pretty_env_logger = "0.4.0"
+# pretty_env_logger = "0.4.0"
 # hyper-reverse-proxy = "0.5.1"
 hyper-reverse-proxy = { git = "https://github.com/felipenoris/hyper-reverse-proxy.git" }
 hyper-trust-dns = { version = "0.5.0", features = [
@@ -54,8 +54,11 @@ axum-core = "0.3.2"
 thiserror = "1.0.38"
 http-body = "0.4.5"
 futures-util = "0.3.26"
+config = "0.13.3"
 
 [dev-dependencies]
+axum-test-helper = "0.2.0"
+httpmock = "0.6.7"
 pretty_assertions = "1.3.0"
 
 # [patch."https://github.com/sarendsen/plex-api.rs.git"]

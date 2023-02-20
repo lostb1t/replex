@@ -5,9 +5,9 @@ build:
 	cargo build --release
 
 build-docker:
-	docker build -t ghcr.io/sarendsen/plex_proxy:latest .
+	docker build -t ghcr.io/sarendsen/httplex:latest .
 
 push-docker:
-	docker push ghcr.io/sarendsen/plex_proxy:latest
+	docker push ghcr.io/sarendsen/httplex:latest
 
 release: build-docker push-docker

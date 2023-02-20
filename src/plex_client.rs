@@ -18,7 +18,7 @@ pub struct PlexClient {
     pub http_client: HttpClient,
     pub host: String,
 
-    pub accept: String,
+    pub content_type: ContentType,
 
     // /// `X-Plex-Provides` header value. Comma-separated list.
     // ///
@@ -92,7 +92,7 @@ impl PlexClient {
             .uri(uri)
             .header("X-Plex-Client-Identifier", &self.x_plex_client_identifier)
             .header("X-Plex-Token", &self.x_plex_token)
-            .header("Accept", &self.accept)
+            .header("Content-Type", &self.content_type.to_string())
             .body(Body::empty())
             .unwrap();
         self.http_client.request(request)
@@ -126,11 +126,14 @@ impl PlexClient {
         Ok(container.media_container.children())
     }
 
-    pub async fn get_collection_children(&self, id: u32) -> Result<MediaContainerWrapper<MediaContainer>> {
+    pub async fn get_collection_children(
+        &self,
+        id: u32,
+    ) -> Result<MediaContainerWrapper<MediaContainer>> {
         let mut resp = self
             .get(format!("/library/collections/{}/children", id))
             .await
-            .unwrap();;
+            .unwrap();
         let mut container: MediaContainerWrapper<MediaContainer> =
             from_response(resp).await.unwrap();
         Ok(container)
@@ -152,14 +155,15 @@ impl From<&Request<Body>> for PlexClient {
         Self {
             http_client: HttpClient::new(),
             host: "http://100.91.35.113:32400".to_string(),
-            x_plex_token: get_header_or_param("x-plex-token".to_string(), &req).unwrap(),
+            x_plex_token: get_header_or_param("x-plex-token".to_string(), &req)
+                .expect("Expected to have an token in header or query"),
             x_plex_client_identifier: get_header_or_param(
                 "x-plex-client-identifier".to_string(),
                 &req,
             )
-            .unwrap(),
+            .expect("Expected to have an plex client identifier header"),
             x_plex_sync_version: "2".to_owned(),
-            accept: get_header_or_param("Accept".to_string(), &req).unwrap()
+            content_type: get_content_type_from_headers(req.headers()),
         }
     }
 }

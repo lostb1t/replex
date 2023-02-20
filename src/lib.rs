@@ -10,3 +10,4 @@ pub mod utils;
 pub mod response;
 pub mod plex_client;
 pub mod xml;
+pub mod url;

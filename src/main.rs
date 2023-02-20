@@ -3,6 +3,7 @@ extern crate tracing;
 #[macro_use]
 extern crate axum_core;
 
+use axum::headers::ContentType as HContentType;
 use axum::response::IntoResponse;
 use axum::{
     extract::Path,
@@ -13,7 +14,6 @@ use axum::{
     routing::put,
     Router,
 };
-use axum::headers::ContentType as HContentType;
 // use axum::headers::ContentType;
 use cached::proc_macro::cached;
 // use bytes::Bytes;
@@ -26,11 +26,12 @@ use http::{Request, Response};
 
 use hyper::{client::HttpConnector, Body};
 
+use httplex::models::*;
+use httplex::plex_client::*;
+use httplex::proxy::*;
+use httplex::url::*;
+use httplex::utils::*;
 use itertools::Itertools;
-use plex_proxy::models::*;
-use plex_proxy::plex_client::*;
-use plex_proxy::proxy::*;
-use plex_proxy::utils::*;
 use tower_http::cors::AllowOrigin;
 use tower_http::cors::Any;
 use tower_http::cors::CorsLayer;
@@ -48,34 +49,63 @@ async fn main() {
     // tokio::spawn(server());
     // let bla = Client::new();
     // let plex_api_client = create_client_from_request()
+
+    // let app = Router::new()
+    //     .route("/hubs/promoted", get(get_hubs_promoted))
+    //     // .route("/hubs/sections/:id/*path", get(default_handler))
+    //     .route("/hubs/sections/:id", get(get_hubs_sections))
+    //     .route(
+    //         "/hubs/library/collections/:ids/children",
+    //         get(get_collections_children),
+    //     )
+    //     .fallback(default_handler)
+    //     // .route("/*path", get(default_handler))
+    //     // .route("/*path", put(default_handler))
+    //     // .route("/", get(default_handler))
+    //     .with_state(proxy)
+    //     .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
+    //     .layer(
+    //         CorsLayer::new().allow_origin(AllowOrigin::mirror_request()), // TODO: Limit to https://app.plex.tv
+    //     );
+
     let proxy = Proxy {
         host: "http://100.91.35.113:32400".to_string(),
         client: Client::new(),
     };
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3001));
+    println!("reverse proxy listening on {}", addr);
+    axum::Server::bind(&addr)
+        .serve(router(proxy).into_make_service())
+        .await
+        .unwrap();
+}
 
-    let app = Router::new()
-        .route("/hubs/promoted", get(get_hubs_promoted))
+fn router(proxy: Proxy) -> Router {
+    // let proxy = Proxy {
+    //     host: "http://100.91.35.113:32400".to_string(),
+    //     client: Client::new(),
+    // };
+
+    Router::new()
+        .route(PLEX_HUBS_PROMOTED, get(get_hubs_promoted))
         // .route("/hubs/sections/:id/*path", get(default_handler))
-        .route("/hubs/sections/:id", get(get_hubs_sections))
+        .route(
+            &format!("{}/:id", PLEX_HUBS_SECTIONS),
+            get(get_hubs_sections),
+        )
         .route(
             "/hubs/library/collections/:ids/children",
             get(get_collections_children),
         )
-        .route("/*path", get(default_handler))
-        .route("/*path", put(default_handler))
-        .route("/", get(default_handler))
+        .fallback(default_handler)
+        // .route("/*path", get(default_handler))
+        // .route("/*path", put(default_handler))
+        // .route("/", get(default_handler))
         .with_state(proxy)
         .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
         .layer(
             CorsLayer::new().allow_origin(AllowOrigin::mirror_request()), // TODO: Limit to https://app.plex.tv
-        );
-
-    let addr = SocketAddr::from(([0, 0, 0, 0], 3001));
-    println!("reverse proxy listening on {}", addr);
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+        )
 }
 
 async fn default_handler(State(proxy): State<Proxy>, req: Request<Body>) -> Response<Body> {
@@ -88,11 +118,15 @@ async fn get_hubs_sections(
 ) -> MediaContainerWrapper<MediaContainer> {
     // proxy.set_plex_api_from_request(&req).await;
     // let resp = proxy.request(req).await.unwrap();
+    // dbg!(&req.content_type);
     let plex = PlexClient::from(&req);
+    dbg!(&plex.content_type);
     let resp = proxy.request(req).await.unwrap();
+    dbg!(&resp.headers());
     // let container =
     //     MediaContainerWrapper::<MediaContainer>::from_response(proxy.request(req).await.unwrap()).unwrap();
     let mut container = from_response(resp).await.unwrap();
+    dbg!(&container.content_type);
     container = container.fix_permissions(plex).await;
     container
 }
@@ -111,6 +145,7 @@ async fn get_hubs_promoted(
     State(mut proxy): State<Proxy>,
     mut req: Request<Body>,
 ) -> MediaContainerWrapper<MediaContainer> {
+    dbg!(req.uri_mut().path());
     let dir_id = get_header_or_param("contentDirectoryID".to_owned(), &req).unwrap();
     let pinned_id_header =
         get_header_or_param("pinnedContentDirectoryID".to_owned(), &req).unwrap();
@@ -128,9 +163,9 @@ async fn get_hubs_promoted(
 
     let plex = PlexClient::from(&req);
     // TODO: This one can be cached globally for everybody (make sure to exclude continue watching)
-    let resp = proxy.request(req).await.unwrap();
+    let resp = proxy.request(req).await.expect("Expected an response");
     let mut container = from_response(resp).await.unwrap();
-    
+
     // container.media_container.metadata = vec![];
     // dbg!(&container);
     container = container.fix_permissions(plex).await;
@@ -146,24 +181,22 @@ async fn get_collections_children(
     let plex = PlexClient::from(&req);
 
     let mut children: Vec<MetaData> = vec![];
-    
+
     for id in collection_ids {
         let mut c = plex.get_collection_children(id).await.unwrap();
         // dbg!(&c.media_container.children());
         match children.is_empty() {
             False => {
-                children = children.into_iter()
-                .interleave(c.media_container.children())
-                .collect::<Vec<MetaData>>();
+                children = children
+                    .into_iter()
+                    .interleave(c.media_container.children())
+                    .collect::<Vec<MetaData>>();
             }
-            True => {
-
-                children.append(&mut c.media_container.children())
-            },
+            True => children.append(&mut c.media_container.children()),
         }
         // children.append(&mut c.media_container.children())
     }
-    
+
     let mut container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
     // dbg!(req.headers().get("Accept").unwrap());
     container.content_type = get_content_type_from_headers(req.headers());
@@ -181,3 +214,49 @@ async fn get_collections_children(
 //         Request::from_parts(parts, Body::empty())
 //     }
 // }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use axum::http::StatusCode;
+    use axum_test_helper::TestClient;
+    use httpmock::prelude::*;
+    use std::fs;
+    use pretty_assertions::assert_eq;
+
+    #[tokio::test]
+    async fn test_main_router() {
+        let mock_server = MockServer::start();
+        let file_path = "test/fixtures/hubs_sections_6.json";
+        let path = format!("{}/6", PLEX_HUBS_SECTIONS);
+        let m = mock_server.mock(|when, then| {
+            when.method(GET).path(&path);
+            // .header("X-Plex-Token", "fixture_auth_token");
+            then.status(200)
+                .header("Content-Type", "application/json")
+                .body_from_file(file_path);
+        });
+
+        let proxy = Proxy {
+            host: mock_server.base_url(),
+            client: Client::new(),
+        };
+    
+
+        let mut router = router(proxy);
+
+        let client = TestClient::new(router);
+        let res = client
+            .get(&path)
+            .header("X-Plex-Token", "fakeID")
+            .header("X-Plex-Client-Identifier", "fakeID")
+            .header("Accept", "application/json")
+            .send()
+            .await;
+        assert_eq!(res.status(), StatusCode::OK);
+
+        let contents =
+            fs::read_to_string(file_path).expect("Should have been able to read the file");
+        assert_eq!(res.text().await, contents);
+    }
+}
