@@ -171,7 +171,7 @@ async fn get_hubs_promoted(
 
     // container.media_container.metadata = vec![];
     // dbg!(&container);
-    container = container.fix_permissions(plex).await;
+    // container = container.fix_permissions(plex).await;
     container.make_mixed()
 }
 
