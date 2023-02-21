@@ -1,0 +1,387 @@
+{
+    "MediaContainer": {
+        "size": 3,
+        "allowSync": true,
+        "identifier": "com.plexapp.plugins.library",
+        "Hub": [
+            {
+                "hubKey": "/library/metadata/217469",
+                "key": "/hubs/home/continueWatching",
+                "title": "Continue Watching",
+                "type": "mixed",
+                "hubIdentifier": "home.continue",
+                "context": "hub.home.continue",
+                "size": 1,
+                "more": false,
+                "style": "hero",
+                "promoted": true,
+                "Metadata": [
+                    {
+                        "ratingKey": "217469",
+                        "key": "/library/metadata/217469",
+                        "parentRatingKey": "217468",
+                        "grandparentRatingKey": "217467",
+                        "guid": "plex://episode/5e7218eb388dc2003e4495ac",
+                        "grandparentGuid": "plex://show/5e69c6f6874db7003e2dd59b",
+                        "type": "episode",
+                        "title": "When You're Lost in the Darkness",
+                        "grandparentKey": "/library/metadata/217467",
+                        "parentKey": "/library/metadata/217468",
+                        "librarySectionTitle": "Shows Test",
+                        "librarySectionID": 7,
+                        "librarySectionKey": "/library/sections/7",
+                        "grandparentTitle": "The Last of Us",
+                        "parentTitle": "Season 1",
+                        "contentRating": "TV-MA",
+                        "summary": "2003. As a parasitic fungal outbreak begins to ravage the country and the world, Joel Miller attempts to escape the escalating chaos with his daughter and brother. Twenty years later, a now hardened Joel and his partner Tess fight to survive under a totalitarian regime, while the insurgent Fireflies harbor a teenage girl with a unique gift.",
+                        "index": 1,
+                        "parentIndex": 1,
+                        "audienceRating": 8.4,
+                        "viewOffset": 461000,
+                        "lastViewedAt": 1675436393,
+                        "year": 2023,
+                        "thumb": "/library/metadata/217469/thumb/1676967988",
+                        "art": "/library/metadata/217467/art/1674546274",
+                        "grandparentThumb": "/library/metadata/217467/thumb/1674546274",
+                        "grandparentArt": "/library/metadata/217467/art/1674546274",
+                        "duration": 4847328,
+                        "originallyAvailableAt": "2023-01-15",
+                        "addedAt": 1673839793,
+                        "updatedAt": 1676967988,
+                        "audienceRatingImage": "themoviedb://image.rating",
+                        "chapterSource": "media",
+                        "Media": [
+                            {
+                                "id": 270360,
+                                "duration": 4847328,
+                                "bitrate": 9005,
+                                "width": 1920,
+                                "height": 1080,
+                                "aspectRatio": 1.78,
+                                "audioChannels": 6,
+                                "audioCodec": "eac3",
+                                "videoCodec": "h264",
+                                "videoResolution": "1080",
+                                "container": "mkv",
+                                "videoFrameRate": "24p",
+                                "videoProfile": "high",
+                                "Part": [
+                                    {
+                                        "id": 271990,
+                                        "key": "/library/parts/271990/1673839793/file.mkv",
+                                        "duration": 4847328,
+                                        "file": "/data/shows/The Last of Us (2023)/Season 1/The Last of Us - S01E01 - When You're Lost in the Darkness [1080p.HMAX.WEB-DL.DDP5.1.Atmos.H.264 WEBDL-1080p X264 EAC3 Atmos 5.1].mkv",
+                                        "size": 5456112002,
+                                        "container": "mkv",
+                                        "videoProfile": "high"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 308807,
+                                "duration": 2911520,
+                                "bitrate": 7171,
+                                "width": 1920,
+                                "height": 1080,
+                                "aspectRatio": 1.78,
+                                "audioChannels": 6,
+                                "audioCodec": "eac3",
+                                "videoCodec": "h264",
+                                "videoResolution": "1080",
+                                "container": "mkv",
+                                "videoFrameRate": "24p",
+                                "videoProfile": "main",
+                                "Part": [
+                                    {
+                                        "id": 310437,
+                                        "key": "/library/parts/310437/1611592275/file.mkv",
+                                        "duration": 2911520,
+                                        "file": "/data/shows/Alice in Borderland/Season 1/Alice in Borderland - S01E01 - Episode 1 [WEBDL-1080p X264 EAC3 5.1]-iKA.mkv",
+                                        "size": 2609655736,
+                                        "container": "mkv",
+                                        "videoProfile": "main"
+                                    }
+                                ]
+                            }
+                        ],
+                        "Director": [
+                            {
+                                "tag": "Craig Mazin"
+                            }
+                        ],
+                        "Writer": [
+                            {
+                                "tag": "Craig Mazin"
+                            },
+                            {
+                                "tag": "Neil Druckmann"
+                            }
+                        ],
+                        "Role": [
+                            {
+                                "tag": "Merle Dandridge"
+                            },
+                            {
+                                "tag": "John Hannah"
+                            },
+                            {
+                                "tag": "Josh Brener"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "hubKey": "/library/metadata/148287,148277",
+                "key": "/library/collections/254687/children",
+                "title": "Trending",
+                "type": "movie",
+                "hubIdentifier": "custom.collection.6.254687.254687",
+                "context": "hub.custom.collection",
+                "size": 2,
+                "more": false,
+                "style": "shelf",
+                "promoted": true,
+                "Metadata": [
+                    {
+                        "ratingKey": "148287",
+                        "key": "/library/metadata/148287",
+                        "guid": "plex://movie/5d77689f7a53e9001e6d4473",
+                        "studio": "TriStar Pictures",
+                        "type": "movie",
+                        "title": "Looper",
+                        "librarySectionTitle": "Movies test",
+                        "librarySectionID": 6,
+                        "librarySectionKey": "/library/sections/6",
+                        "contentRating": "R",
+                        "summary": "In 2074, when the mob wants to get rid of someone, the target is sent into the past, where a hired gun awaits - someone like Joe - who one day learns the mob wants to 'close the loop' by sending back Joe's future self for assassination.",
+                        "rating": 7.4,
+                        "audienceRating": 8.2,
+                        "year": 2012,
+                        "tagline": "Hunted by your future, haunted by your past.",
+                        "thumb": "/library/metadata/148287/thumb/1674785266",
+                        "art": "/library/metadata/148287/art/1674785266",
+                        "duration": 7117736,
+                        "originallyAvailableAt": "2012-09-26",
+                        "addedAt": 1670488040,
+                        "updatedAt": 1674785266,
+                        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+                        "chapterSource": "media",
+                        "primaryExtraKey": "/library/metadata/148288",
+                        "ratingImage": "rottentomatoes://image.rating.ripe",
+                        "Media": [
+                            {
+                                "id": 204482,
+                                "duration": 7117736,
+                                "bitrate": 17550,
+                                "width": 3840,
+                                "height": 1600,
+                                "aspectRatio": 2.35,
+                                "audioChannels": 6,
+                                "audioCodec": "dca-ma",
+                                "videoCodec": "hevc",
+                                "videoResolution": "4k",
+                                "container": "mkv",
+                                "videoFrameRate": "24p",
+                                "audioProfile": "ma",
+                                "videoProfile": "main 10",
+                                "Part": [
+                                    {
+                                        "id": 206112,
+                                        "key": "/library/parts/206112/1632337352/file.mkv",
+                                        "duration": 7117736,
+                                        "file": "/data/movies/Looper (2012) {tmdb-59967}/Looper (2012) {tmdb-59967} - 2160p bluray h265 hdr dtshd.mkv",
+                                        "size": 15614403675,
+                                        "audioProfile": "ma",
+                                        "container": "mkv",
+                                        "hasThumbnail": "1",
+                                        "videoProfile": "main 10"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 201550,
+                                "duration": 7133232,
+                                "bitrate": 8371,
+                                "width": 1920,
+                                "height": 816,
+                                "aspectRatio": 2.35,
+                                "audioChannels": 6,
+                                "audioCodec": "dca",
+                                "videoCodec": "h264",
+                                "videoResolution": "1080",
+                                "container": "mkv",
+                                "videoFrameRate": "24p",
+                                "audioProfile": "dts",
+                                "videoProfile": "main",
+                                "Part": [
+                                    {
+                                        "id": 203180,
+                                        "key": "/library/parts/203180/1504161660/file.mkv",
+                                        "duration": 7133232,
+                                        "file": "/data/movies/Looper (2012) {tmdb-59967}/Looper (2012) {tmdb-59967} - 1080p bluray h264 8bit dts.mkv",
+                                        "size": 7463888308,
+                                        "audioProfile": "dts",
+                                        "container": "mkv",
+                                        "videoProfile": "main"
+                                    }
+                                ]
+                            }
+                        ],
+                        "Genre": [
+                            {
+                                "tag": "Action"
+                            },
+                            {
+                                "tag": "Drama"
+                            }
+                        ],
+                        "Director": [
+                            {
+                                "tag": "Rian Johnson"
+                            }
+                        ],
+                        "Writer": [
+                            {
+                                "tag": "Rian Johnson"
+                            }
+                        ],
+                        "Country": [
+                            {
+                                "tag": "United States of America"
+                            }
+                        ],
+                        "Collection": [
+                            {
+                                "tag": "Trending"
+                            },
+                            {
+                                "tag": "Popular"
+                            }
+                        ],
+                        "Role": [
+                            {
+                                "tag": "Joseph Gordon-Levitt"
+                            },
+                            {
+                                "tag": "Bruce Willis"
+                            },
+                            {
+                                "tag": "Emily Blunt"
+                            }
+                        ]
+                    },
+                    {
+                        "ratingKey": "148277",
+                        "key": "/library/metadata/148277",
+                        "guid": "plex://movie/5d776d4796b655001fe44b28",
+                        "studio": "Marvel Studios",
+                        "type": "movie",
+                        "title": "Doctor Strange in the Multiverse of Madness",
+                        "librarySectionTitle": "Movies test",
+                        "librarySectionID": 6,
+                        "librarySectionKey": "/library/sections/6",
+                        "contentRating": "PG-13",
+                        "summary": "Doctor Strange teams up with a mysterious teenage girl from his dreams who can travel across multiverses, to battle multiple threats, including other-universe versions of himself, which threaten to wipe out millions across the multiverse. They seek help from Wanda the Scarlet Witch, Wong and others.",
+                        "rating": 6.9,
+                        "audienceRating": 8.5,
+                        "year": 2022,
+                        "tagline": "Enter a new dimension of Strange.",
+                        "thumb": "/library/metadata/148277/thumb/1674785265",
+                        "art": "/library/metadata/148277/art/1674785265",
+                        "duration": 7591232,
+                        "originallyAvailableAt": "2022-05-04",
+                        "addedAt": 1657218243,
+                        "updatedAt": 1674785265,
+                        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+                        "chapterSource": "media",
+                        "primaryExtraKey": "/library/metadata/148278",
+                        "ratingImage": "rottentomatoes://image.rating.ripe",
+                        "Media": [
+                            {
+                                "id": 201524,
+                                "duration": 7591232,
+                                "bitrate": 10833,
+                                "width": 1920,
+                                "height": 804,
+                                "aspectRatio": 2.35,
+                                "audioChannels": 8,
+                                "audioCodec": "dca-ma",
+                                "videoCodec": "hevc",
+                                "videoResolution": "1080",
+                                "container": "mkv",
+                                "videoFrameRate": "24p",
+                                "audioProfile": "ma",
+                                "videoProfile": "main 10",
+                                "Part": [
+                                    {
+                                        "id": 203154,
+                                        "key": "/library/parts/203154/1657218243/file.mkv",
+                                        "duration": 7591232,
+                                        "file": "/data/movies/Doctor Strange in the Multiverse of Madness (2022) {tmdb-453395}/Doctor Strange in the Multiverse of Madness (2022) {tmdb-453395} - 1080p bluray h265 10bit dtshd.mkv",
+                                        "size": 10279762077,
+                                        "audioProfile": "ma",
+                                        "container": "mkv",
+                                        "videoProfile": "main 10"
+                                    }
+                                ]
+                            }
+                        ],
+                        "Genre": [
+                            {
+                                "tag": "Fantasy"
+                            },
+                            {
+                                "tag": "Horror"
+                            }
+                        ],
+                        "Director": [
+                            {
+                                "tag": "Sam Raimi"
+                            }
+                        ],
+                        "Writer": [
+                            {
+                                "tag": "Michael Waldron"
+                            }
+                        ],
+                        "Country": [
+                            {
+                                "tag": "United States of America"
+                            }
+                        ],
+                        "Collection": [
+                            {
+                                "tag": "Popular"
+                            },
+                            {
+                                "tag": "Trending"
+                            }
+                        ],
+                        "Role": [
+                            {
+                                "tag": "Benedict Cumberbatch"
+                            },
+                            {
+                                "tag": "Elizabeth Olsen"
+                            },
+                            {
+                                "tag": "Chiwetel Ejiofor"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "key": "/hubs/home/recentlyAdded?type=1&pinnedContentDirectoryID=6,7",
+                "title": "Recently Added Movies",
+                "type": "movie",
+                "hubIdentifier": "home.movies.recent.6",
+                "context": "hub.home.movies.recent",
+                "size": 0,
+                "more": false,
+                "style": "shelf"
+            }
+        ]
+    }
+}

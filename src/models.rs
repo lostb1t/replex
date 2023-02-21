@@ -65,6 +65,9 @@ pub struct MetaData {
     pub thumb: Option<String>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub tagline: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub view_group: Option<String>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -111,6 +114,10 @@ pub struct MetaData {
     #[yaserde(rename = "librarySectionTitle")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub library_section_title: Option<String>,
+    #[yaserde(attribute)]
+    #[yaserde(rename = "librarySectionKey")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub library_section_key: Option<String>,
     #[yaserde(rename = "type")]
     #[yaserde(attribute)]
     pub r#type: String,
@@ -141,6 +148,9 @@ pub struct MetaData {
     #[yaserde(attribute)]
     pub style: Option<String>,
     // pub context: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(attribute)]
+    pub size: Option<i32>,
     #[serde(rename = "Metadata", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Metadata")]
@@ -157,6 +167,7 @@ pub struct MetaData {
 
 impl MetaData {
     pub fn set_children(&mut self, value: Vec<MetaData>) {
+        let len: i32 = value.len().try_into().unwrap();
         if !self.metadata.is_empty() {
             self.metadata = value;
         } else if !self.directory.is_empty() {
@@ -164,6 +175,7 @@ impl MetaData {
         } else if !self.video.is_empty() {
             self.video = value;
         };
+        self.size = Some(len);
     }
 
     pub fn children(&mut self) -> Vec<MetaData> {
@@ -387,33 +399,16 @@ fn merge_children_keys(mut key_left: String, mut key_right: String) -> String {
 }
 
 impl MediaContainerWrapper<MediaContainer> {
-    // pub fn set_content_type(&mut self, content_type: &http::HeaderValue) {
-    //     // let b = HContentType::json();
-    //     if content_type == HContentType::json() {
-    //         self.content_type = ContentType::Json
-    //     } else {
-    //         self.content_type = ContentType::Xml
-    //     }
-    // }
     pub fn make_mixed(mut self) -> Self {
-        // if !self.metadata.is_empty() {
-        //     let collections = self.media_container.hub;
-        // } else if !self.hub.is_empty() {
-        // }
-        // let collections = self.media_container.get_children();
-        
         let collections = self.media_container.children();
         let mut new_collections: Vec<MetaData> = vec![];
         for mut hub in collections {
-            // if hub.context.is_none() { // not an collection or
-            //     continue
-            // }
             let p = new_collections.iter().position(|v| v.title == hub.title);
             hub.r#type = "mixed".to_string();
             match p {
                 Some(v) => {
-                    new_collections[v].key =
-                        merge_children_keys(new_collections[v].key.clone(), hub.key.clone());
+                    // new_collections[v].key =
+                    //     merge_children_keys(new_collections[v].key.clone(), hub.key.clone());
                     let c = new_collections[v].children();
                     // let h = hub.metadata;
                     new_collections[v].set_children(

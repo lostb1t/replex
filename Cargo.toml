@@ -20,13 +20,6 @@ tokio = { version = "1.25.0", features = ["full"] }
 lazy_static = "1.4.0"
 # pretty_env_logger = "0.4.0"
 # hyper-reverse-proxy = "0.5.1"
-hyper-reverse-proxy = { git = "https://github.com/felipenoris/hyper-reverse-proxy.git" }
-hyper-trust-dns = { version = "0.5.0", features = [
-  "rustls-http2",
-  "dnssec-ring",
-  "dns-over-https-rustls",
-  "rustls-webpki",
-] }
 anyhow = "1.0.69"
 cached = "0.42.0"
 # quick-xml = "0.27.1"

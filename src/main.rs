@@ -155,11 +155,19 @@ async fn get_hubs_promoted(
     let pinned_ids: Vec<&str> = pinned_id_header.split(',').collect();
     // dbg!(pinned_ids);
     //pinnedContentDirectoryID
-
+    debug!("{:#?}", &req);
     if dir_id != pinned_ids[0] {
         // We only fill the first one.
         //let content_type = get_content_type(req);
-        return MediaContainerWrapper::default();
+        debug!("Gonna return an empty response");
+        let mut c: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
+        // c.content_type = get_content_type(req);
+        c.content_type = ContentType::Json;
+        c.media_container.size = Some(0);
+        c.media_container.allow_sync = Some(true);
+        c.media_container.identifier = Some("com.plexapp.plugins.library".to_string());
+        c.media_container.hub = vec![];
+        return c;
     }
 
     // req = remove_param(req, "contentDirectoryID");
