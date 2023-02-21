@@ -9,6 +9,7 @@ use hyper::{Body};
 use strum_macros::Display as EnumDisplay;
 use strum_macros::EnumString;
 
+use tracing::debug;
 use yaserde::ser::to_string as to_xml_str;
 
 
@@ -34,10 +35,16 @@ pub fn remove_param(mut req: Request<Body>, param: &str) -> Request<Body> {
 }
 
 pub fn add_query_param(mut req: Request<Body>, param: &str, value: &str) -> Request<Body> {
-    let uri = pathetic::Uri::default()
+    let mut uri = pathetic::Uri::default()
         .with_path(req.uri_mut().path())
-        .with_query(req.uri_mut().query())
-        .with_query_pairs_mut(|q| q.append_pair(param, value));
+        .with_query(req.uri_mut().query());
+    let mut query: Vec<(String, String)> = uri // remove existing values
+        .query_pairs()
+        .filter(|(name, _)| name != param)
+        .map(|(name, value)| (name.into_owned(), value.into_owned()))
+        .collect();    
+    query.push((param.to_owned(), value.to_owned()));
+    uri.query_pairs_mut().clear().extend_pairs(query);
     *req.uri_mut() = Uri::try_from(uri.as_str()).unwrap();
     req
 }
@@ -233,3 +240,10 @@ pub fn get_header_or_param(name: String, req: &Request<Body>) -> Option<String> 
 
 //     Ok(vec.into())
 // }
+
+pub async fn debug_resp_body(resp: Response<Body>) {
+        let (parts, body) = resp.into_parts();
+        debug!("{:#?}", body_to_string(body).await);
+}
+
+// pub fn clone_req(req: &Request<Body>) -> Request

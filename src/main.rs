@@ -148,33 +148,51 @@ async fn get_hubs_promoted(
     State(mut proxy): State<Proxy>,
     mut req: Request<Body>,
 ) -> MediaContainerWrapper<MediaContainer> {
+    let ids_header = get_header_or_param("contentDirectoryID".to_owned(), &req).unwrap();
+    let content_directory_ids: Vec<&str> = ids_header.split(',').collect();
 
-    let dir_id = get_header_or_param("contentDirectoryID".to_owned(), &req).unwrap();
+    // Cant handle multiple directories yet
+    if content_directory_ids.len() > 1 {
+        let resp = proxy.request(req).await.unwrap();
+        return from_response(resp).await.unwrap();
+    }
+
     let pinned_id_header =
         get_header_or_param("pinnedContentDirectoryID".to_owned(), &req).unwrap();
     let pinned_ids: Vec<&str> = pinned_id_header.split(',').collect();
     // dbg!(pinned_ids);
     //pinnedContentDirectoryID
-    debug!("{:#?}", &req);
-    if dir_id != pinned_ids[0] {
+    // dbg!(&req);
+    // debug!("{:#?}", &req);
+    if content_directory_ids[0] != pinned_ids[0] {
         // We only fill the first one.
         //let content_type = get_content_type(req);
-        debug!("Gonna return an empty response");
+        // debug!("Gonna return an empty response");
         let mut c: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
-        // c.content_type = get_content_type(req);
-        c.content_type = ContentType::Json;
+        c.content_type = get_content_type(req);
+        // c.content_type = ContentType::Json;
         c.media_container.size = Some(0);
         c.media_container.allow_sync = Some(true);
         c.media_container.identifier = Some("com.plexapp.plugins.library".to_string());
-        c.media_container.hub = vec![];
         return c;
     }
 
     // req = remove_param(req, "contentDirectoryID");
     req = add_query_param(req, "contentDirectoryID", &pinned_id_header);
     // dbg!(&req);
+    // dbg!(&proxy.host);
     let plex = PlexClient::from(&req);
     let resp = proxy.request(req).await.expect("Expected an response");
+    // let (parts, body) = resp.into_parts();
+    // dbg!(body_to_string(body).await);
+    // return MediaContainerWrapper::default();
+    // let mut resp_second = self
+    //     .get(format!("/library/sections/{}/collections", id))
+    //     .await
+    //     .unwrap();
+    // let (parts, body) = resp_second.into_parts();
+    // dbg!(body_to_string(body).await);
+    // dbg!(&req);
     let mut container = from_response(resp).await.unwrap();
 
     // container.media_container.metadata = vec![];
@@ -234,8 +252,8 @@ mod tests {
     use httpmock::{prelude::*, Mock};
     use pretty_assertions::assert_eq;
     extern crate jsonxf;
-    use std::fs;
     use rstest::rstest;
+    use std::fs;
 
     fn get_mock_server() -> MockServer {
         let mock_server = MockServer::start();
@@ -258,17 +276,30 @@ mod tests {
                 .header("content-type", "application/json")
                 .body_from_file("test/mock/in/library_sections_6_collections.json");
         });
+
+        let _ = mock_server.mock(|when, then| {
+            when.method(GET)
+                .path("/hubs/promoted")
+                .header("X-Plex-Token", "fakeID")
+                .header("X-Plex-Client-Identifier", "fakeID")
+                .query_param( "pinnedContentDirectoryID", "6,7")
+                .query_param( "contentDirectoryID", "6,7");
+            then.status(200)
+                .header("content-type", "application/json")
+                .body_from_file("test/mock/in/hubs_promoted_6_7.json");
+        });
+
         return mock_server;
     }
 
     #[rstest]
-    #[case("/hubs/sections/6", "test/mock/out/hubs_sections_6.json")]
-    #[case(PLEX_HUBS_PROMOTED.to_string(), "test/mock/out/hubs_sections_6.json")]
+    #[case::hubs_sections("/hubs/sections/6", "test/mock/out/hubs_sections_6.json")]
+    #[case::hubs_promoted(format!("{}?contentDirectoryID=6&pinnedContentDirectoryID=6,7", PLEX_HUBS_PROMOTED), "test/mock/out/hubs_promoted_6.json")]
     #[tokio::test]
     async fn test_routes(#[case] path: String, #[case] expected_path: String) {
         let mock_server: MockServer = get_mock_server();
         // let expected_out = "test/mock/out/hubs_sections_6.json";
-
+        dbg!(&path);
         SETTINGS
             .write()
             .unwrap()

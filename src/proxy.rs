@@ -86,12 +86,12 @@ impl Proxy {
             .map(|v| v.as_str())
             .unwrap_or(path);
         let uri = format!("{}{}", self.host, path_query);
-
+        // dbg!(&uri);
         // Default is gzip. Dont want that
         req.headers_mut()
             .insert("Accept-Encoding", HeaderValue::from_static("identity"));
 
-        // dbg!(&uri);
+        dbg!(&uri);
         *req.uri_mut() = Uri::try_from(uri).unwrap();
         self.client.request(req)
     }

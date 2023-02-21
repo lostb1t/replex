@@ -1,0 +1,66 @@
+{
+    "MediaContainer": {
+        "size": 3,
+        "allowSync": true,
+        "identifier": "com.plexapp.plugins.library",
+        "Hub": [
+            {
+                "key": "/hubs/home/continueWatching",
+                "title": "Continue Watching",
+                "type": "mixed",
+                "promoted": true,
+                "context": "hub.home.continue",
+                "hubKey": "/library/metadata/217469",
+                "hubIdentifier": "home.continue",
+                "size": 1,
+                "more": false,
+                "style": "hero",
+                "Metadata": [
+                    {
+                        "ratingKey": "217469",
+                        "key": "/library/metadata/217469",
+                        "guid": "plex://episode/5e7218eb388dc2003e4495ac",
+                        "title": "When You're Lost in the Darkness",
+                        "thumb": "/library/metadata/217469/thumb/1676967988",
+                        "art": "/library/metadata/217467/art/1674546274",
+                        "parentKey": "/library/metadata/217468",
+                        "parentRatingKey": "217468",
+                        "parentTitle": "Season 1",
+                        "grandparentRatingKey": "217467",
+                        "grandparentKey": "/library/metadata/217467",
+                        "grandparentGuid": "plex://show/5e69c6f6874db7003e2dd59b",
+                        "grandparentTitle": "The Last of Us",
+                        "grandparentThumb": "/library/metadata/217467/thumb/1674546274",
+                        "grandparentArt": "/library/metadata/217467/art/1674546274",
+                        "librarySectionID": 7,
+                        "librarySectionTitle": "Shows Test",
+                        "librarySectionKey": "/library/sections/7",
+                        "type": "episode",
+                        "summary": "2003. As a parasitic fungal outbreak begins to ravage the country and the world, Joel Miller attempts to escape the escalating chaos with his daughter and brother. Twenty years later, a now hardened Joel and his partner Tess fight to survive under a totalitarian regime, while the insurgent Fireflies harbor a teenage girl with a unique gift.",
+                        "year": 2023
+                    }
+                ]
+            },
+            {
+                "key": "/hubs/home/recentlyAdded?type=1&pinnedContentDirectoryID=6,7",
+                "title": "Recently Added Movies",
+                "type": "mixed",
+                "context": "hub.home.movies.recent",
+                "hubIdentifier": "home.movies.recent.6",
+                "size": 0,
+                "more": false,
+                "style": "shelf"
+            },
+            {
+                "key": "/hubs/home/recentlyAdded?type=2&pinnedContentDirectoryID=6,7",
+                "title": "Recently Added TV",
+                "type": "mixed",
+                "context": "hub.home.television.recent",
+                "hubIdentifier": "home.television.recent.7",
+                "size": 0,
+                "more": false,
+                "style": "shelf"
+            }
+        ]
+    }
+}

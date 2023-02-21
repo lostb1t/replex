@@ -62,10 +62,10 @@ pub struct MetaData {
     pub title: String,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub thumb: Option<String>,
+    pub tagline: Option<String>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tagline: Option<String>,
+    pub thumb: Option<String>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub view_group: Option<String>,
@@ -79,6 +79,14 @@ pub struct MetaData {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[yaserde(rename = "parentKey")]
     pub parent_key: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "parentRatingKey")]
+    pub parent_rating_key: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "parentTitle")]
+    pub parent_title: Option<String>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[yaserde(rename = "grandparentRatingKey")]
@@ -141,6 +149,9 @@ pub struct MetaData {
     #[yaserde(rename = "hubIdentifier")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub hub_identifier: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(attribute)]
+    pub size: Option<i32>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub more: Option<bool>,
@@ -148,9 +159,6 @@ pub struct MetaData {
     #[yaserde(attribute)]
     pub style: Option<String>,
     // pub context: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[yaserde(attribute)]
-    pub size: Option<i32>,
     #[serde(rename = "Metadata", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Metadata")]
