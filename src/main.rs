@@ -221,13 +221,13 @@ async fn get_collections_children(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use assert_json_diff::assert_json_eq;
     use axum::http::StatusCode;
     use axum_test_helper::TestClient;
     use httpmock::{prelude::*, Mock};
     use pretty_assertions::assert_eq;
     extern crate jsonxf;
     use std::fs;
+    use rstest::rstest;
 
     fn get_mock_server() -> MockServer {
         let mock_server = MockServer::start();
@@ -253,10 +253,12 @@ mod tests {
         return mock_server;
     }
 
+    #[rstest]
+    #[case("/hubs/sections/6", "test/mock/out/hubs_sections_6.json")]
     #[tokio::test]
-    async fn test_hubs_sections() {
+    async fn test_routes(#[case] path: String, #[case] expected_path: String) {
         let mock_server: MockServer = get_mock_server();
-        let expected_out = "test/mock/out/hubs_sections_6.json";
+        // let expected_out = "test/mock/out/hubs_sections_6.json";
 
         SETTINGS
             .write()
@@ -269,7 +271,7 @@ mod tests {
         // dbg!("everything stup");
         let client = TestClient::new(router);
         let res = client
-            .get("/hubs/sections/6")
+            .get(&path)
             .header("X-Plex-Token", "fakeID")
             .header("X-Plex-Client-Identifier", "fakeID")
             .header("Accept", "application/json")
@@ -281,11 +283,47 @@ mod tests {
         let sup = jsonxf::pretty_print(&result).unwrap();
 
         let expected =
-            fs::read_to_string(expected_out).expect("Should have been able to read the file");
+            fs::read_to_string(&expected_path).expect("Should have been able to read the file");
 
         assert_eq!(
             jsonxf::pretty_print(&result).unwrap(),
             jsonxf::pretty_print(&expected).unwrap()
         );
     }
+
+    // #[tokio::test]
+    // async fn test_hubs_sections() {
+    //     let mock_server: MockServer = get_mock_server();
+    //     let expected_out = "test/mock/out/hubs_sections_6.json";
+
+    //     SETTINGS
+    //         .write()
+    //         .unwrap()
+    //         .set("host", mock_server.base_url())
+    //         .unwrap();
+
+    //     let proxy = Proxy::default();
+    //     let mut router = router(proxy);
+    //     // dbg!("everything stup");
+    //     let client = TestClient::new(router);
+    //     let res = client
+    //         .get("/hubs/sections/6")
+    //         .header("X-Plex-Token", "fakeID")
+    //         .header("X-Plex-Client-Identifier", "fakeID")
+    //         .header("Accept", "application/json")
+    //         .send()
+    //         .await;
+    //     assert_eq!(res.status(), StatusCode::OK);
+
+    //     let result = res.text().await;
+    //     let sup = jsonxf::pretty_print(&result).unwrap();
+
+    //     let expected =
+    //         fs::read_to_string(expected_out).expect("Should have been able to read the file");
+
+    //     assert_eq!(
+    //         jsonxf::pretty_print(&result).unwrap(),
+    //         jsonxf::pretty_print(&expected).unwrap()
+    //     );
+    // }
 }

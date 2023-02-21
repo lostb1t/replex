@@ -57,11 +57,12 @@ futures-util = "0.3.26"
 config = "0.13.3"
 
 [dev-dependencies]
-assert-json-diff = "2.0.2"
+async-std = { version = "^1.12", features = ["attributes"] }
 axum-test-helper = "0.2.0"
 httpmock = "0.6.7"
 jsonxf = "1.1.1"
 pretty_assertions = "1.3.0"
+rstest = "0.16.0"
 
 # [patch."https://github.com/sarendsen/plex-api.rs.git"]
 # plex-api = { path = "./vendor/plex-api.rs/crates/plex-api" }
