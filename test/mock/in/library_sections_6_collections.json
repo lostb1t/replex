@@ -1,0 +1,37 @@
+{
+    "MediaContainer": {
+        "size": 1,
+        "allowSync": true,
+        "art": "/:/resources/movie-fanart.jpg",
+        "identifier": "com.plexapp.plugins.library",
+        "librarySectionID": 6,
+        "librarySectionTitle": "Movies test",
+        "librarySectionUUID": "93ee2394-9426-425c-a965-72eba59c7b87",
+        "mediaTagPrefix": "/system/bundle/media/flags/",
+        "mediaTagVersion": 1676446670,
+        "thumb": "/:/resources/movie.png",
+        "title1": "Movies test",
+        "title2": "All Movies test",
+        "viewGroup": "movie",
+        "viewMode": 65592,
+        "Metadata": [
+            {
+                "ratingKey": "254688",
+                "key": "/library/collections/254688/children",
+                "guid": "collection://62e70d7f-ca87-4f97-99ae-3ce0a75c0297",
+                "type": "collection",
+                "title": "Popular",
+                "subtype": "movie",
+                "summary": "",
+                "index": 727520,
+                "ratingCount": 1,
+                "thumb": "/library/collections/254688/composite/1676890212?width=400&height=600",
+                "addedAt": 1676890181,
+                "updatedAt": 1676890212,
+                "childCount": "2",
+                "maxYear": "2022",
+                "minYear": "2012"
+            }
+        ]
+    }
+}

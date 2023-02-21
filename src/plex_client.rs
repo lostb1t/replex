@@ -73,6 +73,7 @@ pub struct PlexClient {
 }
 
 impl PlexClient {
+    // TODO: Handle 404s/500 etc
     pub fn get(&self, path: String) -> hyper::client::ResponseFuture {
         // let path = req.uri().path();
         // let path_query = req
@@ -92,7 +93,7 @@ impl PlexClient {
             .uri(uri)
             .header("X-Plex-Client-Identifier", &self.x_plex_client_identifier)
             .header("X-Plex-Token", &self.x_plex_token)
-            .header("Content-Type", &self.content_type.to_string())
+            .header("Accept", &self.content_type.to_string())
             .body(Body::empty())
             .unwrap();
         self.http_client.request(request)
@@ -103,10 +104,18 @@ impl PlexClient {
             .get(format!("/library/sections/{}/collections", id))
             .await
             .unwrap();
+        
         // dbg!(&resp);
+        // let mut resp_second = self
+        //     .get(format!("/library/sections/{}/collections", id))
+        //     .await
+        //     .unwrap();
+        // let (parts, body) = resp_second.into_parts();
+        // dbg!(body_to_string(body).await);
+    
         let mut container: MediaContainerWrapper<MediaContainer> =
-            from_response(resp).await.unwrap();
-        // dbg!(&container.media_container.children());
+            from_response(resp).await.expect("Cannot get MediaContainerWrapper from response");
+        // dbg!("YOOO");
         // let plex_client = create_client_from_request(&req).unwrap();
         // let plex_api = plex_api::Server::new("http://100.91.35.113:32400", plex_client).await.unwrap();
         // let mut collections = vec![];
@@ -152,6 +161,7 @@ impl PlexClient {
 
 impl From<&Request<Body>> for PlexClient {
     fn from(req: &Request<Body>) -> Self {
+        // dbg!(get_content_type_from_headers(req.headers()));
         Self {
             http_client: HttpClient::new(),
             // host: "http://100.91.35.113:32400".to_string(),

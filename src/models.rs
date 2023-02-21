@@ -47,9 +47,11 @@ pub type HttpClient = hyper::client::Client<HttpConnector, Body>;
 )]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
+#[yaserde(rename_all = "camelCase")]
 pub struct MetaData {
     #[yaserde(attribute)]
     #[yaserde(rename = "ratingKey")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub rating_key: Option<String>,
     #[yaserde(attribute)]
     pub key: String,
@@ -61,6 +63,12 @@ pub struct MetaData {
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub thumb: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub view_group: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub view_mode: Option<u32>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub art: Option<String>,
@@ -436,27 +444,31 @@ impl MediaContainerWrapper<MediaContainer> {
 
         for hub in collections.clone() {
             // dbg!(&hub);
-            // dbg!("yp");
-            if hub.metadata.is_empty() {
-                // debug!("metadata is empty");
-                continue;
-            }
-            let section_id = hub.metadata[0].library_section_id.unwrap();
+            // dbg!("YOOO");
+            // if hub.metadata.is_empty() {
+            //     // debug!("metadata is empty");
+            //     continue;
+            // }
+            // dbg!(&collections);
+            let section_id: u32 = self.media_container.library_section_id.expect("Missing Library section id");
+            //let section_id = collections[0].library_section_id.unwrap();
             if processed_section_ids.contains(&section_id) {
                 continue;
             }
-
+            // dbg!(section_id);
             processed_section_ids.push(section_id);
             // TODO: Use join to join these async requests
+            
             let mut c = plex.get_section_collections(section_id).await.unwrap();
+            
             // dbg!(&c);
             custom_collections.append(&mut c);
         }
         // dbg!(&custom_collections);
-
+       
         let custom_collections_keys: Vec<String> =
             custom_collections.iter().map(|c| c.key.clone()).collect();
-
+        // dbg!(&custom_collections_keys);
         // let slice = &collections[..];
         let new_collections: Vec<MetaData> = collections
             .into_iter()
@@ -465,11 +477,12 @@ impl MediaContainerWrapper<MediaContainer> {
                     || custom_collections_keys.contains(&c.key)
             })
             .collect();
-
+        // dbg!(&new_collections);
         // println!("{:#?}", new_collections.len());
         let mut new = self.clone();
         let size = new_collections.len();
-        new.media_container.hub = new_collections; // uch need to know if this is a hub or not
+        //new.media_container.hub = new_collections; // uch need to know if this is a hub or not
+        new.media_container.set_children(new_collections);
         new.media_container.size = Some(size.try_into().unwrap());
         new
     }
