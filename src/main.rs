@@ -148,7 +148,7 @@ async fn get_hubs_promoted(
     State(mut proxy): State<Proxy>,
     mut req: Request<Body>,
 ) -> MediaContainerWrapper<MediaContainer> {
-    dbg!(req.uri_mut().path());
+
     let dir_id = get_header_or_param("contentDirectoryID".to_owned(), &req).unwrap();
     let pinned_id_header =
         get_header_or_param("pinnedContentDirectoryID".to_owned(), &req).unwrap();
@@ -162,10 +162,10 @@ async fn get_hubs_promoted(
         return MediaContainerWrapper::default();
     }
 
-    req = remove_param(req, "contentDirectoryID");
-
+    // req = remove_param(req, "contentDirectoryID");
+    req = add_query_param(req, "contentDirectoryID", &pinned_id_header);
+    // dbg!(&req);
     let plex = PlexClient::from(&req);
-    // TODO: This one can be cached globally for everybody (make sure to exclude continue watching)
     let resp = proxy.request(req).await.expect("Expected an response");
     let mut container = from_response(resp).await.unwrap();
 
@@ -255,6 +255,7 @@ mod tests {
 
     #[rstest]
     #[case("/hubs/sections/6", "test/mock/out/hubs_sections_6.json")]
+    #[case(PLEX_HUBS_PROMOTED.to_string(), "test/mock/out/hubs_sections_6.json")]
     #[tokio::test]
     async fn test_routes(#[case] path: String, #[case] expected_path: String) {
         let mock_server: MockServer = get_mock_server();

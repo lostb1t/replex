@@ -33,6 +33,16 @@ pub fn remove_param(mut req: Request<Body>, param: &str) -> Request<Body> {
     req
 }
 
+pub fn add_query_param(mut req: Request<Body>, param: &str, value: &str) -> Request<Body> {
+    let uri = pathetic::Uri::default()
+        .with_path(req.uri_mut().path())
+        .with_query(req.uri_mut().query())
+        .with_query_pairs_mut(|q| q.append_pair(param, value));
+    *req.uri_mut() = Uri::try_from(uri.as_str()).unwrap();
+    req
+}
+
+
 #[derive(Debug, Clone, PartialEq, Eq, EnumString, EnumDisplay)]
 pub enum ContentType {
     #[strum(serialize = "application/json")]
