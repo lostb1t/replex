@@ -94,7 +94,7 @@ fn router(proxy: Proxy) -> Router {
             get(get_hubs_sections),
         )
         .route(
-            "/hubs/library/collections/:ids/children",
+            "/httplex/library/collections/:ids/children",
             get(get_collections_children),
         )
         // .route(
