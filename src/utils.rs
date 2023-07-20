@@ -122,10 +122,12 @@ pub async fn from_body(
     // bytes = EventReader::new(bytes.strip_prefix(UTF8_BOM).unwrap_or(bytes));
     // dbg!(&bytes);
     // yaserde::de::from_r
+    // dbg!(&bytes);
     let result: MediaContainerWrapper<MediaContainer> = match content_type {
         ContentType::Json => {
             // let mut c: MediaContainerWrapper<MediaContainer> =
             //     serde_json::from_str(&string).unwrap();
+            
             let mut c: MediaContainerWrapper<MediaContainer> =
                 serde_json::from_reader(&*bytes).unwrap();
             c.content_type = ContentType::Json;
@@ -147,7 +149,7 @@ pub async fn from_response(
     let (parts, body) = resp.into_parts();
     // let f = body.to_bytes();
     // let r = to_bytes(body).await.unwrap();
-    // dbg!(r);
+    
     let content_type = get_content_type_from_headers(&parts.headers);
     // let yo = body;
     from_body(body, &content_type).await

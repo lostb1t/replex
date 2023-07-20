@@ -171,9 +171,27 @@ pub struct MetaData {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Video")]
     pub video: Vec<MetaData>, // again only xml, but its the same as directory and metadata
+    #[yaserde(attribute)]
+    #[yaserde(rename = "childCount")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub child_count: Option<i32>,
+    #[yaserde(attribute)]
+    #[yaserde(rename = "skipChildren")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub skip_children: Option<bool>,
+    #[yaserde(attribute)]
+    #[yaserde(rename = "leafCount")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub leaf_count: Option<i32>,
+    #[yaserde(attribute)]
+    #[yaserde(rename = "viewedLeafCount")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub viewed_leaf_count: Option<i32>,
 }
 
 impl MetaData {
+
+    // TODO: Does not work when using a new instance
     pub fn set_children(&mut self, value: Vec<MetaData>) {
         let len: i32 = value.len().try_into().unwrap();
         if !self.metadata.is_empty() {
@@ -276,6 +294,13 @@ pub struct MediaContainer {
     #[yaserde(attribute)]
     pub size: Option<i32>,
     #[yaserde(attribute)]
+    #[yaserde(rename = "totalSize")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub total_size: Option<i32>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub offset: Option<i32>,
+    #[yaserde(attribute)]
     #[yaserde(rename = "allowSync")]
     pub allow_sync: Option<bool>,
     #[yaserde(attribute)]
@@ -306,6 +331,10 @@ pub struct MediaContainer {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Video")]
     pub video: Vec<MetaData>, // again only xml, but its the same as directory and metadata
+    #[serde(rename = "Directory", default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[yaserde(rename = "Directory")]
+    pub directory: Vec<MetaData>,
 }
 
 impl MediaContainer {
@@ -321,6 +350,8 @@ impl MediaContainer {
             self.hub = value;
         } else if !self.video.is_empty() {
             self.video = value;
+        } else if !self.directory.is_empty() {
+            self.directory = value;
         };
     }
 
@@ -331,6 +362,8 @@ impl MediaContainer {
             return self.hub.clone();
         } else if !self.video.is_empty() {
             return self.video.clone();
+        } else if !self.directory.is_empty() {
+            return self.directory.clone();
         };
         vec![]
     }
@@ -415,8 +448,8 @@ impl MediaContainerWrapper<MediaContainer> {
             hub.r#type = "mixed".to_string();
             match p {
                 Some(v) => {
-                    // new_collections[v].key =
-                    //     merge_children_keys(new_collections[v].key.clone(), hub.key.clone());
+                    new_collections[v].key =
+                        merge_children_keys(new_collections[v].key.clone(), hub.key.clone());
                     let c = new_collections[v].children();
                     // let h = hub.metadata;
                     new_collections[v].set_children(

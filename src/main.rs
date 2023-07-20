@@ -150,7 +150,7 @@ async fn get_hubs_promoted(
 ) -> MediaContainerWrapper<MediaContainer> {
     let ids_header = get_header_or_param("contentDirectoryID".to_owned(), &req).unwrap();
     let content_directory_ids: Vec<&str> = ids_header.split(',').collect();
-
+    println!("SUP");
     // Cant handle multiple directories yet
     if content_directory_ids.len() > 1 {
         let resp = proxy.request(req).await.unwrap();
@@ -208,12 +208,13 @@ async fn get_collections_children(
 ) -> MediaContainerWrapper<MediaContainer> {
     let collection_ids: Vec<u32> = ids.split(',').map(|v| v.parse().unwrap()).collect();
     let plex = PlexClient::from(&req);
-
     let mut children: Vec<MetaData> = vec![];
 
     for id in collection_ids {
         let mut c = plex.get_collection_children(id).await.unwrap();
         // dbg!(&c.media_container.children());
+        //container.media_container.set_children(c.media_container.children()); // TODO: unnecessary. Just need the type (video, directory etc)
+        //dbg!(&c.media_container.children());
         match children.is_empty() {
             False => {
                 children = children
@@ -224,15 +225,21 @@ async fn get_collections_children(
             True => children.append(&mut c.media_container.children()),
         }
         // children.append(&mut c.media_container.children())
-    }
+    };
 
-    let mut container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
+    
     // dbg!(req.headers().get("Accept").unwrap());
+    let mut container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
     container.content_type = get_content_type_from_headers(req.headers());
     // dbg!(&container.content_type);
     let size = children.len();
-    container.media_container.set_children(children);
+    // container.media_container.set_children(children);
+    container.media_container.directory = children;
     container.media_container.size = Some(size.try_into().unwrap());
+    container.media_container.total_size = Some(size.try_into().unwrap());
+    container.media_container.offset = Some(0);
+
+    
     // container = container.make_mixed();
     container
 }
