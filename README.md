@@ -14,8 +14,8 @@ then access your proxy url http://0.0.0.0:3001
 
 fyi: this isnt a fully fledged proxy and doesnt aim to be. I suggest putting it behind a reverse proxy and only route the following paths (and subpaths) to this app.
 
-/hubs/promoted
-/hubs/sections
-/httplex
+- /hubs/promoted
+- /hubs/sections
+- /httplex
 
 ![plot](./example.png)
