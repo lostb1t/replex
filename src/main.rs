@@ -12,6 +12,8 @@ use axum::{
     // http::{uri::Uri, Request, Response},
     routing::get,
     routing::put,
+    response::Redirect,
+    body::Body,
     Router,
 };
 // use axum::headers::ContentType;
@@ -24,7 +26,7 @@ use cached::proc_macro::cached;
 // };
 use http::{Request, Response};
 
-use hyper::{client::HttpConnector, Body};
+// use hyper::{client::HttpConnector, Body};
 
 use httplex::models::*;
 use httplex::plex_client::*;
@@ -93,6 +95,18 @@ fn router(proxy: Proxy) -> Router {
             "/hubs/library/collections/:ids/children",
             get(get_collections_children),
         )
+        // .route(
+        //     "/video/:/transcode",
+        //     get(redirect_to_source),
+        // )
+        // .route(
+        //     "/photo/:/transcode",
+        //     get(redirect_to_source),
+        // )
+        .route(
+            "/web/static",
+            get(redirect_to_source),
+        )
         .fallback(default_handler)
         // .route("/*path", get(default_handler))
         // .route("/*path", put(default_handler))
@@ -106,6 +120,12 @@ fn router(proxy: Proxy) -> Router {
 
 async fn default_handler(State(proxy): State<Proxy>, req: Request<Body>) -> Response<Body> {
     proxy.request(req).await.unwrap()
+}
+
+async fn redirect_to_source(State(proxy): State<Proxy>, req: Request<Body>) -> axum::response::Redirect {
+    //Redirect::to("https://46-4-30-217.01b0839de64b49138531cab1bf32f7c2.plex.direct:42405")
+    //proxy.request(req).await.unwrap()
+    Redirect::temporary(&SETTINGS.read().unwrap().get::<String>("host").unwrap())
 }
 
 async fn get_hubs_sections(
