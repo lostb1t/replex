@@ -46,6 +46,7 @@ use tower_http::trace::TraceLayer;
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
+    
     // tracing_subscriber::fmt().with_max_level(tracing::Level::DEBUG).init();
     // tokio::spawn(server());
     // let bla = Client::new();
@@ -71,7 +72,8 @@ async fn main() {
     // let app = App::default();
     let proxy = Proxy::default();
     let addr = SocketAddr::from(([0, 0, 0, 0], 3001));
-    println!("reverse proxy listening on {}", addr);
+    // println!("reverse proxy listening on {}", addr);
+    info!(message = "Listening on", %addr);
     axum::Server::bind(&addr)
         .serve(router(proxy).into_make_service())
         .await
@@ -96,17 +98,17 @@ fn router(proxy: Proxy) -> Router {
             get(get_collections_children),
         )
         // .route(
-        //     "/video/:/transcode",
-        //     get(redirect_to_source),
+        //     "/video/:placeholder/*wild",
+        //     get(redirect_to_host),
         // )
         // .route(
-        //     "/photo/:/transcode",
-        //     get(redirect_to_source),
+        //     "/photo/:placeholder/*wild",
+        //     get(redirect_to_host),
         // )
-        .route(
-            "/web/static",
-            get(redirect_to_source),
-        )
+        // .route(
+        //     "/web/static/*wild",
+        //     get(redirect_to_host),
+        // )
         .fallback(default_handler)
         // .route("/*path", get(default_handler))
         // .route("/*path", put(default_handler))
@@ -122,12 +124,16 @@ async fn default_handler(State(proxy): State<Proxy>, req: Request<Body>) -> Resp
     proxy.request(req).await.unwrap()
 }
 
-async fn redirect_to_source(State(proxy): State<Proxy>, req: Request<Body>) -> axum::response::Redirect {
+//#[instrument]
+async fn redirect_to_host(State(proxy): State<Proxy>, req: Request<Body>) -> axum::response::Redirect {
     //Redirect::to("https://46-4-30-217.01b0839de64b49138531cab1bf32f7c2.plex.direct:42405")
     //proxy.request(req).await.unwrap()
+    info!("Redirecting: {:?}", &req.uri());
+    // debug!("req: {:?}", req);
     Redirect::temporary(&SETTINGS.read().unwrap().get::<String>("host").unwrap())
 }
 
+#[instrument]
 async fn get_hubs_sections(
     State(mut proxy): State<Proxy>,
     req: Request<Body>,
@@ -229,8 +235,8 @@ async fn get_collections_children(
     let collection_ids: Vec<u32> = ids.split(',').map(|v| v.parse().unwrap()).collect();
     let plex = PlexClient::from(&req);
     let mut children: Vec<MetaData> = vec![];
-
-    for id in collection_ids {
+    let reversed: Vec<u32> = collection_ids.iter().copied().rev().collect();
+    for id in reversed {
         let mut c = plex.get_collection_children(id).await.unwrap();
         // dbg!(&c.media_container.children());
         //container.media_container.set_children(c.media_container.children()); // TODO: unnecessary. Just need the type (video, directory etc)

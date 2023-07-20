@@ -59,6 +59,8 @@ pub struct MetaData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub guid: Option<String>,
     #[yaserde(attribute)]
+    // #[yaserde(skip_serializing = true)]
+    // #[serde(skip_serializing)]
     pub title: String,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -446,6 +448,7 @@ impl MediaContainerWrapper<MediaContainer> {
         for mut hub in collections {
             let p = new_collections.iter().position(|v| v.title == hub.title);
             hub.r#type = "mixed".to_string();
+            // hub.style = Some("hero".to_string());
             match p {
                 Some(v) => {
                     new_collections[v].key =
