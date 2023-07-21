@@ -18,12 +18,6 @@ use axum::{
 };
 // use axum::headers::ContentType;
 use cached::proc_macro::cached;
-// use bytes::Bytes;
-// use crate::{
-//     body::{Bytes, HttpBody},
-//     extract::{rejection::*, FromRequest},
-//     BoxError,
-// };
 use http::{Request, Response};
 
 // use hyper::{client::HttpConnector, Body};
@@ -46,33 +40,8 @@ use tower_http::trace::TraceLayer;
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
-    
-    // tracing_subscriber::fmt().with_max_level(tracing::Level::DEBUG).init();
-    // tokio::spawn(server());
-    // let bla = Client::new();
-    // let plex_api_client = create_client_from_request()
-
-    // let app = Router::new()
-    //     .route("/hubs/promoted", get(get_hubs_promoted))
-    //     // .route("/hubs/sections/:id/*path", get(default_handler))
-    //     .route("/hubs/sections/:id", get(get_hubs_sections))
-    //     .route(
-    //         "/hubs/library/collections/:ids/children",
-    //         get(get_collections_children),
-    //     )
-    //     .fallback(default_handler)
-    //     // .route("/*path", get(default_handler))
-    //     // .route("/*path", put(default_handler))
-    //     // .route("/", get(default_handler))
-    //     .with_state(proxy)
-    //     .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
-    //     .layer(
-    //         CorsLayer::new().allow_origin(AllowOrigin::mirror_request()), // TODO: Limit to https://app.plex.tv
-    //     );
-    // let app = App::default();
     let proxy = Proxy::default();
     let addr = SocketAddr::from(([0, 0, 0, 0], 3001));
-    // println!("reverse proxy listening on {}", addr);
     info!(message = "Listening on", %addr);
     axum::Server::bind(&addr)
         .serve(router(proxy).into_make_service())
@@ -81,11 +50,6 @@ async fn main() {
 }
 
 fn router(proxy: Proxy) -> Router {
-    // let proxy = Proxy {
-    //     host: "http://100.91.35.113:32400".to_string(),
-    //     client: Client::new(),
-    // };
-
     Router::new()
         .route(PLEX_HUBS_PROMOTED, get(get_hubs_promoted))
         // .route("/hubs/sections/:id/*path", get(default_handler))
@@ -97,22 +61,7 @@ fn router(proxy: Proxy) -> Router {
             "/hubs/library/collections/:ids/children",
             get(get_collections_children),
         )
-        // .route(
-        //     "/video/:placeholder/*wild",
-        //     get(redirect_to_host),
-        // )
-        // .route(
-        //     "/photo/:placeholder/*wild",
-        //     get(redirect_to_host),
-        // )
-        // .route(
-        //     "/web/static/*wild",
-        //     get(redirect_to_host),
-        // )
         .fallback(default_handler)
-        // .route("/*path", get(default_handler))
-        // .route("/*path", put(default_handler))
-        // .route("/", get(default_handler))
         .with_state(proxy)
         .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
         .layer(
@@ -138,45 +87,20 @@ async fn get_hubs_sections(
     State(mut proxy): State<Proxy>,
     req: Request<Body>,
 ) -> MediaContainerWrapper<MediaContainer> {
-    // proxy.set_plex_api_from_request(&req).await;
-    // let resp = proxy.request(req).await.unwrap();
-    // dbg!(&req.content_type);
-
     let plex = PlexClient::from(&req);
-    // dbg!(&plex.content_type);
     let resp = proxy.request(req).await.unwrap();
 
-    // dbg!(&resp.headers());
-    // let container =
-    //     MediaContainerWrapper::<MediaContainer>::from_response(proxy.request(req).await.unwrap()).unwrap();
     let mut container = from_response(resp).await.unwrap();
-    // dbg!(&container);
-    // dbg!("YOOOOOO");
-
     container = container.fix_permissions(plex).await;
-    // dbg!("YOOOOOO");
-
     container
-    // MediaContainerWrapper::default()
 }
 
-// fn bla(req: Request<Body>) -> String {
-//     "hoszaaa".to_string()
-// }
-
-// #[cached(    DOESNT WORK BECAUSE OF ARGUMENT State(mut proxy): State<Proxy>
-//     time = 720,
-//     key = "String",
-//     convert = r#"{ bla(&req) }"#
-//     // convert = r#"{ format!("{}{}", proxy.host, req.method()) }"#
-// )]
 async fn get_hubs_promoted(
     State(mut proxy): State<Proxy>,
     mut req: Request<Body>,
 ) -> MediaContainerWrapper<MediaContainer> {
     let ids_header = get_header_or_param("contentDirectoryID".to_owned(), &req).unwrap();
     let content_directory_ids: Vec<&str> = ids_header.split(',').collect();
-    println!("SUP");
     // Cant handle multiple directories yet
     if content_directory_ids.len() > 1 {
         let resp = proxy.request(req).await.unwrap();
@@ -186,10 +110,7 @@ async fn get_hubs_promoted(
     let pinned_id_header =
         get_header_or_param("pinnedContentDirectoryID".to_owned(), &req).unwrap();
     let pinned_ids: Vec<&str> = pinned_id_header.split(',').collect();
-    // dbg!(pinned_ids);
-    //pinnedContentDirectoryID
-    // dbg!(&req);
-    // debug!("{:#?}", &req);
+
     if content_directory_ids[0] != pinned_ids[0] {
         // We only fill the first one.
         //let content_type = get_content_type(req);
@@ -205,25 +126,11 @@ async fn get_hubs_promoted(
 
     // req = remove_param(req, "contentDirectoryID");
     req = add_query_param(req, "contentDirectoryID", &pinned_id_header);
-    // dbg!(&req);
-    // dbg!(&proxy.host);
+
     let plex = PlexClient::from(&req);
     let resp = proxy.request(req).await.expect("Expected an response");
-    // let (parts, body) = resp.into_parts();
-    // dbg!(body_to_string(body).await);
-    // return MediaContainerWrapper::default();
-    // let mut resp_second = self
-    //     .get(format!("/library/sections/{}/collections", id))
-    //     .await
-    //     .unwrap();
-    // let (parts, body) = resp_second.into_parts();
-    // dbg!(body_to_string(body).await);
-    // dbg!(&req);
     let mut container = from_response(resp).await.unwrap();
 
-    // container.media_container.metadata = vec![];
-    // dbg!(&container);
-    // container = container.fix_permissions(plex).await;
     container.make_mixed()
 }
 
@@ -238,9 +145,7 @@ async fn get_collections_children(
     let reversed: Vec<u32> = collection_ids.iter().copied().rev().collect();
     for id in reversed {
         let mut c = plex.get_collection_children(id).await.unwrap();
-        // dbg!(&c.media_container.children());
-        //container.media_container.set_children(c.media_container.children()); // TODO: unnecessary. Just need the type (video, directory etc)
-        //dbg!(&c.media_container.children());
+
         match children.is_empty() {
             False => {
                 children = children
