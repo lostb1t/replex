@@ -189,6 +189,10 @@ pub struct MetaData {
     #[yaserde(rename = "viewedLeafCount")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub viewed_leaf_count: Option<i32>,
+    #[yaserde(attribute)]
+    #[yaserde(rename = "viewCount")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub view_count: Option<i32>,
 }
 
 impl MetaData {
