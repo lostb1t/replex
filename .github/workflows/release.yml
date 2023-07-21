@@ -1,0 +1,67 @@
+name: Overseerr Blackbeard Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  release:
+    name: Tag and release latest version
+    runs-on: ubuntu-20.04
+    env:
+      HUSKY: 0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.PERSONAL_TOKEN }}
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+      - uses: benjlevesque/short-sha@v2.2
+        id: short-sha
+        with:
+          length: 6
+      - name: Set env
+        #run: echo ${{ steps.package-version.outputs.current-version}}.${{ steps.short-sha.outputs.sha }} >> $GITHUB_ENV
+        run: echo "VERSION=${{ steps.package-version.outputs.current-version}}.${{ steps.short-sha.outputs.sha }}" >> $GITHUB_ENV
+      # - run: echo $VERSION
+      #   env:
+      #     VERSION: ${{ steps.package-version.outputs.current-version}}.${{ steps.short-sha.outputs.sha }}
+      - name: Save version to image
+        run: |
+          echo '{"version": "${{ env.VERSION }}-blackbeard"}' > version.json
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          push: true
+          build-args: |
+            COMMIT_TAG=${{ github.sha }}
+          tags: |
+            ghcr.io/sarendsen/overseerr:latest
+            ghcr.io/sarendsen/overseerr:${{ env.VERSION }}
+      # - name: Push tag
+      #   id: tag_version
+      #   uses: mathieudutour/github-tag-action@v6.1
+      #   with:
+      #     github_token: ${{ secrets.PERSONAL_TOKEN }}
+      #     custom_tag: ${{ env.VERSION }}
