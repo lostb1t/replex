@@ -438,7 +438,7 @@ fn merge_children_keys(mut key_left: String, mut key_right: String) -> String {
     key_right = key_right.replace("/library/collections/", "");
     key_right = key_right.replace("/children", "");
 
-    format!("/httplex/library/collections/{},{}/children", key_right, key_left)
+    format!("/hubs/library/collections/{},{}/children", key_right, key_left)
 }
 
 impl MediaContainerWrapper<MediaContainer> {
