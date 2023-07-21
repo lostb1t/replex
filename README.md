@@ -1,7 +1,24 @@
 # Replex (WIP)
 
-Plex proxy that merges movies and shows recommended rows on home.
+Plex proxy with the following features:
+
+- Merge movies and shows from hubs on home.
+- Remove watched items from hubs in home and all library home's
+
+### Settings
+Settings are set via [environment variables](https://kinsta.com/knowledgebase/what-is-an-environment-variable/) 
+
+| Setting        	       | Default 	| Description                                                            	|
+|--------------------------|------------|---------------------------------------------------------------------------|
+| REPLEX_HOST              | -      	| Plex host we want to proxy                                             	|
+| REPLEX_INCLUDE_WATCHED   | false    	| If set to true, remove watched items from hubs.                        	|
+
+
 Make sure you have collections/recommended rows with the same name in both movies and shows (aka trending) as it will be merged by name.
+
+### Usage
+
+(Docker images are coming)
 
 Run cargo with your plex adress as APP_HOST env, ex:
 

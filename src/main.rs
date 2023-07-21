@@ -133,7 +133,15 @@ async fn get_hubs_promoted(
     let plex = PlexClient::from(&req);
     let resp = proxy.request(req).await.expect("Expected an response");
     let mut container = from_response(resp).await.unwrap();
-    container.remove_watched().make_mixed()
+    let remove_watched = &SETTINGS
+        .read()
+        .unwrap()
+        .get::<bool>("include_watched")
+        .unwrap();
+    if *remove_watched {
+        container = container.remove_watched();
+    }
+    container.make_mixed()
 }
 
 async fn get_collections_children(
@@ -165,10 +173,17 @@ async fn get_collections_children(
     container.content_type = get_content_type_from_headers(req.headers());
     // children = children.remove_watched();
     // dbg!(&container.content_type);
-    
+
     // container.media_container.set_children(children);
     container.media_container.directory = children;
-    container.media_container.remove_watched();
+    let remove_watched = &SETTINGS
+        .read()
+        .unwrap()
+        .get::<bool>("include_watched")
+        .unwrap();
+    if *remove_watched {
+        container.media_container.remove_watched();
+    }
     let size = container.media_container.children().len();
     container.media_container.size = Some(size.try_into().unwrap());
     container.media_container.total_size = Some(size.try_into().unwrap());
