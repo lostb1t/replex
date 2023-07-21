@@ -23,6 +23,7 @@ server {
     location /hubs {
       proxy_pass http://replex;
     }
+
     location /replex {
       proxy_pass http://replex;
     }
