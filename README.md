@@ -1,4 +1,4 @@
-# Replex
+# Replex (WIP)
 
 Plex proxy that merges movies and shows recommended rows on home.
 Make sure you have collections/recommended rows with the same name in both movies and shows (aka trending) as it will be merged by name.
