@@ -1,10 +1,8 @@
 #!/bin/bash
 
-# Start the first process
-./my_first_process &
+./app/replex &
 
-# Start the second process
-./my_second_process &
+nginx -g daemon off &
 
 # Wait for any process to exit
 wait -n
