@@ -1,4 +1,4 @@
-# Replex (WIP)
+# Replex
 
 ![plot](./examplewithhero.png)
 
