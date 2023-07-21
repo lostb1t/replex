@@ -6,6 +6,7 @@ Plex proxy with the following features:
 
 - Merge movies and shows from hubs on home.
 - Remove watched items from hubs in home and library recommended
+- Choose between hub styles, shelf (default) or hero.
 
 Make sure you have collections/recommended rows with the same name in both movies and shows (aka trending) as it will be merged by name.
 
