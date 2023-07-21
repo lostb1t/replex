@@ -11,7 +11,7 @@ COPY ./ ./
 RUN cargo build --release
 
 # alpine needs musl, too much work
-FROM debian:stable-slim
+FROM debian:stable-slim as replex
 WORKDIR /app
 RUN apt update \
     && apt install -y openssl ca-certificates \
@@ -20,6 +20,8 @@ RUN apt update \
 COPY --from=builder /app/src/replex/target/release/replex /app
 CMD ["/app/replex"]
 
+FROM nginx as nginx-replex
+COPY --from=builder /app/src/replex/target/release/replex /app
 
 # FROM rust:1.61.0 as builder
 # WORKDIR /usr/src/myapp
