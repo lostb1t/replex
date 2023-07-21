@@ -34,8 +34,7 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64
           push: true
-          build-args: |
-            COMMIT_TAG=${{ github.sha }}
+          target: standalone
           tags: |
             ghcr.io/sarendsen/overseerr:latest
             #ghcr.io/sarendsen/overseerr:${{ env.VERSION }}
