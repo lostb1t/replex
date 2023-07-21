@@ -36,6 +36,5 @@ jobs:
           push: true
           target: standalone
           tags: |
-            ghcr.io/sarendsen/overseerr:latest
-            #ghcr.io/sarendsen/overseerr:${{ env.VERSION }}
+            ghcr.io/sarendsen/replex:latest
 
