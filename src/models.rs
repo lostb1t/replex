@@ -11,8 +11,8 @@ use axum::{
     Json,
 };
 use cached::proc_macro::cached;
-use hyper::Body;
 use hyper::client::HttpConnector;
+use hyper::Body;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use tracing::debug;
@@ -21,14 +21,10 @@ use yaserde::YaSerialize;
 // use parse_display::{Display, FromStr};
 // use yaserde_derive::{YaDeserialize, YaSerialize};
 
-
-#[derive(
-    Debug,
-    Clone,
-)]
+#[derive(Debug, Clone)]
 pub struct App {
     proxy: Proxy,
-    plex: PlexClient
+    plex: PlexClient,
 }
 
 pub type HttpClient = hyper::client::Client<HttpConnector, Body>;
@@ -196,6 +192,31 @@ pub struct MetaData {
 }
 
 impl MetaData {
+    fn is_watched(&self) -> bool {
+        if self.view_count.is_some() && self.view_count.unwrap_or_default() > 0 {
+            return true
+        }
+        if self.viewed_leaf_count.is_some() && self.viewed_leaf_count.unwrap_or_default() > 0 {
+            return true
+        }
+        false
+    }
+
+    fn remove_watched(&mut self) {
+        let new_children: Vec<MetaData> = self
+            .children()
+            .into_iter()
+            .filter(|c| {
+                !c.is_watched()
+            })
+            .collect::<Vec<MetaData>>();
+
+        let size = new_children.len();
+        self.size = Some(size.try_into().unwrap());
+        // trace!("mangled promoted container {:#?}", container);
+        self.set_children(new_children);
+        //self
+    }
 
     // TODO: Does not work when using a new instance
     pub fn set_children(&mut self, value: Vec<MetaData>) {
@@ -222,73 +243,110 @@ impl MetaData {
     }
 }
 
-#[derive(
-    Debug, Serialize, Deserialize, Clone, PartialEq, Eq, YaDeserialize, YaSerialize, Default,
-)]
-#[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
-#[serde(rename_all = "camelCase")]
-// #[display("{key}")]
-pub struct Hub {
-    #[yaserde(attribute)]
-    pub key: String,
-    #[yaserde(attribute)]
-    #[yaserde(rename = "hubKey")]
-    pub hub_key: Option<String>,
-    #[yaserde(attribute)]
-    pub title: String,
-    #[yaserde(attribute)]
-    #[yaserde(rename = "hubIdentifier")]
-    pub hub_identifier: String,
-    #[yaserde(attribute)]
-    pub context: String,
-    #[yaserde(attribute)]
-    #[yaserde(rename = "type")]
-    pub r#type: String,
-    #[yaserde(attribute)]
-    pub size: i32,
-    #[yaserde(attribute)]
-    pub more: bool,
-    #[yaserde(attribute)]
-    pub style: String,
-    #[yaserde(attribute)]
-    pub promoted: Option<bool>,
-    #[serde(rename = "Metadata", default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    #[yaserde(rename = "Metadata")]
-    pub metadata: Vec<MetaData>,
-    #[serde(rename = "Directory", default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    #[yaserde(rename = "Directory")]
-    directory: Vec<MetaData>, // only avaiable in XML
-    #[serde(rename = "Video", default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    #[yaserde(rename = "Video")]
-    video: Vec<MetaData>, // again only xml, but its the same as directory and metadata
-}
+// #[derive(
+//     Debug, Serialize, Deserialize, Clone, PartialEq, Eq, YaDeserialize, YaSerialize, Default,
+// )]
+// #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
+// #[serde(rename_all = "camelCase")]
+// // #[display("{key}")]
+// pub struct Hub {
+//     #[yaserde(attribute)]
+//     pub key: String,
+//     #[yaserde(attribute)]
+//     #[yaserde(rename = "hubKey")]
+//     pub hub_key: Option<String>,
+//     #[yaserde(attribute)]
+//     pub title: String,
+//     #[yaserde(attribute)]
+//     #[yaserde(rename = "hubIdentifier")]
+//     pub hub_identifier: String,
+//     #[yaserde(attribute)]
+//     pub context: String,
+//     #[yaserde(attribute)]
+//     #[yaserde(rename = "type")]
+//     pub r#type: String,
+//     #[yaserde(attribute)]
+//     pub size: i32,
+//     #[yaserde(attribute)]
+//     pub more: bool,
+//     #[yaserde(attribute)]
+//     pub style: String,
+//     #[yaserde(attribute)]
+//     pub promoted: Option<bool>,
+//     #[serde(rename = "Metadata", default)]
+//     #[serde(skip_serializing_if = "Vec::is_empty")]
+//     #[yaserde(rename = "Metadata")]
+//     pub metadata: Vec<MetaData>,
+//     #[serde(rename = "Directory", default)]
+//     #[serde(skip_serializing_if = "Vec::is_empty")]
+//     #[yaserde(rename = "Directory")]
+//     directory: Vec<MetaData>, // only avaiable in XML
+//     #[serde(rename = "Video", default)]
+//     #[serde(skip_serializing_if = "Vec::is_empty")]
+//     #[yaserde(rename = "Video")]
+//     video: Vec<MetaData>, // again only xml, but its the same as directory and metadata
+// }
 
-impl Hub {
-    // as there are 3 diff names for it
-    pub fn set_children(&mut self, value: Vec<MetaData>) {
-        if !self.metadata.is_empty() {
-            self.metadata = value;
-        } else if !self.directory.is_empty() {
-            self.directory = value;
-        } else if !self.video.is_empty() {
-            self.video = value;
-        };
-    }
+// impl Hub {
+//     fn remove_watched(&mut self) {
+//         let new_children: Vec<MetaData> = self
+//             .children()
+//             .into_iter()
+//             .filter(|c| {
+//                 c.view_count.clone().unwrap_or_default() == 0
+//                     || c.viewed_leaf_count.clone().unwrap_or_default() == 0
+//                     || c.leaf_count.clone().unwrap_or_default()
+//                         != c.viewed_leaf_count.clone().unwrap_or_default()
+//             })
+//             .collect::<Vec<MetaData>>();
+//         // for mut child in children {
+//         //     let p = new_collections.iter().position(|v| v.title == hub.title);
+//         //     // hub.r#type = "mixed".to_string();
+//         //     // hub.style = Some("hero".to_string());
+//         //     match p {
+//         //         Some(v) => {
+//         //             new_collections[v].key =
+//         //                 merge_children_keys(new_collections[v].key.clone(), hub.key.clone());
+//         //             let c = new_collections[v].children();
+//         //             // let h = hub.metadata;
+//         //             new_collections[v].set_children(
+//         //                 c.into_iter()
+//         //                     .interleave(hub.children())
+//         //                     .collect::<Vec<MetaData>>(),
+//         //             );
+//         //         }
+//         //         None => new_collections.push(hub),
+//         //     }
+//         // }
+//         let size = new_children.len();
+//         self.size = size.try_into().unwrap();
+//         // trace!("mangled promoted container {:#?}", container);
+//         self.set_children(new_children);
+//         //self
+//     }
 
-    pub fn children(&mut self) -> Vec<MetaData> {
-        if !self.metadata.is_empty() {
-            return self.metadata.clone();
-        } else if !self.directory.is_empty() {
-            return self.directory.clone();
-        } else if !self.video.is_empty() {
-            return self.video.clone();
-        };
-        vec![]
-    }
-}
+//     // as there are 3 diff names for it
+//     pub fn set_children(&mut self, value: Vec<MetaData>) {
+//         if !self.metadata.is_empty() {
+//             self.metadata = value;
+//         } else if !self.directory.is_empty() {
+//             self.directory = value;
+//         } else if !self.video.is_empty() {
+//             self.video = value;
+//         };
+//     }
+
+//     pub fn children(&mut self) -> Vec<MetaData> {
+//         if !self.metadata.is_empty() {
+//             return self.metadata.clone();
+//         } else if !self.directory.is_empty() {
+//             return self.directory.clone();
+//         } else if !self.video.is_empty() {
+//             return self.video.clone();
+//         };
+//         vec![]
+//     }
+// }
 
 #[derive(
     Debug, Serialize, Deserialize, Clone, PartialEq, Eq, YaDeserialize, YaSerialize, Default,
@@ -328,7 +386,6 @@ pub struct MediaContainer {
     #[serde(rename = "Hub", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Hub")]
-    // pub hub: Vec<Hub>,
     pub hub: Vec<MetaData>,
     #[serde(rename = "Metadata", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -344,6 +401,22 @@ pub struct MediaContainer {
 }
 
 impl MediaContainer {
+    pub fn remove_watched(&mut self) {
+        let new_children: Vec<MetaData> = self
+            .children()
+            .into_iter()
+            .filter(|c| {
+                !c.is_watched()
+            })
+            .collect::<Vec<MetaData>>();
+
+        let size = new_children.len();
+        self.size = Some(size.try_into().unwrap());
+        // trace!("mangled promoted container {:#?}", container);
+        self.set_children(new_children);
+        //self
+    }
+
     pub fn set_type(&mut self, value: String) {
         for hub in &mut self.hub {
             hub.r#type = value.clone();
@@ -392,6 +465,48 @@ pub struct MediaContainerWrapper<T> {
     #[serde(skip_serializing, skip_deserializing)]
     pub content_type: ContentType,
 }
+
+// // #[async_trait]
+// pub trait MetaDataFilter<T> {
+//     fn remove_watched(&self) -> Self {
+//         // let children = self.children();
+//         let mut new_children: Vec<MetaData> = vec![];
+//         new_children = (self.children
+//             .into_iter()
+//             .filter(|c| {
+//                 c.context.clone().unwrap() != "hub.custom.collection"
+//                     || custom_collections_keys.contains(&c.key)
+//             })
+//             .collect::<Vec<MetaData>>(),);
+//         // for mut child in children {
+//         //     let p = new_collections.iter().position(|v| v.title == hub.title);
+//         //     // hub.r#type = "mixed".to_string();
+//         //     // hub.style = Some("hero".to_string());
+//         //     match p {
+//         //         Some(v) => {
+//         //             new_collections[v].key =
+//         //                 merge_children_keys(new_collections[v].key.clone(), hub.key.clone());
+//         //             let c = new_collections[v].children();
+//         //             // let h = hub.metadata;
+//         //             new_collections[v].set_children(
+//         //                 c.into_iter()
+//         //                     .interleave(hub.children())
+//         //                     .collect::<Vec<MetaData>>(),
+//         //             );
+//         //         }
+//         //         None => new_collections.push(hub),
+//         //     }
+//         // }
+//         let size = new_collections.len();
+//         self.media_container.library_section_id = None;
+//         self.media_container.library_section_title = None;
+//         self.media_container.library_section_uuid = None;
+//         self.media_container.size = Some(size.try_into().unwrap());
+//         // trace!("mangled promoted container {:#?}", container);
+//         self.media_container.set_children(new_collections);
+//         self
+//     }
+// }
 
 #[async_trait]
 pub trait FromResponse<T>: Sized {
@@ -442,10 +557,23 @@ fn merge_children_keys(mut key_left: String, mut key_right: String) -> String {
     key_right = key_right.replace("/library/collections/", "");
     key_right = key_right.replace("/children", "");
 
-    format!("/replex/library/collections/{},{}/children", key_right, key_left)
+    format!(
+        "/replex/library/collections/{},{}/children",
+        key_right, key_left
+    )
 }
 
 impl MediaContainerWrapper<MediaContainer> {
+    pub fn remove_watched(mut self) -> Self {
+        let mut children: Vec<MetaData> = vec![];
+        for mut child in self.media_container.children() {
+            child.remove_watched();
+            children.push(child);
+        }
+        self.media_container.set_children(children);
+        self
+    }
+
     pub fn make_mixed(mut self) -> Self {
         let collections = self.media_container.children();
         let mut new_collections: Vec<MetaData> = vec![];
@@ -478,7 +606,7 @@ impl MediaContainerWrapper<MediaContainer> {
         self
     }
 
-    /// collection hubs dont follow plex restrictions. 
+    /// collection hubs dont follow plex restrictions.
     /// We fix that by checking the collection endpoint. As that does listen to plex restrictions
     pub async fn fix_permissions(&mut self, plex: PlexClient) -> Self {
         debug!("Fixing hub permissions");
@@ -494,7 +622,10 @@ impl MediaContainerWrapper<MediaContainer> {
             //     continue;
             // }
             // dbg!(&collections);
-            let section_id: u32 = self.media_container.library_section_id.expect("Missing Library section id");
+            let section_id: u32 = self
+                .media_container
+                .library_section_id
+                .expect("Missing Library section id");
             //let section_id = collections[0].library_section_id.unwrap();
             if processed_section_ids.contains(&section_id) {
                 continue;
@@ -502,14 +633,14 @@ impl MediaContainerWrapper<MediaContainer> {
             // dbg!(section_id);
             processed_section_ids.push(section_id);
             // TODO: Use join to join these async requests
-            
+
             let mut c = plex.get_section_collections(section_id).await.unwrap();
-            
+
             // dbg!(&c);
             custom_collections.append(&mut c);
         }
         // dbg!(&custom_collections);
-       
+
         let custom_collections_keys: Vec<String> =
             custom_collections.iter().map(|c| c.key.clone()).collect();
         // dbg!(&custom_collections_keys);
@@ -536,34 +667,14 @@ impl MediaContainerWrapper<MediaContainer> {
     // }
 }
 
-async fn get_collections() -> Result<Vec<MetaData>> {
-    // let plex_client = create_client_from_request(&req).unwrap();
-    // let plex_api = plex_api::Server::new("http://100.91.35.113:32400", plex_client).await.unwrap();
-    // let mut collections = vec![];
-    // let api = self.plex_api.clone().unwrap();
-    // for library in api.libraries() {
-    //     // library.media
-
-    //     let mut resp: MediaContainerWrapper<MediaContainer> = api
-    //         .client()
-    //         .get(format!("/library/sections/{}/collections", library.id()))
-    //         .json()
-    //         .await?;
-    //     collections.append(&mut resp.media_container.metadata);
-    // }
-    // println!("no cache");
-    // Ok(MediaContainerWrapper::default().media_container.metadata)
-    Ok(vec![])
-}
-
-#[cached(
-    time = 720,
-    // key = "String",
-    // convert = r#"{ proxy.get_x_plex_token() }"#
-)]
-pub async fn get_cached_collections() -> Vec<MetaData> {
-    get_collections().await.unwrap()
-}
+// #[cached(
+//     time = 720,
+//     // key = "String",
+//     // convert = r#"{ proxy.get_x_plex_token() }"#
+// )]
+// pub async fn get_cached_collections() -> Vec<MetaData> {
+//     get_collections().await.unwrap()
+// }
 
 // async fn get_collections() -> Result<Vec<MetaData>> {
 //     // let plex_client = create_client_from_request(&req).unwrap();

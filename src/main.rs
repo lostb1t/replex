@@ -6,14 +6,14 @@ extern crate axum_core;
 use axum::headers::ContentType as HContentType;
 use axum::response::IntoResponse;
 use axum::{
+    body::Body,
     extract::Path,
     extract::State,
     extract::TypedHeader,
+    response::Redirect,
     // http::{uri::Uri, Request, Response},
     routing::get,
     routing::put,
-    response::Redirect,
-    body::Body,
     Router,
 };
 // use axum::headers::ContentType;
@@ -22,13 +22,13 @@ use http::{Request, Response};
 
 // use hyper::{client::HttpConnector, Body};
 
+use itertools::Itertools;
 use replex::models::*;
 use replex::plex_client::*;
 use replex::proxy::*;
 use replex::settings::*;
 use replex::url::*;
 use replex::utils::*;
-use itertools::Itertools;
 use tower_http::cors::AllowOrigin;
 use tower_http::cors::Any;
 use tower_http::cors::CorsLayer;
@@ -74,10 +74,13 @@ async fn default_handler(State(proxy): State<Proxy>, req: Request<Body>) -> Resp
 }
 
 //#[instrument]
-async fn redirect_to_host(State(proxy): State<Proxy>, req: Request<Body>) -> axum::response::Redirect {
+async fn redirect_to_host(
+    State(proxy): State<Proxy>,
+    req: Request<Body>,
+) -> axum::response::Redirect {
     //Redirect::to("https://46-4-30-217.01b0839de64b49138531cab1bf32f7c2.plex.direct:42405")
     //proxy.request(req).await.unwrap()
-    info!("Redirecting: {:?}", &req.uri());
+    debug!("Redirecting: {:?}", &req.uri());
     // debug!("req: {:?}", req);
     Redirect::temporary(&SETTINGS.read().unwrap().get::<String>("host").unwrap())
 }
@@ -130,8 +133,7 @@ async fn get_hubs_promoted(
     let plex = PlexClient::from(&req);
     let resp = proxy.request(req).await.expect("Expected an response");
     let mut container = from_response(resp).await.unwrap();
-
-    container.make_mixed()
+    container.remove_watched().make_mixed()
 }
 
 async fn get_collections_children(
@@ -156,21 +158,22 @@ async fn get_collections_children(
             True => children.append(&mut c.media_container.children()),
         }
         // children.append(&mut c.media_container.children())
-    };
+    }
 
-    
     // dbg!(req.headers().get("Accept").unwrap());
     let mut container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
     container.content_type = get_content_type_from_headers(req.headers());
+    // children = children.remove_watched();
     // dbg!(&container.content_type);
-    let size = children.len();
+    
     // container.media_container.set_children(children);
     container.media_container.directory = children;
+    container.media_container.remove_watched();
+    let size = container.media_container.children().len();
     container.media_container.size = Some(size.try_into().unwrap());
     container.media_container.total_size = Some(size.try_into().unwrap());
     container.media_container.offset = Some(0);
 
-    
     // container = container.make_mixed();
     container
 }
@@ -220,8 +223,8 @@ mod tests {
                 .path("/hubs/promoted")
                 .header("X-Plex-Token", "fakeID")
                 .header("X-Plex-Client-Identifier", "fakeID")
-                .query_param( "pinnedContentDirectoryID", "6,7")
-                .query_param( "contentDirectoryID", "6,7");
+                .query_param("pinnedContentDirectoryID", "6,7")
+                .query_param("contentDirectoryID", "6,7");
             then.status(200)
                 .header("content-type", "application/json")
                 .body_from_file("test/mock/in/hubs_promoted_6_7.json");

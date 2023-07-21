@@ -1178,49 +1178,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4a1e36c821dbe04574f602848a19f742f4fb3c98d40449f11bcad18d6b17421"
 
 [[package]]
-name = "replex"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-std",
- "async-trait",
- "axum",
- "axum-core",
- "axum-test-helper",
- "bytes",
- "cached",
- "config",
- "derive_more",
- "futures-util",
- "http",
- "http-body",
- "httpmock",
- "hyper",
- "itertools",
- "jsonxf",
- "lazy_static",
- "mime",
- "pathetic",
- "plex-api",
- "pretty_assertions",
- "reqwest",
- "rstest",
- "serde",
- "serde_json",
- "strum",
- "strum_macros",
- "thiserror",
- "tokio",
- "tower",
- "tower-http",
- "tracing",
- "tracing-subscriber",
- "url",
- "yaserde",
- "yaserde_derive",
-]
-
-[[package]]
 name = "httpmock"
 version = "0.6.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2070,6 +2027,49 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3acd125665422973a33ac9d3dd2df85edad0f4ae9b00dafb1a05e43a9f5ef8e7"
 dependencies = [
  "winapi",
+]
+
+[[package]]
+name = "replex"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-std",
+ "async-trait",
+ "axum",
+ "axum-core",
+ "axum-test-helper",
+ "bytes",
+ "cached",
+ "config",
+ "derive_more",
+ "futures-util",
+ "http",
+ "http-body",
+ "httpmock",
+ "hyper",
+ "itertools",
+ "jsonxf",
+ "lazy_static",
+ "mime",
+ "pathetic",
+ "plex-api",
+ "pretty_assertions",
+ "reqwest",
+ "rstest",
+ "serde",
+ "serde_json",
+ "strum",
+ "strum_macros",
+ "thiserror",
+ "tokio",
+ "tower",
+ "tower-http",
+ "tracing",
+ "tracing-subscriber",
+ "url",
+ "yaserde",
+ "yaserde_derive",
 ]
 
 [[package]]

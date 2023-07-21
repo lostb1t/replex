@@ -2,7 +2,7 @@ use crate::models::*;
 use crate::utils::*;
 use anyhow::Result;
 use axum::http::{uri::Uri, Request};
-use tracing::info;
+use tracing::debug;
 use tracing::instrument;
 // use crate::axum::http::{uri::Uri, Request, Response};
 use crate::models::*;
@@ -94,7 +94,7 @@ impl Proxy {
         req.headers_mut()
             .insert("Accept-Encoding", HeaderValue::from_static("identity"));
 
-        info!("Proxieng: {:?}", &req.uri());
+        debug!("Proxieng: {:?}", &req.uri());
         *req.uri_mut() = Uri::try_from(uri).unwrap();
         self.client.request(req)
     }
