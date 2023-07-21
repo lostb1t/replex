@@ -1,5 +1,7 @@
 # Replex (WIP)
 
+![plot](./example.png)
+
 Plex proxy with the following features:
 
 - Merge movies and shows from hubs on home.
@@ -34,5 +36,3 @@ fyi: this isnt a fully fledged proxy and doesnt aim to be. I suggest putting it 
 
 - /hubs
 - /replex
-
-![plot](./example.png)
