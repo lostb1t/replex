@@ -23,6 +23,7 @@ CMD ["/app/replex"]
 
 FROM nginx as nginx
 COPY --from=builder /app/src/replex/target/release/replex /app
+COPY nginx.conf.template /etc/nginx/templates
 
 # FROM rust:1.61.0 as builder
 # WORKDIR /usr/src/myapp
