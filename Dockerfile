@@ -1,10 +1,10 @@
 FROM rust:1.67 as builder
 
 WORKDIR /app/src
-RUN USER=root cargo new --bin httplex
-COPY Cargo.toml Cargo.lock ./httplex/
+RUN USER=root cargo new --bin replex
+COPY Cargo.toml Cargo.lock ./replex/
 
-WORKDIR /app/src/httplex
+WORKDIR /app/src/replex
 RUN cargo build --release
 
 COPY ./ ./
@@ -17,5 +17,5 @@ RUN apt update \
     && apt install -y openssl ca-certificates \
     && apt clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-COPY --from=builder /app/src/httplex/target/release/httplex /app
-CMD ["/app/httplex"]
+COPY --from=builder /app/src/replex/target/release/replex /app
+CMD ["/app/replex"]

@@ -28,12 +28,12 @@ use http::{Request, Response};
 
 // use hyper::{client::HttpConnector, Body};
 
-use httplex::models::*;
-use httplex::plex_client::*;
-use httplex::proxy::*;
-use httplex::settings::*;
-use httplex::url::*;
-use httplex::utils::*;
+use replex::models::*;
+use replex::plex_client::*;
+use replex::proxy::*;
+use replex::settings::*;
+use replex::url::*;
+use replex::utils::*;
 use itertools::Itertools;
 use tower_http::cors::AllowOrigin;
 use tower_http::cors::Any;

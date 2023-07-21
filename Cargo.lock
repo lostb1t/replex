@@ -1178,7 +1178,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4a1e36c821dbe04574f602848a19f742f4fb3c98d40449f11bcad18d6b17421"
 
 [[package]]
-name = "httplex"
+name = "replex"
 version = "0.1.0"
 dependencies = [
  "anyhow",
