@@ -18,6 +18,7 @@ RUN apt update \
     && apt clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 COPY --from=builder /app/src/replex/target/release/replex /app
+EXPOSE 3001
 CMD ["/app/replex"]
 
 FROM nginx as nginx-replex
