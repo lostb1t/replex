@@ -5,7 +5,7 @@
 Plex proxy with the following features:
 
 - Merge movies and shows from hubs on home.
-- Remove watched items from hubs in home and all library home's
+- Remove watched items from hubs in home and library recommended
 
 ### Settings
 Settings are set via [environment variables](https://kinsta.com/knowledgebase/what-is-an-environment-variable/) 
@@ -32,7 +32,7 @@ add your proxy url to plex "Custom server access URLs" (ex http://0.0.0.0:3001)
 
 then access your proxy url http://0.0.0.0:3001
 
-fyi: this isnt a fully fledged proxy and doesnt aim to be. I suggest putting it behind a reverse proxy and only route the following paths (and it subpaths) to this app.
+fyi: this isnt a fully fledged proxy and doesnt aim to be. I suggest putting it behind a proper (reverse) proxy and only route the following paths (and it subpaths) to this app.
 
 - /hubs
 - /replex
