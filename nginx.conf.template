@@ -19,10 +19,13 @@ server {
     proxy_redirect off;
 
     location / {
-      proxy_pass http://example.org;
+      proxy_pass http://plex;
     }
 
-    location /services {
-      proxy_pass http://other.example.org;
+    location /hubs {
+      proxy_pass http://replex;
+    }
+    location /replex {
+      proxy_pass http://replex;
     }
  }
