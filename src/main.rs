@@ -153,7 +153,7 @@ async fn get_collections_children(
     let plex = PlexClient::from(&req);
     let mut children: Vec<MetaData> = vec![];
     let reversed: Vec<u32> = collection_ids.iter().copied().rev().collect();
-    for id in collection_ids {
+    for id in reversed {
         let mut c = plex.get_collection_children(id).await.unwrap();
         // children = [children, c.media_container.children()].concat();
         match children.is_empty() {
