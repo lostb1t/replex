@@ -58,7 +58,7 @@ fn router(proxy: Proxy) -> Router {
             get(get_hubs_sections),
         )
         .route(
-            "/hubs/library/collections/:ids/children",
+            "/replex/library/collections/:ids/children",
             get(get_collections_children),
         )
         .fallback(default_handler)
