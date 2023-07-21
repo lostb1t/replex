@@ -141,7 +141,7 @@ async fn get_hubs_promoted(
     if *remove_watched {
         container = container.remove_watched();
     }
-    container.make_mixed()
+    container.process_hubs(plex).await
 }
 
 async fn get_collections_children(

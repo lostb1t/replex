@@ -6,8 +6,8 @@ use anyhow::Result;
 use async_trait::async_trait;
 use axum::headers::ContentType as HContentType;
 use axum::{
-    body::HttpBody,
     body::Body,
+    body::HttpBody,
     response::{IntoResponse, Response},
     Json,
 };
@@ -19,6 +19,8 @@ use serde::{Deserialize, Serialize};
 use tracing::debug;
 use yaserde::YaDeserialize;
 use yaserde::YaSerialize;
+//mod replex;
+use super::plex_client::*;
 // use parse_display::{Display, FromStr};
 // use yaserde_derive::{YaDeserialize, YaSerialize};
 
@@ -26,6 +28,28 @@ use yaserde::YaSerialize;
 pub struct App {
     proxy: Proxy,
     plex: PlexClient,
+}
+
+#[derive(
+    Debug,
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    YaDeserialize,
+    YaSerialize,
+    Default,
+    PartialOrd,
+)]
+#[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
+#[serde(rename_all = "camelCase")]
+#[yaserde(rename_all = "camelCase")]
+pub struct Label {
+    #[yaserde(attribute)]
+    id: i32,
+    #[yaserde(attribute)]
+    tag: String,
 }
 
 pub type HttpClient = hyper::client::Client<HttpConnector, Body>;
@@ -190,15 +214,31 @@ pub struct MetaData {
     #[yaserde(rename = "viewCount")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub view_count: Option<i32>,
+    #[serde(rename = "Label", default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    // #[yaserde(skip_serializing_if = "Vec::is_empty")]
+    #[yaserde(rename = "Label")]
+    #[yaserde(child)]
+    pub label: Vec<Label>,
 }
 
 impl MetaData {
+    fn has_label(&self, name: String) -> bool {
+        for label in &self.label {
+            if label.tag == name {
+                return true;
+            }
+        }
+        false
+        // collection_details.media_container.directory.get(0).unwrap().label.is_some()
+    }
+
     fn is_watched(&self) -> bool {
         if self.view_count.is_some() && self.view_count.unwrap_or_default() > 0 {
-            return true
+            return true;
         }
         if self.viewed_leaf_count.is_some() && self.viewed_leaf_count.unwrap_or_default() > 0 {
-            return true
+            return true;
         }
         false
     }
@@ -207,9 +247,7 @@ impl MetaData {
         let new_children: Vec<MetaData> = self
             .children()
             .into_iter()
-            .filter(|c| {
-                !c.is_watched()
-            })
+            .filter(|c| !c.is_watched())
             .collect::<Vec<MetaData>>();
 
         let size = new_children.len();
@@ -243,7 +281,6 @@ impl MetaData {
         vec![]
     }
 }
-
 
 #[derive(
     Debug, Serialize, Deserialize, Clone, PartialEq, Eq, YaDeserialize, YaSerialize, Default,
@@ -304,9 +341,7 @@ impl MediaContainer {
         let new_children: Vec<MetaData> = self
             .children()
             .into_iter()
-            .filter(|c| {
-                !c.is_watched()
-            })
+            .filter(|c| !c.is_watched())
             .collect::<Vec<MetaData>>();
 
         let size = new_children.len();
@@ -365,7 +400,6 @@ pub struct MediaContainerWrapper<T> {
     pub content_type: ContentType,
 }
 
-
 #[async_trait]
 pub trait FromResponse<T>: Sized {
     async fn from_response(resp: T) -> Result<Self>;
@@ -406,6 +440,14 @@ impl FromResponse<Response<Body>> for MediaContainerWrapper<MediaContainer> {
 //     }
 // }
 
+fn get_collection_id_from_child_path(path: String) -> i32 {
+    let mut path = path.replace("/library/collections/", "");
+    path = path.replace("/children", "");
+    // let id = path.parse();
+    // dbg!(&path);
+    path.parse().unwrap()
+}
+
 // TODO: Merge hub keys when mixed
 fn merge_children_keys(mut key_left: String, mut key_right: String) -> String {
     key_left = key_left.replace("/hubs/library/collections/", "");
@@ -432,14 +474,34 @@ impl MediaContainerWrapper<MediaContainer> {
         self
     }
 
-    // TODO: Only works for hubs. Make it generic
-    pub fn make_mixed(mut self) -> Self {
+    // TODO: Only works for hubs. Make it generic or name it specific for hubs
+    pub async fn process_hubs(mut self, plex: PlexClient) -> Self {
         let collections = self.media_container.children();
         let mut new_collections: Vec<MetaData> = vec![];
         for mut hub in collections {
             let p = new_collections.iter().position(|v| v.title == hub.title);
             hub.r#type = "mixed".to_string();
-            // hub.style = Some("hero".to_string());
+
+            /// Apply the hub style
+            if hub.context.clone().unwrap() == "hub.custom.collection" {
+                let collection_details = plex
+                    .get_collection(get_collection_id_from_child_path(hub.key.clone()))
+                    .await
+                    .unwrap(); // TODO: Cache
+                // dbg!(&collection_details.media_container.directory.get(0).unwrap().label);
+                if collection_details
+                    .media_container
+                    .directory
+                    .get(0)
+                    .unwrap()
+                    .has_label("REPLEXHERO".to_string())
+                {
+                    hub.style = Some("hero".to_string());
+                }
+                // dbg!(collection_details);
+            }
+            //if collection_details.
+            //hub.style = Some("hero".to_string());
             match p {
                 Some(v) => {
                     new_collections[v].key =
@@ -525,7 +587,6 @@ impl MediaContainerWrapper<MediaContainer> {
 
     // }
 }
-
 
 impl<T> IntoResponse for MediaContainerWrapper<T>
 where

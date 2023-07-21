@@ -98,7 +98,8 @@ impl PlexClient {
             .uri(uri)
             .header("X-Plex-Client-Identifier", &self.x_plex_client_identifier)
             .header("X-Plex-Token", &self.x_plex_token)
-            .header("Accept", &self.content_type.to_string())
+            // .header("Accept", &self.content_type.to_string())
+            .header("Accept", "application/xml")
             .body(Body::empty())
             .unwrap();
         self.http_client.request(request)
@@ -146,6 +147,19 @@ impl PlexClient {
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
         let mut resp = self
             .get(format!("/library/collections/{}/children", id))
+            .await
+            .unwrap();
+        let mut container: MediaContainerWrapper<MediaContainer> =
+            from_response(resp).await.unwrap();
+        Ok(container)
+    }
+
+    pub async fn get_collection(
+        &self,
+        id: i32,
+    ) -> Result<MediaContainerWrapper<MediaContainer>> {
+        let mut resp = self
+            .get(format!("/library/collections/{}", id))
             .await
             .unwrap();
         let mut container: MediaContainerWrapper<MediaContainer> =

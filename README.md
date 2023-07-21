@@ -1,6 +1,6 @@
 # Replex (WIP)
 
-![plot](./example.png)
+![plot](./examplewithhero.png)
 
 Plex proxy with the following features:
 
@@ -35,3 +35,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 |--------------------------|------------|---------------------------------------------------------------------------|
 | REPLEX_HOST              | -      	| Plex target host to proxy                                             	|
 | REPLEX_INCLUDE_WATCHED   | false    	| If set to true, remove watched items from hubs.                        	|
+
+### Hub style
+
+You can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection. 
