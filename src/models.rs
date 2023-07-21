@@ -478,7 +478,8 @@ impl MediaContainerWrapper<MediaContainer> {
         self
     }
 
-    // pub async fn fix_permissions(&mut self, plex: PlexClient) -> &Self {
+    /// collection hubs dont follow plex restrictions. 
+    /// We fix that by checking the collection endpoint. As that does listen to plex restrictions
     pub async fn fix_permissions(&mut self, plex: PlexClient) -> Self {
         debug!("Fixing hub permissions");
         let collections = self.media_container.children();
