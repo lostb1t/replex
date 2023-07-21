@@ -263,8 +263,10 @@ pub struct MediaContainer {
     pub offset: Option<i32>,
     #[yaserde(attribute)]
     #[yaserde(rename = "allowSync")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub allow_sync: Option<bool>,
     #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub identifier: Option<String>,
     #[serde(rename = "librarySectionID")]
     #[yaserde(rename = "librarySectionID")]
@@ -430,6 +432,7 @@ impl MediaContainerWrapper<MediaContainer> {
         self
     }
 
+    // TODO: Only works for hubs. Make it generic
     pub fn make_mixed(mut self) -> Self {
         let collections = self.media_container.children();
         let mut new_collections: Vec<MetaData> = vec![];

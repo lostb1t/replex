@@ -153,9 +153,9 @@ async fn get_collections_children(
     let plex = PlexClient::from(&req);
     let mut children: Vec<MetaData> = vec![];
     let reversed: Vec<u32> = collection_ids.iter().copied().rev().collect();
-    for id in reversed {
+    for id in collection_ids {
         let mut c = plex.get_collection_children(id).await.unwrap();
-
+        // children = [children, c.media_container.children()].concat();
         match children.is_empty() {
             False => {
                 children = children
@@ -165,7 +165,7 @@ async fn get_collections_children(
             }
             True => children.append(&mut c.media_container.children()),
         }
-        // children.append(&mut c.media_container.children())
+        children.append(&mut c.media_container.children())
     }
 
     // dbg!(req.headers().get("Accept").unwrap());
@@ -175,7 +175,7 @@ async fn get_collections_children(
     // dbg!(&container.content_type);
 
     // container.media_container.set_children(children);
-    container.media_container.directory = children;
+    container.media_container.metadata = children;
     let remove_watched = &SETTINGS
         .read()
         .unwrap()
