@@ -13,9 +13,6 @@ use tracing::debug;
 use yaserde::ser::to_string as to_xml_str;
 
 
-
-
-use plex_api::HttpClientBuilder;
 use std::collections::HashMap;
 
 use crate::models::*;
@@ -194,54 +191,6 @@ pub fn get_header_or_param(name: String, req: &Request<Body>) -> Option<String> 
     val
 }
 
-// pub fn create_client_from_request(req: &Request<Body>) -> Result<plex_api::HttpClient> {
-//     // TODO: make this a generic function ( get_value or something )
-//     let token: String = get_header_or_param("x-plex-token".to_string(), req).unwrap();
-//     let client_identifier: String =
-//         get_header_or_param("x-plex-client-identifier".to_string(), req).unwrap();
-//     // let client_identifier: String = match headers.get("x-plex-client-identifier") {
-//     //     None => params.get("X-Plex-Client-Identifier").unwrap().to_string(),
-//     //     Some(value) => value.to_str().unwrap().to_string(),
-//     // };
-
-//     let client = HttpClientBuilder::default()
-//         .set_api_url("https://plex.sjoerdarendsen.dev")
-//         .set_x_plex_token(token)
-//         .set_x_plex_client_identifier(client_identifier)
-//         .build()?;
-//     Ok(client)
-// }
-// async fn to_bytes<T>(body: T) -> Result<Bytes, T::Error>
-// where
-//     T: httpBody,
-// {
-//     futures_util::pin_mut!(body);
-
-//     // If there's only 1 chunk, we can just return Buf::to_bytes()
-//     let mut first = if let Some(buf) = body.data().await {
-//         buf?
-//     } else {
-//         return Ok(Bytes::new());
-//     };
-
-//     let second = if let Some(buf) = body.data().await {
-//         buf?
-//     } else {
-//         return Ok(first.copy_to_bytes(first.remaining()));
-//     };
-
-//     // With more than 1 buf, we gotta flatten into a Vec first.
-//     let cap = first.remaining() + second.remaining() + body.size_hint().lower() as usize;
-//     let mut vec = Vec::with_capacity(cap);
-//     vec.put(first);
-//     vec.put(second);
-
-//     while let Some(buf) = body.data().await {
-//         vec.put(buf?);
-//     }
-
-//     Ok(vec.into())
-// }
 
 pub async fn debug_resp_body(resp: Response<Body>) {
         let (parts, body) = resp.into_parts();

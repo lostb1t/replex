@@ -1,7 +1,3 @@
-upstream plex {
-    server ${REPLEX_HOST};
-    keepalive 8;
-}
 upstream replex {
     server 127.0.0.1:3001;
     keepalive 8;
@@ -17,14 +13,14 @@ server {
     proxy_redirect off;
 
     location / {
-      proxy_pass http://plex;
+      proxy_pass ${REPLEX_HOST};
     }
 
-    location /hubs {
+    location /hubs/ {
       proxy_pass http://replex;
     }
 
-    location /replex {
+    location /replex/ {
       proxy_pass http://replex;
     }
  }

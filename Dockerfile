@@ -17,21 +17,21 @@ RUN apt update \
     && apt install -y openssl ca-certificates \
     && apt clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-COPY --from=builder /app/src/replex/target/release/replex /app
+COPY --from=builder /app/src/replex/target/release/replex /app/
 EXPOSE 3001
 CMD ["/app/replex"]
 
+# FROM nginx:stable-alpine as nginx
+# RUN apk update && apk add openssl
 FROM nginx as nginx
-COPY --from=builder /app/src/replex/target/release/replex /app
-COPY nginx.conf.template /etc/nginx/templates
+COPY --from=builder /app/src/replex/target/release/replex /app/
+RUN apt update \
+    && apt install -y openssl ca-certificates \
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+COPY nginx.conf.template /etc/nginx/templates/
+RUN echo "daemon off;" >> /etc/nginx/nginx.conf
+RUN rm /etc/nginx/conf.d/default.conf
 COPY start.sh start.sh
+STOPSIGNAL SIGQUIT
 CMD ./start.sh
-
-# FROM rust:1.61.0 as builder
-# WORKDIR /usr/src/myapp
-# COPY . .
-# RUN cargo install --path .
-# FROM debian:buster-slim
-# RUN apt-get update & apt-get install -y extra-runtime-dependencies & rm -rf /var/lib/apt/lists/*
-# COPY --from=builder /usr/local/cargo/bin/myapp /usr/local/bin/myapp
-# CMD ["myapp"]

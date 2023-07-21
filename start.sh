@@ -2,7 +2,8 @@
 
 ./app/replex &
 
-nginx -g daemon off &
+./docker-entrypoint.sh "nginx" &
+# nginx  &
 
 # Wait for any process to exit
 wait -n
