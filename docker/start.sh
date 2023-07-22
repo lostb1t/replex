@@ -10,7 +10,7 @@ export NGINX_PLEX
 
 ./app/replex &
 
-./docker-entrypoint.sh "nginx-debug" &
+./docker-entrypoint.sh "nginx" &
 # nginx  &
 
 # Wait for any process to exit
