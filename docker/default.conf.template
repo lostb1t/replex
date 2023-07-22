@@ -1,10 +1,10 @@
-upstream replex {
-    server 127.0.0.1:3001;
+upstream plex {
+    server ${NGINX_PLEX};
     keepalive 8;
 }
 
-upstream plex {
-    server ${NGINX_PLEX};
+upstream replex {
+    server 127.0.0.1:3001;
     keepalive 8;
 }
 
