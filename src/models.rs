@@ -324,6 +324,7 @@ pub struct MediaContainer {
     pub hub: Vec<MetaData>,
     #[serde(rename = "Metadata", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[yaserde(rename = "Metadata")]
     pub metadata: Vec<MetaData>,
     #[serde(rename = "Video", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
