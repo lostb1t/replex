@@ -4,14 +4,16 @@ runtest:
 build:
 	cargo build --release
 
-build-docker:
-	docker build -t ghcr.io/sarendsen/replex-test:latest --target replex-nginx .
+docker-build:
+	docker build -t ghcr.io/sarendsen/replex-test:latest --target nginx .
 
-push-docker:
-	docker push ghcr.io/sarendsen/replex:latest
+docker-run:
+	docker run --rm -it -p 80:80 -e REPLEX_HOST="http://46.4.30.217:42405" ghcr.io/sarendsen/replex-test:latest
 
-release: build-docker push-docker
+# push-docker:
+# 	docker push ghcr.io/sarendsen/replex:latest
 
-clean:
+# release: build-docker push-docker
+
+fix:
 	cargo fix
-	cargo machete
