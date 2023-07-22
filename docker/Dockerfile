@@ -29,9 +29,9 @@ RUN apt update \
     && apt install -y openssl ca-certificates \
     && apt clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-COPY nginx.conf.template /etc/nginx/templates/
+COPY docker/default.conf.template /etc/nginx/templates/
 RUN echo "daemon off;" >> /etc/nginx/nginx.conf
-RUN rm /etc/nginx/conf.d/default.conf
-COPY start.sh start.sh
+# RUN rm /etc/nginx/conf.d/default.conf
+COPY docker/start.sh start.sh
 STOPSIGNAL SIGQUIT
 CMD ./start.sh
