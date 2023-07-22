@@ -16,6 +16,13 @@ server {
       proxy_pass ${REPLEX_HOST};
     }
 
+    location /:/websockets {
+      proxy_pass ${REPLEX_HOST};
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+    }
+
     location /hubs/ {
       proxy_pass http://replex;
     }
