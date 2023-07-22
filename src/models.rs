@@ -4,14 +4,14 @@ use crate::utils::*;
 use crate::xml::*;
 use anyhow::Result;
 use async_trait::async_trait;
-use axum::headers::ContentType as HContentType;
+
 use axum::{
     body::Body,
     body::HttpBody,
     response::{IntoResponse, Response},
     Json,
 };
-use cached::proc_macro::cached;
+
 use hyper::client::HttpConnector;
 // use hyper::Body;
 use itertools::Itertools;
@@ -20,7 +20,7 @@ use tracing::debug;
 use yaserde::YaDeserialize;
 use yaserde::YaSerialize;
 //mod replex;
-use super::plex_client::*;
+
 // use parse_display::{Display, FromStr};
 // use yaserde_derive::{YaDeserialize, YaSerialize};
 
@@ -535,7 +535,7 @@ impl MediaContainerWrapper<MediaContainer> {
         let mut custom_collections: Vec<MetaData> = vec![];
         let mut processed_section_ids: Vec<u32> = vec![];
 
-        for hub in collections.clone() {
+        for _hub in collections.clone() {
             // dbg!(&hub);
             // dbg!("YOOO");
             // if hub.metadata.is_empty() {

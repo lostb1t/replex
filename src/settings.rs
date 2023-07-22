@@ -1,7 +1,7 @@
 #![allow(deprecated)]
 use config::Config;
 use lazy_static::lazy_static;
-use std::error::Error;
+
 use std::sync::RwLock;
 
 lazy_static! {

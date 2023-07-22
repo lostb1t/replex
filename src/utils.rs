@@ -193,7 +193,7 @@ pub fn get_header_or_param(name: String, req: &Request<Body>) -> Option<String> 
 
 
 pub async fn debug_resp_body(resp: Response<Body>) {
-        let (parts, body) = resp.into_parts();
+        let (_parts, body) = resp.into_parts();
         debug!("{:#?}", body_to_string(body).await);
 }
 

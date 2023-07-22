@@ -3,21 +3,19 @@ extern crate tracing;
 #[macro_use]
 extern crate axum_core;
 
-use axum::headers::ContentType as HContentType;
-use axum::response::IntoResponse;
+
+
 use axum::{
     body::Body,
     extract::Path,
     extract::State,
-    extract::TypedHeader,
     response::Redirect,
     // http::{uri::Uri, Request, Response},
     routing::get,
-    routing::put,
     Router,
 };
 // use axum::headers::ContentType;
-use cached::proc_macro::cached;
+
 use http::{Request, Response};
 
 // use hyper::{client::HttpConnector, Body};
@@ -30,7 +28,7 @@ use replex::settings::*;
 use replex::url::*;
 use replex::utils::*;
 use tower_http::cors::AllowOrigin;
-use tower_http::cors::Any;
+
 use tower_http::cors::CorsLayer;
 
 use std::net::SocketAddr;
@@ -75,7 +73,7 @@ async fn default_handler(State(proxy): State<Proxy>, req: Request<Body>) -> Resp
 
 //#[instrument]
 async fn redirect_to_host(
-    State(proxy): State<Proxy>,
+    State(_proxy): State<Proxy>,
     req: Request<Body>,
 ) -> axum::response::Redirect {
     //Redirect::to("https://46-4-30-217.01b0839de64b49138531cab1bf32f7c2.plex.direct:42405")
@@ -87,7 +85,7 @@ async fn redirect_to_host(
 
 #[instrument]
 async fn get_hubs_sections(
-    State(mut proxy): State<Proxy>,
+    State(proxy): State<Proxy>,
     req: Request<Body>,
 ) -> MediaContainerWrapper<MediaContainer> {
     let plex = PlexClient::from(&req);
@@ -99,7 +97,7 @@ async fn get_hubs_sections(
 }
 
 async fn get_hubs_promoted(
-    State(mut proxy): State<Proxy>,
+    State(proxy): State<Proxy>,
     mut req: Request<Body>,
 ) -> MediaContainerWrapper<MediaContainer> {
     let ids_header = get_header_or_param("contentDirectoryID".to_owned(), &req).unwrap();
@@ -145,7 +143,7 @@ async fn get_hubs_promoted(
 }
 
 async fn get_collections_children(
-    State(mut proxy): State<Proxy>,
+    State(_proxy): State<Proxy>,
     Path(ids): Path<String>,
     req: Request<Body>,
 ) -> MediaContainerWrapper<MediaContainer> {
@@ -157,13 +155,13 @@ async fn get_collections_children(
         let mut c = plex.get_collection_children(id).await.unwrap();
         // children = [children, c.media_container.children()].concat();
         match children.is_empty() {
-            False => {
+            false => {
                 children = children
                     .into_iter()
                     .interleave(c.media_container.children())
                     .collect::<Vec<MetaData>>();
             }
-            True => children.append(&mut c.media_container.children()),
+            true => children.append(&mut c.media_container.children()),
         }
         children.append(&mut c.media_container.children())
     }
@@ -205,7 +203,7 @@ mod tests {
     use super::*;
     use axum::http::StatusCode;
     use axum_test_helper::TestClient;
-    use httpmock::{prelude::*, Mock};
+    use httpmock::{prelude::*};
     use pretty_assertions::assert_eq;
     extern crate jsonxf;
     use rstest::rstest;
@@ -263,7 +261,7 @@ mod tests {
             .unwrap();
 
         let proxy = Proxy::default();
-        let mut router = router(proxy);
+        let router = router(proxy);
         // dbg!("everything stup");
         let client = TestClient::new(router);
         let res = client
@@ -276,7 +274,7 @@ mod tests {
         assert_eq!(res.status(), StatusCode::OK);
 
         let result = res.text().await;
-        let sup = jsonxf::pretty_print(&result).unwrap();
+        let _sup = jsonxf::pretty_print(&result).unwrap();
 
         let expected =
             fs::read_to_string(&expected_path).expect("Should have been able to read the file");
