@@ -3,6 +3,11 @@ upstream replex {
     keepalive 8;
 }
 
+upstream plex {
+    server ${NGINX_PLEX};
+    keepalive 8;
+}
+
 server {
     listen 0.0.0.0:80;
     
@@ -13,11 +18,11 @@ server {
     proxy_redirect off;
 
     location / {
-      proxy_pass ${REPLEX_HOST};
+      proxy_pass http://replex;
     }
 
     location /:/websockets {
-      proxy_pass ${REPLEX_HOST};
+      proxy_pass http://replex;
       proxy_http_version 1.1;
       proxy_set_header Upgrade $http_upgrade;
       proxy_set_header Connection "upgrade";
