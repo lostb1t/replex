@@ -222,6 +222,26 @@ pub struct MetaData {
 }
 
 impl MetaData {
+    pub async fn apply_hub_style(&mut self, plex: &PlexClient) {
+        if self.context.clone().unwrap() == "hub.custom.collection" {
+            let collection_details = plex
+                .get_collection(get_collection_id_from_child_path(self.key.clone()))
+                .await
+                .unwrap(); // TODO: Cache
+            if collection_details
+                .media_container
+                .directory
+                .get(0)
+                .unwrap()
+                .has_label("REPLEXHERO".to_string())
+            {
+                self.style = Some("hero".to_string());
+            }
+            // dbg!(collection_details);
+        }
+        // self
+    }
+
     fn has_label(&self, name: String) -> bool {
         for label in &self.label {
             if label.tag == name {
@@ -481,25 +501,25 @@ impl MediaContainerWrapper<MediaContainer> {
         for mut hub in collections {
             let p = new_collections.iter().position(|v| v.title == hub.title);
             hub.r#type = "mixed".to_string();
-
+            hub.apply_hub_style(&plex).await;
             // Apply the hub style
-            if hub.context.clone().unwrap() == "hub.custom.collection" {
-                let collection_details = plex
-                    .get_collection(get_collection_id_from_child_path(hub.key.clone()))
-                    .await
-                    .unwrap(); // TODO: Cache
-                // dbg!(&collection_details.media_container.directory.get(0).unwrap().label);
-                if collection_details
-                    .media_container
-                    .directory
-                    .get(0)
-                    .unwrap()
-                    .has_label("REPLEXHERO".to_string())
-                {
-                    hub.style = Some("hero".to_string());
-                }
-                // dbg!(collection_details);
-            }
+            // if hub.context.clone().unwrap() == "hub.custom.collection" {
+            //     let collection_details = plex
+            //         .get_collection(get_collection_id_from_child_path(hub.key.clone()))
+            //         .await
+            //         .unwrap(); // TODO: Cache
+            //     // dbg!(&collection_details.media_container.directory.get(0).unwrap().label);
+            //     if collection_details
+            //         .media_container
+            //         .directory
+            //         .get(0)
+            //         .unwrap()
+            //         .has_label("REPLEXHERO".to_string())
+            //     {
+            //         hub.style = Some("hero".to_string());
+            //     }
+            //     // dbg!(collection_details);
+            // }
             //if collection_details.
             //hub.style = Some("hero".to_string());
             match p {
@@ -527,9 +547,21 @@ impl MediaContainerWrapper<MediaContainer> {
         self
     }
 
+    pub async fn apply_hub_style(&mut self, plex: &PlexClient) -> &Self {
+        let mut metadata: Vec<MetaData> = vec![];
+        for mut hub in self.media_container.children() {
+            if hub.style.is_some() {
+                hub.apply_hub_style(plex).await;
+                metadata.push(hub);
+            }
+        }
+        self.media_container.set_children(metadata);
+        self
+    }
+
     /// collection hubs dont follow plex restrictions.
     /// We fix that by checking the collection endpoint. As that does listen to plex restrictions
-    pub async fn fix_permissions(&mut self, plex: PlexClient) -> Self {
+    pub async fn fix_permissions(&mut self, plex: &PlexClient) -> Self {
         debug!("Fixing hub permissions");
         let collections = self.media_container.children();
         let mut custom_collections: Vec<MetaData> = vec![];

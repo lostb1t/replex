@@ -89,7 +89,12 @@ async fn get_hubs_sections(
     let resp = proxy.request(req).await.unwrap();
 
     let mut container = from_response(resp).await.unwrap();
-    container = container.fix_permissions(plex).await;
+    container = container
+        .fix_permissions(&plex)
+        .await
+        .apply_hub_style(&plex)
+        .await
+        .clone();
     container
 }
 
@@ -149,7 +154,6 @@ async fn get_collections_children(
     let mut children: Vec<MetaData> = vec![];
     let reversed: Vec<u32> = collection_ids.iter().copied().rev().collect();
 
-    let mut container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
     for id in reversed {
         let mut c = plex.get_collection_children(id).await.unwrap();
 
@@ -166,15 +170,10 @@ async fn get_collections_children(
         children.append(&mut c.media_container.children())
     }
 
-    // dbg!(req.headers().get("Accept").unwrap());
-    
-    
+    let mut container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
     container.content_type = get_content_type_from_headers(req.headers());
-
-
     // so not change the child type, video is needed for collections
     container.media_container.video = children;
-    // container.media_container.metadata = children;
     let remove_watched = &SETTINGS
         .read()
         .unwrap()
