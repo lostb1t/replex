@@ -148,19 +148,10 @@ async fn get_collections_children(
     let plex = PlexClient::from(&req);
     let mut children: Vec<MetaData> = vec![];
     let reversed: Vec<u32> = collection_ids.iter().copied().rev().collect();
-    let mut t: Option<String> = None;
+
     let mut container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
     for id in reversed {
         let mut c = plex.get_collection_children(id).await.unwrap();
-        if t.is_none() {
-            if !c.media_container.directory.is_empty() {
-                t = Some("directory".to_string());
-            } else if !c.media_container.video.is_empty()  {
-                t = Some("video".to_string());
-            } else {
-                t = Some("metadata".to_string());
-            }
-        }
 
         // children = [children, c.media_container.children()].concat();
         match children.is_empty() {
@@ -179,18 +170,9 @@ async fn get_collections_children(
     
     
     container.content_type = get_content_type_from_headers(req.headers());
-    // children = children.remove_watched();
-    // dbg!(&container.content_type);
 
-    // container.media_container.set_children(children);
-    // TODO: Should be a match
-    // if t.clone().unwrap() == "directory" {
-    //     container.media_container.directory = children;
-    // } else if t.clone().unwrap() == "video" {
-    //     container.media_container.video = children;
-    // } else {
-    //     container.media_container.metadata = children;
-    // }
+
+    // so not change the child type, video is needed for collections
     container.media_container.video = children;
     // container.media_container.metadata = children;
     let remove_watched = &SETTINGS
