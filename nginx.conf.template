@@ -18,7 +18,11 @@ server {
     proxy_redirect off;
 
     location / {
-      proxy_pass http://replex;
+      proxy_pass http://plex;
+    }
+
+    location /hubs/search {
+      proxy_pass http://plex;
     }
 
     location /:/websockets {
