@@ -22,7 +22,7 @@ EXPOSE 3001
 CMD ["/app/replex"]
 
 # FROM nginx:stable-alpine as nginx
-# RUN apk update && apk add openssl
+# RUN apk update && apk add --no-cache bash openssl
 FROM nginx as nginx
 COPY --from=builder /app/src/replex/target/release/replex /app/
 RUN apt update \

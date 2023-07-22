@@ -79,18 +79,8 @@ pub struct PlexClient {
 impl PlexClient {
     // TODO: Handle 404s/500 etc
     pub fn get(&self, path: String) -> hyper::client::ResponseFuture {
-        // let path = req.uri().path();
-        // let path_query = req
-        //     .uri()
-        //     .path_and_query()
-        //     .map(|v| v.as_str())
-        //     .unwrap_or(path);
-        // let uri = format!("{}{}", self.host, path_query);
-
-        // Default is gzip. Dont want that
-        // req.headers_mut()
-        //     .insert("Accept-Encoding", HeaderValue::from_static("identity"));
-
+        /// Could use this: https://docs.rs/tower-http/latest/tower_http/propagate_header/index.html
+        /// https://github.com/tokio-rs/axum/discussions/1131
         let uri = format!("{}{}", self.host, path);
         // dbg!(&uri);
         let request = Request::builder()
@@ -110,33 +100,9 @@ impl PlexClient {
             .await
             .unwrap();
         
-        // dbg!(&resp);
-        // let mut resp_second = self
-        //     .get(format!("/library/sections/{}/collections", id))
-        //     .await
-        //     .unwrap();
-        // let (parts, body) = resp_second.into_parts();
-        // dbg!(body_to_string(body).await);
-        // debug_resp_body(&resp);
         let mut container: MediaContainerWrapper<MediaContainer> =
             from_response(resp).await.expect("Cannot get MediaContainerWrapper from response");
-        // dbg!("YOOO");
-        // let plex_client = create_client_from_request(&req).unwrap();
-        // let plex_api = plex_api::Server::new("http://100.91.35.113:32400", plex_client).await.unwrap();
-        // let mut collections = vec![];
-        // let api = self.plex_api.clone().unwrap();
-        // for library in api.libraries() {
-        //     // library.media
 
-        //     let mut resp: MediaContainerWrapper<MediaContainer> = api
-        //         .client()
-        //         .get(format!("/library/sections/{}/collections", library.id()))
-        //         .json()
-        //         .await?;
-        //     collections.append(&mut resp.media_container.metadata);
-        // }
-        // println!("no cache");
-        // Ok(MediaContainerWrapper::default().media_container.metadata)
         Ok(container.media_container.children())
     }
 
