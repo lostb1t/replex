@@ -43,4 +43,4 @@ You can change the hub style to hero elements by setting the label "REPLEXHERO" 
 
 ### notes
 
-to force plex clients to use your proxy you either use a custom domain with ssl and point plex towards that or set your ip in Custom server access URLs and disable remote access (you loose ssl)
+to force plex clients to use your proxy you either use a custom domain with ssl or use your server ip and set it in Custom server access URLs and disable remote access (you loose automatic ssl but you can provide it yourself with a reverse proxy and custom domain)
