@@ -481,7 +481,7 @@ impl MediaContainerWrapper<MediaContainer> {
             let p = new_collections.iter().position(|v| v.title == hub.title);
             hub.r#type = "mixed".to_string();
 
-            /// Apply the hub style
+            // Apply the hub style
             if hub.context.clone().unwrap() == "hub.custom.collection" {
                 let collection_details = plex
                     .get_collection(get_collection_id_from_child_path(hub.key.clone()))
