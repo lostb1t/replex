@@ -11,3 +11,7 @@ push-docker:
 	docker push ghcr.io/sarendsen/replex:latest
 
 release: build-docker push-docker
+
+clean:
+	cargo fix
+	cargo machete

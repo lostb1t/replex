@@ -2,10 +2,9 @@ extern crate tracing;
 use anyhow::Result;
 use axum::{
     http::{uri::Uri, HeaderMap, HeaderValue, Request, Response},
+    body::Body,
 };
 
-// use http::{HeaderMap, HeaderValue};
-use hyper::{Body};
 use strum_macros::Display as EnumDisplay;
 use strum_macros::EnumString;
 
