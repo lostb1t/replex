@@ -1,9 +1,5 @@
 #[macro_use]
 extern crate tracing;
-#[macro_use]
-extern crate axum_core;
-
-
 
 use axum::{
     body::Body,
@@ -72,6 +68,7 @@ async fn default_handler(State(proxy): State<Proxy>, req: Request<Body>) -> Resp
 }
 
 //#[instrument]
+#[allow(dead_code)]
 async fn redirect_to_host(
     State(_proxy): State<Proxy>,
     req: Request<Body>,
@@ -203,7 +200,7 @@ mod tests {
     use super::*;
     use axum::http::StatusCode;
     use axum_test_helper::TestClient;
-    use httpmock::{prelude::*};
+    use httpmock::prelude::*;
     use pretty_assertions::assert_eq;
     extern crate jsonxf;
     use rstest::rstest;
