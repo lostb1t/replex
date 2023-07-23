@@ -1,20 +1,28 @@
+use std::fmt::Display;
+use std::io::Read;
+use std::str::FromStr;
+
 use crate::plex_client::PlexClient;
 use crate::proxy::*;
 use crate::utils::*;
 use crate::xml::*;
 use anyhow::Result;
 use async_trait::async_trait;
-
 use axum::{
     body::Body,
     response::{IntoResponse, Response},
     Json,
 };
-
+use serde_aux::prelude::{
+    deserialize_number_from_string, deserialize_option_number_from_string,
+    deserialize_string_from_number,
+};
 use hyper::client::HttpConnector;
 // use hyper::Body;
 use itertools::Itertools;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
+use serde_with::serde_as;
+use serde_with::skip_serializing_none;
 use tracing::debug;
 use yaserde::YaDeserialize;
 use yaserde::YaSerialize;
@@ -49,6 +57,8 @@ pub struct Label {
     id: i32,
     #[yaserde(attribute)]
     tag: String,
+    #[yaserde(attribute)]
+    filter: String,
 }
 
 pub type HttpClient = hyper::client::Client<HttpConnector, Body>;
@@ -62,12 +72,14 @@ pub type HttpClient = hyper::client::Client<HttpConnector, Body>;
     Eq,
     YaDeserialize,
     YaSerialize,
-    Default,
-    PartialOrd,
+    // Default,
+    // PartialOrd,
 )]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 #[yaserde(rename_all = "camelCase")]
+#[skip_serializing_none]
+#[serde_as]
 pub struct MetaData {
     #[yaserde(attribute)]
     #[yaserde(rename = "ratingKey")]
@@ -185,6 +197,7 @@ pub struct MetaData {
     pub hub_identifier: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[yaserde(attribute)]
+    //#[serde(deserialize_with = "str_or_i32")]
     pub size: Option<i32>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -205,10 +218,13 @@ pub struct MetaData {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Video")]
     pub video: Vec<MetaData>, // again only xml, but its the same as directory and metadata
-    #[yaserde(attribute)]
-    #[yaserde(rename = "childCount")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub child_count: Option<i32>,
+    #[yaserde(attribute, rename = "childCount")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        deserialize_with = "deserialize_option_string_from_number"
+    )]
+    pub child_count: Option<String>,
     #[yaserde(attribute)]
     #[yaserde(rename = "skipChildren")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -228,21 +244,41 @@ pub struct MetaData {
     #[serde(rename = "Label", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     // #[yaserde(skip_serializing_if = "Vec::is_empty")]
-    #[yaserde(rename = "Label")]
+    #[yaserde(rename = "Label", default)]
+    // #[yaserde(flatten)]
     #[yaserde(child)]
-    pub label: Vec<Label>,
+    pub labels: Vec<Label>,
 }
+
+
+
+// impl YaDeserialize for MetaData {
+//     fn deserialize<R: Read>(reader: &mut yaserde::de::Deserializer<R>) -> Result<Self, String> {
+//       // deserializer code
+//     }
+//   }
+
+pub(crate) fn deserialize_option_string_from_number<'de, D>(
+    deserializer: D,
+) -> Result<Option<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Ok(Some(deserialize_string_from_number(deserializer)?))
+}
+
 
 impl MetaData {
     pub async fn apply_hub_style(&mut self, plex: &PlexClient) {
         if self.context.clone().unwrap() == "hub.custom.collection" {
-            let collection_details = plex
+            let mut collection_details = plex
                 .get_collection(get_collection_id_from_child_path(self.key.clone()))
                 .await
                 .unwrap(); // TODO: Cache
+            // dbg!(&collection_details);
             if collection_details
                 .media_container
-                .directory
+                .children()
                 .get(0)
                 .unwrap()
                 .has_label("REPLEXHERO".to_string())
@@ -255,7 +291,7 @@ impl MetaData {
     }
 
     fn has_label(&self, name: String) -> bool {
-        for label in &self.label {
+        for label in &self.labels {
             if label.tag == name {
                 return true;
             }
@@ -321,6 +357,7 @@ impl MetaData {
 #[yaserde(root = "MediaContainer")]
 pub struct MediaContainer {
     #[yaserde(attribute)]
+    //#[serde(deserialize_with = "str_or_i32")]
     pub size: Option<i32>,
     #[yaserde(attribute)]
     #[yaserde(rename = "totalSize")]

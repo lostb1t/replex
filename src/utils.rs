@@ -95,7 +95,7 @@ pub async fn body_to_string(body: Body) -> Result<String> {
     // let body_bytes = to_bytes(body).await.unwrap();
     
     let string = String::from_utf8(body_bytes.to_vec())?;
-    dbg!(&string);
+    // dbg!(&string);
     // return Ok(snailquote::unescape(&string).unwrap());
     // return Ok(string.replace("\"",'\\\\\"'));
     Ok(string)
@@ -119,6 +119,7 @@ pub async fn from_body(
     // dbg!(&bytes);
     // yaserde::de::from_r
     // dbg!(&bytes);
+    debug!("Response bytes: {:?}", bytes);
     let result: MediaContainerWrapper<MediaContainer> = match content_type {
         ContentType::Json => {
             // let mut c: MediaContainerWrapper<MediaContainer> =

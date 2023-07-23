@@ -61,10 +61,11 @@ async fn main() {
     //     return false;
     // };
 
-    // tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt::init();
     // env::set_var("OTEL_EXPORTER_OTLP_ENDPOINT", "https://otlp.eu01.nr-data.net");
     //OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-    init_tracing_opentelemetry::tracing_subscriber_ext::init_subscribers().unwrap();
+    // init_tracing_opentelemetry::tracing_subscriber_ext::init_subscribers().unwrap();
+
     let proxy = Proxy::default();
     let addr = SocketAddr::from(([0, 0, 0, 0], 3001));
     info!(message = "Listening on", %addr);
@@ -88,10 +89,9 @@ fn router(proxy: Proxy) -> Router {
         )
         .fallback(default_handler)
         .with_state(proxy)
-        // .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
-        .layer(OtelInResponseLayer::default())
-        //start OpenTelemetry trace on incoming request
-        .layer(OtelAxumLayer::default())
+        .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
+        // .layer(OtelInResponseLayer::default())
+        // .layer(OtelAxumLayer::default())
         .layer(
             CorsLayer::new().allow_origin(AllowOrigin::mirror_request()), // TODO: Limit to https://app.plex.tv
         )

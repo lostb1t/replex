@@ -81,7 +81,7 @@ impl PlexClient {
             .header("X-Plex-Client-Identifier", &self.x_plex_client_identifier)
             .header("X-Plex-Token", &self.x_plex_token)
             // .header("Accept", &self.content_type.to_string())
-            .header("Accept", "application/xml")
+            .header("Accept", "application/json")
             .body(Body::empty())
             .unwrap();
         self.http_client.request(request)
