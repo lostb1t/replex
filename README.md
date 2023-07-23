@@ -14,7 +14,7 @@ Make sure you have collections/recommended rows with the same name in both movie
 
 ### Usage example
 
-Run the docker image.
+Run the docker image with REPLEX_HOST set to your plex instance.
 
 ```
 docker run --rm -it -p 80:80 -e REPLEX_HOST="http://10.0.0.3:42405" ghcr.io/sarendsen/replex-nginx:latest
