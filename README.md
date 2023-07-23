@@ -4,7 +4,7 @@
 
 Plex proxy with the following features:
 
-- Merge rows into one from different libraries. Aka have movies and shows merged into one.
+- Merge rows into one from different libraries. Aka have movies and shows in a single row.
 - Remove watched items from hubs in home and library recommended
 - Choose between hub styles, shelf (default) or hero.
 - Plex doesnt apply user restrictions to collection hubs/recommendations. this proxy fixes that so you can have unique rows for every user.
