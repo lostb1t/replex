@@ -7,7 +7,7 @@ use axum::{
     http::Request,
     body::Body,
 };
-use tracing::debug;
+use tracing::{debug, instrument};
 
 // use crate::axum::http::{uri::Uri, Request, Response};
 
@@ -85,7 +85,7 @@ impl Proxy {
     //     self.request(self.req)
     // }
 
-    //#[instrument]
+    #[instrument]
     pub fn request(&self, mut req: Request<Body>) -> hyper::client::ResponseFuture {
         let path = req.uri().path();
         let path_query = req
@@ -99,7 +99,7 @@ impl Proxy {
         req.headers_mut()
             .insert("Accept-Encoding", HeaderValue::from_static("identity"));
 
-        debug!("Proxieng: {:?}", &req.uri());
+        debug!("Proxy");
         *req.uri_mut() = Uri::try_from(uri).unwrap();
         self.client.request(req)
     }

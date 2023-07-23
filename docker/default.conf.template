@@ -21,6 +21,8 @@ server {
     proxy_set_header X-NginX-Proxy true;
     proxy_pass_request_headers on;
     proxy_redirect off;
+    # TODO: Only allow same server and app.plex.tv
+    add_header Access-Control-Allow-Origin "*";
 
     location / {
       proxy_pass http://plex;

@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate tracing;
 
+use std::{convert::Infallible, env, net::SocketAddr, time::Duration};
 use axum::{
     body::Body,
     extract::Path,
@@ -12,6 +13,8 @@ use axum::{
 };
 // use axum::headers::ContentType;
 
+use axum_tracing_opentelemetry::middleware::OtelAxumLayer;
+use axum_tracing_opentelemetry::middleware::OtelInResponseLayer;
 use http::{Request, Response};
 
 // use hyper::{client::HttpConnector, Body};
@@ -24,16 +27,44 @@ use replex::settings::*;
 use replex::url::*;
 use replex::utils::*;
 use tower_http::cors::AllowOrigin;
-
-use tower_http::cors::CorsLayer;
-
-use std::net::SocketAddr;
-use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
+use tower_http::cors::CorsLayer;
+use tracing_subscriber::Registry;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use axum_tracing_opentelemetry::opentelemetry_tracing_layer;
+use tower::ServiceBuilder;
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt::init();
+    // set_default_env_var("REPLEX_", "8080");
+    // let new_relic_api_key = SETTINGS.read().unwrap().get::<String>("host");
+    // env_logger::init();
+    // https://github.com/tokio-rs/axum/blob/main/examples/tracing-aka-logging/src/main.rs
+    // if let new_relic_api_key = SETTINGS.read().unwrap().get::<String>("newrelic_api_key").unwrap() {
+    //     let newrelic = tracing_newrelic::layer(new_relic_api_key);
+    //     tracing_subscriber::registry()
+    //         .with(newrelic)
+    //         .with(tracing_subscriber::fmt::layer())
+    //         .init();
+
+    //     // let fmt = tracing_subscriber::fmt::layer();
+    //     // let subscriber = Registry::default().with(newrelic).with(fmt).with(target);
+    //     // tracing::subscriber::set_global_default(subscriber)
+    //     //     .expect("failed to initilize tracing subscriber");
+    // } else {
+    //     tracing_subscriber::fmt::init();
+    // }
+
+    // let content_type = if let Some(content_type) = headers.get(header::CONTENT_TYPE) {
+    //     content_type
+    // } else {
+    //     return false;
+    // };
+
+    // tracing_subscriber::fmt::init();
+    // env::set_var("OTEL_EXPORTER_OTLP_ENDPOINT", "https://otlp.eu01.nr-data.net");
+    //OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+    init_tracing_opentelemetry::tracing_subscriber_ext::init_subscribers().unwrap();
     let proxy = Proxy::default();
     let addr = SocketAddr::from(([0, 0, 0, 0], 3001));
     info!(message = "Listening on", %addr);
@@ -57,17 +88,24 @@ fn router(proxy: Proxy) -> Router {
         )
         .fallback(default_handler)
         .with_state(proxy)
-        .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
+        // .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
+        .layer(OtelInResponseLayer::default())
+        //start OpenTelemetry trace on incoming request
+        .layer(OtelAxumLayer::default())
         .layer(
             CorsLayer::new().allow_origin(AllowOrigin::mirror_request()), // TODO: Limit to https://app.plex.tv
         )
+}
+
+async fn shutdown_signal() {
+    opentelemetry::global::shutdown_tracer_provider();
 }
 
 async fn default_handler(State(proxy): State<Proxy>, req: Request<Body>) -> Response<Body> {
     proxy.request(req).await.unwrap()
 }
 
-//#[instrument]
+#[instrument]
 #[allow(dead_code)]
 async fn redirect_to_host(
     State(_proxy): State<Proxy>,
@@ -75,7 +113,7 @@ async fn redirect_to_host(
 ) -> axum::response::Redirect {
     //Redirect::to("https://46-4-30-217.01b0839de64b49138531cab1bf32f7c2.plex.direct:42405")
     //proxy.request(req).await.unwrap()
-    debug!("Redirecting: {:?}", &req.uri());
+    // debug!("Redirecting: {:?}", &req.uri());
     // debug!("req: {:?}", req);
     Redirect::temporary(&SETTINGS.read().unwrap().get::<String>("host").unwrap())
 }
@@ -98,6 +136,7 @@ async fn get_hubs_sections(
     container
 }
 
+#[instrument]
 async fn get_hubs_promoted(
     State(proxy): State<Proxy>,
     mut req: Request<Body>,
@@ -144,6 +183,7 @@ async fn get_hubs_promoted(
     container.process_hubs(plex).await
 }
 
+#[instrument]
 async fn get_collections_children(
     State(_proxy): State<Proxy>,
     Path(ids): Path<String>,
