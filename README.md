@@ -10,7 +10,7 @@ Plex proxy with the following features:
 - Plex doesnt apply user restrictions to collection hubs/recommendations. this proxy fixes that so you can have unique rows for every user.
 - Works on every client!
 
-Make sure you to that your collections you want to merge have **same name** (aka trending) as it will be merged by name.
+Make sure you to that your collections you want to merge have the **same name** as it will be merged by name.
 
 ### Usage example
 
