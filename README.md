@@ -5,7 +5,7 @@
 Plex proxy with the following features:
 
 - Merge recommendations on home into one from different libraries. Aka have movies and shows in a single row.
-- Remove watched items from recommendations.
+- Hide watched items from recommendations.
 - Choose between styles, shelf (default) or hero.
 - Plex doesnt apply user restrictions to collection recommendations. this proxy fixes that so you can have unique rows for every user.
 - Works on every client!
@@ -37,7 +37,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | Setting        	       | Default 	| Description                                                            	|
 |--------------------------|------------|---------------------------------------------------------------------------|
 | REPLEX_HOST              | -      	| Plex target host to proxy                                             	|
-| REPLEX_INCLUDE_WATCHED   | false    	| If set to true, remove watched items from hubs.                        	|
+| REPLEX_INCLUDE_WATCHED   | false    	| If set to false, hide watched items.                        	|
 
 ### Hub style
 
