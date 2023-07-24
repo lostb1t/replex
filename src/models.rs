@@ -611,36 +611,6 @@ impl MediaContainerWrapper<MediaContainer> {
         self
     }
 
-    // pub async fn replex_hub(self, mut hub: MetaData, plex: PlexClient) -> MetaData {
-    //     // let p = new_collections.iter().position(|v| v.title == hub.title);
-    //     // hub.r#type = "mixed".to_string();
-    //     // hub.apply_hub_style(&plex).await;
-    //     // hub
-    //     //     match p {
-    //     //         Some(v) => {
-    //     //             new_collections[v].key =
-    //     //                 merge_children_keys(new_collections[v].key.clone(), hub.key.clone());
-    //     //             let c = new_collections[v].children();
-    //     //             // let h = hub.metadata;
-    //     //             new_collections[v].set_children(
-    //     //                 c.into_iter()
-    //     //                     .interleave(hub.children())
-    //     //                     .collect::<Vec<MetaData>>(),
-    //     //             );
-    //     //         }
-    //     //         None => new_collections.push(hub),
-    //     //     }
-    //     // }
-    //     // let size = new_collections.len();
-    //     // self.media_container.library_section_id = None;
-    //     // self.media_container.library_section_title = None;
-    //     // self.media_container.library_section_uuid = None;
-    //     // self.media_container.size = Some(size.try_into().unwrap());
-    //     // // trace!("mangled promoted container {:#?}", container);
-    //     // self.media_container.set_children(new_collections);
-    //     // self
-    // }
-
     // TODO: Only works for hubs. Make it generic or name it specific for hubs
     pub async fn process_hubs(mut self, plex: &PlexClient) -> Self {
         let collections = self.media_container.children();
@@ -695,10 +665,7 @@ impl MediaContainerWrapper<MediaContainer> {
         let collections = self.media_container.children();
         let mut custom_collections: Vec<MetaData> = vec![];
         let mut processed_section_ids: Vec<u32> = vec![];
-        // let section_id: Option<u32> = self.media_container.library_section_id;
 
-        // self.media_container.set_children(vec![]);
-        // ;       dbg!(&self.media_container);
         for mut metadata in collections.clone() {
             if metadata.is_hub() && !metadata.is_collection_hub() {
                 continue;
@@ -712,50 +679,29 @@ impl MediaContainerWrapper<MediaContainer> {
                     .library_section_id
                     .expect("Missing Library section id")
             });
-            // if !metadata.is_hub() && section_id.is_none() && metadata.library_section_id.is_none() {
-            //     continue;
-            // }
 
-            // if metadata.is_hub() {
-            //     let section_id: u32 = metadata.library_section_id.unwrap_or_else(|| {
-            //         metadata.children()
-            //             .get(0)
-            //             .unwrap()
-            //             .library_section_id
-            //             .expect("Missing Library section id")
-            //     });
-            // } else {
-            //     let section_id: u32 = metadata.library_section_id.unwrap();
-            // }
-            //let section_id = collections[0].library_section_id.unwrap();
             if processed_section_ids.contains(&section_id) {
                 continue;
             }
-            // dbg!(section_id);
+
             processed_section_ids.push(section_id);
+
             // TODO: Use join to join these async requests
             let mut c = plex.get_section_collections(section_id).await.unwrap();
-            
-            // let mut c = plex.get_section_collections(section_id).await.unwrap();
-
-            // dbg!(&c);
             custom_collections.append(&mut c);
         }
-        // dbg!(&custom_collections);
 
         let custom_collections_keys: Vec<String> =
             custom_collections.iter().map(|c| c.key.clone()).collect();
-        // dbg!(&custom_collections_keys);
-        // let slice = &collections[..];
+
         let new_collections: Vec<MetaData> = collections
             .into_iter()
             .filter(|c| {
-                c.context.clone().unwrap() != "hub.custom.collection"
+                !c.is_collection_hub()
                     || custom_collections_keys.contains(&c.key)
             })
             .collect();
-        // dbg!(&new_collections);
-        // println!("{:#?}", new_collections.len());
+
         let mut new = self.clone();
         let size = new_collections.len();
         //new.media_container.hub = new_collections; // uch need to know if this is a hub or not
@@ -764,63 +710,6 @@ impl MediaContainerWrapper<MediaContainer> {
         new
     }
 
-    // pub async fn fix_permissions(&mut self, plex: &PlexClient) -> Self {
-    //     debug!("Fixing hub permissions");
-    //     let collections = self.media_container.children();
-    //     let mut custom_collections: Vec<MetaData> = vec![];
-    //     let mut processed_section_ids: Vec<u32> = vec![];
-
-    //     for _hub in collections.clone() {
-    //         // dbg!(&hub);
-    //         // dbg!("YOOO");
-    //         // if hub.metadata.is_empty() {
-    //         //     // debug!("metadata is empty");
-    //         //     continue;
-    //         // }
-    //         // dbg!(&collections);
-    //         let section_id: u32 = self
-    //             .media_container
-    //             .library_section_id
-    //             .expect("Missing Library section id");
-    //         //let section_id = collections[0].library_section_id.unwrap();
-    //         if processed_section_ids.contains(&section_id) {
-    //             continue;
-    //         }
-    //         // dbg!(section_id);
-    //         processed_section_ids.push(section_id);
-    //         // TODO: Use join to join these async requests
-
-    //         let mut c = plex.get_section_collections(section_id).await.unwrap();
-
-    //         // dbg!(&c);
-    //         custom_collections.append(&mut c);
-    //     }
-    //     // dbg!(&custom_collections);
-
-    //     let custom_collections_keys: Vec<String> =
-    //         custom_collections.iter().map(|c| c.key.clone()).collect();
-    //     // dbg!(&custom_collections_keys);
-    //     // let slice = &collections[..];
-    //     let new_collections: Vec<MetaData> = collections
-    //         .into_iter()
-    //         .filter(|c| {
-    //             c.context.clone().unwrap() != "hub.custom.collection"
-    //                 || custom_collections_keys.contains(&c.key)
-    //         })
-    //         .collect();
-    //     // dbg!(&new_collections);
-    //     // println!("{:#?}", new_collections.len());
-    //     let mut new = self.clone();
-    //     let size = new_collections.len();
-    //     //new.media_container.hub = new_collections; // uch need to know if this is a hub or not
-    //     new.media_container.set_children(new_collections);
-    //     new.media_container.size = Some(size.try_into().unwrap());
-    //     new
-    // }
-
-    // pub fn merge_children(mut self, children) -> Self {
-
-    // }
 }
 
 impl<T> IntoResponse for MediaContainerWrapper<T>

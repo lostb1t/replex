@@ -8,6 +8,13 @@ upstream replex {
     keepalive 8;
 }
 
+map $request_method $upstream_location {
+  PUT     ${NGINX_PLEX};
+  POST    ${NGINX_PLEX};
+  PATCH   ${NGINX_PLEX};
+  default 127.0.0.1:3001;
+}
+
 ## If there is no Upgrade header, then $connection_upgrade is close, otherwise it is upgrade
 map $http_upgrade $connection_upgrade {
     default upgrade;
@@ -42,7 +49,7 @@ server {
     }
 
     location /hubs/ {
-      proxy_pass http://replex;
+      proxy_pass http://$upstream_location;
     }
 
     location /replex/ {
