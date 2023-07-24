@@ -13,11 +13,11 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
+use hyper::client::HttpConnector;
 use serde_aux::prelude::{
     deserialize_number_from_string, deserialize_option_number_from_string,
     deserialize_string_from_number,
 };
-use hyper::client::HttpConnector;
 // use hyper::Body;
 use itertools::Itertools;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -220,10 +220,7 @@ pub struct MetaData {
     pub video: Vec<MetaData>, // again only xml, but its the same as directory and metadata
     #[yaserde(attribute, rename = "childCount")]
     // #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(
-        default,
-        deserialize_with = "deserialize_option_string_from_number"
-    )]
+    #[serde(default, deserialize_with = "deserialize_option_string_from_number")]
     pub child_count: Option<String>,
     #[yaserde(attribute)]
     #[yaserde(rename = "skipChildren")]
@@ -250,8 +247,6 @@ pub struct MetaData {
     pub labels: Vec<Label>,
 }
 
-
-
 // impl YaDeserialize for MetaData {
 //     fn deserialize<R: Read>(reader: &mut yaserde::de::Deserializer<R>) -> Result<Self, String> {
 //       // deserializer code
@@ -267,7 +262,6 @@ where
     Ok(Some(deserialize_string_from_number(deserializer)?))
 }
 
-
 impl MetaData {
     pub async fn apply_hub_style(&mut self, plex: &PlexClient) {
         if self.context.clone().unwrap() == "hub.custom.collection" {
@@ -275,7 +269,7 @@ impl MetaData {
                 .get_collection(get_collection_id_from_child_path(self.key.clone()))
                 .await
                 .unwrap(); // TODO: Cache
-            // dbg!(&collection_details);
+                           // dbg!(&collection_details);
             if collection_details
                 .media_container
                 .children()
