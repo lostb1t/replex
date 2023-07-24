@@ -7,6 +7,21 @@ on:
       - main
 
 jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          override: true
+      - name: Run Tests
+        run: make run-tests
+        shell: bash
+
   release:
     name: Tag and release latest version
     runs-on: ubuntu-20.04
