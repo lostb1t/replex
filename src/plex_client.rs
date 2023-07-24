@@ -1,3 +1,4 @@
+use crate::config::Config;
 use crate::models::*;
 use crate::utils::*;
 use anyhow::Result;
@@ -5,7 +6,6 @@ use axum::{
     http::Request,
     body::Body,
 };
-use crate::settings::*;
 use hyper::client::HttpConnector;
 
 
@@ -138,11 +138,12 @@ impl PlexClient {
 
 impl From<&Request<Body>> for PlexClient {
     fn from(req: &Request<Body>) -> Self {
+        let config: Config = Config::figment().extract().unwrap();
         // dbg!(get_content_type_from_headers(req.headers()));
         Self {
             http_client: HttpClient::new(),
             // host: "http://100.91.35.113:32400".to_string(),
-            host: SETTINGS.read().unwrap().get::<String>("host").unwrap(),
+            host: config.host,
             x_plex_token: get_header_or_param("x-plex-token".to_string(), &req)
                 .expect("Expected to have an token in header or query"),
             x_plex_client_identifier: get_header_or_param(

@@ -1,0 +1,48 @@
+{
+    "MediaContainer": {
+        "size": 1,
+        "allowSync": true,
+        "identifier": "com.plexapp.plugins.library",
+        "librarySectionID": 6,
+        "librarySectionTitle": "Movies test",
+        "librarySectionUUID": "80065a44-7df3-402d-a7de-ece85c71cb71",
+        "mediaTagPrefix": "/system/bundle/media/flags/",
+        "mediaTagVersion": 1689685224,
+        "Metadata": [
+            {
+                "ratingKey": "254688",
+                "key": "/library/collections/254688/children",
+                "guid": "collection://3db842b0-f100-45ce-8528-427daa7e98b2",
+                "type": "collection",
+                "title": "Popular",
+                "librarySectionTitle": "Movies test",
+                "librarySectionID": 6,
+                "librarySectionKey": "/library/sections/6",
+                "contentRating": "R",
+                "subtype": "movie",
+                "index": 2042524,
+                "ratingCount": 2,
+                "thumb": "/library/collections/254688/composite/1690169715?width=400&height=600",
+                "addedAt": 1689651491,
+                "updatedAt": 1690169715,
+                "childCount": "19",
+                "collectionSort": "2",
+                "maxYear": "2023",
+                "minYear": "2022",
+                "Label": [
+                    {
+                        "id": 2032329,
+                        "filter": "label=2032329",
+                        "tag": "PMM"
+                    }
+                ],
+                "Field": [
+                    {
+                        "locked": true,
+                        "name": "label"
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,4 +1,4 @@
-use crate::models::*;
+use crate::{models::*, config::Config};
 
 
 // use axum::http::{uri::Uri, Request};
@@ -11,7 +11,6 @@ use tracing::{debug, instrument};
 
 // use crate::axum::http::{uri::Uri, Request, Response};
 
-use crate::settings::*;
 
 use http::HeaderValue;
 // use hyper::Body;
@@ -147,8 +146,9 @@ impl Proxy {
 
 impl Default for Proxy {
     fn default() -> Self {
+        let config: Config = Config::figment().extract().unwrap();
         Self {
-            host: SETTINGS.read().unwrap().get::<String>("host").unwrap(),
+            host: config.host,
             client: HttpClient::new(),
         }
     }

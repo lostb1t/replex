@@ -11,4 +11,5 @@ pub mod response;
 pub mod plex_client;
 pub mod xml;
 pub mod url;
-pub mod settings;
+pub mod config;
+pub mod routes;

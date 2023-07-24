@@ -1,6 +1,6 @@
 {
     "MediaContainer": {
-        "size": 3,
+        "size": 2,
         "allowSync": true,
         "identifier": "com.plexapp.plugins.library",
         "Hub": [
@@ -47,16 +47,6 @@
                 "type": "mixed",
                 "context": "hub.home.movies.recent",
                 "hubIdentifier": "home.movies.recent.6",
-                "size": 0,
-                "more": false,
-                "style": "shelf"
-            },
-            {
-                "key": "/hubs/home/recentlyAdded?type=2&pinnedContentDirectoryID=6,7",
-                "title": "Recently Added TV",
-                "type": "mixed",
-                "context": "hub.home.television.recent",
-                "hubIdentifier": "home.television.recent.7",
                 "size": 0,
                 "more": false,
                 "style": "shelf"

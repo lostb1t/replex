@@ -1,4 +1,4 @@
-runtest:
+run-tests:
 	cargo test -- --nocapture
 
 build:
