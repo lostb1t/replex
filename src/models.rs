@@ -648,6 +648,7 @@ impl MediaContainerWrapper<MediaContainer> {
         for mut hub in collections {
             hub.apply_hub_style(plex).await;
             if self.is_section_hub() {
+                new_collections.push(hub),
                 continue
             }
             let p = new_collections.iter().position(|v| v.title == hub.title);
@@ -667,10 +668,6 @@ impl MediaContainerWrapper<MediaContainer> {
                 }
                 None => new_collections.push(hub),
             }
-        }
-
-        if self.is_section_hub() {
-            return self
         }
 
         let size = new_collections.len();
