@@ -442,6 +442,7 @@ impl MediaContainer {
         }
     }
     pub fn set_children(&mut self, value: Vec<MetaData>) {
+        let len: i32 = value.len().try_into().unwrap();
         if !self.metadata.is_empty() {
             self.metadata = value;
         } else if !self.hub.is_empty() {
@@ -451,6 +452,7 @@ impl MediaContainer {
         } else if !self.directory.is_empty() {
             self.directory = value;
         };
+        self.size = Some(len);
     }
 
     pub fn children(&mut self) -> Vec<MetaData> {

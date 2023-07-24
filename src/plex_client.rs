@@ -2,12 +2,8 @@ use crate::config::Config;
 use crate::models::*;
 use crate::utils::*;
 use anyhow::Result;
-use axum::{
-    http::Request,
-    body::Body,
-};
+use axum::{body::Body, http::Request};
 use hyper::client::HttpConnector;
-
 
 type HttpClient = hyper::client::Client<HttpConnector, Body>;
 #[derive(Debug, Clone)]
@@ -92,9 +88,10 @@ impl PlexClient {
             .get(format!("/library/sections/{}/collections", id))
             .await
             .unwrap();
-        
-        let mut container: MediaContainerWrapper<MediaContainer> =
-            from_response(resp).await.expect("Cannot get MediaContainerWrapper from response");
+
+        let mut container: MediaContainerWrapper<MediaContainer> = from_response(resp)
+            .await
+            .expect("Cannot get MediaContainerWrapper from response");
 
         Ok(container.media_container.children())
     }
@@ -102,26 +99,28 @@ impl PlexClient {
     pub async fn get_collection_children(
         &self,
         id: u32,
+        offset: Option<i32>,
+        limit: Option<i32>,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
-        let resp = self
-            .get(format!("/library/collections/{}/children", id))
-            .await
-            .unwrap();
-        let container: MediaContainerWrapper<MediaContainer> =
-            from_response(resp).await.unwrap();
+        let mut path = format!("/library/collections/{}/children", id);
+ 
+        if offset.is_some() {
+            path = format!("{}?X-Plex-Container-Start={}", path, offset.unwrap());
+        }
+        if limit.is_some() {
+            path = format!("{}&X-Plex-Container-Size={}", path, limit.unwrap());
+        }
+        let resp = self.get(path).await.unwrap();
+        let container: MediaContainerWrapper<MediaContainer> = from_response(resp).await.unwrap();
         Ok(container)
     }
 
-    pub async fn get_collection(
-        &self,
-        id: i32,
-    ) -> Result<MediaContainerWrapper<MediaContainer>> {
+    pub async fn get_collection(&self, id: i32) -> Result<MediaContainerWrapper<MediaContainer>> {
         let resp = self
             .get(format!("/library/collections/{}", id))
             .await
             .unwrap();
-        let container: MediaContainerWrapper<MediaContainer> =
-            from_response(resp).await.unwrap();
+        let container: MediaContainerWrapper<MediaContainer> = from_response(resp).await.unwrap();
         Ok(container)
     }
 
@@ -130,8 +129,7 @@ impl PlexClient {
         key: String,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
         let resp = self.get(key).await.unwrap();
-        let container: MediaContainerWrapper<MediaContainer> =
-            from_response(resp).await.unwrap();
+        let container: MediaContainerWrapper<MediaContainer> = from_response(resp).await.unwrap();
         Ok(container)
     }
 }

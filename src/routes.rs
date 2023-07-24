@@ -7,8 +7,8 @@ use axum::{
     routing::get,
     Router,
 };
-use tracing::instrument;
 use std::{convert::Infallible, env, net::SocketAddr, time::Duration};
+use tracing::instrument;
 // use axum::headers::ContentType;
 
 use axum_tracing_opentelemetry::middleware::OtelAxumLayer;
@@ -17,14 +17,14 @@ use http::{Request, Response};
 
 // use hyper::{client::HttpConnector, Body};
 
-use axum_tracing_opentelemetry::opentelemetry_tracing_layer;
-use itertools::Itertools;
+use crate::config::*;
 use crate::models::*;
 use crate::plex_client::*;
 use crate::proxy::*;
-use crate::config::*;
 use crate::url::*;
 use crate::utils::*;
+use axum_tracing_opentelemetry::opentelemetry_tracing_layer;
+use itertools::Itertools;
 use tower::ServiceBuilder;
 use tower_http::cors::AllowOrigin;
 use tower_http::cors::CorsLayer;
@@ -125,14 +125,31 @@ async fn get_collections_children(
     req: Request<Body>,
 ) -> MediaContainerWrapper<MediaContainer> {
     let collection_ids: Vec<u32> = ids.split(',').map(|v| v.parse().unwrap()).collect();
+    let collection_ids_len: i32 = collection_ids.len() as i32;
     let plex = PlexClient::from(&req);
     let mut children: Vec<MetaData> = vec![];
     let reversed: Vec<u32> = collection_ids.iter().copied().rev().collect();
 
-    for id in reversed {
-        let mut c = plex.get_collection_children(id).await.unwrap();
+    let mut offset: Option<i32> = None;
+    let mut original_offset: Option<i32> = None;
+    if let Some(i) = get_header_or_param("X-Plex-Container-Start".to_string(), &req) {
+        offset = Some(i.parse().unwrap());
+        original_offset = offset;
+        offset = Some(offset.unwrap() / collection_ids_len);
+    }
+    let mut limit: Option<i32> = None;
+    if let Some(i) = get_header_or_param("X-Plex-Container-Size".to_string(), &req) {
+        limit = Some(i.parse().unwrap());
+        limit = Some(limit.unwrap() / collection_ids_len);
+    }
 
-        // children = [children, c.media_container.children()].concat();
+    // dbg!(&offset);
+    for id in reversed {
+        let mut c = plex
+            .get_collection_children(id, offset.clone(), limit.clone())
+            .await
+            .unwrap();
+        // dbg!(c.media_container.children().len());
         match children.is_empty() {
             false => {
                 children = children
@@ -142,7 +159,6 @@ async fn get_collections_children(
             }
             true => children.append(&mut c.media_container.children()),
         }
-        children.append(&mut c.media_container.children())
     }
 
     let mut container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
@@ -152,7 +168,7 @@ async fn get_collections_children(
     let size = container.media_container.children().len();
     container.media_container.size = Some(size.try_into().unwrap());
     container.media_container.total_size = Some(size.try_into().unwrap());
-    container.media_container.offset = Some(0);
+    container.media_container.offset = original_offset.clone();
 
     // container = container.make_mixed();
     container.replex(plex).await
