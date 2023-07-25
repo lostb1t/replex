@@ -49,17 +49,11 @@ if using an ip only set 'Custom server access URLs'. By using your IP you will n
 
 Disable remote access and it will route everything properly
 
-## Docker
+## reverse prozy
 
-2 images are provided:
-
-- `replex`
-- `replex-standalone`
-
-This isnt a fully fledged proxy and doesnt aim to be. The default docker image `replex` includes nginx. 
-If you already have a reverse proxy running and want to ax nginx you can route the following paths (and it subpaths) to this app and use the `replex-standalone` image. 
+If you have a reverse proxy running and only want to route the necessary paths:
 
 - /hubs (excluding /hubs/search)
 - /replex
 
-But there is no real reason to use the standalone version. And i advice against using it, as there is no harm or real overhead in using the main and is already configured properly. 
+Paths are subject to change, for the latest routing check th
