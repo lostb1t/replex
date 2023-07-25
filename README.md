@@ -40,7 +40,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 
 You can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection. 
 
-## Force clients to use the proxy
+## force clients to use the proxy
 
 To force plex clients to use your proxy you can either use a custom domain with or without ssl or use your server ip.
 
