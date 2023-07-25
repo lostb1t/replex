@@ -623,11 +623,20 @@ impl MediaContainerWrapper<MediaContainer> {
         self
     }
 
+    // TODO: This should be a trait so we dont repeat ourselfs
     pub fn remove_watched(mut self) -> Self {
         let mut children: Vec<MetaData> = vec![];
-        for mut child in self.media_container.children() {
-            child.remove_watched();
-            children.push(child);
+        if self.is_hub() {
+            for mut child in self.media_container.children() {
+                child.remove_watched();
+                children.push(child);
+            }
+        } else {
+            children = self.media_container
+                .children()
+                .into_iter()
+                .filter(|c| !c.is_watched())
+                .collect::<Vec<MetaData>>();
         }
         self.media_container.set_children(children);
         self
