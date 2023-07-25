@@ -13,7 +13,7 @@ Plex proxy with the following features:
 
 !!This does not alter your plex data in anyway. it only alters outgoing api requests. All your collections or rows are kept intact!!
 
-## Usage example
+## usage example
 
 _Make sure that the collections you want to merge have the same name in your different libraries as the merge happens by name. 
 Example: an collection named "Trending" in a Movie library will be merged with an collection named "Trending" from a shows library on home._
@@ -28,7 +28,7 @@ add your proxy url to plex "Custom server access URLs" (ex http://0.0.0.0:80)
 
 then access your proxy url http://0.0.0.0:80
 
-## Settings
+## settings
 Settings are set via [environment variables](https://kinsta.com/knowledgebase/what-is-an-environment-variable/) 
 
 | Setting        	       | Default 	| Description                                                            	|
@@ -36,7 +36,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_HOST              | -      	| Plex target host to proxy                                             	|
 | REPLEX_INCLUDE_WATCHED   | false    	| If set to false, hide watched items.                        	|
 
-## Hub style
+## hub style
 
 You can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection. 
 
