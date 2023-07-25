@@ -12,7 +12,7 @@ Plex proxy with the following features:
 
 ### Usage example
 
-**sMake sure that the collections you want to merge have the same name as it will be merged by name.**s
+**Make sure that the collections you want to merge have the same name as it will be merged by name.**
 
 Run the docker image with REPLEX_HOST set to your plex instance.
 
