@@ -58,7 +58,8 @@ Disable remote access and it will route everything properly
 
 This isnt a fully fledged proxy and doesnt aim to be. The default docker image `replex` includes nginx. 
 If you already have a reverse proxy running and want to ax nginx you can route the following paths (and it subpaths) to this app and use the `replex-standalone` image. 
-There is no real reason to ise the stabdalone version. And i advice against using the standalone versio tho, as there is no harm or real overhead in using the main and is already configured properly. 
 
 - /hubs (excluding /hubs/search)
 - /replex
+
+There is no real reason to use the stabdalone version. And i advice against using the standalone versio tho, as there is no harm or real overhead in using the main and is already configured properly. 
