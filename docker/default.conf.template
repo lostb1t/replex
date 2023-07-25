@@ -23,13 +23,16 @@ map $http_upgrade $connection_upgrade {
 
 server {
     listen 0.0.0.0:80;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-NginX-Proxy true;
+    #proxy_set_header X-Real-IP $remote_addr;
+    #proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    #proxy_set_header X-NginX-Proxy true;
     proxy_pass_request_headers on;
     proxy_redirect off;
     # TODO: Only allow same server and app.plex.tv
     add_header "Access-Control-Allow-Methods" "GET, POST, PUT, PATCH, OPTIONS, HEAD";
+    # proxy_set_header Origin '$http_origin';
+    #add header "Access-Control-Expose-Headers" "Location, Date";
+    #add_header "Access-Control-Allow-Methods" "GET, POST, PUT, OPTIONS, HEAD";
     #add_header 'Access-Control-Allow-Origin' "$http_origin" always;
     #add_header "Access-Control-Allow-Origin" $http_origin;
 
