@@ -82,7 +82,7 @@ async fn get_hubs_sections(
     let mut options = ReplexOptions::default();
     if let Some(original_count) = get_header_or_param("count".to_owned(), &req) {
         let count_number: i32 = original_count.parse().unwrap();
-        req = add_query_param(req, "count", &(count_number * 3).to_string());
+        req = add_query_param(req, "count", &(count_number * 2).to_string());
         options = ReplexOptions {
             limit: Some(count_number),
         };
@@ -126,7 +126,7 @@ async fn get_hubs_promoted(
     let mut options = ReplexOptions::default();
     if let Some(original_count) = get_header_or_param("count".to_owned(), &req) {
         let count_number: i32 = original_count.parse().unwrap();
-        req = add_query_param(req, "count", &(count_number * 3).to_string());
+        req = add_query_param(req, "count", &(count_number * 2).to_string());
         options = ReplexOptions {
             limit: Some(count_number),
         };
