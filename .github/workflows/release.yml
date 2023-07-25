@@ -58,7 +58,7 @@ jobs:
           push: true
           target: standalone
           tags: | 
-            ghcr.io/sarendsen/replex:latest
+            ghcr.io/sarendsen/replex-standalone:latest
       - name: Build and push nginx
         uses: docker/build-push-action@v4
         with:
@@ -69,4 +69,4 @@ jobs:
           push: true 
           target: nginx
           tags: | 
-            ghcr.io/sarendsen/replex-nginx:latest
+            ghcr.io/sarendsen/replex:latest

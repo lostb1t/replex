@@ -18,17 +18,12 @@ Example: an collection named "Trending" in a Movie library will be merged with a
 Run the docker image with REPLEX_HOST set to your plex instance.
 
 ```
-docker run --rm -it -p 80:80 -e REPLEX_HOST="http://10.0.0.3:42405" ghcr.io/sarendsen/replex-nginx:latest
+docker run --rm -it -p 80:80 -e REPLEX_HOST="http://10.0.0.3:42405" ghcr.io/sarendsen/replex:latest
 ```
 
 add your proxy url to plex "Custom server access URLs" (ex http://0.0.0.0:80)
 
 then access your proxy url http://0.0.0.0:80
-
-NOTICE: this isnt a fully fledged proxy and doesnt aim to be. The default docker images includes nginx. If you already have a reverse proxy running and want to ax nginx you can route the following paths (and it subpaths) to this app and use the replex-standalone image. 
-
-- /hubs (excluding /hubs/search)
-- /replex
 
 ### Settings
 Settings are set via [environment variables](https://kinsta.com/knowledgebase/what-is-an-environment-variable/) 
@@ -49,3 +44,10 @@ To force plex clients to use your proxy you can either use a custom domain with 
 if using a domain set 'Custom certificate domain' to your domain (without http/https) and to your 'Custom server access URLs' (with http/https)
 if using an ip only set 'Custom server access URLs'
 Disable remote access and it will route everything properly
+
+## Docker
+
+This isnt a fully fledged proxy and doesnt aim to be. The default docker images includes nginx. If you already have a reverse proxy running and want to ax nginx you can route the following paths (and it subpaths) to this app and use the replex-standalone image. 
+
+- /hubs (excluding /hubs/search)
+- /replex
