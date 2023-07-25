@@ -13,7 +13,7 @@ Plex proxy with the following features:
 
 ### Usage example
 
-_Make sure that the collections you want the recommended rows to be merged have the same name in your different libraries as the merge happens by name. 
+_Make sure that the collections you want to merge have the same name in your different libraries as the merge happens by name. 
 Example: an collection named "Trending" in a Movie library will be merged with an collection named "Trending" from a shows library on home._
 
 Run the docker image with REPLEX_HOST set to your plex instance.
