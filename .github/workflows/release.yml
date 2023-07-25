@@ -48,18 +48,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.PERSONAL_TOKEN }}
-      - name: Build and push standalone
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: docker/Dockerfile
-          # platforms: linux/amd64,linux/arm64
-          platforms: linux/amd64
-          push: true
-          target: standalone
-          tags: | 
-            ghcr.io/sarendsen/replex-standalone:latest
-      - name: Build and push nginx
+      - name: Build and push
         uses: docker/build-push-action@v4
         with:
           context: .
