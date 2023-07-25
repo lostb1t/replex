@@ -2,11 +2,11 @@ use std::fmt::Display;
 use std::io::Read;
 use std::str::FromStr;
 
+use crate::config::*;
 use crate::plex_client::PlexClient;
 use crate::proxy::*;
 use crate::utils::*;
 use crate::xml::*;
-use crate::config::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use axum::{
@@ -32,6 +32,16 @@ use yaserde::YaSerialize;
 // use parse_display::{Display, FromStr};
 // use yaserde_derive::{YaDeserialize, YaSerialize};
 
+
+#[derive(Debug, Clone, Default)]
+pub struct ReplexOptions {
+    pub limit: Option<i32>,
+}
+
+// impl Default for ReplexOptions {
+//     fn default() -> Self { limit: None }
+// }
+
 #[derive(Debug, Clone)]
 pub struct App {
     proxy: Proxy,
@@ -52,7 +62,6 @@ pub struct App {
 )]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
-#[yaserde(rename_all = "camelCase")]
 pub struct Label {
     #[yaserde(attribute)]
     id: i32,
@@ -69,16 +78,11 @@ pub type HttpClient = hyper::client::Client<HttpConnector, Body>;
     Serialize,
     Deserialize,
     Clone,
-    PartialEq,
-    Eq,
     YaDeserialize,
     YaSerialize,
-    // Default,
-    // PartialOrd,
 )]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
-#[yaserde(rename_all = "camelCase")]
 #[serde_as]
 pub struct MetaData {
     #[yaserde(attribute)]
@@ -245,6 +249,18 @@ pub struct MetaData {
     // #[yaserde(flatten)]
     #[yaserde(child)]
     pub labels: Vec<Label>,
+    #[yaserde( attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rating: Option<f64>,
+    #[yaserde(rename = "audienceRating" attribute)]
+    #[serde(rename = "audienceRating", skip_serializing_if = "Option::is_none")]
+    pub audience_rating: Option<f64>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub index: Option<i32>,
+    #[yaserde(rename = "primaryExtraKey", attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub primary_extra_key: Option<String>,
 }
 
 // impl YaDeserialize for MetaData {
@@ -292,7 +308,7 @@ impl MetaData {
                 .get_collection(get_collection_id_from_child_path(self.key.clone()))
                 .await
                 .unwrap(); // TODO: Cache
-            // dbg!("yup");       // dbg!(&collection_details);
+                           // dbg!("yup");       // dbg!(&collection_details);
             if collection_details
                 .media_container
                 .children()
@@ -367,7 +383,7 @@ impl MetaData {
 }
 
 #[derive(
-    Debug, Serialize, Deserialize, Clone, PartialEq, Eq, YaDeserialize, YaSerialize, Default,
+    Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default,
 )]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
@@ -562,7 +578,7 @@ impl MediaContainerWrapper<MediaContainer> {
     }
 
     /// TODO: use filter an map. And chain them for performance
-    pub async fn replex(mut self, plex: PlexClient) -> Self {
+    pub async fn replex(mut self, plex: PlexClient, options: ReplexOptions) -> Self {
         let config: Config = Config::figment().extract().unwrap();
 
         // needs to come before process hubs as it will set some valeus to none
@@ -576,30 +592,34 @@ impl MediaContainerWrapper<MediaContainer> {
             self = self.remove_watched();
         }
 
-        // let new_children = self
-        //     .media_container
-        //     .children()
-        //     .into_iter()
-        //     // .filter(remove_watched)
-        //     .filter(|x| {
-        //         if !self.media_container.hub.is_empty() {
-        //             return true;
-        //         }
-        //         !include_watched && !x.is_watched()
-        //     });
-        // .map(
-        //     |x| async {self.replex_hub(x, plex).await}
-        // )
-        // .collect::<Vec<MetaData>>();
+        if options.limit.is_some() {
+            self = self.limit(options.limit.unwrap());
+        }
 
-        // let new_children = futures::future::join_all(
-        //     new_children.filter_map(|mut x| Some(async move { x.replex(&plex).await })),
-        // )
-        // .await;
+        self
+    }
 
-        // let size = new_children.len();
-        // self.media_container.size = Some(size.try_into().unwrap());
-        // self.media_container.set_children(new_children);
+    pub fn limit(mut self, limit: i32) -> Self {
+        // let mut children: Vec<MetaData> = vec![];
+        // for mut child in self.media_container.children() {
+        //     child.truncate(limit);
+        //     children.push(child);
+        // }
+        let len = limit as usize;
+        if self.is_hub() {
+            let mut hubs: Vec<MetaData> = vec![];
+            for mut hub in self.media_container.children() {
+                let mut children = hub.children();
+                children.truncate(len);
+                hub.set_children(children);
+                hubs.push(hub);
+            }
+            self.media_container.set_children(hubs);
+        } else {
+            let mut children =  self.media_container.children();
+            children.truncate(len);
+            self.media_container.set_children(children);
+        }
         self
     }
 
@@ -621,11 +641,11 @@ impl MediaContainerWrapper<MediaContainer> {
             hub.apply_hub_style(plex).await;
             if self.is_section_hub() {
                 new_collections.push(hub);
-                continue
+                continue;
             }
             let p = new_collections.iter().position(|v| v.title == hub.title);
             hub.r#type = "mixed".to_string();
-            
+
             match p {
                 Some(v) => {
                     new_collections[v].key =
@@ -698,10 +718,7 @@ impl MediaContainerWrapper<MediaContainer> {
 
         let new_collections: Vec<MetaData> = collections
             .into_iter()
-            .filter(|c| {
-                !c.is_collection_hub()
-                    || custom_collections_keys.contains(&c.key)
-            })
+            .filter(|c| !c.is_collection_hub() || custom_collections_keys.contains(&c.key))
             .collect();
 
         let mut new = self.clone();
@@ -711,7 +728,6 @@ impl MediaContainerWrapper<MediaContainer> {
         new.media_container.size = Some(size.try_into().unwrap());
         new
     }
-
 }
 
 impl<T> IntoResponse for MediaContainerWrapper<T>

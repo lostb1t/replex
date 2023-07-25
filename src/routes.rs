@@ -75,13 +75,22 @@ async fn redirect_to_host(
 #[instrument]
 async fn get_hubs_sections(
     State(proxy): State<Proxy>,
-    req: Request<Body>,
+    mut req: Request<Body>,
 ) -> MediaContainerWrapper<MediaContainer> {
     let plex = PlexClient::from(&req);
-    let resp = proxy.request(req).await.unwrap();
+    // Hack, as the list could be smaller when removing watched items. So we request more.
+    let original_count: i32 = get_header_or_param("count".to_owned(), &req)
+        .unwrap()
+        .parse()
+        .unwrap();
+    req = add_query_param(req, "count", &(original_count * 3).to_string());
+    let options = ReplexOptions {
+        limit: Some(original_count),
+    };
 
+    let resp = proxy.request(req).await.unwrap();
     let container = from_response(resp).await.unwrap();
-    container.replex(plex).await
+    container.replex(plex, options).await
 }
 
 #[instrument]
@@ -112,10 +121,19 @@ async fn get_hubs_promoted(
     }
 
     req = add_query_param(req, "contentDirectoryID", &pinned_id_header);
+    // Hack, as the list could be smaller when removing watched items. So we request more.
+    let original_count: i32 = get_header_or_param("count".to_owned(), &req)
+        .unwrap()
+        .parse()
+        .unwrap();
+    req = add_query_param(req, "count", &(original_count * 3).to_string());
     let plex = PlexClient::from(&req);
     let resp = proxy.request(req).await.expect("Expected an response");
     let container = from_response(resp).await.unwrap();
-    container.replex(plex).await
+    let options = ReplexOptions {
+        limit: Some(original_count),
+    };
+    container.replex(plex, options).await
 }
 
 #[instrument]
@@ -138,17 +156,22 @@ async fn get_collections_children(
         offset = Some(offset.unwrap() / collection_ids_len);
     }
     let mut limit: Option<i32> = None;
+    let mut original_limit: Option<i32> = None;
     if let Some(i) = get_header_or_param("X-Plex-Container-Size".to_string(), &req) {
         limit = Some(i.parse().unwrap());
+        original_limit = limit;
         limit = Some(limit.unwrap() / collection_ids_len);
     }
 
     // dbg!(&offset);
+    let mut total_size: i32 = 0;
     for id in reversed {
         let mut c = plex
             .get_collection_children(id, offset.clone(), limit.clone())
             .await
             .unwrap();
+        total_size += c.media_container.total_size.unwrap();
+        // dbg!(c.media_container.total_size);
         // dbg!(c.media_container.children().len());
         match children.is_empty() {
             false => {
@@ -163,13 +186,15 @@ async fn get_collections_children(
 
     let mut container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
     container.content_type = get_content_type_from_headers(req.headers());
-    // so not change the child type, video is needed for collections
-    container.media_container.video = children;
+    // so not change the child type, metadata is needed for collections
+    container.media_container.metadata = children;
     let size = container.media_container.children().len();
     container.media_container.size = Some(size.try_into().unwrap());
-    container.media_container.total_size = Some(size.try_into().unwrap());
+    container.media_container.total_size = Some(total_size);
     container.media_container.offset = original_offset.clone();
 
-    // container = container.make_mixed();
-    container.replex(plex).await
+    let options = ReplexOptions {
+        limit: original_limit,
+    };
+    container.replex(plex, options).await
 }
