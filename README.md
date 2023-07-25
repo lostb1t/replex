@@ -62,4 +62,4 @@ If you already have a reverse proxy running and want to ax nginx you can route t
 - /hubs (excluding /hubs/search)
 - /replex
 
-There is no real reason to use the stabdalone version. And i advice against using the standalone versio tho, as there is no harm or real overhead in using the main and is already configured properly. 
+There is no real reason to use the standalone version. And i advice against using it, as there is no harm or real overhead in using the main and is already configured properly. 
