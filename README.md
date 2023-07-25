@@ -11,6 +11,8 @@ Plex proxy with the following features:
 - Works on every client/app not only plex web!
 - Plays nice with PMM (and without).
 
+This doesnt alter your plex data in anyway. it only alters outgoing api requests. All your collections or rows are not actually edited.
+
 ### Usage example
 
 _Make sure that the collections you want to merge have the same name in your different libraries as the merge happens by name. 
