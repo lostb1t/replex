@@ -10,9 +10,9 @@ Plex proxy with the following features:
 - Plex doesnt apply user restrictions to collection recommendations. this proxy fixes that so you can have unique rows for every user.
 - Works on every client!
 
-Make sure that the collections you want to merge have the **same name** as it will be merged by name.
-
 ### Usage example
+
+**sMake sure that the collections you want to merge have the same name as it will be merged by name.**s
 
 Run the docker image with REPLEX_HOST set to your plex instance.
 
