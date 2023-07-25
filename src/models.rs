@@ -249,18 +249,18 @@ pub struct MetaData {
     // #[yaserde(flatten)]
     #[yaserde(child)]
     pub labels: Vec<Label>,
-    #[yaserde( attribute)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub rating: Option<f64>,
-    #[yaserde(rename = "audienceRating" attribute)]
-    #[serde(rename = "audienceRating", skip_serializing_if = "Option::is_none")]
-    pub audience_rating: Option<f64>,
-    #[yaserde(attribute)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub index: Option<i32>,
-    #[yaserde(rename = "primaryExtraKey", attribute)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub primary_extra_key: Option<String>,
+    // #[yaserde( attribute)]
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub rating: Option<f64>,
+    // #[yaserde(rename = "audienceRating" attribute)]
+    // #[serde(rename = "audienceRating", skip_serializing_if = "Option::is_none")]
+    // pub audience_rating: Option<f64>,
+    // #[yaserde(attribute)]
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub index: Option<i32>,
+    // #[yaserde(rename = "primaryExtraKey", attribute)]
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub primary_extra_key: Option<String>,
 }
 
 // impl YaDeserialize for MetaData {

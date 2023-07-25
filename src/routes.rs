@@ -79,14 +79,14 @@ async fn get_hubs_sections(
 ) -> MediaContainerWrapper<MediaContainer> {
     let plex = PlexClient::from(&req);
     // Hack, as the list could be smaller when removing watched items. So we request more.
-    let original_count: i32 = get_header_or_param("count".to_owned(), &req)
-        .unwrap()
-        .parse()
-        .unwrap();
-    req = add_query_param(req, "count", &(original_count * 3).to_string());
-    let options = ReplexOptions {
-        limit: Some(original_count),
-    };
+    let mut options = ReplexOptions::default();
+    if let Some(original_count) = get_header_or_param("count".to_owned(), &req) {
+        let count_number: i32 = original_count.parse().unwrap();
+        req = add_query_param(req, "count", &(count_number * 3).to_string());
+        options = ReplexOptions {
+            limit: Some(count_number),
+        };
+    }
 
     let resp = proxy.request(req).await.unwrap();
     let container = from_response(resp).await.unwrap();
@@ -121,18 +121,20 @@ async fn get_hubs_promoted(
     }
 
     req = add_query_param(req, "contentDirectoryID", &pinned_id_header);
+
     // Hack, as the list could be smaller when removing watched items. So we request more.
-    let original_count: i32 = get_header_or_param("count".to_owned(), &req)
-        .unwrap()
-        .parse()
-        .unwrap();
-    req = add_query_param(req, "count", &(original_count * 3).to_string());
+    let mut options = ReplexOptions::default();
+    if let Some(original_count) = get_header_or_param("count".to_owned(), &req) {
+        let count_number: i32 = original_count.parse().unwrap();
+        req = add_query_param(req, "count", &(count_number * 3).to_string());
+        options = ReplexOptions {
+            limit: Some(count_number),
+        };
+    }
+
     let plex = PlexClient::from(&req);
     let resp = proxy.request(req).await.expect("Expected an response");
     let container = from_response(resp).await.unwrap();
-    let options = ReplexOptions {
-        limit: Some(original_count),
-    };
     container.replex(plex, options).await
 }
 
