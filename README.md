@@ -56,4 +56,4 @@ If you have a reverse proxy running and only want to route the necessary paths, 
 - /hubs (excluding /hubs/search)
 - /replex
 
-Paths are subject to change, for the latest routing check the nginx [nginx](docker/default.conf.template)
+Paths are subject to change, for the latest routing check the nginx [conf](docker/default.conf.template)
