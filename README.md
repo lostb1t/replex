@@ -25,12 +25,10 @@ add your proxy url to plex "Custom server access URLs" (ex http://0.0.0.0:80)
 
 then access your proxy url http://0.0.0.0:80
 
-NOTICE: this isnt a fully fledged proxy and doesnt aim to be. I suggest putting it behind a proper (reverse) proxy and only route the following paths (and it subpaths) to this app. 
+NOTICE: this isnt a fully fledged proxy and doesnt aim to be. socker images including nginx are provided. if you already have a reverse proxy running and you can  route the following paths (and it subpaths) to this app. 
 
-- /hubs
+- /hubs (excluding /hubs/search)
 - /replex
-
-If you dont have a reverse proxy an docker image including nginx exists at ghcr.io/sarendsen/replex-nginx and a version without nginx at ghcr.io/sarendsen/replex.
 
 ### Settings
 Settings are set via [environment variables](https://kinsta.com/knowledgebase/what-is-an-environment-variable/) 
