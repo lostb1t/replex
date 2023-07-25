@@ -124,6 +124,24 @@ impl PlexClient {
         Ok(container)
     }
 
+    pub async fn get_hubs_section_without_metadata(&self, section_id: String) -> Result<MediaContainerWrapper<MediaContainer>> {
+        let resp = self
+            .get(format!("/hubs/sections/{}/manage", section_id))
+            .await
+            .unwrap();
+        let container: MediaContainerWrapper<MediaContainer> = from_response(resp).await.unwrap();
+        Ok(container)
+    }
+
+    pub async fn get_library_sections(&self) -> Result<MediaContainerWrapper<MediaContainer>> {
+        let resp = self
+            .get(format!("/library/sections"))
+            .await
+            .unwrap();
+        let container: MediaContainerWrapper<MediaContainer> = from_response(resp).await.unwrap();
+        Ok(container)
+    }
+
     pub async fn get_item_by_key(
         self,
         key: String,

@@ -2,11 +2,11 @@ use std::fmt::Display;
 use std::io::Read;
 use std::str::FromStr;
 
+use crate::config::*;
 use crate::plex_client::PlexClient;
 use crate::proxy::*;
 use crate::utils::*;
 use crate::xml::*;
-use crate::config::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use axum::{
@@ -86,7 +86,8 @@ pub struct MetaData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rating_key: Option<String>,
     #[yaserde(attribute)]
-    pub key: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub guid: Option<String>,
@@ -174,7 +175,8 @@ pub struct MetaData {
     pub library_section_key: Option<String>,
     #[yaserde(rename = "type")]
     #[yaserde(attribute)]
-    pub r#type: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<String>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub summary: Option<String>,
@@ -245,6 +247,39 @@ pub struct MetaData {
     // #[yaserde(flatten)]
     #[yaserde(child)]
     pub labels: Vec<Label>,
+    #[yaserde(attribute, rename = "recommendationsVisibility")]
+    #[serde(
+        rename = "recommendationsVisibility",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub recommendations_visibility: Option<String>,
+    #[yaserde(attribute, rename = "homeVisibility")]
+    #[serde(rename = "homeVisibility", skip_serializing_if = "Option::is_none")]
+    pub home_visibility: Option<String>,
+    #[yaserde(attribute, rename = "promotedToRecommended")]
+    #[serde(
+        rename = "promotedToRecommended",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub promoted_to_recommended: Option<bool>,
+    #[yaserde(attribute, rename = "promotedToOwnHome")]
+    #[serde(rename = "promotedToOwnHome", skip_serializing_if = "Option::is_none")]
+    pub promoted_to_own_home: Option<bool>,
+    #[yaserde(attribute, rename = "promotedToSharedHome")]
+    #[serde(
+        rename = "promotedToSharedHome",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub promoted_to_shared_home: Option<bool>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub deletable: Option<bool>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hidden: Option<i32>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub identifier: Option<String>,
 }
 
 // impl YaDeserialize for MetaData {
@@ -268,7 +303,8 @@ impl MetaData {
     }
 
     pub fn is_media(&self) -> bool {
-        !self.is_hub() && (self.r#type == "movie" || self.r#type == "show")
+        !self.is_hub()
+            && (self.r#type.clone().unwrap() == "movie" || self.r#type.clone().unwrap() == "show")
     }
 
     pub fn is_collection_hub(&self) -> bool {
@@ -279,7 +315,7 @@ impl MetaData {
 
     pub async fn replex(&mut self, plex: &PlexClient) -> MetaData {
         if self.context.clone().unwrap_or_default() == "hub.custom.collection" {
-            self.r#type = "mixed".to_string();
+            self.r#type = Some("mixed".to_string());
             self.apply_hub_style(&plex).await;
         }
         self.clone()
@@ -289,10 +325,12 @@ impl MetaData {
         if self.is_collection_hub() {
             // dbg!(get_collection_id_from_child_path(self.key.clone()));
             let mut collection_details = plex
-                .get_collection(get_collection_id_from_child_path(self.key.clone()))
+                .get_collection(get_collection_id_from_child_path(
+                    self.key.clone().unwrap().clone(),
+                ))
                 .await
                 .unwrap(); // TODO: Cache
-            // dbg!("yup");       // dbg!(&collection_details);
+                           // dbg!("yup");       // dbg!(&collection_details);
             if collection_details
                 .media_container
                 .children()
@@ -438,7 +476,7 @@ pub struct MediaContainer {
 impl MediaContainer {
     pub fn set_type(&mut self, value: String) {
         for hub in &mut self.hub {
-            hub.r#type = value.clone();
+            hub.r#type = Some(value.clone());
         }
     }
     pub fn set_children(&mut self, value: Vec<MetaData>) {
@@ -553,6 +591,52 @@ fn merge_children_keys(mut key_left: String, mut key_right: String) -> String {
 }
 
 impl MediaContainerWrapper<MediaContainer> {
+    pub async fn home_hubs(plex: &PlexClient) -> MediaContainerWrapper<MediaContainer> {
+        // get all home sections
+        let home_sections = plex
+            .get_library_sections()
+            .await
+            .unwrap()
+            .media_container
+            .directory
+            .into_iter()
+            .filter(|x| x.hidden.is_some() && x.hidden.unwrap() == 1)
+            .collect::<Vec<MetaData>>();
+
+        // get promoted hubs per section
+        let mut hubs: Vec<MetaData> = vec![];
+        for section in home_sections {
+            let mut h = plex
+                .get_hubs_section_without_metadata(section.key.clone().unwrap())
+                .await
+                .unwrap()
+                .media_container
+                .hub
+                .into_iter()
+                .filter(|x| {
+                    x.identifier
+                        .clone()
+                        .unwrap()
+                        .starts_with("custom.collection")
+                })
+                .collect::<Vec<MetaData>>();
+            hubs.append(&mut h);
+        }
+
+        // filter_keys = 
+        // get our media items for the hubs
+        // for hub in hubs {
+        //     let resp = plex
+        //         .get(format!("/library/all?unwatched=1&includeMeta=0&type=1,2&includeExternalMedia=0&excludeFields=summary"))
+        //         .await
+        //         .unwrap();
+        //     let container: MediaContainerWrapper<MediaContainer> =
+        //         from_response(resp).await.unwrap();
+        // }
+
+        MediaContainerWrapper::default()
+    }
+
     pub fn is_hub(&self) -> bool {
         !self.media_container.hub.is_empty()
     }
@@ -562,7 +646,7 @@ impl MediaContainerWrapper<MediaContainer> {
     }
 
     /// TODO: use filter an map. And chain them for performance
-    pub async fn replex(mut self, plex: PlexClient) -> Self {
+    pub async fn replex(mut self, plex: &PlexClient) -> Self {
         let config: Config = Config::figment().extract().unwrap();
 
         // needs to come before process hubs as it will set some valeus to none
@@ -617,30 +701,30 @@ impl MediaContainerWrapper<MediaContainer> {
     pub async fn process_hubs(mut self, plex: &PlexClient) -> Self {
         let collections = self.media_container.children();
         let mut new_collections: Vec<MetaData> = vec![];
-        for mut hub in collections {
-            hub.apply_hub_style(plex).await;
-            if self.is_section_hub() {
-                new_collections.push(hub);
-                continue
-            }
-            let p = new_collections.iter().position(|v| v.title == hub.title);
-            hub.r#type = "mixed".to_string();
-            
-            match p {
-                Some(v) => {
-                    new_collections[v].key =
-                        merge_children_keys(new_collections[v].key.clone(), hub.key.clone());
-                    let c = new_collections[v].children();
-                    // let h = hub.metadata;
-                    new_collections[v].set_children(
-                        c.into_iter()
-                            .interleave(hub.children())
-                            .collect::<Vec<MetaData>>(),
-                    );
-                }
-                None => new_collections.push(hub),
-            }
-        }
+        // for mut hub in collections {
+        //     hub.apply_hub_style(plex).await;
+        //     if self.is_section_hub() {
+        //         new_collections.push(hub);
+        //         continue;
+        //     }
+        //     let p = new_collections.iter().position(|v| v.title == hub.title);
+        //     hub.r#type = "mixed".to_string();
+
+        //     match p {
+        //         Some(v) => {
+        //             new_collections[v].key =
+        //                 merge_children_keys(new_collections[v].key.clone().unwrap(), hub.key.clone().unwrap());
+        //             let c = new_collections[v].children();
+        //             // let h = hub.metadata;
+        //             new_collections[v].set_children(
+        //                 c.into_iter()
+        //                     .interleave(hub.children())
+        //                     .collect::<Vec<MetaData>>(),
+        //             );
+        //         }
+        //         None => new_collections.push(hub),
+        //     }
+        // }
 
         let size = new_collections.len();
         self.media_container.size = Some(size.try_into().unwrap());
@@ -693,14 +777,15 @@ impl MediaContainerWrapper<MediaContainer> {
             custom_collections.append(&mut c);
         }
 
-        let custom_collections_keys: Vec<String> =
-            custom_collections.iter().map(|c| c.key.clone()).collect();
+        let custom_collections_keys: Vec<String> = custom_collections
+            .iter()
+            .map(|c| c.key.clone().unwrap())
+            .collect();
 
         let new_collections: Vec<MetaData> = collections
             .into_iter()
             .filter(|c| {
-                !c.is_collection_hub()
-                    || custom_collections_keys.contains(&c.key)
+                !c.is_collection_hub() || custom_collections_keys.contains(&c.key.clone().unwrap())
             })
             .collect();
 
@@ -711,7 +796,6 @@ impl MediaContainerWrapper<MediaContainer> {
         new.media_container.size = Some(size.try_into().unwrap());
         new
     }
-
 }
 
 impl<T> IntoResponse for MediaContainerWrapper<T>

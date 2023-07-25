@@ -81,7 +81,7 @@ async fn get_hubs_sections(
     let resp = proxy.request(req).await.unwrap();
 
     let container = from_response(resp).await.unwrap();
-    container.replex(plex).await
+    container.replex(&plex).await
 }
 
 #[instrument]
@@ -110,12 +110,12 @@ async fn get_hubs_promoted(
         c.media_container.identifier = Some("com.plexapp.plugins.library".to_string());
         return c;
     }
-
-    req = add_query_param(req, "contentDirectoryID", &pinned_id_header);
     let plex = PlexClient::from(&req);
+    let k = MediaContainerWrapper::home_hubs(&plex).await; 
+    req = add_query_param(req, "contentDirectoryID", &pinned_id_header);
     let resp = proxy.request(req).await.expect("Expected an response");
     let container = from_response(resp).await.unwrap();
-    container.replex(plex).await
+    container.replex(&plex).await
 }
 
 #[instrument]
@@ -171,5 +171,5 @@ async fn get_collections_children(
     container.media_container.offset = original_offset.clone();
 
     // container = container.make_mixed();
-    container.replex(plex).await
+    container.replex(&plex).await
 }

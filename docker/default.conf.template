@@ -13,6 +13,7 @@ map $request_method $upstream_location {
   POST    ${NGINX_PLEX};
   PATCH   ${NGINX_PLEX};
   default 127.0.0.1:3001;
+  keepalive 8;
 }
 
 ## If there is no Upgrade header, then $connection_upgrade is close, otherwise it is upgrade
