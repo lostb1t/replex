@@ -49,9 +49,9 @@ if using an ip only set 'Custom server access URLs'. By using your IP you will n
 
 Disable remote access and it will route everything properly
 
-## reverse prozy
+## reverse proxy
 
-If you have a reverse proxy running and only want to route the necessary paths:
+If you have a reverse proxy running and only want to route the necessary paths, you can do so. (and all subpaths unless otherwise stated).
 
 - /hubs (excluding /hubs/search)
 - /replex
