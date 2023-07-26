@@ -47,11 +47,12 @@ pub fn router(proxy: Proxy) -> Router {
         .fallback(default_handler)
         .with_state(proxy)
         .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
+        .layer(CorsLayer::permissive())
         // .layer(OtelInResponseLayer::default())
         // .layer(OtelAxumLayer::default())
-        .layer(
-            CorsLayer::new().allow_origin(AllowOrigin::mirror_request()), // TODO: Limit to https://app.plex.tv
-        )
+        //.layer(
+        //    CorsLayer::new().allow_origin(AllowOrigin::mirror_request()), // TODO: Limit to https://app.plex.tv
+        //)
 }
 
 async fn shutdown_signal() {
