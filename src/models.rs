@@ -319,7 +319,25 @@ impl MetaData {
                 .has_label("REPLEXHERO".to_string())
             {
                 self.style = Some("hero".to_string());
+
+                // for android
+                self.meta = Some(Meta {
+                    // r#type: Some("clip".to_string()),
+                    r#type: None,
+                    display_fields: vec![
+                    DisplayField {
+                        r#type: Some("movie".to_string()),
+                        fields: vec!["title".to_string(), "year".to_string()],
+                    },
+                    DisplayField {
+                        r#type: Some("show".to_string()),
+                        fields: vec!["title".to_string(), "year".to_string()],
+                    }],
+                });          
+                self.r#type = "clip".to_string();
             }
+
+            
             // dbg!(collection_details);
         }
         // self
@@ -441,6 +459,11 @@ pub struct MediaContainer {
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 pub struct DisplayField {
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "type")]
+    pub r#type: Option<String>,
+    // #[yaserde(attribute)]
     pub fields: Vec<String>,
 }
 
@@ -450,7 +473,10 @@ pub struct DisplayField {
 pub struct Meta {
     #[serde(rename = "DisplayFields")]
     pub display_fields: Vec<DisplayField>,
-    pub r#type: String,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "type")]
+    pub r#type: Option<String>,
 }
 
 // pub fn remove_watched(item: MetaData) {
@@ -675,15 +701,10 @@ impl MediaContainerWrapper<MediaContainer> {
                 continue;
             }
             let p = new_collections.iter().position(|v| v.title == hub.title);
-            hub.r#type = "mixed".to_string();
 
-            // hub.meta = Some(Meta {
-            //     r#type: "clip".to_string(),
-            //     display_fields: vec![DisplayField {
-            //         fields: vec!["title".to_string(), "originallyAvailableAt".to_string()],
-            //     }],
-            // });          
-            // hub.r#type = "clip".to_string();
+            if hub.r#type != "clip" {
+                hub.r#type = "mixed".to_string();
+            }
 
             match p {
                 Some(v) => {
