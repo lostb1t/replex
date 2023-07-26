@@ -40,14 +40,21 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 
 You can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection. 
 
-## force clients to use the proxy
+## force clients to use the proxy (remote access)
 
-To force plex clients to use your proxy you can either use a custom domain with or without ssl or use your server ip.
+Because this app sits before Plex the builtin remote access will not work anymore an needs to be disabled.
 
-if using a domain set 'Custom certificate domain' to your domain (without http/https) and to your 'Custom server access URLs' (with http/https).
-if using an ip only set 'Custom server access URLs'. By using your IP you will not have SSL tho.
+You have 2 options to provide remote access.
 
-Disable remote access and it will route everything properly
+1. By ip http://[replexip]:[replexport]
+
+   This option has 2 downsides. One it has no SSL so your connections will be insecure. Second app.plex.tv will not work. As browsers do not allow unsecure connections from a securew website. Gf you want to to use the web ui you can access it by ip. All other clients should work with unsecured connections
+
+2. Custom domain (reverse proxy)
+
+   You can setup a reverse proxy with a custom domain. This solves both the issues from option 1.
+
+For both options set your domain or ip (http://[replexip]:[replexport]) in the 'Custom server access URLs' field under network and make sure to disable remote access under remote access.
 
 ## reverse proxy
 
