@@ -201,7 +201,9 @@ pub struct MetaData {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[yaserde(attribute)]
     pub style: Option<String>,
-    // pub context: String,
+    #[yaserde(skip)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub meta: Option<Meta>,
     #[serde(rename = "Metadata", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Metadata")]
@@ -241,9 +243,6 @@ pub struct MetaData {
     // #[yaserde(flatten)]
     #[yaserde(child)]
     pub labels: Vec<Label>,
-    #[yaserde(skip)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub meta: Option<Meta>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub originally_available_at: Option<String>,
@@ -305,6 +304,7 @@ impl MetaData {
 
     pub async fn apply_hub_style(&mut self, plex: &PlexClient) {
         if self.is_collection_hub() {
+            let mut children: Vec<MetaData> = self.children();
             // dbg!(get_collection_id_from_child_path(self.key.clone()));
             let mut collection_details = plex
                 .get_collection(get_collection_id_from_child_path(self.key.clone()))
@@ -335,9 +335,14 @@ impl MetaData {
                     }],
                 });          
                 self.r#type = "clip".to_string();
+                // children[0].r#type = "clip".to_string();
+
+                // let child = children.get(0).unwrap().clone();
+                // child.r#type = "clip".to_string();
+                // children.push(children.get(0).unwrap().r#type = "clip".to_string())
             }
 
-            
+            // self.set_children(children);
             // dbg!(collection_details);
         }
         // self
