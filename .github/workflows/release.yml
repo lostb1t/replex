@@ -59,6 +59,6 @@ jobs:
           platforms: linux/amd64,linux/arm64
           #platforms: linux/amd64
           push: true 
-          target: nginx
+          target: replex
           tags: | 
             ghcr.io/sarendsen/replex:latest
