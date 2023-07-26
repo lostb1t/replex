@@ -678,11 +678,18 @@ impl MediaContainerWrapper<MediaContainer> {
             let p = new_collections.iter().position(|v| v.title == hub.title);
             hub.r#type = "mixed".to_string();
 
+            // hub.meta = Some(Meta {
+            //     display_fields: vec![DisplayField {
+            //         fields: vec!["originallyAvailableAt".to_string()],
+            //     }],
+            // });
+
+
             hub.meta = Some(Meta {
                 display_fields: vec![DisplayField {
-                    fields: vec!["originallyAvailableAt".to_string()],
+                    fields: vec![],
                 }],
-            });
+            });            
             hub.r#type = "clip".to_string();
             match p {
                 Some(v) => {
