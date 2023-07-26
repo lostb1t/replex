@@ -3,8 +3,10 @@ use axum::{
     extract::Path,
     extract::State,
     response::Redirect,
+    extract::ws::{WebSocketUpgrade, WebSocket},
     // http::{uri::Uri, Request, Response},
     routing::get,
+    response::Response,
     Router,
 };
 use std::{convert::Infallible, env, net::SocketAddr, time::Duration};
@@ -13,7 +15,7 @@ use tracing::instrument;
 
 // use axum_tracing_opentelemetry::middleware::OtelAxumLayer;
 // use axum_tracing_opentelemetry::middleware::OtelInResponseLayer;
-use http::{Request, Response};
+use http::{Request};
 
 // use hyper::{client::HttpConnector, Body};
 
@@ -44,6 +46,10 @@ pub fn router(proxy: Proxy) -> Router {
             "/replex/library/collections/:ids/children",
             get(get_collections_children),
         )
+        .route(
+            "/:dummy/websockets",
+            get(ws_handler),
+        )
         .fallback(default_handler)
         .with_state(proxy)
         .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
@@ -53,6 +59,28 @@ pub fn router(proxy: Proxy) -> Router {
         //.layer(
         //    CorsLayer::new().allow_origin(AllowOrigin::mirror_request()), // TODO: Limit to https://app.plex.tv
         //)
+}
+
+
+async fn ws_handler(ws: WebSocketUpgrade) -> Response {
+    dbg!("HANDLER");
+    ws.on_upgrade(handle_socket)
+}
+
+async fn handle_socket(mut socket: WebSocket) {
+    while let Some(msg) = socket.recv().await {
+        let msg = if let Ok(msg) = msg {
+            msg
+        } else {
+            // client disconnected
+            return;
+        };
+
+        if socket.send(msg).await.is_err() {
+            // client disconnected
+            return;
+        }
+    }
 }
 
 async fn shutdown_signal() {
