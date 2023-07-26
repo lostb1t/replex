@@ -333,11 +333,7 @@ impl MetaData {
                 });          
                 self.r#type = "clip".to_string();
             }
-
-            // self.set_children(children);
-            // dbg!(collection_details);
         }
-        // self
     }
 
     fn has_label(&self, name: String) -> bool {

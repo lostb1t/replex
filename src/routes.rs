@@ -102,10 +102,9 @@ async fn get_hubs_promoted(
     let ids_header = get_header_or_param("contentDirectoryID".to_owned(), &req).unwrap();
     let content_directory_ids: Vec<&str> = ids_header.split(',').collect();
 
-    let test = get_header_or_param("X-Plex-Client-Platform".to_owned(), &req); 
-    let test_another = get_header_or_param("X-Plex-Platform".to_owned(), &req); 
-    dbg!(test);
-    dbg!(test_another);
+    let platform = get_header_or_param("x-plex-platform".to_owned(), &req); 
+    // dbg!(test);
+    // dbg!(test_another);
     // Cant handle multiple directories yet
     if content_directory_ids.len() > 1 {
         let resp = proxy.request(req).await.unwrap();
