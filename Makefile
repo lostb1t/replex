@@ -23,3 +23,6 @@ run:
 
 fix:
 	cargo fix
+
+# cargo-update:
+# 	cargo install-update -a

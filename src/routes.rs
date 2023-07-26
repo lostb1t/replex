@@ -11,8 +11,8 @@ use std::{convert::Infallible, env, net::SocketAddr, time::Duration};
 use tracing::instrument;
 // use axum::headers::ContentType;
 
-use axum_tracing_opentelemetry::middleware::OtelAxumLayer;
-use axum_tracing_opentelemetry::middleware::OtelInResponseLayer;
+// use axum_tracing_opentelemetry::middleware::OtelAxumLayer;
+// use axum_tracing_opentelemetry::middleware::OtelInResponseLayer;
 use http::{Request, Response};
 
 // use hyper::{client::HttpConnector, Body};
@@ -23,7 +23,7 @@ use crate::plex_client::*;
 use crate::proxy::*;
 use crate::url::*;
 use crate::utils::*;
-use axum_tracing_opentelemetry::opentelemetry_tracing_layer;
+// use axum_tracing_opentelemetry::opentelemetry_tracing_layer;
 use itertools::Itertools;
 use tower::ServiceBuilder;
 use tower_http::cors::AllowOrigin;
@@ -55,7 +55,7 @@ pub fn router(proxy: Proxy) -> Router {
 }
 
 async fn shutdown_signal() {
-    opentelemetry::global::shutdown_tracer_provider();
+    // opentelemetry::global::shutdown_tracer_provider();
 }
 
 async fn default_handler(State(proxy): State<Proxy>, req: Request<Body>) -> Response<Body> {

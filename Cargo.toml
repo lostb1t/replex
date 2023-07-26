@@ -6,9 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-http = "^0.2.8"
-serde = { version = "^1.0", features = ["derive"] }
-serde_json = "^1.0"
+http = "0.2.8"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 hyper = { version = "0.14.24", features = ["full"] }
 tokio = { version = "1.25.0", features = ["full"] }
 lazy_static = "1.4.0"
@@ -35,16 +35,16 @@ thiserror = "1.0.38"
 http-body = "0.4.5"
 futures-util = "0.3.26"
 config = "0.13.3"
-tracing-newrelic = "0.1.2"
 env_logger = "0.10.0"
-axum-tracing-opentelemetry = "0.12.0"
-init-tracing-opentelemetry = {version ="0.12.0", features = [
-  "otlp",
-  "tracing_subscriber_ext",
-]}
-opentelemetry = "0.19.0"
+tracing-newrelic = "0.1.2"
+#axum-tracing-opentelemetry = "0.12.0"
+#init-tracing-opentelemetry = {version ="0.12.0", features = [
+#  "otlp",
+#  "tracing_subscriber_ext",
+#]}
+#opentelemetry = "0.19.0"
 serde-aux = "^4.2.0"
-serde_with = { version = "^3.0", features = ["json"] }
+serde_with = { version = "3.0", features = ["json"] }
 futures = "0.3.28"
 figment = { version = "0.10.10", features = ["env"] }
 
@@ -55,8 +55,3 @@ httpmock = "0.6.7"
 jsonxf = "1.1.1"
 pretty_assertions = "1.3.0"
 rstest = "0.16.0"
-
-# [patch."https://github.com/sarendsen/plex-api.rs.git"]
-# plex-api = { path = "./vendor/plex-api.rs/crates/plex-api" }
-# [patch."https://github.com/felipenoris/hyper-reverse-proxy.git"]
-# hyper-reverse-proxy = { path = "./vendor/hyper-reverse-proxy" }

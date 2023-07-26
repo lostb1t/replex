@@ -13,13 +13,13 @@ use axum::{
 use std::{convert::Infallible, env, net::SocketAddr, time::Duration};
 // use axum::headers::ContentType;
 
-use axum_tracing_opentelemetry::middleware::OtelAxumLayer;
-use axum_tracing_opentelemetry::middleware::OtelInResponseLayer;
+// use axum_tracing_opentelemetry::middleware::OtelAxumLayer;
+// use axum_tracing_opentelemetry::middleware::OtelInResponseLayer;
 use http::{Request, Response};
 
 // use hyper::{client::HttpConnector, Body};
 
-use axum_tracing_opentelemetry::opentelemetry_tracing_layer;
+// use axum_tracing_opentelemetry::opentelemetry_tracing_layer;
 use itertools::Itertools;
 use replex::models::*;
 use replex::plex_client::*;
