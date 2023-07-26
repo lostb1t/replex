@@ -10,15 +10,14 @@ RUN cargo build --release
 COPY ./ ./
 RUN cargo build --release
 
-# alpine needs musl, too much work
-FROM debian:stable-slim as standalone
+FROM debian:stable-slim as replex
 WORKDIR /app
 RUN apt update \
     && apt install -y openssl ca-certificates \
     && apt clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 COPY --from=builder /app/src/replex/target/release/replex /app/
-EXPOSE 3001
+EXPOSE 80
 CMD ["/app/replex"]
 
 # FROM nginx:stable-alpine as nginx

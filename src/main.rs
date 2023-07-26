@@ -68,7 +68,7 @@ async fn main() {
     // init_tracing_opentelemetry::tracing_subscriber_ext::init_subscribers().unwrap();
 
     let proxy = Proxy::default();
-    let addr = SocketAddr::from(([0, 0, 0, 0], 3001));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 80));
     info!(message = "Listening on", %addr);
     axum::Server::bind(&addr)
         .serve(router(proxy).into_make_service())
