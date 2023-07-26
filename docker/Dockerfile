@@ -11,7 +11,6 @@ COPY ./ ./
 RUN cargo build --release
 
 FROM debian:stable-slim as replex
-WORKDIR /app
 RUN apt update \
     && apt install -y openssl ca-certificates \
     && apt clean \

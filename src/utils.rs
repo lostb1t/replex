@@ -9,6 +9,7 @@ use strum_macros::Display as EnumDisplay;
 use strum_macros::EnumString;
 
 use tracing::debug;
+use tracing::error;
 use yaserde::ser::to_string as to_xml_str;
 
 
@@ -149,7 +150,18 @@ pub async fn from_response(
     
     let content_type = get_content_type_from_headers(&parts.headers);
     // let yo = body;
-    from_body(body, &content_type).await
+    
+    let result = match from_body(body, &content_type).await {
+        Ok(result) => result,
+        Err(error) => {
+            error!("Problem deserializing: {:?}", error);
+            let container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
+            container // TOOD: Handle this higher up
+        }
+    };
+    Ok(result)
+    // let result = from_body(body, &content_type).await;
+    // result
 }
 
 pub async fn to_string(
