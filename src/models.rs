@@ -32,7 +32,6 @@ use yaserde::YaSerialize;
 // use parse_display::{Display, FromStr};
 // use yaserde_derive::{YaDeserialize, YaSerialize};
 
-
 #[derive(Debug, Clone, Default)]
 pub struct ReplexOptions {
     pub limit: Option<i32>,
@@ -73,14 +72,7 @@ pub struct Label {
 
 pub type HttpClient = hyper::client::Client<HttpConnector, Body>;
 
-#[derive(
-    Debug,
-    Serialize,
-    Deserialize,
-    Clone,
-    YaDeserialize,
-    YaSerialize,
-)]
+#[derive(Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 #[serde_as]
@@ -249,6 +241,8 @@ pub struct MetaData {
     // #[yaserde(flatten)]
     #[yaserde(child)]
     pub labels: Vec<Label>,
+    #[yaserde(skip)]
+    pub meta: Option<Meta>,
     // #[yaserde( attribute)]
     // #[serde(skip_serializing_if = "Option::is_none")]
     // pub rating: Option<f64>,
@@ -290,7 +284,11 @@ impl MetaData {
     pub fn is_collection_hub(&self) -> bool {
         self.is_hub()
             && self.context.is_some()
-            && self.context.clone().unwrap().starts_with("hub.custom.collection")
+            && self
+                .context
+                .clone()
+                .unwrap()
+                .starts_with("hub.custom.collection")
     }
 
     // pub async fn replex(&mut self, plex: &PlexClient) -> MetaData {
@@ -382,9 +380,7 @@ impl MetaData {
     }
 }
 
-#[derive(
-    Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default,
-)]
+#[derive(Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 #[yaserde(root = "MediaContainer")]
@@ -435,6 +431,21 @@ pub struct MediaContainer {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Directory")]
     pub directory: Vec<MetaData>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default)]
+#[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
+#[serde(rename_all = "camelCase")]
+pub struct DisplayField {
+    pub fields: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default)]
+#[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
+#[serde(rename_all = "camelCase")]
+pub struct Meta {
+    #[serde(rename = "DisplayFields")]
+    pub display_fields: Vec<DisplayField>,
 }
 
 // pub fn remove_watched(item: MetaData) {
@@ -616,7 +627,7 @@ impl MediaContainerWrapper<MediaContainer> {
             }
             self.media_container.set_children(hubs);
         } else {
-            let mut children =  self.media_container.children();
+            let mut children = self.media_container.children();
             children.truncate(len);
             self.media_container.set_children(children);
         }
@@ -632,7 +643,8 @@ impl MediaContainerWrapper<MediaContainer> {
                 children.push(child);
             }
         } else {
-            children = self.media_container
+            children = self
+                .media_container
                 .children()
                 .into_iter()
                 .filter(|c| !c.is_watched())
@@ -649,8 +661,14 @@ impl MediaContainerWrapper<MediaContainer> {
         for mut hub in collections {
             if !hub.is_collection_hub() {
                 new_collections.push(hub);
-                continue
+                continue;
             }
+
+            hub.meta = Some(Meta {
+                display_fields: vec![DisplayField {
+                    fields: vec!["originallyAvailableAt".to_string()],
+                }],
+            });
 
             hub.apply_hub_style(plex).await;
             if self.is_section_hub() {
@@ -660,6 +678,12 @@ impl MediaContainerWrapper<MediaContainer> {
             let p = new_collections.iter().position(|v| v.title == hub.title);
             hub.r#type = "mixed".to_string();
 
+            hub.meta = Some(Meta {
+                display_fields: vec![DisplayField {
+                    fields: vec!["originallyAvailableAt".to_string()],
+                }],
+            });
+            hub.r#type = "clip".to_string();
             match p {
                 Some(v) => {
                     new_collections[v].key =
