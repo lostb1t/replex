@@ -290,16 +290,16 @@ impl MetaData {
     pub fn is_collection_hub(&self) -> bool {
         self.is_hub()
             && self.context.is_some()
-            && self.context.clone().unwrap() == "hub.custom.collection"
+            && self.context.clone().unwrap().starts_with("hub.custom.collection")
     }
 
-    pub async fn replex(&mut self, plex: &PlexClient) -> MetaData {
-        if self.context.clone().unwrap_or_default() == "hub.custom.collection" {
-            self.r#type = "mixed".to_string();
-            self.apply_hub_style(&plex).await;
-        }
-        self.clone()
-    }
+    // pub async fn replex(&mut self, plex: &PlexClient) -> MetaData {
+    //     if self.context.clone().unwrap_or_default().starts_with("hub.custom.collection") {
+    //         self.r#type = "mixed".to_string();
+    //         self.apply_hub_style(&plex).await;
+    //     }
+    //     self.clone()
+    // }
 
     pub async fn apply_hub_style(&mut self, plex: &PlexClient) {
         if self.is_collection_hub() {
@@ -647,6 +647,11 @@ impl MediaContainerWrapper<MediaContainer> {
         let collections = self.media_container.children();
         let mut new_collections: Vec<MetaData> = vec![];
         for mut hub in collections {
+            if !hub.is_collection_hub() {
+                new_collections.push(hub);
+                continue
+            }
+
             hub.apply_hub_style(plex).await;
             if self.is_section_hub() {
                 new_collections.push(hub);
