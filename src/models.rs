@@ -304,8 +304,6 @@ impl MetaData {
 
     pub async fn apply_hub_style(&mut self, plex: &PlexClient) {
         if self.is_collection_hub() {
-            let mut children: Vec<MetaData> = self.children();
-            // dbg!(get_collection_id_from_child_path(self.key.clone()));
             let mut collection_details = plex
                 .get_collection(get_collection_id_from_child_path(self.key.clone()))
                 .await
@@ -320,9 +318,8 @@ impl MetaData {
             {
                 self.style = Some("hero".to_string());
 
-                // for android
+                // for android, as it doesnt listen to hero style on home..... so we make it a clip
                 self.meta = Some(Meta {
-                    // r#type: Some("clip".to_string()),
                     r#type: None,
                     display_fields: vec![
                     DisplayField {
@@ -335,11 +332,6 @@ impl MetaData {
                     }],
                 });          
                 self.r#type = "clip".to_string();
-                // children[0].r#type = "clip".to_string();
-
-                // let child = children.get(0).unwrap().clone();
-                // child.r#type = "clip".to_string();
-                // children.push(children.get(0).unwrap().r#type = "clip".to_string())
             }
 
             // self.set_children(children);
