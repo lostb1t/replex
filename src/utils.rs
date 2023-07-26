@@ -175,6 +175,7 @@ pub async fn to_string(
     }
 }
 
+
 pub fn get_header_or_param(name: String, req: &Request<Body>) -> Option<String> {
     // fn create_client_from_request(req: Request<Body>) -> Result<plex_api::HttpClient> {
     let headers = req.headers();

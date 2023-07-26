@@ -35,6 +35,7 @@ use yaserde::YaSerialize;
 #[derive(Debug, Clone, Default)]
 pub struct ReplexOptions {
     pub limit: Option<i32>,
+    pub platform: Option<String>,
 }
 
 // impl Default for ReplexOptions {
@@ -302,7 +303,7 @@ impl MetaData {
     //     self.clone()
     // }
 
-    pub async fn apply_hub_style(&mut self, plex: &PlexClient) {
+    pub async fn apply_hub_style(&mut self, plex: &PlexClient, options: &ReplexOptions) {
         if self.is_collection_hub() {
             let mut collection_details = plex
                 .get_collection(get_collection_id_from_child_path(self.key.clone()))
@@ -319,19 +320,23 @@ impl MetaData {
                 self.style = Some("hero".to_string());
 
                 // for android, as it doesnt listen to hero style on home..... so we make it a clip
-                self.meta = Some(Meta {
-                    r#type: None,
-                    display_fields: vec![
-                    DisplayField {
-                        r#type: Some("movie".to_string()),
-                        fields: vec!["title".to_string(), "year".to_string()],
-                    },
-                    DisplayField {
-                        r#type: Some("show".to_string()),
-                        fields: vec!["title".to_string(), "year".to_string()],
-                    }],
-                });          
-                self.r#type = "clip".to_string();
+                if let Some(platform) = &options.platform {
+                    if platform.to_lowercase() == "android" {
+                        self.meta = Some(Meta {
+                            r#type: None,
+                            display_fields: vec![
+                            DisplayField {
+                                r#type: Some("movie".to_string()),
+                                fields: vec!["title".to_string(), "year".to_string()],
+                            },
+                            DisplayField {
+                                r#type: Some("show".to_string()),
+                                fields: vec!["title".to_string(), "year".to_string()],
+                            }],
+                        });          
+                        self.r#type = "clip".to_string();
+                    }
+                }
             }
         }
     }
@@ -620,7 +625,7 @@ impl MediaContainerWrapper<MediaContainer> {
         self = self.fix_permissions(&plex).await;
 
         if self.is_hub() {
-            self = self.process_hubs(&plex).await;
+            self = self.process_hubs(&plex, &options).await;
         }
 
         if !config.include_watched {
@@ -679,7 +684,7 @@ impl MediaContainerWrapper<MediaContainer> {
     }
 
     // TODO: Only works for hubs. Make it generic or name it specific for hubs
-    pub async fn process_hubs(mut self, plex: &PlexClient) -> Self {
+    pub async fn process_hubs(mut self, plex: &PlexClient, options: &ReplexOptions) -> Self {
         let collections = self.media_container.children();
         let mut new_collections: Vec<MetaData> = vec![];
         for mut hub in collections {
@@ -688,7 +693,7 @@ impl MediaContainerWrapper<MediaContainer> {
                 continue;
             }
 
-            hub.apply_hub_style(plex).await;
+            hub.apply_hub_style(plex, &options).await;
             if self.is_section_hub() {
                 new_collections.push(hub);
                 continue;
@@ -721,11 +726,11 @@ impl MediaContainerWrapper<MediaContainer> {
         self
     }
 
-    pub async fn apply_hub_style(&mut self, plex: &PlexClient) -> &Self {
+    pub async fn apply_hub_style(&mut self, plex: &PlexClient, options: &ReplexOptions) -> &Self {
         let mut metadata: Vec<MetaData> = vec![];
         for mut hub in self.media_container.children() {
             if hub.style.is_some() {
-                hub.apply_hub_style(plex).await;
+                hub.apply_hub_style(plex, options).await;
                 metadata.push(hub);
             }
         }

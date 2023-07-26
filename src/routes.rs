@@ -79,6 +79,7 @@ async fn get_hubs_sections(
     mut req: Request<Body>,
 ) -> MediaContainerWrapper<MediaContainer> {
     let plex = PlexClient::from(&req);
+    let platform = get_header_or_param("x-plex-platform".to_owned(), &req); 
     // Hack, as the list could be smaller when removing watched items. So we request more.
     let mut options = ReplexOptions::default();
     if let Some(original_count) = get_header_or_param("count".to_owned(), &req) {
@@ -86,6 +87,7 @@ async fn get_hubs_sections(
         req = add_query_param(req, "count", &(count_number * 2).to_string());
         options = ReplexOptions {
             limit: Some(count_number),
+            platform
         };
     }
 
@@ -101,11 +103,8 @@ async fn get_hubs_promoted(
 ) -> MediaContainerWrapper<MediaContainer> {
     let ids_header = get_header_or_param("contentDirectoryID".to_owned(), &req).unwrap();
     let content_directory_ids: Vec<&str> = ids_header.split(',').collect();
-
     let platform = get_header_or_param("x-plex-platform".to_owned(), &req); 
-    // dbg!(test);
-    // dbg!(test_another);
-    // Cant handle multiple directories yet
+
     if content_directory_ids.len() > 1 {
         let resp = proxy.request(req).await.unwrap();
         return from_response(resp).await.unwrap();
@@ -134,6 +133,7 @@ async fn get_hubs_promoted(
         req = add_query_param(req, "count", &(count_number * 2).to_string());
         options = ReplexOptions {
             limit: Some(count_number),
+            platform: platform,
         };
     }
 
@@ -154,7 +154,7 @@ async fn get_collections_children(
     let plex = PlexClient::from(&req);
     let mut children: Vec<MetaData> = vec![];
     let reversed: Vec<u32> = collection_ids.iter().copied().rev().collect();
-
+    let platform = get_header_or_param("x-plex-platform".to_owned(), &req); 
     let mut offset: Option<i32> = None;
     let mut original_offset: Option<i32> = None;
     if let Some(i) = get_header_or_param("X-Plex-Container-Start".to_string(), &req) {
@@ -202,6 +202,7 @@ async fn get_collections_children(
 
     let options = ReplexOptions {
         limit: original_limit,
+        platform
     };
     container.replex(plex, options).await
 }
