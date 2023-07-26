@@ -242,7 +242,11 @@ pub struct MetaData {
     #[yaserde(child)]
     pub labels: Vec<Label>,
     #[yaserde(skip)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub meta: Option<Meta>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub originally_available_at: Option<String>,
     // #[yaserde( attribute)]
     // #[serde(skip_serializing_if = "Option::is_none")]
     // pub rating: Option<f64>,
@@ -446,6 +450,7 @@ pub struct DisplayField {
 pub struct Meta {
     #[serde(rename = "DisplayFields")]
     pub display_fields: Vec<DisplayField>,
+    pub r#type: String,
 }
 
 // pub fn remove_watched(item: MetaData) {
@@ -664,12 +669,6 @@ impl MediaContainerWrapper<MediaContainer> {
                 continue;
             }
 
-            hub.meta = Some(Meta {
-                display_fields: vec![DisplayField {
-                    fields: vec!["originallyAvailableAt".to_string()],
-                }],
-            });
-
             hub.apply_hub_style(plex).await;
             if self.is_section_hub() {
                 new_collections.push(hub);
@@ -679,18 +678,13 @@ impl MediaContainerWrapper<MediaContainer> {
             hub.r#type = "mixed".to_string();
 
             // hub.meta = Some(Meta {
+            //     r#type: "clip".to_string(),
             //     display_fields: vec![DisplayField {
-            //         fields: vec!["originallyAvailableAt".to_string()],
+            //         fields: vec!["title".to_string(), "originallyAvailableAt".to_string()],
             //     }],
-            // });
+            // });          
+            // hub.r#type = "clip".to_string();
 
-
-            hub.meta = Some(Meta {
-                display_fields: vec![DisplayField {
-                    fields: vec![],
-                }],
-            });            
-            hub.r#type = "clip".to_string();
             match p {
                 Some(v) => {
                     new_collections[v].key =
