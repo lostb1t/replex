@@ -44,7 +44,7 @@
             {
                 "key": "/hubs/home/recentlyAdded?type=1&pinnedContentDirectoryID=6,7",
                 "title": "Recently Added Movies",
-                "type": "mixed",
+                "type": "movie",
                 "context": "hub.home.movies.recent",
                 "hubIdentifier": "home.movies.recent.6",
                 "size": 0,
