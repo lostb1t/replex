@@ -162,7 +162,7 @@ async fn get_collections_children(req: &mut Request, depot: &mut Depot, res: &mu
     let plex_client = PlexClient::new(req, params.clone());
     let mut children: Vec<MetaData> = vec![];
     let reversed: Vec<u32> = collection_ids.iter().copied().rev().collect();
-    dbg!("yo");
+
     let mut offset: Option<i32> = None;
     let mut original_offset: Option<i32> = None;
     if let Some(i) = params.clone().x_plex_container_start {

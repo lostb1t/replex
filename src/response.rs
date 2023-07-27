@@ -33,7 +33,7 @@ impl<T> Piece for MediaContainerWrapper<T>
     fn render(self, res: &mut Response) {
         match &self.content_type {
             ContentType::Json => Json(self).render(res),
-            ContentType::Xml => Json(self).render(res),
+            ContentType::Xml => Xml(self.media_container).render(res),
         }
     }
 }
