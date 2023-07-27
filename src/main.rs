@@ -62,6 +62,11 @@ async fn main() {
                 .path("/replex/library/collections/<ids>/children")
                 .get(get_collections_children),
         )
+        // .push(
+        //     Router::new()
+        //         .path("/<id>/websockets/<**rest>")
+        //         .handle(connect),
+        // )
         .push(
             Router::new()
                 .path("/<id>/websockets/<**rest>")
@@ -71,6 +76,29 @@ async fn main() {
 
     let acceptor = TcpListener::new("0.0.0.0:80").bind().await;
     Server::new(acceptor).serve(router).await;
+}
+
+
+#[handler]
+async fn connect(req: &mut Request, res: &mut Response) -> Result<(), StatusError> {
+    WebSocketUpgrade::new()
+        .upgrade(req, res, |mut ws| async move {
+            while let Some(msg) = ws.recv().await {
+                let msg = if let Ok(msg) = msg {
+                    dbg!(&msg);
+                    msg
+                } else {
+                    // client disconnected
+                    return;
+                };
+
+                if ws.send(msg).await.is_err() {
+                    // client disconnected
+                    return;
+                }
+            }
+        })
+        .await
 }
 
 #[handler]
