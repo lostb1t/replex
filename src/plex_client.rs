@@ -1,16 +1,28 @@
 use crate::config::Config;
 use crate::models::*;
+use crate::proxy::PlexProxy;
 use crate::utils::*;
 use anyhow::Result;
-use axum::{body::Body, http::Request};
+use http::HeaderValue;
+use http::Uri;
 use hyper::client::HttpConnector;
+use hyper::Body;
+use salvo::http::ReqBody;
+use salvo::Request;
+use salvo::Response;
+// use hyper::client::HttpConnector;
+use reqwest::Client;
+use salvo::http::ResBody;
 
 type HttpClient = hyper::client::Client<HttpConnector, Body>;
+
+type HyperRequest = hyper::Request<ReqBody>;
+type HyperResponse = hyper::Response<ResBody>;
+
 #[derive(Debug, Clone)]
 pub struct PlexClient {
     pub http_client: HttpClient,
     pub host: String, // TODO: Dont think this suppsoed to be here. Should be higher up
-
     pub content_type: ContentType,
 
     // /// `X-Plex-Provides` header value. Comma-separated list.
@@ -72,7 +84,7 @@ impl PlexClient {
         /// https://github.com/tokio-rs/axum/discussions/1131
         let uri = format!("{}{}", self.host, path);
         // dbg!(&uri);
-        let request = Request::builder()
+        let request = hyper::Request::builder()
             .uri(uri)
             .header("X-Plex-Client-Identifier", &self.x_plex_client_identifier)
             .header("X-Plex-Token", &self.x_plex_token)
@@ -82,6 +94,17 @@ impl PlexClient {
             .unwrap();
         self.http_client.request(request)
     }
+
+    pub async fn request(&self, req: &mut Request) -> Response {
+        let path = req.uri().path();
+        let upstream = format!("{}{}", self.host.clone(), path);
+        let proxy = PlexProxy::new(upstream);
+        proxy.request(req).await
+    }
+
+    // pub fn request(&self, req) -> hyper::client::ResponseFuture {
+    //     self.http_client.request(req)
+    // }
 
     pub async fn get_section_collections(&self, id: u32) -> Result<Vec<MetaData>> {
         let resp = self
@@ -103,7 +126,7 @@ impl PlexClient {
         limit: Option<i32>,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
         let mut path = format!("/library/collections/{}/children", id);
- 
+
         if offset.is_some() {
             path = format!("{}?X-Plex-Container-Start={}", path, offset.unwrap());
         }
@@ -134,21 +157,21 @@ impl PlexClient {
     }
 }
 
-impl From<&Request<Body>> for PlexClient {
-    fn from(req: &Request<Body>) -> Self {
+impl PlexClient {
+    pub fn new(req: &mut Request, params: PlexParams) -> Self {
+        // TODO: Dont need request
         let config: Config = Config::figment().extract().unwrap();
         // dbg!(get_content_type_from_headers(req.headers()));
         Self {
             http_client: HttpClient::new(),
             // host: "http://100.91.35.113:32400".to_string(),
             host: config.host,
-            x_plex_token: get_header_or_param("x-plex-token".to_string(), &req)
+            x_plex_token: params
+                .x_plex_token
                 .expect("Expected to have an token in header or query"),
-            x_plex_client_identifier: get_header_or_param(
-                "x-plex-client-identifier".to_string(),
-                &req,
-            )
-            .expect("Expected to have an plex client identifier header"),
+            x_plex_client_identifier: params
+                .x_plex_client_identifier
+                .expect("Expected to have an plex client identifier header"),
             x_plex_sync_version: "2".to_owned(),
             content_type: get_content_type_from_headers(req.headers()),
         }

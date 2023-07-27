@@ -9,7 +9,5 @@ pub mod proxy;
 pub mod utils;
 pub mod response;
 pub mod plex_client;
-pub mod xml;
 pub mod url;
 pub mod config;
-pub mod routes;

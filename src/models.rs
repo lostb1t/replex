@@ -1,12 +1,13 @@
 use std::fmt::Display;
 use std::io::Read;
 use std::str::FromStr;
+use salvo::prelude::*;
 
+extern crate mime;
 use crate::config::*;
 use crate::plex_client::PlexClient;
 use crate::proxy::*;
 use crate::utils::*;
-use crate::xml::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use axum::{
@@ -26,6 +27,7 @@ use serde_with::serde_as;
 use tracing::debug;
 use yaserde::YaDeserialize;
 use yaserde::YaSerialize;
+use salvo::macros::Extractible;
 // use replex::settings::*;
 //mod replex;
 
@@ -38,15 +40,60 @@ pub struct ReplexOptions {
     pub platform: Option<String>,
 }
 
-// impl Default for ReplexOptions {
+#[derive(Serialize, Deserialize, Debug, Extractible, Default, Clone)]
+#[salvo(extract(
+    default_source(from = "query"),
+    default_source(from = "header"),
+    rename_all = "camelCase"
+))]
+pub struct PlexParams {
+    #[serde(default, deserialize_with = "deserialize_comma_seperated_number")]
+    #[salvo(extract(rename = "contentDirectoryID"))]
+    pub content_directory_id: Option<Vec<i32>>,
+    #[serde(default, deserialize_with = "deserialize_comma_seperated_number")]
+    #[salvo(extract(rename = "pinnedContentDirectoryID"))]
+    pub pinned_content_directory_id: Option<Vec<i32>>,
+    pub platform: Option<String>,
+    pub count: Option<i32>,
+    #[salvo(extract(rename = "X-Plex-Client-Identifier"))]
+    pub x_plex_client_identifier: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Token"))]
+    pub x_plex_token: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Container-Size"))]
+    pub x_plex_container_size: Option<i32>,
+    #[salvo(extract(rename = "X-Plex-Container-Start"))]
+    pub x_plex_container_start: Option<i32>,
+    // #[salvo(extract(rename = "Accept"))]
+    // pub accept: ContentType,
+}
+
+
+
+
+pub fn deserialize_comma_seperated_number<'de, D>(
+    deserializer: D,
+) -> Result<Option<Vec<i32>>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    match Deserialize::deserialize(deserializer)? {
+        Some::<String>(s) => {
+            let r: Vec<i32> = s.split(',').map(|s| s.parse().unwrap()).collect();
+            Ok(Some(r))
+        }
+        None => Ok(None),
+    }
+}
+
+// impl Default for Mime {
 //     fn default() -> Self { limit: None }
 // }
 
-#[derive(Debug, Clone)]
-pub struct App {
-    proxy: Proxy,
-    plex: PlexClient,
-}
+// #[derive(Debug, Clone)]
+// pub struct App {
+//     proxy: Proxy,
+//     plex: PlexClient,
+// }
 
 #[derive(
     Debug,
@@ -325,15 +372,16 @@ impl MetaData {
                         self.meta = Some(Meta {
                             r#type: None,
                             display_fields: vec![
-                            DisplayField {
-                                r#type: Some("movie".to_string()),
-                                fields: vec!["title".to_string(), "year".to_string()],
-                            },
-                            DisplayField {
-                                r#type: Some("show".to_string()),
-                                fields: vec!["title".to_string(), "year".to_string()],
-                            }],
-                        });          
+                                DisplayField {
+                                    r#type: Some("movie".to_string()),
+                                    fields: vec!["title".to_string(), "year".to_string()],
+                                },
+                                DisplayField {
+                                    r#type: Some("show".to_string()),
+                                    fields: vec!["title".to_string(), "year".to_string()],
+                                },
+                            ],
+                        });
                         self.r#type = "clip".to_string();
                     }
                 }
@@ -534,16 +582,49 @@ impl MediaContainer {
 
 // pub MediaContainerBuilder
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Default)]
+/// BUG: Cant set yaserde on this? it will complain about a generic
+#[derive(
+    Debug, Serialize, Deserialize, Clone, Default
+)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 pub struct MediaContainerWrapper<T> {
     #[serde(rename = "MediaContainer")]
     // #[serde(rename="$value")]
+    // #[yaserde(child)]
     pub media_container: T,
     #[serde(skip_serializing, skip_deserializing)]
+    // #[yaserde(attribute)]
     pub content_type: ContentType,
 }
+
+// impl Default for MediaContainerWrapper<T> {
+//     fn default() -> Self {
+//         MediaContainerWrapper {
+//             content_type
+//         }
+//      }
+// }
+
+fn default_resource() -> mime::Mime {
+    mime::APPLICATION_JSON
+}
+
+
+// #[derive(
+//     Debug, Serialize, Deserialize, Clone, Default, YaDeserialize, YaSerialize
+// )]
+// #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
+// #[serde(rename_all = "camelCase")]
+// pub struct MediaContainerWrapper {
+//     #[serde(rename = "MediaContainer")]
+//     // #[serde(rename="$value")]
+//     #[yaserde(child)]
+//     pub media_container: MediaContainer,
+//     #[serde(skip_serializing, skip_deserializing)]
+//     #[yaserde(attribute)]
+//     pub content_type: ContentType,
+// }
 
 #[async_trait]
 pub trait FromResponse<T>: Sized {
@@ -750,7 +831,7 @@ impl MediaContainerWrapper<MediaContainer> {
             if metadata.is_hub() && !metadata.is_collection_hub() {
                 continue;
             }
-
+            // dbg!(&metadata);
             let section_id: u32 = metadata.library_section_id.unwrap_or_else(|| {
                 metadata
                     .children()
@@ -788,14 +869,3 @@ impl MediaContainerWrapper<MediaContainer> {
     }
 }
 
-impl<T> IntoResponse for MediaContainerWrapper<T>
-where
-    T: Serialize + YaDeserialize + YaSerialize,
-{
-    fn into_response(self) -> Response {
-        match self.content_type {
-            ContentType::Json => Json(self).into_response(),
-            ContentType::Xml => Xml(self.media_container).into_response(),
-        }
-    }
-}
