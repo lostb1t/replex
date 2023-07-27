@@ -5,7 +5,7 @@ build:
 	cargo build --release
 
 docker-build:
-	docker buildx build -t ghcr.io/sarendsen/replex:latest --target replex . -f docker/Dockerfile
+	docker build -t ghcr.io/sarendsen/replex:latest --target replex . -f docker/Dockerfile
 
 # docker-build:
 # 	docker buildx build -t ghcr.io/sarendsen/replexnonginx:latest --platform linux/amd64 --target replex . -f docker/Dockerfile

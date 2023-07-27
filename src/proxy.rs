@@ -10,20 +10,8 @@ use salvo::{
     http::response::Response as SalvoResponse, test::ResponseExt,
     Extractible, Request as SalvoRequest,
 };
-
-// use axum::http::{uri::Uri, Request};
-use axum::{
-    http::uri::Uri,
-    http::Request,
-    body::Body,
-};
 use tracing::{debug, instrument};
 
-// use crate::axum::http::{uri::Uri, Request, Response};
-
-
-// use http::HeaderValue;
-// use hyper::Body;
 
 use std::convert::TryFrom;
 

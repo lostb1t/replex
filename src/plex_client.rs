@@ -33,7 +33,7 @@ pub struct PlexClient {
     // /// `X-Plex-Platform` header value.
     // ///
     // /// Platform name, e.g. iOS, macOS, etc.
-    // pub x_plex_platform: String,
+    pub x_plex_platform: String,
 
     // /// `X-Plex-Platform-Version` header value.
     // ///
@@ -112,7 +112,7 @@ impl PlexClient {
             .await
             .unwrap();
 
-        let mut container: MediaContainerWrapper<MediaContainer> = from_response(resp)
+        let mut container: MediaContainerWrapper<MediaContainer> = from_response_hyper(resp)
             .await
             .expect("Cannot get MediaContainerWrapper from response");
 
@@ -134,7 +134,7 @@ impl PlexClient {
             path = format!("{}&X-Plex-Container-Size={}", path, limit.unwrap());
         }
         let resp = self.get(path).await.unwrap();
-        let container: MediaContainerWrapper<MediaContainer> = from_response(resp).await.unwrap();
+        let container: MediaContainerWrapper<MediaContainer> = from_response_hyper(resp).await.unwrap();
         Ok(container)
     }
 
@@ -143,7 +143,7 @@ impl PlexClient {
             .get(format!("/library/collections/{}", id))
             .await
             .unwrap();
-        let container: MediaContainerWrapper<MediaContainer> = from_response(resp).await.unwrap();
+        let container: MediaContainerWrapper<MediaContainer> = from_response_hyper(resp).await.unwrap();
         Ok(container)
     }
 
@@ -152,7 +152,7 @@ impl PlexClient {
         key: String,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
         let resp = self.get(key).await.unwrap();
-        let container: MediaContainerWrapper<MediaContainer> = from_response(resp).await.unwrap();
+        let container: MediaContainerWrapper<MediaContainer> = from_response_hyper(resp).await.unwrap();
         Ok(container)
     }
 }
@@ -166,12 +166,13 @@ impl PlexClient {
             http_client: HttpClient::new(),
             // host: "http://100.91.35.113:32400".to_string(),
             host: config.host,
-            x_plex_token: params
+            x_plex_token: params.clone()
                 .x_plex_token
                 .expect("Expected to have an token in header or query"),
-            x_plex_client_identifier: params
+            x_plex_client_identifier: params.clone()
                 .x_plex_client_identifier
                 .expect("Expected to have an plex client identifier header"),
+            x_plex_platform: params.clone().platform.unwrap_or_default(),
             x_plex_sync_version: "2".to_owned(),
             content_type: get_content_type_from_headers(req.headers()),
         }

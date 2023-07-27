@@ -111,7 +111,7 @@ async fn get_hubs_promoted(req: &mut Request, depot: &mut Depot, res: &mut Respo
     let content_directory_id_size = params.clone().content_directory_id.unwrap().len();
     if content_directory_id_size > usize::try_from(1).unwrap() {
         let upstream_res = plex_client.request(req).await;
-        let container = from_response_new(upstream_res).await.unwrap();
+        let container = from_response(upstream_res).await.unwrap();
         res.render(container);
     }
 
@@ -153,8 +153,7 @@ async fn get_hubs_promoted(req: &mut Request, depot: &mut Depot, res: &mut Respo
     }
 
     let upstream_res: Response = plex_client.request(req).await;
-    let mut container: MediaContainerWrapper<MediaContainer> =
-        from_response_new(upstream_res).await.unwrap();
+    let mut container: MediaContainerWrapper<MediaContainer> = from_response(upstream_res).await.unwrap();
     container = container.replex(plex_client, options).await;
     res.render(container); // TODO: FIx XML
 }
@@ -176,8 +175,7 @@ async fn get_hubs_sections(req: &mut Request, depot: &mut Depot, res: &mut Respo
     }
 
     let upstream_res: Response = plex_client.request(req).await;
-    let mut container: MediaContainerWrapper<MediaContainer> =
-        from_response_new(upstream_res).await.unwrap();
+    let mut container: MediaContainerWrapper<MediaContainer> = from_response(upstream_res).await.unwrap();
     container = container.replex(plex_client, options).await;
     res.render(container); // TODO: FIx XML
 }

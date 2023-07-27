@@ -1,5 +1,7 @@
 FROM rust:1.71 as builder
 
+RUN update-ca-certificates
+
 WORKDIR /app/src
 RUN USER=root cargo new --bin replex
 COPY Cargo.toml Cargo.lock ./replex/

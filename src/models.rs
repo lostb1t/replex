@@ -10,11 +10,6 @@ use crate::proxy::*;
 use crate::utils::*;
 use anyhow::Result;
 use async_trait::async_trait;
-use axum::{
-    body::Body,
-    response::{IntoResponse, Response},
-    Json,
-};
 use hyper::client::HttpConnector;
 use serde_aux::prelude::{
     deserialize_number_from_string, deserialize_option_number_from_string,
@@ -118,7 +113,7 @@ pub struct Label {
     filter: String,
 }
 
-pub type HttpClient = hyper::client::Client<HttpConnector, Body>;
+pub type HttpClient = hyper::client::Client<HttpConnector, hyper::Body>;
 
 #[derive(Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
@@ -644,13 +639,13 @@ pub trait FromResponse<T>: Sized {
 
 // pub type Container = MediaContainerWrapper<MediaContainer>;
 
-#[async_trait]
-impl FromResponse<Response<Body>> for MediaContainerWrapper<MediaContainer> {
-    async fn from_response(resp: Response<Body>) -> Result<MediaContainerWrapper<MediaContainer>> {
-        let res = from_response(resp).await?;
-        Ok(res)
-    }
-}
+// #[async_trait]
+// impl FromResponse<Response<Body>> for MediaContainerWrapper<MediaContainer> {
+//     async fn from_response(resp: Response<Body>) -> Result<MediaContainerWrapper<MediaContainer>> {
+//         let res = from_response(resp).await?;
+//         Ok(res)
+//     }
+// }
 
 // #[async_trait]
 // impl FromResponse for MediaContainerWrapper<MediaContainer> {
