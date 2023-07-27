@@ -1,18 +1,17 @@
-use std::fmt::Display;
-use std::io::Read;
+
+
 use std::str::FromStr;
 use salvo::prelude::*;
 
 extern crate mime;
 use crate::config::*;
 use crate::plex_client::PlexClient;
-use crate::proxy::*;
+
 use crate::utils::*;
 use anyhow::Result;
 use async_trait::async_trait;
 use hyper::client::HttpConnector;
 use serde_aux::prelude::{
-    deserialize_number_from_string, deserialize_option_number_from_string,
     deserialize_string_from_number,
 };
 // use hyper::Body;
@@ -20,8 +19,8 @@ use itertools::Itertools;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_with::serde_as;
 use tracing::debug;
-use yaserde::YaDeserialize;
-use yaserde::YaSerialize;
+
+
 use salvo::macros::Extractible;
 // use replex::settings::*;
 //mod replex;

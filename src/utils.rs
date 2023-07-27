@@ -1,6 +1,6 @@
 extern crate tracing;
 use anyhow::Result;
-use bytes::{Bytes, BytesMut};
+use bytes::{Bytes};
 extern crate mime;
 use mime::Mime;
 use serde::{Deserialize, Serialize};
@@ -12,14 +12,14 @@ use tracing::error;
 use yaserde::ser::to_string as to_xml_str;
 // use salvo_core::http::response::Response as SalvoResponse;
 use salvo::http::HeaderValue;
-use salvo::http::body::ResBody;
+
 use salvo::http::HeaderMap;
 use salvo::{
-    http::response::Response as SalvoResponse, prelude::Extractible, test::ResponseExt,
+    http::response::Response as SalvoResponse, test::ResponseExt,
     Extractible, Request as SalvoRequest,
 };
 
-use std::collections::HashMap;
+
 
 use crate::models::*;
 

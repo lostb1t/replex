@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use figment::{Figment, providers::{Format, Env}};
+use figment::{Figment, providers::{Env}};
 
 fn default_as_false() -> bool {
     false

@@ -5,25 +5,25 @@ use itertools::Itertools;
 use replex::config::Config;
 use replex::models::*;
 use replex::plex_client::*;
-use replex::proxy::PlexProxy;
+
 use replex::url::*;
 use replex::utils::*;
 // use replex::response::Json;
-use replex::response::*;
-use salvo::BoxedError;
+
+
 // use salvo::extract;
-use salvo::http::header::HeaderValue;
-use salvo::macros::Extractible;
+
+
 use salvo::prelude::*;
 use salvo::proxy::Proxy as SalvoProxy;
-use salvo::proxy::Upstreams;
-use serde::de::Error;
-use serde::Deserializer;
-use serde::{Deserialize, Serialize};
+
+
+
+
 // use tracing::log::Level;
-use std::fmt::Display;
-use std::str::FromStr;
-use tracing::{info, Level};
+
+
+use tracing::{Level};
 use tracing_subscriber;
 
 // #[handler]
@@ -102,7 +102,7 @@ async fn connect(req: &mut Request, res: &mut Response) -> Result<(), StatusErro
 }
 
 #[handler]
-async fn get_hubs_promoted(req: &mut Request, depot: &mut Depot, res: &mut Response) {
+async fn get_hubs_promoted(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
     let params: PlexParams = req.extract().await.unwrap();
     // dbg!(&params);
     let plex_client = PlexClient::new(req, params.clone());
@@ -159,7 +159,7 @@ async fn get_hubs_promoted(req: &mut Request, depot: &mut Depot, res: &mut Respo
 }
 
 #[handler]
-async fn get_hubs_sections(req: &mut Request, depot: &mut Depot, res: &mut Response) {
+async fn get_hubs_sections(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
     let params: PlexParams = req.extract().await.unwrap();
     let plex_client = PlexClient::new(req, params.clone());
 
@@ -181,7 +181,7 @@ async fn get_hubs_sections(req: &mut Request, depot: &mut Depot, res: &mut Respo
 }
 
 #[handler]
-async fn get_collections_children(req: &mut Request, depot: &mut Depot, res: &mut Response) {
+async fn get_collections_children(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
     let params: PlexParams = req.extract().await.unwrap();
     let collection_ids = req.param::<String>("ids").unwrap();
     let collection_ids: Vec<u32> = collection_ids

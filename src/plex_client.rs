@@ -3,15 +3,15 @@ use crate::models::*;
 use crate::proxy::PlexProxy;
 use crate::utils::*;
 use anyhow::Result;
-use http::HeaderValue;
-use http::Uri;
+
+
 use hyper::client::HttpConnector;
 use hyper::Body;
 use salvo::http::ReqBody;
 use salvo::Request;
 use salvo::Response;
 // use hyper::client::HttpConnector;
-use reqwest::Client;
+
 use salvo::http::ResBody;
 
 type HttpClient = hyper::client::Client<HttpConnector, Body>;

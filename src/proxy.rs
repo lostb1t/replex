@@ -1,19 +1,18 @@
-use crate::{models::*, config::Config};
+
 use salvo::BoxedError;
 // use salvo::extract;
 use salvo::http::header::HeaderValue;
-use salvo::macros::Extractible;
+
 use salvo::prelude::*;
 use salvo::proxy::Proxy as SalvoProxy;
 use salvo::proxy::Upstreams;
 use salvo::{
-    http::response::Response as SalvoResponse, test::ResponseExt,
     Extractible, Request as SalvoRequest,
 };
-use tracing::{debug, instrument};
+use tracing::{debug};
 
 
-use std::convert::TryFrom;
+
 
 
 pub struct PlexProxy<U> {
