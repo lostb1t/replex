@@ -62,7 +62,11 @@ async fn main() {
                 .path("/replex/library/collections/<ids>/children")
                 .get(get_collections_children),
         )
-        // .push(Router::with_path("<id>/websockets/<**rest>").handle(Proxy::new("46.4.30.217:42405")))
+        .push(
+            Router::new()
+                .path("/<id>/websockets/<**rest>")
+                .handle(Proxy::new(format!("{}/:/websockets", config.host))),
+        )
         .push(Router::with_path("<**rest>").handle(SalvoProxy::new(config.host)));
 
     let acceptor = TcpListener::new("0.0.0.0:80").bind().await;
@@ -88,7 +92,7 @@ async fn get_hubs_promoted(req: &mut Request, depot: &mut Depot, res: &mut Respo
     {
         // We only fill the first one.
         let mut container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
-        container.content_type = mime_to_content_type(req.content_type().unwrap_or(mime::TEXT_XML));
+        container.content_type = get_content_type_from_headers(req.headers_mut());
         container.media_container.size = Some(0);
         container.media_container.allow_sync = Some(true);
         container.media_container.identifier = Some("com.plexapp.plugins.library".to_string());
@@ -198,9 +202,10 @@ async fn get_collections_children(req: &mut Request, depot: &mut Depot, res: &mu
             true => children.append(&mut c.media_container.children()),
         }
     }
-    // dbg!(&children);
+
     let mut container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
-    container.content_type = mime_to_content_type(req.content_type().unwrap_or(mime::TEXT_XML));
+    container.content_type = get_content_type_from_headers(req.headers_mut());
+
     // so not change the child type, metadata is needed for collections
     container.media_container.metadata = children;
     let size = container.media_container.children().len();
