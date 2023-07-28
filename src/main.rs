@@ -5,24 +5,11 @@ use itertools::Itertools;
 use replex::config::Config;
 use replex::models::*;
 use replex::plex_client::*;
-
+use replex::proxy::PlexProxy;
 use replex::url::*;
 use replex::utils::*;
-// use replex::response::Json;
-
-
-// use salvo::extract;
-
-
 use salvo::prelude::*;
 use salvo::proxy::Proxy as SalvoProxy;
-
-
-
-
-// use tracing::log::Level;
-
-
 use tracing::{Level};
 use tracing_subscriber;
 
@@ -67,12 +54,13 @@ async fn main() {
         //         .path("/<id>/websockets/<**rest>")
         //         .handle(connect),
         // )
-        .push(
-            Router::new()
-                .path("/<id>/websockets/<**rest>")
-                .handle(Proxy::new(format!("{}/:/websockets", config.host))),
-        )
-        .push(Router::with_path("<**rest>").handle(SalvoProxy::new(config.host)));
+        // .push(
+        //     Router::new()
+        //         .path("/<id>/websockets/<**rest>")
+        //         .handle(Proxy::new(format!("{}/:/websockets", config.host))),
+        // )
+        // .push(Router::with_path("<**rest>").handle(SalvoProxy::new(config.host)));
+        .push(Router::with_path("<**rest>").handle(PlexProxy::new(config.host)));
 
     let acceptor = TcpListener::new("0.0.0.0:80").bind().await;
     Server::new(acceptor).serve(router).await;

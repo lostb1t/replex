@@ -359,10 +359,11 @@ impl MetaData {
                 .has_label("REPLEXHERO".to_string())
             {
                 self.style = Some("hero".to_string());
-
+                dbg!(&options.platform);
                 // for android, as it doesnt listen to hero style on home..... so we make it a clip
                 if let Some(platform) = &options.platform {
                     if platform.to_lowercase() == "android" {
+                        dbg!("We got android");
                         self.meta = Some(Meta {
                             r#type: None,
                             display_fields: vec![
