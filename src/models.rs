@@ -47,6 +47,7 @@ pub struct PlexParams {
     #[serde(default, deserialize_with = "deserialize_comma_seperated_number")]
     #[salvo(extract(rename = "pinnedContentDirectoryID"))]
     pub pinned_content_directory_id: Option<Vec<i32>>,
+    #[salvo(extract(rename = "X-Plex-Platform"))]
     pub platform: Option<String>,
     pub count: Option<i32>,
     #[salvo(extract(rename = "X-Plex-Client-Identifier"))]
