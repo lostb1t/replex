@@ -1,6 +1,4 @@
-FROM rust:1.71 as builder
-
-RUN update-ca-certificates
+FROM rust:latest as builder
 
 WORKDIR /app/src
 RUN USER=root cargo new --bin replex
@@ -12,11 +10,14 @@ RUN cargo build --release
 COPY ./ ./
 RUN cargo build --release
 
-FROM debian:stable-slim as replex
-COPY --from=builder /app/src/replex/target/release/replex /app/
+FROM debian:bullseye-slim as replex
 RUN apt update \
     && apt install -y openssl ca-certificates \
     && apt clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+WORKDIR /app
+COPY --from=builder /app/src/replex/target/release/replex ./
+
 EXPOSE 80
 CMD ["/app/replex"]
