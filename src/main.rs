@@ -92,6 +92,7 @@ async fn connect(req: &mut Request, res: &mut Response) -> Result<(), StatusErro
 #[handler]
 async fn get_hubs_promoted(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
     let params: PlexParams = req.extract().await.unwrap();
+    dbg!(req.headers_mut());
     // dbg!(&params);
     let plex_client = PlexClient::new(req, params.clone());
 
