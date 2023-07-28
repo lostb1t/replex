@@ -364,20 +364,20 @@ impl MetaData {
                 // for android, as it doesnt listen to hero style on home..... so we make it a clip
                 if let Some(platform) = &options.platform {
                     if platform.to_lowercase() == "android" {
-                        dbg!("We got android");
-                        self.meta = Some(Meta {
-                            r#type: None,
-                            display_fields: vec![
-                                DisplayField {
-                                    r#type: Some("movie".to_string()),
-                                    fields: vec!["title".to_string(), "year".to_string()],
-                                },
-                                DisplayField {
-                                    r#type: Some("show".to_string()),
-                                    fields: vec!["title".to_string(), "year".to_string()],
-                                },
-                            ],
-                        });
+                        // dbg!("We got android");
+                        // self.meta = Some(Meta {
+                        //     r#type: None,
+                        //     display_fields: vec![
+                        //         DisplayField {
+                        //             r#type: Some("movie".to_string()),
+                        //             fields: vec!["title".to_string(), "year".to_string()],
+                        //         },
+                        //         DisplayField {
+                        //             r#type: Some("show".to_string()),
+                        //             fields: vec!["title".to_string(), "year".to_string()],
+                        //         },
+                        //     ],
+                        // });
                         self.r#type = "clip".to_string();
                     }
                 }
