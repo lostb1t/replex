@@ -8,9 +8,9 @@ use replex::plex_client::*;
 use replex::proxy::PlexProxy;
 use replex::url::*;
 use replex::utils::*;
+use salvo::cors::Cors;
 use salvo::prelude::*;
-use salvo::proxy::Proxy as SalvoProxy;
-use tracing::{Level};
+use tracing::Level;
 use tracing_subscriber;
 
 // #[handler]
@@ -30,7 +30,7 @@ async fn main() {
         .init();
 
     let config: Config = Config::figment().extract().unwrap();
-    let router = Router::new()
+    let router = Router::with_hoop(Cors::permissive().into_handler())
         .push(
             Router::new()
                 // .hoop(set_plex_proxy)
@@ -66,34 +66,9 @@ async fn main() {
     Server::new(acceptor).serve(router).await;
 }
 
-
-#[handler]
-async fn connect(req: &mut Request, res: &mut Response) -> Result<(), StatusError> {
-    WebSocketUpgrade::new()
-        .upgrade(req, res, |mut ws| async move {
-            while let Some(msg) = ws.recv().await {
-                let msg = if let Ok(msg) = msg {
-                    dbg!(&msg);
-                    msg
-                } else {
-                    // client disconnected
-                    return;
-                };
-
-                if ws.send(msg).await.is_err() {
-                    // client disconnected
-                    return;
-                }
-            }
-        })
-        .await
-}
-
 #[handler]
 async fn get_hubs_promoted(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
     let params: PlexParams = req.extract().await.unwrap();
-    dbg!(req.headers_mut());
-    // dbg!(&params);
     let plex_client = PlexClient::new(req, params.clone());
 
     // not sure anymore why i have this lol
@@ -142,7 +117,8 @@ async fn get_hubs_promoted(req: &mut Request, _depot: &mut Depot, res: &mut Resp
     }
 
     let upstream_res: Response = plex_client.request(req).await;
-    let mut container: MediaContainerWrapper<MediaContainer> = from_response(upstream_res).await.unwrap();
+    let mut container: MediaContainerWrapper<MediaContainer> =
+        from_response(upstream_res).await.unwrap();
     container = container.replex(plex_client, options).await;
     res.render(container); // TODO: FIx XML
 }
@@ -164,7 +140,8 @@ async fn get_hubs_sections(req: &mut Request, _depot: &mut Depot, res: &mut Resp
     }
 
     let upstream_res: Response = plex_client.request(req).await;
-    let mut container: MediaContainerWrapper<MediaContainer> = from_response(upstream_res).await.unwrap();
+    let mut container: MediaContainerWrapper<MediaContainer> =
+        from_response(upstream_res).await.unwrap();
     container = container.replex(plex_client, options).await;
     res.render(container); // TODO: FIx XML
 }
