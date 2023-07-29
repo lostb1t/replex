@@ -1,77 +1,194 @@
 #[macro_use]
 extern crate tracing;
 
-use axum::{
-    body::Body,
-    extract::Path,
-    extract::State,
-    response::Redirect,
-    // http::{uri::Uri, Request, Response},
-    routing::get,
-    Router,
-};
-use std::{convert::Infallible, env, net::SocketAddr, time::Duration};
-// use axum::headers::ContentType;
-
-use axum_tracing_opentelemetry::middleware::OtelAxumLayer;
-use axum_tracing_opentelemetry::middleware::OtelInResponseLayer;
-use http::{Request, Response};
-
-// use hyper::{client::HttpConnector, Body};
-
-use axum_tracing_opentelemetry::opentelemetry_tracing_layer;
 use itertools::Itertools;
+use replex::config::Config;
 use replex::models::*;
 use replex::plex_client::*;
-use replex::proxy::*;
-use replex::routes::*;
-use replex::config::*;
+use replex::proxy::PlexProxy;
 use replex::url::*;
 use replex::utils::*;
-use tower::ServiceBuilder;
-use tower_http::cors::AllowOrigin;
-use tower_http::cors::CorsLayer;
-use tower_http::trace::TraceLayer;
-use tracing_subscriber::Registry;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use salvo::cors::Cors;
+use salvo::hyper::upgrade::OnUpgrade;
+use salvo::prelude::*;
+use tracing::Level;
+use tracing_subscriber;
 
 #[tokio::main]
 async fn main() {
-    // set_default_env_var("REPLEX_", "8080");
-    // let new_relic_api_key = SETTINGS.read().unwrap().get::<String>("host");
-    // env_logger::init();
-    // https://github.com/tokio-rs/axum/blob/main/examples/tracing-aka-logging/src/main.rs
-    // if let new_relic_api_key = SETTINGS.read().unwrap().get::<String>("newrelic_api_key").unwrap() {
-    //     let newrelic = tracing_newrelic::layer(new_relic_api_key);
-    //     tracing_subscriber::registry()
-    //         .with(newrelic)
-    //         .with(tracing_subscriber::fmt::layer())
-    //         .init();
+    tracing_subscriber::fmt().init();
+    // tracing_subscriber::fmt()
+    //     .compact()
+    //     .with_line_number(true)
+    //     .with_max_level(Level::INFO)
+    //     .init();
 
-    //     // let fmt = tracing_subscriber::fmt::layer();
-    //     // let subscriber = Registry::default().with(newrelic).with(fmt).with(target);
-    //     // tracing::subscriber::set_global_default(subscriber)
-    //     //     .expect("failed to initilize tracing subscriber");
-    // } else {
-    //     tracing_subscriber::fmt::init();
-    // }
+    let config: Config = Config::figment().extract().unwrap();
+    let router = Router::with_hoop(Cors::permissive().into_handler())
+        .push(
+            Router::new()
+                .path(PLEX_HUBS_PROMOTED)
+                .get(get_hubs_promoted),
+        )
+        .push(
+            Router::new()
+                .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
+                .get(get_hubs_sections),
+        )
+        .push(
+            Router::new()
+                .path("/replex/library/collections/<ids>/children")
+                .get(get_collections_children),
+        )
+        .push(Router::with_path("<**rest>").handle(PlexProxy::new(config.host)));
 
-    // let content_type = if let Some(content_type) = headers.get(header::CONTENT_TYPE) {
-    //     content_type
-    // } else {
-    //     return false;
-    // };
+    let acceptor = TcpListener::new("0.0.0.0:80").bind().await;
+    Server::new(acceptor).serve(router).await;
+}
 
-    tracing_subscriber::fmt::init();
-    // env::set_var("OTEL_EXPORTER_OTLP_ENDPOINT", "https://otlp.eu01.nr-data.net");
-    //OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-    // init_tracing_opentelemetry::tracing_subscriber_ext::init_subscribers().unwrap();
+#[handler]
+async fn get_hubs_promoted(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+    let params: PlexParams = req.extract().await.unwrap();
+    let plex_client = PlexClient::new(req, params.clone());
 
-    let proxy = Proxy::default();
-    let addr = SocketAddr::from(([0, 0, 0, 0], 3001));
-    info!(message = "Listening on", %addr);
-    axum::Server::bind(&addr)
-        .serve(router(proxy).into_make_service())
-        .await
-        .unwrap();
+    // not sure anymore why i have this lol
+    let content_directory_id_size = params.clone().content_directory_id.unwrap().len();
+    if content_directory_id_size > usize::try_from(1).unwrap() {
+        let upstream_res = plex_client.request(req).await;
+        let container = from_salvo_response(upstream_res).await.unwrap();
+        res.render(container);
+    }
+
+    if params.clone().content_directory_id.unwrap()[0]
+        != params.clone().pinned_content_directory_id.unwrap()[0]
+    {
+        // We only fill the first one.
+        let mut container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
+        container.content_type = get_content_type_from_headers(req.headers_mut());
+        container.media_container.size = Some(0);
+        container.media_container.allow_sync = Some(true);
+        container.media_container.identifier = Some("com.plexapp.plugins.library".to_string());
+        return res.render(container);
+    }
+
+    // first directory, load everything here because we wanna reemiiiixxx
+    add_query_param_salvo(
+        req,
+        "contentDirectoryID".to_string(),
+        params
+            .clone()
+            .pinned_content_directory_id
+            .clone()
+            .unwrap()
+            .iter()
+            .join(",")
+            .to_string(),
+    );
+
+    // Hack, as the list could be smaller when removing watched items. So we request more.
+    let mut options = ReplexOptions::default();
+    if let Some(original_count) = params.clone().count {
+        // let count_number: i32 = original_count.parse().unwrap();
+        add_query_param_salvo(req, "count".to_string(), (original_count * 2).to_string());
+        options = ReplexOptions {
+            limit: Some(original_count),
+            platform: params.clone().platform,
+        };
+    }
+
+    let upstream_res: Response = plex_client.request(req).await;
+    let mut container: MediaContainerWrapper<MediaContainer> =
+        from_salvo_response(upstream_res).await.unwrap();
+    container = container.replex(plex_client, options).await;
+    res.render(container); // TODO: FIx XML
+}
+
+#[handler]
+async fn get_hubs_sections(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+    let params: PlexParams = req.extract().await.unwrap();
+    let plex_client = PlexClient::new(req, params.clone());
+
+    // Hack, as the list could be smaller when removing watched items. So we request more.
+    let mut options = ReplexOptions::default();
+    if let Some(original_count) = params.clone().count {
+        // let count_number: i32 = original_count.parse().unwrap();
+        add_query_param_salvo(req, "count".to_string(), (original_count * 2).to_string());
+        options = ReplexOptions {
+            limit: Some(original_count),
+            platform: params.clone().platform,
+        };
+    }
+
+    let upstream_res: Response = plex_client.request(req).await;
+    let mut container: MediaContainerWrapper<MediaContainer> =
+        from_salvo_response(upstream_res).await.unwrap();
+    container = container.replex(plex_client, options).await;
+    res.render(container); // TODO: FIx XML
+}
+
+#[handler]
+async fn get_collections_children(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+    let params: PlexParams = req.extract().await.unwrap();
+    let collection_ids = req.param::<String>("ids").unwrap();
+    let collection_ids: Vec<u32> = collection_ids
+        .split(',')
+        .map(|v| v.parse().unwrap())
+        .collect();
+    let collection_ids_len: i32 = collection_ids.len() as i32;
+    let plex_client = PlexClient::new(req, params.clone());
+    let mut children: Vec<MetaData> = vec![];
+    let reversed: Vec<u32> = collection_ids.iter().copied().rev().collect();
+
+    let mut offset: Option<i32> = None;
+    let mut original_offset: Option<i32> = None;
+    if let Some(i) = params.clone().container_start {
+        offset = Some(i);
+        original_offset = offset;
+        offset = Some(offset.unwrap() / collection_ids_len);
+    }
+    let mut limit: Option<i32> = None;
+    let mut original_limit: Option<i32> = None;
+    if let Some(i) = params.clone().container_size {
+        limit = Some(i);
+        original_limit = limit;
+        limit = Some(limit.unwrap() / collection_ids_len);
+    }
+
+    // dbg!(&offset);
+    let mut total_size: i32 = 0;
+    for id in reversed {
+        let mut c = plex_client
+            .get_collection_children(id, offset.clone(), limit.clone())
+            .await
+            .unwrap();
+        total_size += c.media_container.total_size.unwrap();
+        // dbg!(c.media_container.total_size);
+        // dbg!(c.media_container.children().len());
+        match children.is_empty() {
+            false => {
+                children = children
+                    .into_iter()
+                    .interleave(c.media_container.children())
+                    .collect::<Vec<MetaData>>();
+            }
+            true => children.append(&mut c.media_container.children()),
+        }
+    }
+
+    let mut container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
+    container.content_type = get_content_type_from_headers(req.headers_mut());
+
+    // so not change the child type, metadata is needed for collections
+    container.media_container.metadata = children;
+    let size = container.media_container.children().len();
+    container.media_container.size = Some(size.try_into().unwrap());
+    container.media_container.total_size = Some(total_size);
+    container.media_container.offset = original_offset.clone();
+
+    let options = ReplexOptions {
+        limit: original_limit,
+        platform: params.clone().platform,
+    };
+    container = container.replex(plex_client, options).await;
+    res.render(container); // TODO: FIx XML
 }

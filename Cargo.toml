@@ -3,13 +3,12 @@ name = "replex"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-http = "^0.2.8"
-serde = { version = "^1.0", features = ["derive"] }
-serde_json = "^1.0"
-hyper = { version = "0.14.24", features = ["full"] }
+#salvo = { workspace = true, features = ["proxy"] }
+#http = "0.2.8"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+hyper = { version = "=1.0.0-rc.4", features = ["full"] }
 tokio = { version = "1.25.0", features = ["full"] }
 lazy_static = "1.4.0"
 anyhow = "1.0.69"
@@ -23,30 +22,40 @@ strum_macros = "0.24.3"
 strum = "0.24.1"
 tracing-subscriber = "0.3.16"
 itertools = "0.10.5"
-axum = { version = "0.6.6", features = ["default", "headers"] }
+#axum = { version = "0.6.6", features = ["default", "headers", "ws"] }
 pathetic = "0.3.0"
-tower = "0.4.13"
-tower-http = { version = "0.3.5", features = ["full"] }
+#tower = "0.4.13"
+#tower-http = { version = "0.3.5", features = ["full"] }
 bytes = "1.4.0"
 mime = "0.3.16"
 async-trait = "0.1"
-axum-core = "0.3.2"
-thiserror = "1.0.38"
-http-body = "0.4.5"
+#axum-core = "0.3.2"
+#thiserror = "1.0.38"
+#http-body = "0.4.5"
 futures-util = "0.3.26"
-config = "0.13.3"
-tracing-newrelic = "0.1.2"
 env_logger = "0.10.0"
-axum-tracing-opentelemetry = "0.12.0"
-init-tracing-opentelemetry = {version ="0.12.0", features = [
-  "otlp",
-  "tracing_subscriber_ext",
-]}
-opentelemetry = "0.19.0"
+#tracing-newrelic = "0.1.2"
+#axum-tracing-opentelemetry = "0.12.0"
+#init-tracing-opentelemetry = {version ="0.12.0", features = [
+#  "otlp",
+#  "tracing_subscriber_ext",
+#]}
+#opentelemetry = "0.19.0"
 serde-aux = "^4.2.0"
-serde_with = { version = "^3.0", features = ["json"] }
+serde_with = { version = "3.0", features = ["json"] }
 futures = "0.3.28"
 figment = { version = "0.10.10", features = ["env"] }
+#salvo_core = { version = "0.49.0" }
+#salvo_macros = { version = "0.49.0" }
+salvo = { version = "0.49.1", features = ["websocket", "proxy", "cors"] }
+hyper-reverse-proxy = { git = "https://github.com/felipenoris/hyper-reverse-proxy.git"}
+hyper-trust-dns = "0.5.0"
+reqwest = "0.11"
+http-body-util = "0.1.0-rc.3"
+#salvo = { version = "0.49.0", features = ["websocket", "proxy"] }
+#salvo = { version = "0.49.0", features = ["websocket"] }
+#salvo = { version = "0.49.0", features = ["full"] }
+#salvo-proxy = { path = "../salvo/crates/proxy" }
 
 [dev-dependencies]
 async-std = { version = "^1.12", features = ["attributes"] }
@@ -56,7 +65,6 @@ jsonxf = "1.1.1"
 pretty_assertions = "1.3.0"
 rstest = "0.16.0"
 
-# [patch."https://github.com/sarendsen/plex-api.rs.git"]
-# plex-api = { path = "./vendor/plex-api.rs/crates/plex-api" }
-# [patch."https://github.com/felipenoris/hyper-reverse-proxy.git"]
-# hyper-reverse-proxy = { path = "./vendor/hyper-reverse-proxy" }
+
+#[replace]
+#"salvo-proxy:0.49.0" = { path = "../salvo/crates/proxy" }

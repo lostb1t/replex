@@ -1,47 +1,35 @@
 use crate::config::Config;
 use crate::models::*;
+use crate::proxy::PlexProxy;
 use crate::utils::*;
 use anyhow::Result;
-use axum::{body::Body, http::Request};
-use hyper::client::HttpConnector;
 
-type HttpClient = hyper::client::Client<HttpConnector, Body>;
+use futures_util::Future;
+use futures_util::TryStreamExt;
+// use hyper::client::HttpConnector;
+// use hyper::Body;
+use hyper::body::Body;
+use reqwest::header;
+use reqwest::Client;
+use salvo::http::ReqBody;
+use salvo::Error;
+use salvo::Request;
+use salvo::Response;
+// use hyper::client::HttpConnector;
+
+use salvo::http::ResBody;
+
+// type HttpClient = hyper::client::Client<HttpConnector, Body>;
+
 #[derive(Debug, Clone)]
 pub struct PlexClient {
-    pub http_client: HttpClient,
+    pub http_client: Client,
     pub host: String, // TODO: Dont think this suppsoed to be here. Should be higher up
-
-    pub content_type: ContentType,
-
-    // /// `X-Plex-Provides` header value. Comma-separated list.
-    // ///
-    // /// Should be one or more of `controller`, `server`, `sync-target`, `player`.
-    // pub x_plex_provides: String,
 
     // /// `X-Plex-Platform` header value.
     // ///
     // /// Platform name, e.g. iOS, macOS, etc.
-    // pub x_plex_platform: String,
-
-    // /// `X-Plex-Platform-Version` header value.
-    // ///
-    // /// OS version, e.g. 4.3.1
-    // pub x_plex_platform_version: String,
-
-    // /// `X-Plex-Product` header value.
-    // ///
-    // /// Application name, e.g. Laika, Plex Media Server, Media Link.
-    // pub x_plex_product: String,
-
-    // /// `X-Plex-Version` header value.
-    // ///
-    // /// Application version, e.g. 10.6.7.
-    // pub x_plex_version: String,
-
-    // /// `X-Plex-Device` header value.
-    // ///
-    // /// Device name and model number, e.g. iPhone3,2, Motorola XOOM™, LG5200TV.
-    // pub x_plex_device: String,
+    pub x_plex_platform: String,
 
     // /// `X-Plex-Device-Name` header value.
     // ///
@@ -58,38 +46,42 @@ pub struct PlexClient {
     ///
     /// Auth token for Plex.
     pub x_plex_token: String,
-
-    /// `X-Plex-Sync-Version` header value.
-    ///
-    /// Not sure what are the valid values, but at the time of writing Plex Web sends `2` here.
-    pub x_plex_sync_version: String,
 }
 
 impl PlexClient {
+
     // TODO: Handle 404s/500 etc
-    pub fn get(&self, path: String) -> hyper::client::ResponseFuture {
-        /// Could use this: https://docs.rs/tower-http/latest/tower_http/propagate_header/index.html
-        /// https://github.com/tokio-rs/axum/discussions/1131
+    // TODO: Map reqwest response and error to salvo
+    pub async fn get(&self, path: String) -> Result<reqwest::Response, Error> {
         let uri = format!("{}{}", self.host, path);
-        // dbg!(&uri);
-        let request = Request::builder()
-            .uri(uri)
-            .header("X-Plex-Client-Identifier", &self.x_plex_client_identifier)
-            .header("X-Plex-Token", &self.x_plex_token)
-            // .header("Accept", &self.content_type.to_string())
-            .header("Accept", "application/json")
-            .body(Body::empty())
-            .unwrap();
-        self.http_client.request(request)
+        let res = self
+            .http_client
+            .get(uri)
+            .send()
+            .await
+            .map_err(Error::other)?;
+        Ok(res)
     }
 
+    // TODO: Should return a reqw response
+    pub async fn request(&self, req: &mut Request) -> Response {
+        let path = req.uri().path();
+        let upstream = format!("{}{}", self.host.clone(), path);
+        let proxy = PlexProxy::new(upstream);
+        proxy.request(req).await
+    }
+
+    // pub fn request(&self, req) -> hyper::client::ResponseFuture {
+    //     self.http_client.request(req)
+    // }
+
     pub async fn get_section_collections(&self, id: u32) -> Result<Vec<MetaData>> {
-        let resp = self
+        let res = self
             .get(format!("/library/sections/{}/collections", id))
             .await
             .unwrap();
 
-        let mut container: MediaContainerWrapper<MediaContainer> = from_response(resp)
+        let mut container: MediaContainerWrapper<MediaContainer> = from_reqwest_response(res)
             .await
             .expect("Cannot get MediaContainerWrapper from response");
 
@@ -103,7 +95,7 @@ impl PlexClient {
         limit: Option<i32>,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
         let mut path = format!("/library/collections/{}/children", id);
- 
+
         if offset.is_some() {
             path = format!("{}?X-Plex-Container-Start={}", path, offset.unwrap());
         }
@@ -111,7 +103,8 @@ impl PlexClient {
             path = format!("{}&X-Plex-Container-Size={}", path, limit.unwrap());
         }
         let resp = self.get(path).await.unwrap();
-        let container: MediaContainerWrapper<MediaContainer> = from_response(resp).await.unwrap();
+        let container: MediaContainerWrapper<MediaContainer> =
+            from_reqwest_response(resp).await.unwrap();
         Ok(container)
     }
 
@@ -120,7 +113,8 @@ impl PlexClient {
             .get(format!("/library/collections/{}", id))
             .await
             .unwrap();
-        let container: MediaContainerWrapper<MediaContainer> = from_response(resp).await.unwrap();
+        let container: MediaContainerWrapper<MediaContainer> =
+            from_reqwest_response(resp).await.unwrap();
         Ok(container)
     }
 
@@ -129,28 +123,57 @@ impl PlexClient {
         key: String,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
         let resp = self.get(key).await.unwrap();
-        let container: MediaContainerWrapper<MediaContainer> = from_response(resp).await.unwrap();
+        let container: MediaContainerWrapper<MediaContainer> =
+            from_reqwest_response(resp).await.unwrap();
         Ok(container)
     }
 }
 
-impl From<&Request<Body>> for PlexClient {
-    fn from(req: &Request<Body>) -> Self {
+impl PlexClient {
+    pub fn new(req: &mut Request, params: PlexParams) -> Self {
+        // TODO: Dont need request
         let config: Config = Config::figment().extract().unwrap();
-        // dbg!(get_content_type_from_headers(req.headers()));
+        let token = params
+            .clone()
+            .token
+            .expect("Expected to have an token in header or query");
+        let client_identifier = params
+            .clone()
+            .client_identifier
+            .expect("Expected to have an plex client identifier header");
+        let platform = params
+            .clone()
+            .platform
+            .expect("Expected to have an plex platform header");
+
+        let mut headers = header::HeaderMap::new();
+        headers.insert(
+            "X-Plex-Token",
+            header::HeaderValue::from_str(token.clone().as_str()).unwrap(),
+        );
+        headers.insert(
+            "X-Plex-Client-Identifier",
+            header::HeaderValue::from_str(client_identifier.clone().as_str()).unwrap(),
+        );
+        headers.insert(
+            "X-Plex-Platform",
+            header::HeaderValue::from_str(platform.clone().as_str()).unwrap(),
+        );
+        headers.insert(
+            "Accept",
+            header::HeaderValue::from_static("application/json"),
+        );
+
         Self {
-            http_client: HttpClient::new(),
-            // host: "http://100.91.35.113:32400".to_string(),
+            http_client: reqwest::Client::builder()
+                .default_headers(headers)
+                .build()
+                .unwrap(),
             host: config.host,
-            x_plex_token: get_header_or_param("x-plex-token".to_string(), &req)
-                .expect("Expected to have an token in header or query"),
-            x_plex_client_identifier: get_header_or_param(
-                "x-plex-client-identifier".to_string(),
-                &req,
-            )
-            .expect("Expected to have an plex client identifier header"),
-            x_plex_sync_version: "2".to_owned(),
-            content_type: get_content_type_from_headers(req.headers()),
+            x_plex_token: token,
+            x_plex_client_identifier: client_identifier,
+            x_plex_platform: platform,
+            // content_type: get_content_type_from_headers(req.headers()),
         }
     }
 }

@@ -1,22 +1,16 @@
-use std::fmt::Display;
-use std::io::Read;
-use std::str::FromStr;
 
+
+use std::str::FromStr;
+use salvo::prelude::*;
+
+extern crate mime;
 use crate::config::*;
 use crate::plex_client::PlexClient;
-use crate::proxy::*;
+
 use crate::utils::*;
-use crate::xml::*;
 use anyhow::Result;
 use async_trait::async_trait;
-use axum::{
-    body::Body,
-    response::{IntoResponse, Response},
-    Json,
-};
-use hyper::client::HttpConnector;
 use serde_aux::prelude::{
-    deserialize_number_from_string, deserialize_option_number_from_string,
     deserialize_string_from_number,
 };
 // use hyper::Body;
@@ -24,29 +18,81 @@ use itertools::Itertools;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_with::serde_as;
 use tracing::debug;
-use yaserde::YaDeserialize;
-use yaserde::YaSerialize;
+use salvo::http::ReqBody;
+use salvo::http::ResBody;
+
+
+use salvo::macros::Extractible;
 // use replex::settings::*;
 //mod replex;
 
 // use parse_display::{Display, FromStr};
 // use yaserde_derive::{YaDeserialize, YaSerialize};
 
+pub type HyperRequest = hyper::Request<ReqBody>;
+pub type HyperResponse = hyper::Response<ResBody>;
 
 #[derive(Debug, Clone, Default)]
 pub struct ReplexOptions {
     pub limit: Option<i32>,
+    pub platform: Option<String>,
 }
 
-// impl Default for ReplexOptions {
+#[derive(Serialize, Deserialize, Debug, Extractible, Default, Clone)]
+#[salvo(extract(
+    default_source(from = "query"),
+    default_source(from = "header"),
+    rename_all = "camelCase"
+))]
+pub struct PlexParams {
+    #[serde(default, deserialize_with = "deserialize_comma_seperated_number")]
+    #[salvo(extract(rename = "contentDirectoryID"))]
+    pub content_directory_id: Option<Vec<i32>>,
+    #[serde(default, deserialize_with = "deserialize_comma_seperated_number")]
+    #[salvo(extract(rename = "pinnedContentDirectoryID"))]
+    pub pinned_content_directory_id: Option<Vec<i32>>,
+    #[salvo(extract(rename = "X-Plex-Platform"))]
+    pub platform: Option<String>,
+    pub count: Option<i32>,
+    #[salvo(extract(rename = "X-Plex-Client-Identifier"))]
+    pub client_identifier: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Token"))]
+    pub token: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Container-Size"))]
+    pub container_size: Option<i32>,
+    #[salvo(extract(rename = "X-Plex-Container-Start"))]
+    pub container_start: Option<i32>,
+    // #[salvo(extract(rename = "Accept"))]
+    // pub accept: ContentType,
+}
+
+
+
+
+pub fn deserialize_comma_seperated_number<'de, D>(
+    deserializer: D,
+) -> Result<Option<Vec<i32>>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    match Deserialize::deserialize(deserializer)? {
+        Some::<String>(s) => {
+            let r: Vec<i32> = s.split(',').map(|s| s.parse().unwrap()).collect();
+            Ok(Some(r))
+        }
+        None => Ok(None),
+    }
+}
+
+// impl Default for Mime {
 //     fn default() -> Self { limit: None }
 // }
 
-#[derive(Debug, Clone)]
-pub struct App {
-    proxy: Proxy,
-    plex: PlexClient,
-}
+// #[derive(Debug, Clone)]
+// pub struct App {
+//     proxy: Proxy,
+//     plex: PlexClient,
+// }
 
 #[derive(
     Debug,
@@ -71,16 +117,7 @@ pub struct Label {
     filter: String,
 }
 
-pub type HttpClient = hyper::client::Client<HttpConnector, Body>;
-
-#[derive(
-    Debug,
-    Serialize,
-    Deserialize,
-    Clone,
-    YaDeserialize,
-    YaSerialize,
-)]
+#[derive(Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 #[serde_as]
@@ -209,7 +246,9 @@ pub struct MetaData {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[yaserde(attribute)]
     pub style: Option<String>,
-    // pub context: String,
+    #[yaserde(skip)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub meta: Option<Meta>,
     #[serde(rename = "Metadata", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Metadata")]
@@ -249,6 +288,9 @@ pub struct MetaData {
     // #[yaserde(flatten)]
     #[yaserde(child)]
     pub labels: Vec<Label>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub originally_available_at: Option<String>,
     // #[yaserde( attribute)]
     // #[serde(skip_serializing_if = "Option::is_none")]
     // pub rating: Option<f64>,
@@ -290,7 +332,11 @@ impl MetaData {
     pub fn is_collection_hub(&self) -> bool {
         self.is_hub()
             && self.context.is_some()
-            && self.context.clone().unwrap().starts_with("hub.custom.collection")
+            && self
+                .context
+                .clone()
+                .unwrap()
+                .starts_with("hub.custom.collection")
     }
 
     // pub async fn replex(&mut self, plex: &PlexClient) -> MetaData {
@@ -301,9 +347,8 @@ impl MetaData {
     //     self.clone()
     // }
 
-    pub async fn apply_hub_style(&mut self, plex: &PlexClient) {
+    pub async fn apply_hub_style(&mut self, plex: &PlexClient, options: &ReplexOptions) {
         if self.is_collection_hub() {
-            // dbg!(get_collection_id_from_child_path(self.key.clone()));
             let mut collection_details = plex
                 .get_collection(get_collection_id_from_child_path(self.key.clone()))
                 .await
@@ -317,10 +362,29 @@ impl MetaData {
                 .has_label("REPLEXHERO".to_string())
             {
                 self.style = Some("hero".to_string());
+                // dbg!(&options.platform);
+                // for android, as it doesnt listen to hero style on home..... so we make it a clip
+                if let Some(platform) = &options.platform {
+                    if platform.to_lowercase() == "android" {
+                        // dbg!("We got android");
+                        // self.meta = Some(Meta {
+                        //     r#type: None,
+                        //     display_fields: vec![
+                        //         DisplayField {
+                        //             r#type: Some("movie".to_string()),
+                        //             fields: vec!["title".to_string(), "year".to_string()],
+                        //         },
+                        //         DisplayField {
+                        //             r#type: Some("show".to_string()),
+                        //             fields: vec!["title".to_string(), "year".to_string()],
+                        //         },
+                        //     ],
+                        // });
+                        self.r#type = "clip".to_string();
+                    }
+                }
             }
-            // dbg!(collection_details);
         }
-        // self
     }
 
     fn has_label(&self, name: String) -> bool {
@@ -382,9 +446,7 @@ impl MetaData {
     }
 }
 
-#[derive(
-    Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default,
-)]
+#[derive(Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 #[yaserde(root = "MediaContainer")]
@@ -437,19 +499,30 @@ pub struct MediaContainer {
     pub directory: Vec<MetaData>,
 }
 
-// pub fn remove_watched(item: MetaData) {
-//     let new_children: Vec<MetaData> = self
-//         .children()
-//         .into_iter()
-//         .filter(|c| !c.is_watched())
-//         .collect::<Vec<MetaData>>();
+#[derive(Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default)]
+#[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
+#[serde(rename_all = "camelCase")]
+pub struct DisplayField {
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "type")]
+    pub r#type: Option<String>,
+    // #[yaserde(attribute)]
+    pub fields: Vec<String>,
+}
 
-//     // let size = new_children.len();
-//     // self.size = Some(size.try_into().unwrap());
-//     // // trace!("mangled promoted container {:#?}", container);
-//     // self.set_children(new_children);
-//     //sel
-// }
+#[derive(Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default)]
+#[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
+#[serde(rename_all = "camelCase")]
+pub struct Meta {
+    #[serde(rename = "DisplayFields")]
+    pub display_fields: Vec<DisplayField>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "type")]
+    pub r#type: Option<String>,
+}
+
 
 impl MediaContainer {
     pub fn set_type(&mut self, value: String) {
@@ -486,22 +559,20 @@ impl MediaContainer {
     // pub fn children_type()
 }
 
-// impl MediaContainer {
-//     fn check_optional_string(&self, value: &Option<Vec<MetaData>>) -> bool {
-//         value == &Some("unset".to_string())
-//     }
-// }
 
-// pub MediaContainerBuilder
-
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Default)]
+/// NOTICE: Cant set yaserde on this? it will complain about a generic
+#[derive(
+    Debug, Serialize, Deserialize, Clone, Default
+)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 pub struct MediaContainerWrapper<T> {
     #[serde(rename = "MediaContainer")]
     // #[serde(rename="$value")]
+    // #[yaserde(child)]
     pub media_container: T,
     #[serde(skip_serializing, skip_deserializing)]
+    // #[yaserde(attribute)]
     pub content_type: ContentType,
 }
 
@@ -509,41 +580,6 @@ pub struct MediaContainerWrapper<T> {
 pub trait FromResponse<T>: Sized {
     async fn from_response(resp: T) -> Result<Self>;
 }
-
-// #[async_trait]
-// impl<T, R> FromResponse<R> for MediaContainerWrapper<T>
-// where
-//     T: MediaContainer,
-//     R: Response<Body>,
-// {
-//     async fn from_response(resp: Response<Body>) -> Self {
-//         from_response(resp).await.unwrap()
-//     }
-// }
-
-// pub type Container = MediaContainerWrapper<MediaContainer>;
-
-#[async_trait]
-impl FromResponse<Response<Body>> for MediaContainerWrapper<MediaContainer> {
-    async fn from_response(resp: Response<Body>) -> Result<MediaContainerWrapper<MediaContainer>> {
-        let res = from_response(resp).await?;
-        Ok(res)
-    }
-}
-
-// #[async_trait]
-// impl FromResponse for MediaContainerWrapper<MediaContainer> {
-//     async fn from_response(resp: Response<Body>) -> Self {
-//         from_response(resp).await.unwrap()
-//     }
-// }
-
-// #[async_trait]
-// impl From<Response<Body>> for MediaContainerWrapper<MediaContainer> {
-//     async fn from_response(resp: Response<Body>) -> Self {
-//         from_response(resp).await.unwrap()
-//     }
-// }
 
 fn get_collection_id_from_child_path(path: String) -> i32 {
     let mut path = path.replace("/library/collections/", "");
@@ -585,7 +621,7 @@ impl MediaContainerWrapper<MediaContainer> {
         self = self.fix_permissions(&plex).await;
 
         if self.is_hub() {
-            self = self.process_hubs(&plex).await;
+            self = self.process_hubs(&plex, &options).await;
         }
 
         if !config.include_watched {
@@ -616,7 +652,7 @@ impl MediaContainerWrapper<MediaContainer> {
             }
             self.media_container.set_children(hubs);
         } else {
-            let mut children =  self.media_container.children();
+            let mut children = self.media_container.children();
             children.truncate(len);
             self.media_container.set_children(children);
         }
@@ -632,7 +668,8 @@ impl MediaContainerWrapper<MediaContainer> {
                 children.push(child);
             }
         } else {
-            children = self.media_container
+            children = self
+                .media_container
                 .children()
                 .into_iter()
                 .filter(|c| !c.is_watched())
@@ -643,22 +680,25 @@ impl MediaContainerWrapper<MediaContainer> {
     }
 
     // TODO: Only works for hubs. Make it generic or name it specific for hubs
-    pub async fn process_hubs(mut self, plex: &PlexClient) -> Self {
+    pub async fn process_hubs(mut self, plex: &PlexClient, options: &ReplexOptions) -> Self {
         let collections = self.media_container.children();
         let mut new_collections: Vec<MetaData> = vec![];
         for mut hub in collections {
             if !hub.is_collection_hub() {
                 new_collections.push(hub);
-                continue
+                continue;
             }
 
-            hub.apply_hub_style(plex).await;
+            hub.apply_hub_style(plex, &options).await;
             if self.is_section_hub() {
                 new_collections.push(hub);
                 continue;
             }
             let p = new_collections.iter().position(|v| v.title == hub.title);
-            hub.r#type = "mixed".to_string();
+
+            if hub.r#type != "clip" {
+                hub.r#type = "mixed".to_string();
+            }
 
             match p {
                 Some(v) => {
@@ -682,11 +722,11 @@ impl MediaContainerWrapper<MediaContainer> {
         self
     }
 
-    pub async fn apply_hub_style(&mut self, plex: &PlexClient) -> &Self {
+    pub async fn apply_hub_style(&mut self, plex: &PlexClient, options: &ReplexOptions) -> &Self {
         let mut metadata: Vec<MetaData> = vec![];
         for mut hub in self.media_container.children() {
             if hub.style.is_some() {
-                hub.apply_hub_style(plex).await;
+                hub.apply_hub_style(plex, options).await;
                 metadata.push(hub);
             }
         }
@@ -706,7 +746,7 @@ impl MediaContainerWrapper<MediaContainer> {
             if metadata.is_hub() && !metadata.is_collection_hub() {
                 continue;
             }
-
+            // dbg!(&metadata);
             let section_id: u32 = metadata.library_section_id.unwrap_or_else(|| {
                 metadata
                     .children()
@@ -744,14 +784,3 @@ impl MediaContainerWrapper<MediaContainer> {
     }
 }
 
-impl<T> IntoResponse for MediaContainerWrapper<T>
-where
-    T: Serialize + YaDeserialize + YaSerialize,
-{
-    fn into_response(self) -> Response {
-        match self.content_type {
-            ContentType::Json => Json(self).into_response(),
-            ContentType::Xml => Xml(self.media_container).into_response(),
-        }
-    }
-}
