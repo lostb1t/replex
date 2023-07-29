@@ -11,6 +11,9 @@ pub struct Config {
     pub host: String,
     #[serde( default = "default_as_false")]
     pub include_watched: bool,
+    #[serde( default = "default_as_false")]
+    pub ssl_enable: bool,
+    pub ssl_domain: Option<String>,
 }
 
 impl Config {

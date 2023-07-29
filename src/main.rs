@@ -38,12 +38,24 @@ async fn main() {
         )
         .push(Router::with_path("<**rest>").handle(PlexProxy::new(config.host)));
 
-    let acceptor = TcpListener::new("0.0.0.0:80").bind().await;
-    Server::new(acceptor).serve(router).await;
+    // let listener = TcpListener::new("0.0.0.0:443");
+    if config.ssl_enable && config.ssl_domain.is_some() {
+        let acceptor = TcpListener::new("0.0.0.0:443")
+            .acme()
+            .cache_path("/data/acme/letsencrypt")
+            .add_domain(config.ssl_domain.unwrap())
+            .bind()
+            .await;
+        Server::new(acceptor).serve(router).await;
+    } else {
+        let acceptor = TcpListener::new("0.0.0.0:80").bind().await;
+        Server::new(acceptor).serve(router).await;
+    }
 }
 
 #[handler]
 async fn get_hubs_promoted(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+    let config: Config = Config::figment().extract().unwrap();
     let params: PlexParams = req.extract().await.unwrap();
     let plex_client = PlexClient::new(req, params.clone());
 
@@ -89,6 +101,7 @@ async fn get_hubs_promoted(req: &mut Request, _depot: &mut Depot, res: &mut Resp
         options = ReplexOptions {
             limit: Some(original_count),
             platform: params.clone().platform,
+            include_watched: config.include_watched,
         };
     }
 
@@ -101,6 +114,7 @@ async fn get_hubs_promoted(req: &mut Request, _depot: &mut Depot, res: &mut Resp
 
 #[handler]
 async fn get_hubs_sections(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+    let config: Config = Config::figment().extract().unwrap();
     let params: PlexParams = req.extract().await.unwrap();
     let plex_client = PlexClient::new(req, params.clone());
 
@@ -112,6 +126,7 @@ async fn get_hubs_sections(req: &mut Request, _depot: &mut Depot, res: &mut Resp
         options = ReplexOptions {
             limit: Some(original_count),
             platform: params.clone().platform,
+            include_watched: config.include_watched,
         };
     }
 
@@ -124,6 +139,7 @@ async fn get_hubs_sections(req: &mut Request, _depot: &mut Depot, res: &mut Resp
 
 #[handler]
 async fn get_collections_children(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+    let config: Config = Config::figment().extract().unwrap();
     let params: PlexParams = req.extract().await.unwrap();
     let collection_ids = req.param::<String>("ids").unwrap();
     let collection_ids: Vec<u32> = collection_ids
@@ -158,8 +174,6 @@ async fn get_collections_children(req: &mut Request, _depot: &mut Depot, res: &m
             .await
             .unwrap();
         total_size += c.media_container.total_size.unwrap();
-        // dbg!(c.media_container.total_size);
-        // dbg!(c.media_container.children().len());
         match children.is_empty() {
             false => {
                 children = children
@@ -179,11 +193,12 @@ async fn get_collections_children(req: &mut Request, _depot: &mut Depot, res: &m
     let size = container.media_container.children().len();
     container.media_container.size = Some(size.try_into().unwrap());
     container.media_container.total_size = Some(total_size);
-    container.media_container.offset = original_offset.clone();
+    container.media_container.offset = original_offset;
 
     let options = ReplexOptions {
         limit: original_limit,
         platform: params.clone().platform,
+        include_watched: config.include_watched,
     };
     container = container.replex(plex_client, options).await;
     res.render(container); // TODO: FIx XML

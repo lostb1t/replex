@@ -32,10 +32,16 @@ use salvo::macros::Extractible;
 pub type HyperRequest = hyper::Request<ReqBody>;
 pub type HyperResponse = hyper::Response<ResBody>;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
 pub struct ReplexOptions {
     pub limit: Option<i32>,
     pub platform: Option<String>,
+    #[serde( default = "default_as_false")]
+    pub include_watched: bool,
+}
+
+fn default_as_false() -> bool {
+    false
 }
 
 #[derive(Serialize, Deserialize, Debug, Extractible, Default, Clone)]
@@ -624,7 +630,7 @@ impl MediaContainerWrapper<MediaContainer> {
             self = self.process_hubs(&plex, &options).await;
         }
 
-        if !config.include_watched {
+        if !options.include_watched {
             self = self.remove_watched();
         }
 
@@ -661,6 +667,7 @@ impl MediaContainerWrapper<MediaContainer> {
 
     // TODO: This should be a trait so we dont repeat ourselfs
     pub fn remove_watched(mut self) -> Self {
+        debug!("Removing watched");
         let mut children: Vec<MetaData> = vec![];
         if self.is_hub() {
             for mut child in self.media_container.children() {
