@@ -14,7 +14,6 @@ use salvo::prelude::*;
 use tracing::Level;
 use tracing_subscriber;
 
-
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt().init();
@@ -46,7 +45,6 @@ async fn main() {
     let acceptor = TcpListener::new("0.0.0.0:80").bind().await;
     Server::new(acceptor).serve(router).await;
 }
-
 
 #[handler]
 async fn get_hubs_promoted(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
@@ -100,7 +98,7 @@ async fn get_hubs_promoted(req: &mut Request, _depot: &mut Depot, res: &mut Resp
 
     let upstream_res: Response = plex_client.request(req).await;
     let mut container: MediaContainerWrapper<MediaContainer> =
-    from_salvo_response(upstream_res).await.unwrap();
+        from_salvo_response(upstream_res).await.unwrap();
     container = container.replex(plex_client, options).await;
     res.render(container); // TODO: FIx XML
 }
@@ -123,7 +121,7 @@ async fn get_hubs_sections(req: &mut Request, _depot: &mut Depot, res: &mut Resp
 
     let upstream_res: Response = plex_client.request(req).await;
     let mut container: MediaContainerWrapper<MediaContainer> =
-    from_salvo_response(upstream_res).await.unwrap();
+        from_salvo_response(upstream_res).await.unwrap();
     container = container.replex(plex_client, options).await;
     res.render(container); // TODO: FIx XML
 }
