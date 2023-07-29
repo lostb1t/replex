@@ -20,7 +20,7 @@ url = "2.3.1"
 tracing = "0.1.37"
 strum_macros = "0.24.3"
 strum = "0.24.1"
-tracing-subscriber = "0.3.16"
+tracing-subscriber = { version = "0.3.17", features=["env-filter"] } 
 itertools = "0.10.5"
 #axum = { version = "0.6.6", features = ["default", "headers", "ws"] }
 pathetic = "0.3.0"

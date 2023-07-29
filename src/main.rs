@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate tracing;
+extern crate tracing_subscriber;
 
 use itertools::Itertools;
 use replex::config::Config;
@@ -9,19 +10,14 @@ use replex::proxy::PlexProxy;
 use replex::url::*;
 use replex::utils::*;
 use salvo::cors::Cors;
-use salvo::hyper::upgrade::OnUpgrade;
 use salvo::prelude::*;
-use tracing::Level;
-use tracing_subscriber;
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt().init();
-    // tracing_subscriber::fmt()
-    //     .compact()
-    //     .with_line_number(true)
-    //     .with_max_level(Level::INFO)
-    //     .init();
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .compact()
+        .init();
 
     let config: Config = Config::figment().extract().unwrap();
     let router = Router::with_hoop(Cors::permissive().into_handler())
