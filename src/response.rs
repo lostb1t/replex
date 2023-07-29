@@ -1,16 +1,7 @@
 
 
-
-// use YaSerialize;
-
-
-
 use serde::Serialize;
 use yaserde::YaSerialize;
-
-
-
-// use yaserde::ser::serialize_with_writer;
 use yaserde::ser::to_string as to_xml_str;
 use async_trait::async_trait;
 use yaserde;
@@ -18,9 +9,6 @@ use salvo::Piece;
 use salvo::http::header::{HeaderValue, CONTENT_TYPE};
 use salvo::http::{Response, StatusError};
 use salvo::writing::Json;
-
-
-
 use crate::models::MediaContainerWrapper;
 use crate::utils::*;
 
@@ -48,11 +36,7 @@ where
     T: YaSerialize + Send
 {
     #[inline]
-    fn render(self, res: &mut Response) {
-        // let bytes = res.take_body();
-        // let bytes = res.take_bytes(Some(&mime::TEXT_XML)).await.unwrap();
-        // let b = res.to_string();
-        // let value = to_xml_str(&self.0);
+    fn render(self, res: &mut Response) {;
         match to_xml_str(&self.0) {
             Ok(bytes) => {
                 res.headers_mut().insert(

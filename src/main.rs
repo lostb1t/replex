@@ -9,62 +9,44 @@ use replex::proxy::PlexProxy;
 use replex::url::*;
 use replex::utils::*;
 use salvo::cors::Cors;
+use salvo::hyper::upgrade::OnUpgrade;
 use salvo::prelude::*;
 use tracing::Level;
 use tracing_subscriber;
 
-// #[handler]
-// async fn set_plex_proxy(_req: &mut Request, depot: &mut Depot) {
-//     let plex_proxy = PlexProxy::new("http://46.4.30.217:42405");
-//     // let plex_proxy = Proxy::default();
-//     depot.insert("plex_proxy", plex_proxy);
-// }
 
 #[tokio::main]
 async fn main() {
-    // tracing_subscriber::fmt().init();
-    tracing_subscriber::fmt()
-        .compact()
-        .with_line_number(true)
-        .with_max_level(Level::INFO)
-        .init();
+    tracing_subscriber::fmt().init();
+    // tracing_subscriber::fmt()
+    //     .compact()
+    //     .with_line_number(true)
+    //     .with_max_level(Level::INFO)
+    //     .init();
 
     let config: Config = Config::figment().extract().unwrap();
     let router = Router::with_hoop(Cors::permissive().into_handler())
         .push(
             Router::new()
-                // .hoop(set_plex_proxy)
                 .path(PLEX_HUBS_PROMOTED)
                 .get(get_hubs_promoted),
         )
         .push(
             Router::new()
-                // .hoop(set_plex_proxy)
                 .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
                 .get(get_hubs_sections),
         )
         .push(
             Router::new()
-                // .hoop(set_plex_proxy)
                 .path("/replex/library/collections/<ids>/children")
                 .get(get_collections_children),
         )
-        // .push(
-        //     Router::new()
-        //         .path("/<id>/websockets/<**rest>")
-        //         .handle(connect),
-        // )
-        // .push(
-        //     Router::new()
-        //         .path("/<id>/websockets/<**rest>")
-        //         .handle(Proxy::new(format!("{}/:/websockets", config.host))),
-        // )
-        // .push(Router::with_path("<**rest>").handle(SalvoProxy::new(config.host)));
         .push(Router::with_path("<**rest>").handle(PlexProxy::new(config.host)));
 
     let acceptor = TcpListener::new("0.0.0.0:80").bind().await;
     Server::new(acceptor).serve(router).await;
 }
+
 
 #[handler]
 async fn get_hubs_promoted(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
@@ -75,7 +57,7 @@ async fn get_hubs_promoted(req: &mut Request, _depot: &mut Depot, res: &mut Resp
     let content_directory_id_size = params.clone().content_directory_id.unwrap().len();
     if content_directory_id_size > usize::try_from(1).unwrap() {
         let upstream_res = plex_client.request(req).await;
-        let container = from_response(upstream_res).await.unwrap();
+        let container = from_salvo_response(upstream_res).await.unwrap();
         res.render(container);
     }
 
@@ -118,7 +100,7 @@ async fn get_hubs_promoted(req: &mut Request, _depot: &mut Depot, res: &mut Resp
 
     let upstream_res: Response = plex_client.request(req).await;
     let mut container: MediaContainerWrapper<MediaContainer> =
-        from_response(upstream_res).await.unwrap();
+    from_salvo_response(upstream_res).await.unwrap();
     container = container.replex(plex_client, options).await;
     res.render(container); // TODO: FIx XML
 }
@@ -141,7 +123,7 @@ async fn get_hubs_sections(req: &mut Request, _depot: &mut Depot, res: &mut Resp
 
     let upstream_res: Response = plex_client.request(req).await;
     let mut container: MediaContainerWrapper<MediaContainer> =
-        from_response(upstream_res).await.unwrap();
+    from_salvo_response(upstream_res).await.unwrap();
     container = container.replex(plex_client, options).await;
     res.render(container); // TODO: FIx XML
 }
@@ -161,14 +143,14 @@ async fn get_collections_children(req: &mut Request, _depot: &mut Depot, res: &m
 
     let mut offset: Option<i32> = None;
     let mut original_offset: Option<i32> = None;
-    if let Some(i) = params.clone().x_plex_container_start {
+    if let Some(i) = params.clone().container_start {
         offset = Some(i);
         original_offset = offset;
         offset = Some(offset.unwrap() / collection_ids_len);
     }
     let mut limit: Option<i32> = None;
     let mut original_limit: Option<i32> = None;
-    if let Some(i) = params.clone().x_plex_container_size {
+    if let Some(i) = params.clone().container_size {
         limit = Some(i);
         original_limit = limit;
         limit = Some(limit.unwrap() / collection_ids_len);

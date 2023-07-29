@@ -47,45 +47,6 @@ where
         res
     }
 
-    // // pub async fn websocket(&self, req: &mut Request, res: &mut Response) -> Result<HyperResponse, Error> {
-    // pub async fn websocket(&self, req: &mut Request, res: &mut Response) {
-    //     // let mut hyper_req = HyperRequest::new(req.take_body());
-    //     // *hyper_req.extensions_mut() = req.extensions_mut();
-    //     // *hyper_req.headers_mut() = req.headers_mut();
-    //     // TryFrom::try_from(req.uri_mut()).map_err(Error::other)?;
-    //     let mut request = hyper::Request::builder()
-    //         .method(req.method())
-    //         .uri(TryFrom::try_from(req.uri_mut()).map_err(Error::other)?);
-    //     for (key, value) in req.headers() {
-    //         request = request.header(key, value);
-    //     }
-    //     request.body(req.take_body()).map_err(Error::other);
-
-    //     let client = Client::new();
-    //     // let reqq: &mut HyperRequest = req.into();
-    //     let mut response = client
-    //         .execute(request.into())
-    //         .await
-    //         .map_err(Error::other)?;
-
-    //     // let request_upgraded = req;
-    //     // let response_upgraded = hyper::upgrade::on(res).await;
-    //     // tokio::spawn(async move {
-    //     //     match request_upgraded.await {
-    //     //         Ok(request_upgraded) => {
-    //     //             let mut request_upgraded = TokioIo::new(request_upgraded);
-    //     //             if let Err(e) =
-    //     //                 copy_bidirectional(&mut response_upgraded, &mut request_upgraded).await
-    //     //             {
-    //     //                 tracing::error!(error = ?e, "coping between upgraded connections failed");
-    //     //             }
-    //     //         }
-    //     //         Err(e) => {
-    //     //             tracing::error!(error = ?e, "upgrade request failed");
-    //     //         }
-    //     //     }
-    //     // });
-    // }
 }
 
 #[async_trait]
@@ -105,29 +66,4 @@ where
         // self.websocket(req, res).await
         self.proxy.handle(req, _depot, res, ctrl).await
     }
-}
-
-#[inline]
-fn get_upgrade_type(headers: &HeaderMap) -> Option<&str> {
-    if headers
-        .get(&CONNECTION)
-        .map(|value| {
-            value
-                .to_str()
-                .unwrap()
-                .split(',')
-                .any(|e| e.trim() == UPGRADE)
-        })
-        .unwrap_or(false)
-    {
-        if let Some(upgrade_value) = headers.get(&UPGRADE) {
-            tracing::debug!(
-                "Found upgrade header with value: {:?}",
-                upgrade_value.to_str()
-            );
-            return upgrade_value.to_str().ok();
-        }
-    }
-
-    None
 }

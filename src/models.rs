@@ -10,7 +10,6 @@ use crate::plex_client::PlexClient;
 use crate::utils::*;
 use anyhow::Result;
 use async_trait::async_trait;
-use hyper::client::HttpConnector;
 use serde_aux::prelude::{
     deserialize_string_from_number,
 };
@@ -19,6 +18,8 @@ use itertools::Itertools;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_with::serde_as;
 use tracing::debug;
+use salvo::http::ReqBody;
+use salvo::http::ResBody;
 
 
 use salvo::macros::Extractible;
@@ -27,6 +28,9 @@ use salvo::macros::Extractible;
 
 // use parse_display::{Display, FromStr};
 // use yaserde_derive::{YaDeserialize, YaSerialize};
+
+pub type HyperRequest = hyper::Request<ReqBody>;
+pub type HyperResponse = hyper::Response<ResBody>;
 
 #[derive(Debug, Clone, Default)]
 pub struct ReplexOptions {
@@ -51,13 +55,13 @@ pub struct PlexParams {
     pub platform: Option<String>,
     pub count: Option<i32>,
     #[salvo(extract(rename = "X-Plex-Client-Identifier"))]
-    pub x_plex_client_identifier: Option<String>,
+    pub client_identifier: Option<String>,
     #[salvo(extract(rename = "X-Plex-Token"))]
-    pub x_plex_token: Option<String>,
+    pub token: Option<String>,
     #[salvo(extract(rename = "X-Plex-Container-Size"))]
-    pub x_plex_container_size: Option<i32>,
+    pub container_size: Option<i32>,
     #[salvo(extract(rename = "X-Plex-Container-Start"))]
-    pub x_plex_container_start: Option<i32>,
+    pub container_start: Option<i32>,
     // #[salvo(extract(rename = "Accept"))]
     // pub accept: ContentType,
 }
@@ -112,8 +116,6 @@ pub struct Label {
     #[yaserde(attribute)]
     filter: String,
 }
-
-pub type HttpClient = hyper::client::Client<HttpConnector, hyper::Body>;
 
 #[derive(Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
@@ -521,19 +523,6 @@ pub struct Meta {
     pub r#type: Option<String>,
 }
 
-// pub fn remove_watched(item: MetaData) {
-//     let new_children: Vec<MetaData> = self
-//         .children()
-//         .into_iter()
-//         .filter(|c| !c.is_watched())
-//         .collect::<Vec<MetaData>>();
-
-//     // let size = new_children.len();
-//     // self.size = Some(size.try_into().unwrap());
-//     // // trace!("mangled promoted container {:#?}", container);
-//     // self.set_children(new_children);
-//     //sel
-// }
 
 impl MediaContainer {
     pub fn set_type(&mut self, value: String) {
@@ -570,15 +559,8 @@ impl MediaContainer {
     // pub fn children_type()
 }
 
-// impl MediaContainer {
-//     fn check_optional_string(&self, value: &Option<Vec<MetaData>>) -> bool {
-//         value == &Some("unset".to_string())
-//     }
-// }
 
-// pub MediaContainerBuilder
-
-/// BUG: Cant set yaserde on this? it will complain about a generic
+/// NOTICE: Cant set yaserde on this? it will complain about a generic
 #[derive(
     Debug, Serialize, Deserialize, Clone, Default
 )]
@@ -594,73 +576,10 @@ pub struct MediaContainerWrapper<T> {
     pub content_type: ContentType,
 }
 
-// impl Default for MediaContainerWrapper<T> {
-//     fn default() -> Self {
-//         MediaContainerWrapper {
-//             content_type
-//         }
-//      }
-// }
-
-fn default_resource() -> mime::Mime {
-    mime::APPLICATION_JSON
-}
-
-
-// #[derive(
-//     Debug, Serialize, Deserialize, Clone, Default, YaDeserialize, YaSerialize
-// )]
-// #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
-// #[serde(rename_all = "camelCase")]
-// pub struct MediaContainerWrapper {
-//     #[serde(rename = "MediaContainer")]
-//     // #[serde(rename="$value")]
-//     #[yaserde(child)]
-//     pub media_container: MediaContainer,
-//     #[serde(skip_serializing, skip_deserializing)]
-//     #[yaserde(attribute)]
-//     pub content_type: ContentType,
-// }
-
 #[async_trait]
 pub trait FromResponse<T>: Sized {
     async fn from_response(resp: T) -> Result<Self>;
 }
-
-// #[async_trait]
-// impl<T, R> FromResponse<R> for MediaContainerWrapper<T>
-// where
-//     T: MediaContainer,
-//     R: Response<Body>,
-// {
-//     async fn from_response(resp: Response<Body>) -> Self {
-//         from_response(resp).await.unwrap()
-//     }
-// }
-
-// pub type Container = MediaContainerWrapper<MediaContainer>;
-
-// #[async_trait]
-// impl FromResponse<Response<Body>> for MediaContainerWrapper<MediaContainer> {
-//     async fn from_response(resp: Response<Body>) -> Result<MediaContainerWrapper<MediaContainer>> {
-//         let res = from_response(resp).await?;
-//         Ok(res)
-//     }
-// }
-
-// #[async_trait]
-// impl FromResponse for MediaContainerWrapper<MediaContainer> {
-//     async fn from_response(resp: Response<Body>) -> Self {
-//         from_response(resp).await.unwrap()
-//     }
-// }
-
-// #[async_trait]
-// impl From<Response<Body>> for MediaContainerWrapper<MediaContainer> {
-//     async fn from_response(resp: Response<Body>) -> Self {
-//         from_response(resp).await.unwrap()
-//     }
-// }
 
 fn get_collection_id_from_child_path(path: String) -> i32 {
     let mut path = path.replace("/library/collections/", "");
