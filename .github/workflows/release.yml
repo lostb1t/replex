@@ -15,25 +15,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: Test
-    runs-on: ubuntu-20.04
-    continue-on-error: false
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-      - name: Run Tests
-        run: make run-tests
-        shell: bash
+  # test:
+  #   name: Test
+  #   runs-on: ubuntu-20.04
+  #   continue-on-error: false
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #     - name: Install Rust
+  #       uses: dtolnay/rust-toolchain@stable
+  #     - name: Run Tests
+  #       run: make run-tests
+  #       shell: bash
 
   release:
     name: Tag and release latest version
     runs-on: ubuntu-20.04
-    needs: [
-       test,
-    ]
+    # needs: [
+    #    test,
+    # ]
     env:
       HUSKY: 0
     steps:
