@@ -42,7 +42,7 @@ where
         // disable gzip
         req.headers_mut()
             .insert("Accept-Encoding", HeaderValue::from_static("identity"));
-        debug!("Making request: {:?}", &req);
+        // debug!("Making request: {:?}", &req);
         self.handle(req, &mut depot, &mut res, &mut ctrl).await;
         res
     }

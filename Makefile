@@ -18,11 +18,11 @@ docker-run:
 
 # release: build-docker push-docker
 
-run:
-	REPLEX_HOST=http://46.4.30.217:42405 REPLEX_NEWRELIC_API_KEY="NRAK-URAH851PRF8TQX5U69OOPDY4T8U" RUST_LOG="info,replex=debug" cargo run
-
 # run:
-# 	REPLEX_HOST=http://46.4.30.217:42405 REPLEX_NEWRELIC_API_KEY="NRAK-URAH851PRF8TQX5U69OOPDY4T8U" RUST_LOG="debug,replex=debug" cargo watch -x run
+# 	REPLEX_HOST=http://46.4.30.217:42405 REPLEX_NEWRELIC_API_KEY="NRAK-URAH851PRF8TQX5U69OOPDY4T8U" RUST_LOG="info,replex=debug" cargo run
+
+run:
+	REPLEX_HOST=http://46.4.30.217:42405 REPLEX_NEWRELIC_API_KEY="NRAK-URAH851PRF8TQX5U69OOPDY4T8U" RUST_LOG="info,replex=debug" cargo watch -x run
 
 fix:
 	cargo fix

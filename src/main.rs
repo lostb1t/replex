@@ -2,6 +2,7 @@
 extern crate tracing;
 extern crate tracing_subscriber;
 
+use http_cache_reqwest::MokaCache;
 use itertools::Itertools;
 use replex::config::Config;
 use replex::models::*;
@@ -11,6 +12,16 @@ use replex::url::*;
 use replex::utils::*;
 use salvo::cors::Cors;
 use salvo::prelude::*;
+use salvo::affix;
+
+
+// #[handler]
+// async fn add_app(depot: &mut Depot) {
+//     depot.inject(App {
+//         config: Config::figment().extract().unwrap(),
+//         http_moka_cache: MokaCache::new(250)
+//     });
+// }
 
 #[tokio::main]
 async fn main() {
@@ -18,9 +29,14 @@ async fn main() {
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .compact()
         .init();
-
     let config: Config = Config::figment().extract().unwrap();
+    let app = App {
+        config: config.clone(),
+        http_moka_cache: MokaCache::new(250)
+    };
+
     let router = Router::with_hoop(Cors::permissive().into_handler())
+        .hoop(affix::inject(app))
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
@@ -38,7 +54,6 @@ async fn main() {
         )
         .push(Router::with_path("<**rest>").handle(PlexProxy::new(config.host)));
 
-    // let listener = TcpListener::new("0.0.0.0:443");
     if config.ssl_enable && config.ssl_domain.is_some() {
         let acceptor = TcpListener::new("0.0.0.0:443")
             .acme()
@@ -54,10 +69,11 @@ async fn main() {
 }
 
 #[handler]
-async fn get_hubs_promoted(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+async fn get_hubs_promoted(req: &mut Request, depot: &mut Depot, res: &mut Response) {
+    let app = depot.obtain::<App>().unwrap();
     let config: Config = Config::figment().extract().unwrap();
     let params: PlexParams = req.extract().await.unwrap();
-    let plex_client = PlexClient::new(req, params.clone());
+    let plex_client = PlexClient::new(req, params.clone(), app.http_moka_cache.clone());
 
     // not sure anymore why i have this lol
     let content_directory_id_size = params.clone().content_directory_id.unwrap().len();
@@ -113,10 +129,11 @@ async fn get_hubs_promoted(req: &mut Request, _depot: &mut Depot, res: &mut Resp
 }
 
 #[handler]
-async fn get_hubs_sections(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+async fn get_hubs_sections(req: &mut Request, depot: &mut Depot, res: &mut Response) {
+    let app = depot.obtain::<App>().unwrap();
     let config: Config = Config::figment().extract().unwrap();
     let params: PlexParams = req.extract().await.unwrap();
-    let plex_client = PlexClient::new(req, params.clone());
+    let plex_client = PlexClient::new(req, params.clone(), app.http_moka_cache.clone());
 
     // Hack, as the list could be smaller when removing watched items. So we request more.
     let mut options = ReplexOptions::default();
@@ -138,7 +155,8 @@ async fn get_hubs_sections(req: &mut Request, _depot: &mut Depot, res: &mut Resp
 }
 
 #[handler]
-async fn get_collections_children(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+async fn get_collections_children(req: &mut Request, depot: &mut Depot, res: &mut Response) {
+    let app = depot.obtain::<App>().unwrap();
     let config: Config = Config::figment().extract().unwrap();
     let params: PlexParams = req.extract().await.unwrap();
     let collection_ids = req.param::<String>("ids").unwrap();
@@ -147,7 +165,7 @@ async fn get_collections_children(req: &mut Request, _depot: &mut Depot, res: &m
         .map(|v| v.parse().unwrap())
         .collect();
     let collection_ids_len: i32 = collection_ids.len() as i32;
-    let plex_client = PlexClient::new(req, params.clone());
+    let plex_client = PlexClient::new(req, params.clone(), app.http_moka_cache.clone());
     let mut children: Vec<MetaData> = vec![];
     let reversed: Vec<u32> = collection_ids.iter().copied().rev().collect();
 

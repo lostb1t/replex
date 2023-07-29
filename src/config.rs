@@ -5,7 +5,7 @@ fn default_as_false() -> bool {
     false
 }
 
-#[derive(Debug, PartialEq, Deserialize)]
+#[derive(Debug, PartialEq, Deserialize, Clone)]
 pub struct Config {
     #[serde( default)]
     pub host: String,

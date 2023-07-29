@@ -8,9 +8,12 @@ use futures_util::Future;
 use futures_util::TryStreamExt;
 // use hyper::client::HttpConnector;
 // use hyper::Body;
+use http_cache_reqwest::{CACacheManager, MokaManager, Cache, CacheMode, HttpCache, HttpCacheOptions};
 use hyper::body::Body;
+use memoize::memoize;
 use reqwest::header;
 use reqwest::Client;
+use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 use salvo::http::ReqBody;
 use salvo::Error;
 use salvo::Request;
@@ -18,13 +21,15 @@ use salvo::Response;
 // use hyper::client::HttpConnector;
 
 use salvo::http::ResBody;
+use tracing::debug;
 
 // type HttpClient = hyper::client::Client<HttpConnector, Body>;
 
 #[derive(Debug, Clone)]
 pub struct PlexClient {
-    pub http_client: Client,
+    pub http_client: ClientWithMiddleware,
     pub host: String, // TODO: Dont think this suppsoed to be here. Should be higher up
+    // pub http_moka_cache: HTTPMokaCache,
 
     // /// `X-Plex-Platform` header value.
     // ///
@@ -49,6 +54,9 @@ pub struct PlexClient {
 }
 
 impl PlexClient {
+    pub fn format_url(&self, path: String) -> String {
+        format!("{}{}", self.host, path)
+    }
 
     // TODO: Handle 404s/500 etc
     // TODO: Map reqwest response and error to salvo
@@ -71,11 +79,30 @@ impl PlexClient {
         proxy.request(req).await
     }
 
+    // #[memoize]
+    // pub async fn get_section_labels(&self, section_id: u32) -> Result<Vec<Label>> {
+    //     debug!("getting labels");
+    //     // type Test = MediaContainerWrapper<Label>;
+    //     let res: MediaContainerWrapper<Label> = self
+    //         .http_client
+    //         .get(format!("/library/sections/{}/label", section_id))
+    //         .send()
+    //         .await?
+    //         .json::<MediaContainerWrapper<Label>>()
+    //         .await?;
+    //     // Ok(res.media_container)
+    //     // let mut container: MediaContainerWrapper<MediaContainer> = from_reqwest_response(res)
+    //     //     .await
+    //     //     .expect("Cannot get MediaContainerWrapper from response");
+
+    //     // Ok(container.media_container.children())
+    // }
     // pub fn request(&self, req) -> hyper::client::ResponseFuture {
     //     self.http_client.request(req)
     // }
 
     pub async fn get_section_collections(&self, id: u32) -> Result<Vec<MetaData>> {
+        debug!("getting collections");
         let res = self
             .get(format!("/library/sections/{}/collections", id))
             .await
@@ -130,7 +157,7 @@ impl PlexClient {
 }
 
 impl PlexClient {
-    pub fn new(req: &mut Request, params: PlexParams) -> Self {
+    pub fn new(req: &mut Request, params: PlexParams, http_moka_cache: HTTPMokaCache) -> Self {
         // TODO: Dont need request
         let config: Config = Config::figment().extract().unwrap();
         let token = params
@@ -165,10 +192,18 @@ impl PlexClient {
         );
 
         Self {
-            http_client: reqwest::Client::builder()
-                .default_headers(headers)
-                .build()
-                .unwrap(),
+            http_client: ClientBuilder::new(
+                reqwest::Client::builder()
+                    .default_headers(headers)
+                    .build()
+                    .unwrap(),
+            )
+            .with(Cache(HttpCache {
+                mode: CacheMode::Default,
+                manager: MokaManager::new(http_moka_cache),
+                options: HttpCacheOptions::default(),
+            }))
+            .build(),
             host: config.host,
             x_plex_token: token,
             x_plex_client_identifier: client_identifier,

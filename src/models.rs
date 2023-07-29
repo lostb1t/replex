@@ -1,26 +1,22 @@
-
-
-use std::str::FromStr;
+use http_cache_reqwest::MokaCache;
 use salvo::prelude::*;
+use std::str::FromStr;
+use std::sync::Arc;
 
 extern crate mime;
-use crate::config::*;
+use crate::config::Config;
 use crate::plex_client::PlexClient;
-
 use crate::utils::*;
 use anyhow::Result;
 use async_trait::async_trait;
-use serde_aux::prelude::{
-    deserialize_string_from_number,
-};
+use serde_aux::prelude::deserialize_string_from_number;
 // use hyper::Body;
 use itertools::Itertools;
+use salvo::http::ReqBody;
+use salvo::http::ResBody;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_with::serde_as;
 use tracing::debug;
-use salvo::http::ReqBody;
-use salvo::http::ResBody;
-
 
 use salvo::macros::Extractible;
 // use replex::settings::*;
@@ -32,11 +28,19 @@ use salvo::macros::Extractible;
 pub type HyperRequest = hyper::Request<ReqBody>;
 pub type HyperResponse = hyper::Response<ResBody>;
 
+pub type HTTPMokaCache = MokaCache<String, Arc<Vec<u8>>>;
+
+#[derive(Debug, Clone)]
+pub struct App {
+    pub http_moka_cache: HTTPMokaCache,
+    pub config: Config
+}
+
 #[derive(Debug, Clone, Default, Deserialize, Serialize)]
 pub struct ReplexOptions {
     pub limit: Option<i32>,
     pub platform: Option<String>,
-    #[serde( default = "default_as_false")]
+    #[serde(default = "default_as_false")]
     pub include_watched: bool,
 }
 
@@ -71,9 +75,6 @@ pub struct PlexParams {
     // #[salvo(extract(rename = "Accept"))]
     // pub accept: ContentType,
 }
-
-
-
 
 pub fn deserialize_comma_seperated_number<'de, D>(
     deserializer: D,
@@ -529,7 +530,6 @@ pub struct Meta {
     pub r#type: Option<String>,
 }
 
-
 impl MediaContainer {
     pub fn set_type(&mut self, value: String) {
         for hub in &mut self.hub {
@@ -565,11 +565,8 @@ impl MediaContainer {
     // pub fn children_type()
 }
 
-
 /// NOTICE: Cant set yaserde on this? it will complain about a generic
-#[derive(
-    Debug, Serialize, Deserialize, Clone, Default
-)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 pub struct MediaContainerWrapper<T> {
@@ -695,8 +692,15 @@ impl MediaContainerWrapper<MediaContainer> {
                 new_collections.push(hub);
                 continue;
             }
-
-            hub.apply_hub_style(plex, &options).await;
+            // hub is always metadata
+            let metadata = hub.metadata.get(0);
+            if metadata.is_some() {
+                // let labels = plex
+                //     .get_section_labels(metadata.unwrap().library_section_id.unwrap())
+                //     .await
+                //     .unwrap();
+                hub.apply_hub_style(plex, &options).await;
+            }
             if self.is_section_hub() {
                 new_collections.push(hub);
                 continue;
@@ -746,7 +750,7 @@ impl MediaContainerWrapper<MediaContainer> {
     pub async fn fix_permissions(&mut self, plex: &PlexClient) -> Self {
         debug!("Fixing hub permissions");
         let collections = self.media_container.children();
-        let mut custom_collections: Vec<MetaData> = vec![];
+        let mut custom_collections = Vec::new();
         let mut processed_section_ids: Vec<u32> = vec![];
 
         for mut metadata in collections.clone() {
@@ -771,8 +775,11 @@ impl MediaContainerWrapper<MediaContainer> {
 
             // TODO: Use join to join these async requests
             let mut c = plex.get_section_collections(section_id).await.unwrap();
+            //custom_collections.push(plex.get_section_collections(section_id));
             custom_collections.append(&mut c);
         }
+
+        // let resolved = futures::future::try_join_all( custom_collections).await.unwrap().;
 
         let custom_collections_keys: Vec<String> =
             custom_collections.iter().map(|c| c.key.clone()).collect();
@@ -790,4 +797,3 @@ impl MediaContainerWrapper<MediaContainer> {
         new
     }
 }
-
