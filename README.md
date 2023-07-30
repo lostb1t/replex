@@ -42,7 +42,7 @@ You can change the hub style to hero elements by setting the label "REPLEXHERO" 
 
 ## force clients to use the proxy (remote access)
 
-Because this app sits before Plex the builtin remote access will not work and needs to be disabled.
+Because this app sits before Plex the builtin remote access (and auto SSL) will not work and needs to be disabled.
 
 You have 2 options to provide remote access.
 
