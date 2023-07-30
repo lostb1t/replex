@@ -38,7 +38,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_HOST              | -      	| Plex target host to proxy                                             	|
 | REPLEX_INCLUDE_WATCHED   | false    	| If set to false, hide watched items.                        	|
 
-## hub style
+## Hub style
 
 You can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection. 
 
