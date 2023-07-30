@@ -2,7 +2,7 @@
 
 ![plot](./examplewithhero.png)
 
-Remix your olex recommendations with the following features:
+Remix your plex recommendations with the following features:
 
 - Merge recommendations on home into one from different libraries. Aka have movies and shows in a single row.
 - Hide watched items from recommendations.
