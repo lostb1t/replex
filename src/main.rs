@@ -9,6 +9,7 @@ use replex::plex_client::*;
 use replex::proxy::PlexProxy;
 use replex::url::*;
 use replex::utils::*;
+use replex::transform::*;
 use salvo::cors::Cors;
 use salvo::prelude::*;
 
@@ -33,6 +34,11 @@ async fn main() {
         )
         .push(
             Router::new()
+                .path("test")
+                .get(test),
+        )
+        .push(
+            Router::new()
                 .path("/replex/library/collections/<ids>/children")
                 .get(get_collections_children),
         )
@@ -51,6 +57,11 @@ async fn main() {
         let acceptor = TcpListener::new("0.0.0.0:80").bind().await;
         Server::new(acceptor).serve(router).await;
     }
+}
+
+#[handler]
+async fn test(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+    let build = TransformBuilder::new().with_transform(CollectionPermissionTransform::default()).build();
 }
 
 #[handler]
