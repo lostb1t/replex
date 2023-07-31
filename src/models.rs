@@ -51,12 +51,12 @@ fn default_as_false() -> bool {
     rename_all = "camelCase"
 ))]
 pub struct PlexParams {
-    #[serde(default, deserialize_with = "deserialize_comma_seperated_number")]
+    #[serde(default, deserialize_with = "deserialize_comma_seperated_string")]
     #[salvo(extract(rename = "contentDirectoryID"))]
-    pub content_directory_id: Option<Vec<i32>>,
-    #[serde(default, deserialize_with = "deserialize_comma_seperated_number")]
+    pub content_directory_id: Option<Vec<String>>,
+    #[serde(default, deserialize_with = "deserialize_comma_seperated_string")]
     #[salvo(extract(rename = "pinnedContentDirectoryID"))]
-    pub pinned_content_directory_id: Option<Vec<i32>>,
+    pub pinned_content_directory_id: Option<Vec<String>>,
     #[salvo(extract(rename = "X-Plex-Platform"))]
     pub platform: Option<String>,
     pub count: Option<i32>,
@@ -84,6 +84,21 @@ where
     match Deserialize::deserialize(deserializer)? {
         Some::<String>(s) => {
             let r: Vec<i32> = s.split(',').map(|s| s.parse().unwrap()).collect();
+            Ok(Some(r))
+        }
+        None => Ok(None),
+    }
+}
+
+pub fn deserialize_comma_seperated_string<'de, D>(
+    deserializer: D,
+) -> Result<Option<Vec<String>>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    match Deserialize::deserialize(deserializer)? {
+        Some::<String>(s) => {
+            let r: Vec<String> = s.split(',').map(|s| s.to_owned()).collect();
             Ok(Some(r))
         }
         None => Ok(None),
