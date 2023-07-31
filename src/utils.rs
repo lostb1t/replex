@@ -24,6 +24,12 @@ use salvo::{
 use crate::models::*;
 
 
+pub fn get_collection_id_from_child_path(path: String) -> i32 {
+    let mut path = path.replace("/library/collections/", "");
+    path = path.replace("/children", "");
+    path.parse().unwrap()
+}
+
 pub fn add_query_param_salvo(req: &mut SalvoRequest, param: String, value: String) {
     let mut uri = pathetic::Uri::default()
         .with_path(req.uri_mut().path())

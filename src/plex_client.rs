@@ -130,7 +130,7 @@ impl PlexClient {
 }
 
 impl PlexClient {
-    pub fn new(req: &mut Request, params: PlexParams) -> Self {
+    pub fn new(req: &mut Request, params: PlexParams) -> Self { // TODO: Split it into a function from_request
         // TODO: Dont need request
         let config: Config = Config::figment().extract().unwrap();
         let token = params

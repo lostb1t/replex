@@ -408,7 +408,7 @@ impl MetaData {
         }
     }
 
-    fn has_label(&self, name: String) -> bool {
+    pub fn has_label(&self, name: String) -> bool {
         for label in &self.labels {
             if label.tag == name {
                 return true;
@@ -418,7 +418,7 @@ impl MetaData {
         // collection_details.media_container.directory.get(0).unwrap().label.is_some()
     }
 
-    fn is_watched(&self) -> bool {
+    pub fn is_watched(&self) -> bool {
         if self.view_count.is_some() && self.view_count.unwrap_or_default() > 0 {
             return true;
         }
@@ -565,6 +565,19 @@ impl MediaContainer {
         self.size = Some(len);
     }
 
+    pub fn test(&mut self) -> &mut Vec<MetaData> {
+        if !self.metadata.is_empty() {
+            return &mut self.metadata;
+        } else if !self.hub.is_empty() {
+            return &mut self.hub;
+        } else if !self.video.is_empty() {
+            return &mut self.video;
+        } else if !self.directory.is_empty() {
+            return &mut self.directory;
+        };
+        return &mut self.metadata;
+    }
+
     pub fn children(&mut self) -> Vec<MetaData> {
         if !self.metadata.is_empty() {
             return self.metadata.clone();
@@ -600,14 +613,6 @@ pub struct MediaContainerWrapper<T> {
 #[async_trait]
 pub trait FromResponse<T>: Sized {
     async fn from_response(resp: T) -> Result<Self>;
-}
-
-fn get_collection_id_from_child_path(path: String) -> i32 {
-    let mut path = path.replace("/library/collections/", "");
-    path = path.replace("/children", "");
-    // let id = path.parse();
-    // dbg!(&path);
-    path.parse().unwrap()
 }
 
 // TODO: Merge hub keys when mixed
