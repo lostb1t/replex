@@ -12,6 +12,8 @@ use replex::utils::*;
 use replex::transform::*;
 use salvo::cors::Cors;
 use salvo::prelude::*;
+use replex::logging::*;
+
 
 #[tokio::main]
 async fn main() {
@@ -21,7 +23,7 @@ async fn main() {
         .init();
 
     let config: Config = Config::figment().extract().unwrap();
-    let router = Router::with_hoop(Cors::permissive().into_handler())
+    let router = Router::with_hoop(Cors::permissive().into_handler()).hoop(Logger::new())
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
