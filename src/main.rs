@@ -6,11 +6,11 @@ use std::time::Duration;
 
 use itertools::Itertools;
 use opentelemetry_otlp::WithExportConfig;
+use replex::cache::*;
 use replex::config::Config;
 use replex::logging::*;
 use replex::models::*;
 use replex::plex_client::*;
-use replex::cache::*;
 use replex::proxy::PlexProxy;
 use replex::transform::*;
 use replex::url::*;
@@ -19,22 +19,31 @@ use salvo::cache::{Cache, MemoryStore};
 use salvo::cors::Cors;
 use salvo::prelude::*;
 
-
-fn init_tracer(pipeline: opentelemetry_otlp::OtlpTracePipeline) -> opentelemetry_otlp::OtlpTracePipeline {
+fn init_tracer(
+    pipeline: opentelemetry_otlp::OtlpTracePipeline,
+) -> opentelemetry_otlp::OtlpTracePipeline {
     // let mut map = MetadataMap::with_capacity(3);
     // map.insert("api-key", "my licence");
     pipeline.with_exporter(
-            opentelemetry_otlp::new_exporter()
+        opentelemetry_otlp::new_exporter()
             .tonic()
             .with_endpoint("https://otlp.eu01.nr-data.net:4317")
-            .with_timeout(Duration::from_secs(3))
-            // .with_metadata(map)
-         )
+            .with_timeout(Duration::from_secs(3)), // .with_metadata(map)
+    )
 }
+
+// fn cache() -> salvo::cache::Cache<salvo::cache::MemoryStore<moka::sync::Cache>, RequestIssuer> {
+//     let config: Config = Config::figment().extract().unwrap();
+//     Cache::new(
+//         MemoryStore::builder()
+//             .time_to_live(Duration::from_secs(config.cache_ttl))
+//             .build(),
+//         RequestIssuer::default(),
+//     )
+// }
 
 #[tokio::main]
 async fn main() {
-
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .compact()
@@ -46,8 +55,18 @@ async fn main() {
         return;
     }
 
+    // let cache = {
+    //     Cache::new(
+    //         MemoryStore::builder()
+    //             .time_to_live(Duration::from_secs(config.cache_ttl))
+    //             .build(),
+    //         RequestIssuer::default(),
+    //     )
+    // };
+
     let router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
+        .hoop(Timeout::new(Duration::from_secs(30)))
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
@@ -55,9 +74,8 @@ async fn main() {
                     MemoryStore::builder()
                         .time_to_live(Duration::from_secs(config.cache_ttl))
                         .build(),
-                    RequestIssuer::default()
-                    )
-                )
+                    RequestIssuer::default(),
+                ))
                 .get(get_hubs_promoted),
         )
         .push(
@@ -67,9 +85,8 @@ async fn main() {
                     MemoryStore::builder()
                         .time_to_live(Duration::from_secs(config.cache_ttl))
                         .build(),
-                    RequestIssuer::default()
-                    )
-                )
+                    RequestIssuer::default(),
+                ))
                 .get(get_hubs_sections),
         )
         .push(Router::new().path("test").get(test))
@@ -80,13 +97,13 @@ async fn main() {
                     MemoryStore::builder()
                         .time_to_live(Duration::from_secs(config.cache_ttl))
                         .build(),
-                    RequestIssuer::default()
-                    )
-                )
+                    RequestIssuer::default(),
+                ))
                 .get(get_collections_children),
         )
         .push(
-            Router::with_path("<**rest>").handle(PlexProxy::new(config.host.unwrap())),
+            Router::with_path("<**rest>")
+                .handle(PlexProxy::new(config.host.unwrap())),
         );
 
     if config.ssl_enable && config.ssl_domain.is_some() {
@@ -105,6 +122,7 @@ async fn main() {
 
 #[handler]
 async fn test(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+    // tokio::time::sleep(Duration::from_secs(60)).await;
     let params: PlexParams = req.extract().await.unwrap();
     let plex_client = PlexClient::new(req, params.clone());
     let upstream_res: reqwest::Response = plex_client.get("/hubs/promoted?contentDirectoryID=1&pinnedContentDirectoryID=1%2C4%2C16&includeMeta=1&excludeFields=summary&count=12&includeStations=1&includeLibraryPlaylists=1&includeRecentChannels=1&excludeContinueWatching=1&X-Plex-Product=Plex%20Web&X-Plex-Version=4.108.0&X-Plex-Client-Identifier=rdit5lbvnrpxnvj2329z4ln5&X-Plex-Platform=Safari&X-Plex-Platform-Version=16.3&X-Plex-Features=external-media%2Cindirect-media%2Chub-style-list&X-Plex-Model=bundled&X-Plex-Device=OSX&X-Plex-Device-Name=Safari&X-Plex-Device-Screen-Resolution=1324x795%2C1440x900&X-Plex-Token=cxA4Pw4MjMPGLfCxmF7d&X-Plex-Provider-Version=6.3&X-Plex-Text-Format=plain&X-Plex-Drm=fairplay&X-Plex-Language=en-GB".to_string()).await.unwrap();
