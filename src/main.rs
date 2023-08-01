@@ -41,6 +41,10 @@ async fn main() {
         .init();
 
     let config: Config = Config::figment().extract().unwrap();
+    if config.host.is_none() {
+        tracing::error!("REPLEX_HOST is required. Exiting");
+        return;
+    }
 
     let router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
@@ -82,10 +86,9 @@ async fn main() {
                 .get(get_collections_children),
         )
         .push(
-            Router::with_path("<**rest>").handle(PlexProxy::new(config.host)),
+            Router::with_path("<**rest>").handle(PlexProxy::new(config.host.unwrap())),
         );
 
-    // let listener = TcpListener::new("0.0.0.0:443");
     if config.ssl_enable && config.ssl_domain.is_some() {
         let acceptor = TcpListener::new("0.0.0.0:443")
             .acme()

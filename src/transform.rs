@@ -8,9 +8,6 @@ use std::sync::Arc;
 use crate::{models::*, plex_client::PlexClient, utils::*};
 use typed_builder::TypedBuilder;
 
-// pub struct MetaDataTest {
-//     pub id: i32
-// }
 
 #[async_trait]
 pub trait Transform: Send + Sync + 'static {

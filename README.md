@@ -20,9 +20,12 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 
 | Setting        	         | Default 	| Description                                                            	  |
 |--------------------------|-----------|----------------------------------------------------------------------------|
-| REPLEX_HOST              | -      	| Plex target host to proxy                                             	  |
+| REPLEX_HOST              |        	| Plex target host to proxy                                             	  |
 | REPLEX_INCLUDE_WATCHED   | false    	| If set to false, hide watched items.                                       |
 | REPLEX_CACHE_TTL         | 3600    	| Time to live for caches in seconds. Set to 0 to disable            	     |
+| REPLEX_SSL_ENABLE        | false    	| Enable automatic SSL generation. http will be disabled                     |
+|                          |           | (stored in /data/acme/letsencrypt so make sure to mount a volume)          |
+| REPLEX_SSL_DOMAIN        |           | Domain to request SSL certificate for when REPLEX_SSL_ENABLE is enabledd   |
 
 ## hub style
 

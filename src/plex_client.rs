@@ -229,7 +229,7 @@ impl PlexClient {
                 .default_headers(headers)
                 .build()
                 .unwrap(),
-            host: config.host,
+            host: config.host.unwrap(),
             x_plex_token: token,
             x_plex_client_identifier: client_identifier,
             x_plex_platform: platform,
