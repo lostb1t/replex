@@ -42,6 +42,8 @@ async fn main() {
         return;
     }
 
+
+    // TODO: rework this a bit: https://docs.rs/tracing-subscriber/latest/tracing_subscriber/layer/#runtime-configuration-with-layers
     let fmt_layer = tracing_subscriber::fmt::layer();
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::from_default_env())
