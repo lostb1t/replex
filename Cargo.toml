@@ -47,11 +47,16 @@ futures = "0.3.28"
 figment = { version = "0.10.10", features = ["env"] }
 #salvo_core = { version = "0.49.0" }
 #salvo_macros = { version = "0.49.0" }
-salvo = { version = "0.49.1", features = ["websocket", "proxy", "cors", "acme"] }
+salvo = { version = "0.49.1", features = ["websocket", "proxy", "cors", "acme", "cache"] }
 hyper-reverse-proxy = { git = "https://github.com/felipenoris/hyper-reverse-proxy.git"}
 hyper-trust-dns = "0.5.0"
 reqwest = "0.11"
 http-body-util = "0.1.0-rc.3"
+typed-builder = "0.15.1"
+bincode = "1.3.3"
+once_cell = "1.18.0"
+moka = { version = "0.11.2", features = ["future"] }
+opentelemetry-otlp = "0.13.0"
 #salvo = { version = "0.49.0", features = ["websocket", "proxy"] }
 #salvo = { version = "0.49.0", features = ["websocket"] }
 #salvo = { version = "0.49.0", features = ["full"] }

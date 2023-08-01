@@ -304,9 +304,7 @@ pub struct MetaData {
     pub view_count: Option<i32>,
     #[serde(rename = "Label", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    // #[yaserde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Label", default)]
-    // #[yaserde(flatten)]
     #[yaserde(child)]
     pub labels: Vec<Label>,
     #[yaserde(attribute)]
@@ -342,6 +340,17 @@ where
 }
 
 impl MetaData {
+    pub fn test(&mut self) -> &mut Vec<MetaData> {
+        if !self.metadata.is_empty() {
+            return &mut self.metadata;
+        } else if !self.video.is_empty() {
+            return &mut self.video;
+        } else if !self.directory.is_empty() {
+            return &mut self.directory;
+        };
+        return &mut self.metadata;
+    }
+
     pub fn is_hub(&self) -> bool {
         self.hub_identifier.is_some()
     }
@@ -371,10 +380,15 @@ impl MetaData {
     pub async fn apply_hub_style(&mut self, plex: &PlexClient, options: &ReplexOptions) {
         if self.is_collection_hub() {
             let mut collection_details = plex
-                .get_collection(get_collection_id_from_child_path(self.key.clone()))
+                .clone()
+                .get_cached(
+                    plex.get_collection(get_collection_id_from_child_path(
+                        self.key.clone(),
+                    )),
+                    format!("collection:{}", self.key.clone()).to_string(),
+                )
                 .await
-                .unwrap(); // TODO: Cache
-                           // dbg!("yup");       // dbg!(&collection_details);
+                .unwrap();
             if collection_details
                 .media_container
                 .children()
@@ -408,7 +422,7 @@ impl MetaData {
         }
     }
 
-    fn has_label(&self, name: String) -> bool {
+    pub fn has_label(&self, name: String) -> bool {
         for label in &self.labels {
             if label.tag == name {
                 return true;
@@ -418,7 +432,7 @@ impl MetaData {
         // collection_details.media_container.directory.get(0).unwrap().label.is_some()
     }
 
-    fn is_watched(&self) -> bool {
+    pub fn is_watched(&self) -> bool {
         if self.view_count.is_some() && self.view_count.unwrap_or_default() > 0 {
             return true;
         }
@@ -565,6 +579,33 @@ impl MediaContainer {
         self.size = Some(len);
     }
 
+    pub fn set_test(&mut self, value: &mut Vec<MetaData>) {
+        let len: i32 = value.len().try_into().unwrap();
+        if !self.metadata.is_empty() {
+            self.metadata = value.to_owned();
+        } else if !self.hub.is_empty() {
+            self.hub = value.to_owned();
+        } else if !self.video.is_empty() {
+            self.video = value.to_owned();
+        } else if !self.directory.is_empty() {
+            self.directory = value.to_owned();
+        };
+        self.size = Some(len);
+    }
+
+    pub fn test(&mut self) -> &mut Vec<MetaData> {
+        if !self.metadata.is_empty() {
+            return &mut self.metadata;
+        } else if !self.hub.is_empty() {
+            return &mut self.hub;
+        } else if !self.video.is_empty() {
+            return &mut self.video;
+        } else if !self.directory.is_empty() {
+            return &mut self.directory;
+        };
+        return &mut self.metadata;
+    }
+
     pub fn children(&mut self) -> Vec<MetaData> {
         if !self.metadata.is_empty() {
             return self.metadata.clone();
@@ -600,14 +641,6 @@ pub struct MediaContainerWrapper<T> {
 #[async_trait]
 pub trait FromResponse<T>: Sized {
     async fn from_response(resp: T) -> Result<Self>;
-}
-
-fn get_collection_id_from_child_path(path: String) -> i32 {
-    let mut path = path.replace("/library/collections/", "");
-    path = path.replace("/children", "");
-    // let id = path.parse();
-    // dbg!(&path);
-    path.parse().unwrap()
 }
 
 // TODO: Merge hub keys when mixed
@@ -784,9 +817,13 @@ impl MediaContainerWrapper<MediaContainer> {
 
             processed_section_ids.push(section_id);
 
-            // TODO: Use join to join these async requests
-            let mut c = plex.get_section_collections(section_id).await.unwrap();
-            custom_collections.append(&mut c);
+            // let mut c = plex.get_section_collections(section_id).await.unwrap();
+            let mut c = plex.clone().get_cached(
+                plex.get_section_collections(section_id),
+                format!("sectioncollections:{}", section_id).to_string(),
+            ).await.unwrap();
+
+            custom_collections.append(&mut c.media_container.test());
         }
 
         let custom_collections_keys: Vec<String> =
