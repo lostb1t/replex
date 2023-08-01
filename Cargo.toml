@@ -54,3 +54,6 @@ rstest = "0.16.0"
 
 #[replace]
 #"salvo-proxy:0.49.0" = { path = "../salvo/crates/proxy" }
+
+[profile.release]
+debug = true
