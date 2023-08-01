@@ -643,21 +643,6 @@ pub trait FromResponse<T>: Sized {
     async fn from_response(resp: T) -> Result<Self>;
 }
 
-// TODO: Merge hub keys when mixed
-fn merge_children_keys(mut key_left: String, mut key_right: String) -> String {
-    key_left = key_left.replace("/hubs/library/collections/", "");
-    key_left = key_left.replace("/library/collections/", "");
-    key_left = key_left.replace("/children", "");
-    key_right = key_right.replace("/hubs/library/collections/", "");
-    key_right = key_right.replace("/library/collections/", "");
-    key_right = key_right.replace("/children", "");
-
-    format!(
-        "/replex/library/collections/{},{}/children",
-        key_right, key_left
-    )
-}
-
 impl MediaContainerWrapper<MediaContainer> {
     pub fn is_hub(&self) -> bool {
         !self.media_container.hub.is_empty()

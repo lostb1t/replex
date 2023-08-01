@@ -230,3 +230,18 @@ pub async fn to_string(
         ContentType::Xml => Ok(to_xml_str(&container.media_container).unwrap()),
     }
 }
+
+// TODO: Merge hub keys when mixed
+pub fn merge_children_keys(mut key_left: String, mut key_right: String) -> String {
+    key_left = key_left.replace("/hubs/library/collections/", "");
+    key_left = key_left.replace("/library/collections/", "");
+    key_left = key_left.replace("/children", "");
+    key_right = key_right.replace("/hubs/library/collections/", "");
+    key_right = key_right.replace("/library/collections/", "");
+    key_right = key_right.replace("/children", "");
+
+    format!(
+        "/replex/library/collections/{},{}/children",
+        key_right, key_left
+    )
+}

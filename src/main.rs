@@ -147,13 +147,14 @@ async fn test(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
     // tokio::time::sleep(Duration::from_secs(60)).await;
     let params: PlexParams = req.extract().await.unwrap();
     let plex_client = PlexClient::new(req, params.clone());
-    let upstream_res: reqwest::Response = plex_client.get("/hubs/promoted?contentDirectoryID=1&pinnedContentDirectoryID=1%2C4%2C16&includeMeta=1&excludeFields=summary&count=12&includeStations=1&includeLibraryPlaylists=1&includeRecentChannels=1&excludeContinueWatching=1&X-Plex-Product=Plex%20Web&X-Plex-Version=4.108.0&X-Plex-Client-Identifier=rdit5lbvnrpxnvj2329z4ln5&X-Plex-Platform=Safari&X-Plex-Platform-Version=16.3&X-Plex-Features=external-media%2Cindirect-media%2Chub-style-list&X-Plex-Model=bundled&X-Plex-Device=OSX&X-Plex-Device-Name=Safari&X-Plex-Device-Screen-Resolution=1324x795%2C1440x900&X-Plex-Token=cxA4Pw4MjMPGLfCxmF7d&X-Plex-Provider-Version=6.3&X-Plex-Text-Format=plain&X-Plex-Drm=fairplay&X-Plex-Language=en-GB".to_string()).await.unwrap();
+    let upstream_res: reqwest::Response = plex_client.get("/hubs/promoted?contentDirectoryID=1,4,16,19&pinnedContentDirectoryID=1,4,16,19&includeMeta=1&excludeFields=summary&count=12&includeStations=1&includeLibraryPlaylists=1&includeRecentChannels=1&excludeContinueWatching=1&X-Plex-Product=Plex Web&X-Plex-Version=4.112.0&X-Plex-Client-Identifier=k5uj3euk92fll0r9s1tee7l8&X-Plex-Platform=Safari&X-Plex-Platform-Version=16.3&X-Plex-Features=external-media,indirect-media,hub-style-list&X-Plex-Model=hosted&X-Plex-Device=OSX&X-Plex-Device-Name=Safari&X-Plex-Device-Screen-Resolution=1440x373,1440x900&X-Plex-Token=T3sJC4bfjR-so1xCbuDb&X-Plex-Provider-Version=6.3&X-Plex-Text-Format=plain&X-Plex-Drm=fairplay&X-Plex-Language=en-GB".to_string()).await.unwrap();
     // dbg!(&upstream_res);
     let mut container: MediaContainerWrapper<MediaContainer> =
         from_reqwest_response(upstream_res).await.unwrap().clone();
     TransformBuilder::new(plex_client, params)
-        .with_transform(StyleTransform::default())
-        .with_filter(CollectionPermissionFilter::default())
+        .with_transform(StyleTransform)
+        .with_transform(MixHomeHubTransform)
+        .with_filter(CollectionPermissionFilter)
         .apply_to(&mut container)
         .await;
     res.render(container);
