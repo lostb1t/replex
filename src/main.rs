@@ -42,16 +42,6 @@ async fn main() {
 
     let config: Config = Config::figment().extract().unwrap();
 
-    // let cache = Cache::new(MemoryStore::builder()
-    // .time_to_live(Duration::from_secs(config.cache_ttl))
-    // .build(), RequestIssuer::default());
-    // let mut long_cache = Cache::new(
-    //     MemoryStore::builder()
-    //         .time_to_live(Duration::from_secs(60))
-    //         .build(),
-    //     RequestIssuer::default(),
-    // );
-
     let router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
         .push(
