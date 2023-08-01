@@ -5,50 +5,90 @@ extern crate tracing_subscriber;
 use std::time::Duration;
 
 use itertools::Itertools;
+use opentelemetry_otlp::WithExportConfig;
 use replex::config::Config;
 use replex::logging::*;
 use replex::models::*;
 use replex::plex_client::*;
+use replex::cache::*;
 use replex::proxy::PlexProxy;
 use replex::transform::*;
 use replex::url::*;
 use replex::utils::*;
+use salvo::cache::{Cache, MemoryStore};
 use salvo::cors::Cors;
 use salvo::prelude::*;
-use salvo::cache::{Cache, MemoryStore, RequestIssuer};
+
+
+fn init_tracer(pipeline: opentelemetry_otlp::OtlpTracePipeline) -> opentelemetry_otlp::OtlpTracePipeline {
+    // let mut map = MetadataMap::with_capacity(3);
+    // map.insert("api-key", "my licence");
+    pipeline.with_exporter(
+            opentelemetry_otlp::new_exporter()
+            .tonic()
+            .with_endpoint("https://otlp.eu01.nr-data.net:4317")
+            .with_timeout(Duration::from_secs(3))
+            // .with_metadata(map)
+         )
+}
 
 #[tokio::main]
 async fn main() {
+
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .compact()
         .init();
 
     let config: Config = Config::figment().extract().unwrap();
-    let cache = Cache::new(
-        MemoryStore::builder()
-            .time_to_live(Duration::from_secs(config.cache_ttl))
-            .build(),
-        RequestIssuer::default(),
-    );
+
+    // let cache = Cache::new(MemoryStore::builder()
+    // .time_to_live(Duration::from_secs(config.cache_ttl))
+    // .build(), RequestIssuer::default());
+    // let mut long_cache = Cache::new(
+    //     MemoryStore::builder()
+    //         .time_to_live(Duration::from_secs(60))
+    //         .build(),
+    //     RequestIssuer::default(),
+    // );
 
     let router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
-        .hoop(cache)
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
+                .hoop(Cache::new(
+                    MemoryStore::builder()
+                        .time_to_live(Duration::from_secs(config.cache_ttl))
+                        .build(),
+                    RequestIssuer::default()
+                    )
+                )
                 .get(get_hubs_promoted),
         )
         .push(
             Router::new()
                 .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
+                .hoop(Cache::new(
+                    MemoryStore::builder()
+                        .time_to_live(Duration::from_secs(config.cache_ttl))
+                        .build(),
+                    RequestIssuer::default()
+                    )
+                )
                 .get(get_hubs_sections),
         )
         .push(Router::new().path("test").get(test))
         .push(
             Router::new()
                 .path("/replex/library/collections/<ids>/children")
+                .hoop(Cache::new(
+                    MemoryStore::builder()
+                        .time_to_live(Duration::from_secs(config.cache_ttl))
+                        .build(),
+                    RequestIssuer::default()
+                    )
+                )
                 .get(get_collections_children),
         )
         .push(
