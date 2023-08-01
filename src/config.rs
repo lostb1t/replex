@@ -21,6 +21,7 @@ pub struct Config {
     )]
     pub ssl_enable: bool,
     pub ssl_domain: Option<String>,
+    pub newrelic_api_key: Option<String>,
 }
 
 fn default_cache_ttl() -> u64 {

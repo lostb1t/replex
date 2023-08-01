@@ -20,7 +20,6 @@ url = "2.3.1"
 tracing = "0.1.37"
 strum_macros = "0.24.3"
 strum = "0.24.1"
-tracing-subscriber = { version = "0.3.17", features=["env-filter"] } 
 itertools = "0.10.5"
 #axum = { version = "0.6.6", features = ["default", "headers", "ws"] }
 pathetic = "0.3.0"
@@ -34,20 +33,17 @@ async-trait = "0.1"
 #http-body = "0.4.5"
 futures-util = "0.3.26"
 env_logger = "0.10.0"
-#tracing-newrelic = "0.1.2"
-#axum-tracing-opentelemetry = "0.12.0"
-#init-tracing-opentelemetry = {version ="0.12.0", features = [
-#  "otlp",
-#  "tracing_subscriber_ext",
-#]}
-#opentelemetry = "0.19.0"
+opentelemetry = { version = "0.19.0", features = [ "trace", "rt-tokio" ] }
+opentelemetry-otlp = { version = "0.12.0", features = ["reqwest-client", "reqwest-rustls", "http-proto", "tls"] }
+tracing-opentelemetry = "0.19.0"
+tracing-subscriber = { version = "0.3.17", features=["registry", "env-filter"] } 
 serde-aux = "^4.2.0"
 serde_with = { version = "3.0", features = ["json"] }
 futures = "0.3.28"
 figment = { version = "0.10.10", features = ["env"] }
 #salvo_core = { version = "0.49.0" }
 #salvo_macros = { version = "0.49.0" }
-salvo = { version = "0.49.1", features = ["websocket", "proxy", "cors", "acme", "cache", "timeout"] }
+salvo = { version = "0.49.1", features = ["websocket", "proxy", "cors", "acme", "cache", "timeout", "otel"] }
 hyper-reverse-proxy = { git = "https://github.com/felipenoris/hyper-reverse-proxy.git"}
 hyper-trust-dns = "0.5.0"
 reqwest = "0.11"
@@ -56,7 +52,7 @@ typed-builder = "0.15.1"
 bincode = "1.3.3"
 once_cell = "1.18.0"
 moka = { version = "0.11.2", features = ["future"] }
-opentelemetry-otlp = "0.13.0"
+tonic = {version = "0.8.0", features = ["tls", "tls-roots"]}
 #salvo = { version = "0.49.0", features = ["websocket", "proxy"] }
 #salvo = { version = "0.49.0", features = ["websocket"] }
 #salvo = { version = "0.49.0", features = ["full"] }

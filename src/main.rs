@@ -1,10 +1,11 @@
 #[macro_use]
 extern crate tracing;
-extern crate tracing_subscriber;
+// extern crate tracing_subscriber;
 
 use std::time::Duration;
 
 use itertools::Itertools;
+use opentelemetry::sdk::export::trace::stdout;
 use opentelemetry_otlp::WithExportConfig;
 use replex::cache::*;
 use replex::config::Config;
@@ -18,20 +19,11 @@ use replex::utils::*;
 use salvo::cache::{Cache, MemoryStore};
 use salvo::cors::Cors;
 use salvo::prelude::*;
+use tonic::metadata::MetadataMap;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::prelude::*;
 
-fn init_tracer(
-    pipeline: opentelemetry_otlp::OtlpTracePipeline,
-) -> opentelemetry_otlp::OtlpTracePipeline {
-    // let mut map = MetadataMap::with_capacity(3);
-    // map.insert("api-key", "my licence");
-    pipeline.with_exporter(
-        opentelemetry_otlp::new_exporter()
-            .tonic()
-            .with_endpoint("https://otlp.eu01.nr-data.net:4317")
-            .with_timeout(Duration::from_secs(3)), // .with_metadata(map)
-    )
-}
-
+// `tonic::metadata::MetadataMap` and `tonic::metadata::map::MetadataMap` ha
 // fn cache() -> salvo::cache::Cache<salvo::cache::MemoryStore<moka::sync::Cache>, RequestIssuer> {
 //     let config: Config = Config::figment().extract().unwrap();
 //     Cache::new(
@@ -44,16 +36,44 @@ fn init_tracer(
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt()
-        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
-        .compact()
-        .init();
-
     let config: Config = Config::figment().extract().unwrap();
     if config.host.is_none() {
         tracing::error!("REPLEX_HOST is required. Exiting");
         return;
     }
+
+    let fmt_layer = tracing_subscriber::fmt::layer();
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::EnvFilter::from_default_env())
+        .with({
+            let otlp;
+            if config.newrelic_api_key.is_some() {
+                let mut map = MetadataMap::with_capacity(3);
+                map.insert(
+                    "api-key",
+                    config.newrelic_api_key.unwrap().parse().unwrap(),
+                );
+                let tracer = opentelemetry_otlp::new_pipeline()
+                    .tracing()
+                    .with_exporter(
+                        opentelemetry_otlp::new_exporter()
+                            .tonic()
+                            .with_tls_config(Default::default())
+                            .with_endpoint("https://otlp.eu01.nr-data.net:443/v1/traces")
+                            .with_metadata(map)
+                            .with_timeout(Duration::from_secs(3)),
+                    )
+                    .install_batch(opentelemetry::runtime::Tokio)
+                    .unwrap();
+                otlp = tracing_opentelemetry::layer().with_tracer(tracer);
+            } else {
+                let tracer = stdout::new_pipeline().install_simple();
+                otlp = tracing_opentelemetry::layer().with_tracer(tracer);
+            }
+            otlp
+        })
+        .with(fmt_layer)
+        .init();
 
     // let cache = {
     //     Cache::new(
@@ -66,7 +86,7 @@ async fn main() {
 
     let router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
-        .hoop(Timeout::new(Duration::from_secs(30)))
+        .hoop(Timeout::new(Duration::from_secs(60)))
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
