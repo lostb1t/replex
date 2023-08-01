@@ -2,6 +2,8 @@
 extern crate tracing;
 extern crate tracing_subscriber;
 
+use std::time::Duration;
+
 use itertools::Itertools;
 use replex::config::Config;
 use replex::logging::*;
@@ -13,6 +15,7 @@ use replex::url::*;
 use replex::utils::*;
 use salvo::cors::Cors;
 use salvo::prelude::*;
+use salvo::cache::{Cache, MemoryStore, RequestIssuer};
 
 #[tokio::main]
 async fn main() {
@@ -22,8 +25,16 @@ async fn main() {
         .init();
 
     let config: Config = Config::figment().extract().unwrap();
+    let cache = Cache::new(
+        MemoryStore::builder()
+            .time_to_live(Duration::from_secs(config.cache_ttl))
+            .build(),
+        RequestIssuer::default(),
+    );
+
     let router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
+        .hoop(cache)
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)

@@ -26,15 +26,6 @@ use once_cell::sync::Lazy;
 
 use salvo::http::ResBody;
 
-// type HttpClient = hyper::client::Client<HttpConnector, Body>;
-// pub static MOKA_CACHE: RwLock<MokaCache<String, Arc<Vec<u8>>>> = RwLock::new(MokaCache::new(250));
-// static CACHE: OnceCell<Cache<String, MediaContainerWrapper<MediaContainer>>> =
-//     OnceCell::new(
-//         Cache::builder()
-//             .max_capacity(10000)
-//             .time_to_live(Duration::from_secs(Config::figment().extract().unwrap().cache_ttl))
-//             .build()
-//     );
 
 static CACHE: Lazy<Cache<String, MediaContainerWrapper<MediaContainer>>> = Lazy::new(|| {
     let c: Config = Config::figment().extract().unwrap();

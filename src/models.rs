@@ -380,10 +380,15 @@ impl MetaData {
     pub async fn apply_hub_style(&mut self, plex: &PlexClient, options: &ReplexOptions) {
         if self.is_collection_hub() {
             let mut collection_details = plex
-                .get_collection(get_collection_id_from_child_path(self.key.clone()))
+                .clone()
+                .get_cached(
+                    plex.get_collection(get_collection_id_from_child_path(
+                        self.key.clone(),
+                    )),
+                    format!("collection:{}", self.key.clone()).to_string(),
+                )
                 .await
-                .unwrap(); // TODO: Cache
-                           // dbg!("yup");       // dbg!(&collection_details);
+                .unwrap();
             if collection_details
                 .media_container
                 .children()
@@ -812,8 +817,12 @@ impl MediaContainerWrapper<MediaContainer> {
 
             processed_section_ids.push(section_id);
 
-            // TODO: Use join to join these async requests
-            let mut c = plex.get_section_collections(section_id).await.unwrap();
+            // let mut c = plex.get_section_collections(section_id).await.unwrap();
+            let mut c = plex.clone().get_cached(
+                plex.get_section_collections(section_id),
+                format!("sectioncollections:{}", section_id).to_string(),
+            ).await.unwrap();
+
             custom_collections.append(&mut c.media_container.test());
         }
 
