@@ -69,7 +69,7 @@ async fn test(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
         from_reqwest_response(upstream_res).await.unwrap().clone();
     TransformBuilder::new(plex_client, params)
         .with_transform(StyleTransform::default())
-        // .with_filter(CollectionPermissionFilter::default())
+        .with_filter(CollectionPermissionFilter::default())
         .apply_to(&mut container)
         .await;
     res.render(container);

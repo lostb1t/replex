@@ -168,7 +168,6 @@ impl PlexClient {
         let cached = self.get_cache(&cache_key).await.unwrap();
 
         if cached.is_some() {
-            dbg!(cache_key.clone());
             return Ok(cached.unwrap());
         }
         let r = f.await.unwrap();

@@ -15,7 +15,20 @@ Remix your plex recommendations.
 
 !!This does not alter your plex data in anyway. it only alters outgoing api requests. All your collections or rows are kept intact!!
 
-## Usage
+## settings
+Settings are set via [environment variables](https://kinsta.com/knowledgebase/what-is-an-environment-variable/) 
+
+| Setting        	         | Default 	| Description                                                            	  |
+|--------------------------|-----------|----------------------------------------------------------------------------|
+| REPLEX_HOST              | -      	| Plex target host to proxy                                             	  |
+| REPLEX_INCLUDE_WATCHED   | false    	| If set to false, hide watched items.                                       |
+| REPLEX_CACHE_TTL         | 3600    	| Time to live for caches in seconds. Set to 0 to disable            	     |
+
+## hub style
+
+You can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection. 
+
+## usage example
 
 _Make sure that the collections you want to merge have the same name in your different libraries as the merge happens by name. 
 Example: an collection named "Trending" in a Movie library will be merged with an collection named "Trending" from a shows library on home._
@@ -29,19 +42,6 @@ docker run --rm -it -p 80:80 -e REPLEX_HOST="http://10.0.0.3:42405" ghcr.io/sare
 add your proxy url to plex "Custom server access URLs" (ex http://0.0.0.0:80)
 
 then access your proxy url http://0.0.0.0:80
-
-## Settings
-Settings are set via [environment variables](https://kinsta.com/knowledgebase/what-is-an-environment-variable/) 
-
-| Setting        	       | Default 	| Description                                                            	|
-|--------------------------|------------|---------------------------------------------------------------------------|
-| REPLEX_HOST              | -      	| Plex target host to proxy                                             	  |
-| REPLEX_INCLUDE_WATCHED   | false    	| If set to false, hide watched items.                                       |
-| REPLEX_CACHE_TTL         | 3600    	| Time to live for caches in seconds.              	                       |
-
-## Hub style
-
-You can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection. 
 
 ## Remote access (force clients to use the proxy)
 
