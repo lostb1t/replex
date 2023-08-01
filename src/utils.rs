@@ -52,8 +52,6 @@ pub fn add_query_param_salvo(req: &mut SalvoRequest, param: String, value: Strin
     Eq,
     EnumString,
     EnumDisplay,
-    YaDeserialize,
-    YaSerialize,
     Serialize,
     Deserialize,
 )]

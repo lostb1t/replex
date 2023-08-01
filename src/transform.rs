@@ -1,4 +1,8 @@
 use async_trait::async_trait;
+use futures_util::{
+    future::{self, join_all, LocalBoxFuture},
+    stream::FuturesUnordered,
+};
 use std::sync::Arc;
 // use crate::models::*;
 use crate::{models::*, plex_client::PlexClient, utils::*};
@@ -10,13 +14,22 @@ use typed_builder::TypedBuilder;
 
 #[async_trait]
 pub trait Transform: Send + Sync + 'static {
-    // type Item;
     async fn transform(
         &self,
         item: &mut MetaData,
         plex_client: PlexClient,
         options: PlexParams,
     );
+}
+
+#[async_trait]
+pub trait Filter: Send + Sync + 'static {
+    async fn filter(
+        &self,
+        item: MetaData,
+        plex_client: PlexClient,
+        options: PlexParams,
+    ) -> bool;
 }
 
 // #[derive(TypedBuilder)]
@@ -26,6 +39,7 @@ pub struct TransformBuilder {
     pub plex_client: PlexClient,
     pub options: PlexParams,
     pub transforms: Vec<Arc<dyn Transform>>,
+    pub filters: Vec<Arc<dyn Filter>>,
 }
 
 impl TransformBuilder {
@@ -33,6 +47,7 @@ impl TransformBuilder {
     pub fn new(plex_client: PlexClient, options: PlexParams) -> Self {
         Self {
             transforms: Vec::new(),
+            filters: Vec::new(),
             plex_client,
             options,
         }
@@ -44,6 +59,11 @@ impl TransformBuilder {
         self
     }
 
+    #[inline]
+    pub fn with_filter<T: Filter>(mut self, filter: T) -> Self {
+        self.filters.push(Arc::new(filter));
+        self
+    }
     // #[inline]
     // pub fn apply_to(mut self, contaoner: MediaContainerWrapper) -> Self {
     //     self.transforms.push(Arc::new(transform));
@@ -54,49 +74,116 @@ impl TransformBuilder {
         self,
         container: &mut MediaContainerWrapper<MediaContainer>,
     ) {
-        for item in container.media_container.test() { // TODO: join all futures
-            for t in self.transforms.clone() {
-                // dbg!("yo");
-                t.transform(
-                    item,
-                    self.plex_client.clone(),
-                    self.options.clone(),
-                )
-                .await;
+        let mut filtered_childs: Vec<MetaData> = vec![];
+        'outer: for item in container.media_container.test() {
+            for filter in self.filters.clone() {
+                if !filter
+                    .filter(
+                        item.to_owned(),
+                        self.plex_client.clone(),
+                        self.options.clone(),
+                    )
+                    .await
+                {
+                    break 'outer;
+                }
             }
+            filtered_childs.push(item.to_owned());
+        }
+        container.media_container.set_children(filtered_childs);
+
+        // for t in self.filters.clone() {
+        // for item in container.media_container.test() {
+        //     let futures = for filter in self.filters.clone().iter().map(
+        //         |x: Filter| {
+        //             x.filter(
+        //                 item,
+        //                 self.plex_client.clone(),
+        //                 self.options.clone(),
+        //             )
+        //         }
+        //     );
+        //     let results = future::join_all(futures).await;
+        // }
+
+        for t in self.transforms.clone() {
+            let futures = container.media_container.test().iter_mut().map(
+                |x: &mut MetaData| {
+                    t.transform(
+                        x,
+                        self.plex_client.clone(),
+                        self.options.clone(),
+                    )
+                },
+            );
+            future::join_all(futures).await;
+        }
+
+        if container.media_container.size.is_some() {
+            container.media_container.size = Some(
+                container.media_container.test().len().try_into().unwrap(),
+            );
         }
     }
 }
 
-// #[derive(Default)]
-// pub struct CollectionPermissionTransform;
+// const T: usize;
+#[derive(Default)]
+pub struct CollectionPermissionFilter;
 
-// impl Transform for CollectionPermissionTransform {
-//     // type Item = MetaData;
-//     fn transform(&self, item: &mut MetaData, plex_client: PlexClient) {
-//         // dbg!("do something");
-//         // tracing::debug!("sup");
-//     }
-// }
+#[async_trait]
+impl Filter for CollectionPermissionFilter {
+    async fn filter(
+        &self,
+        item: MetaData,
+        plex_client: PlexClient,
+        options: PlexParams,
+    ) -> bool {
+        tracing::debug!("filter collection permissions");
+        if item.is_hub() && !item.is_collection_hub() {
+            return true;
+        }
+        // dbg!(&metadata);
+        let section_id: u32 = item.library_section_id.unwrap_or_else(|| {
+            item.clone()
+                .test()
+                .get(0)
+                .unwrap()
+                .library_section_id
+                .expect("Missing Library section id")
+        });
+
+        // let mut custom_collections = plex_client.get_section_collections(section_id).await.unwrap();
+        let mut custom_collections = plex_client.clone().get_cached(
+            plex_client.get_section_collections(section_id),
+            format!("sectioncollections:{}", section_id).to_string(),
+        ).await.unwrap();
+        let custom_collections_keys: Vec<String> =
+            custom_collections.media_container.test().iter().map(|c| c.key.clone()).collect();
+        custom_collections_keys.contains(&item.key)
+    }
+}
 
 #[derive(Default, Debug)]
 pub struct StyleTransform;
 
 #[async_trait]
 impl Transform for StyleTransform {
-    // type Item = MetaData;
     async fn transform(
         &self,
         item: &mut MetaData,
         plex_client: PlexClient,
         options: PlexParams,
     ) {
-        
         if item.is_collection_hub() {
             let mut collection_details = plex_client
-                .get_collection(get_collection_id_from_child_path(
-                    item.key.clone(),
-                ))
+                .clone()
+                .get_cached(
+                    plex_client.get_collection(get_collection_id_from_child_path(
+                        item.key.clone(),
+                    )),
+                    format!("collection:{}", item.key.clone()).to_string(),
+                )
                 .await
                 .unwrap();
 
@@ -132,6 +219,15 @@ impl Transform for StyleTransform {
             }
         }
     }
+
+    // async fn filter(
+    //     &self,
+    //     item: &mut MetaData,
+    //     plex_client: PlexClient,
+    //     options: PlexParams,
+    // ) -> bool {
+    //     true
+    // }
 }
 
 // example usage

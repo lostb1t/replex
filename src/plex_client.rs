@@ -1,3 +1,6 @@
+use std::sync::Arc;
+use std::time::Duration;
+
 use crate::config::Config;
 use crate::models::*;
 use crate::proxy::PlexProxy;
@@ -9,22 +12,43 @@ use futures_util::TryStreamExt;
 // use hyper::client::HttpConnector;
 // use hyper::Body;
 use hyper::body::Body;
+use moka::future::Cache;
+use moka::future::ConcurrentCacheExt;
+use once_cell::sync::OnceCell;
 use reqwest::header;
 use reqwest::Client;
 use salvo::http::ReqBody;
 use salvo::Error;
 use salvo::Request;
 use salvo::Response;
+use once_cell::sync::Lazy;
 // use hyper::client::HttpConnector;
 
 use salvo::http::ResBody;
 
 // type HttpClient = hyper::client::Client<HttpConnector, Body>;
+// pub static MOKA_CACHE: RwLock<MokaCache<String, Arc<Vec<u8>>>> = RwLock::new(MokaCache::new(250));
+// static CACHE: OnceCell<Cache<String, MediaContainerWrapper<MediaContainer>>> =
+//     OnceCell::new(
+//         Cache::builder()
+//             .max_capacity(10000)
+//             .time_to_live(Duration::from_secs(Config::figment().extract().unwrap().cache_ttl))
+//             .build()
+//     );
+
+static CACHE: Lazy<Cache<String, MediaContainerWrapper<MediaContainer>>> = Lazy::new(|| {
+    let c: Config = Config::figment().extract().unwrap();
+    Cache::builder()
+    .max_capacity(10000)
+    .time_to_live(Duration::from_secs(c.cache_ttl))
+    .build()
+});
 
 #[derive(Debug, Clone)]
 pub struct PlexClient {
     pub http_client: Client,
     pub host: String, // TODO: Dont think this suppsoed to be here. Should be higher up
+    pub cache: Cache<String, MediaContainerWrapper<MediaContainer>>,
 
     // /// `X-Plex-Platform` header value.
     // ///
@@ -49,7 +73,6 @@ pub struct PlexClient {
 }
 
 impl PlexClient {
-
     // TODO: Handle 404s/500 etc
     // TODO: Map reqwest response and error to salvo
     pub async fn get(&self, path: String) -> Result<reqwest::Response, Error> {
@@ -75,17 +98,21 @@ impl PlexClient {
     //     self.http_client.request(req)
     // }
 
-    pub async fn get_section_collections(&self, id: u32) -> Result<Vec<MetaData>> {
+    pub async fn get_section_collections(
+        &self,
+        id: u32,
+    ) -> Result<MediaContainerWrapper<MediaContainer>> {
         let res = self
             .get(format!("/library/sections/{}/collections", id))
             .await
             .unwrap();
 
-        let mut container: MediaContainerWrapper<MediaContainer> = from_reqwest_response(res)
-            .await
-            .expect("Cannot get MediaContainerWrapper from response");
+        let mut container: MediaContainerWrapper<MediaContainer> =
+            from_reqwest_response(res)
+                .await
+                .expect("Cannot get MediaContainerWrapper from response");
 
-        Ok(container.media_container.children())
+        Ok(container)
     }
 
     pub async fn get_collection_children(
@@ -97,7 +124,8 @@ impl PlexClient {
         let mut path = format!("/library/collections/{}/children", id);
 
         if offset.is_some() {
-            path = format!("{}?X-Plex-Container-Start={}", path, offset.unwrap());
+            path =
+                format!("{}?X-Plex-Container-Start={}", path, offset.unwrap());
         }
         if limit.is_some() {
             path = format!("{}&X-Plex-Container-Size={}", path, limit.unwrap());
@@ -108,7 +136,10 @@ impl PlexClient {
         Ok(container)
     }
 
-    pub async fn get_collection(&self, id: i32) -> Result<MediaContainerWrapper<MediaContainer>> {
+    pub async fn get_collection(
+        &self,
+        id: i32,
+    ) -> Result<MediaContainerWrapper<MediaContainer>> {
         let resp = self
             .get(format!("/library/collections/{}", id))
             .await
@@ -127,10 +158,48 @@ impl PlexClient {
             from_reqwest_response(resp).await.unwrap();
         Ok(container)
     }
+
+    pub async fn get_cached(
+        self,
+        f: impl Future<Output = Result<MediaContainerWrapper<MediaContainer>>>,
+        name: String,
+    ) -> Result<MediaContainerWrapper<MediaContainer>> {
+        let cache_key = self.generate_cache_key(name.clone());
+        let cached = self.get_cache(&cache_key).await.unwrap();
+
+        if cached.is_some() {
+            dbg!(cache_key.clone());
+            return Ok(cached.unwrap());
+        }
+        let r = f.await.unwrap();
+        self.insert_cache(cache_key, r.clone()).await;
+        Ok(r)
+    }
+
+    async fn get_cache(
+        &self,
+        cache_key: &str,
+    ) -> Result<Option<MediaContainerWrapper<MediaContainer>>> {
+        Ok(self.cache.get(cache_key))
+    }
+
+    async fn insert_cache(
+        &self,
+        cache_key: String,
+        container: MediaContainerWrapper<MediaContainer>,
+    ) {
+        self.cache.insert(cache_key, container).await;
+        self.cache.sync();
+    }
+
+    fn generate_cache_key(&self, name: String) -> String {
+        format!("{}:{}", name, self.x_plex_token)
+    }
 }
 
 impl PlexClient {
-    pub fn new(req: &mut Request, params: PlexParams) -> Self { // TODO: Split it into a function from_request
+    pub fn new(req: &mut Request, params: PlexParams) -> Self {
+        // TODO: Split it into a function from_request
         // TODO: Dont need request
         let config: Config = Config::figment().extract().unwrap();
         let token = params
@@ -153,7 +222,8 @@ impl PlexClient {
         );
         headers.insert(
             "X-Plex-Client-Identifier",
-            header::HeaderValue::from_str(client_identifier.clone().as_str()).unwrap(),
+            header::HeaderValue::from_str(client_identifier.clone().as_str())
+                .unwrap(),
         );
         headers.insert(
             "X-Plex-Platform",
@@ -173,7 +243,7 @@ impl PlexClient {
             x_plex_token: token,
             x_plex_client_identifier: client_identifier,
             x_plex_platform: platform,
-            // content_type: get_content_type_from_headers(req.headers()),
+            cache: CACHE.clone(),
         }
     }
 }

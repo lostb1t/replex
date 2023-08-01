@@ -304,9 +304,7 @@ pub struct MetaData {
     pub view_count: Option<i32>,
     #[serde(rename = "Label", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    // #[yaserde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Label", default)]
-    // #[yaserde(flatten)]
     #[yaserde(child)]
     pub labels: Vec<Label>,
     #[yaserde(attribute)]
@@ -342,6 +340,17 @@ where
 }
 
 impl MetaData {
+    pub fn test(&mut self) -> &mut Vec<MetaData> {
+        if !self.metadata.is_empty() {
+            return &mut self.metadata;
+        } else if !self.video.is_empty() {
+            return &mut self.video;
+        } else if !self.directory.is_empty() {
+            return &mut self.directory;
+        };
+        return &mut self.metadata;
+    }
+
     pub fn is_hub(&self) -> bool {
         self.hub_identifier.is_some()
     }
@@ -561,6 +570,20 @@ impl MediaContainer {
             self.video = value;
         } else if !self.directory.is_empty() {
             self.directory = value;
+        };
+        self.size = Some(len);
+    }
+
+    pub fn set_test(&mut self, value: &mut Vec<MetaData>) {
+        let len: i32 = value.len().try_into().unwrap();
+        if !self.metadata.is_empty() {
+            self.metadata = value.to_owned();
+        } else if !self.hub.is_empty() {
+            self.hub = value.to_owned();
+        } else if !self.video.is_empty() {
+            self.video = value.to_owned();
+        } else if !self.directory.is_empty() {
+            self.directory = value.to_owned();
         };
         self.size = Some(len);
     }
@@ -791,7 +814,7 @@ impl MediaContainerWrapper<MediaContainer> {
 
             // TODO: Use join to join these async requests
             let mut c = plex.get_section_collections(section_id).await.unwrap();
-            custom_collections.append(&mut c);
+            custom_collections.append(&mut c.media_container.test());
         }
 
         let custom_collections_keys: Vec<String> =

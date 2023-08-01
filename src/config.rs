@@ -11,9 +11,15 @@ pub struct Config {
     pub host: String,
     #[serde( default = "default_as_false")]
     pub include_watched: bool,
+    #[serde( default = "default_cache_ttl")]
+    pub cache_ttl: u64,
     #[serde( default = "default_as_false")]
     pub ssl_enable: bool,
     pub ssl_domain: Option<String>,
+}
+
+fn default_cache_ttl() -> u64 {
+    60 * 60
 }
 
 impl Config {
