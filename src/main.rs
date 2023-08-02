@@ -2,8 +2,6 @@
 extern crate tracing;
 // extern crate tracing_subscriber;
 
-use std::time::Duration;
-
 use itertools::Itertools;
 use opentelemetry::sdk::export::trace::stdout;
 use opentelemetry_otlp::WithExportConfig;
@@ -19,6 +17,9 @@ use replex::utils::*;
 use salvo::cache::{Cache, MemoryStore};
 use salvo::cors::Cors;
 use salvo::prelude::*;
+use salvo::proxy::Proxy as SalvoProxy;
+use salvo::test::ResponseExt;
+use std::time::Duration;
 use tonic::metadata::MetadataMap;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::prelude::*;
@@ -93,12 +94,12 @@ async fn main() {
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
-                .hoop(Cache::new(
-                    MemoryStore::builder()
-                        .time_to_live(Duration::from_secs(config.cache_ttl))
-                        .build(),
-                    RequestIssuer::default(),
-                ))
+                // .hoop(Cache::new(
+                //     MemoryStore::builder()
+                //         .time_to_live(Duration::from_secs(config.cache_ttl))
+                //         .build(),
+                //     RequestIssuer::default(),
+                // ))
                 .get(get_hubs_promoted),
         )
         .push(
@@ -112,7 +113,7 @@ async fn main() {
                 ))
                 .get(get_hubs_sections),
         )
-        .push(Router::new().path("test").get(test))
+        .push(Router::new().path("/test").get(test))
         .push(
             Router::new()
                 .path("/replex/library/collections/<ids>/children")
@@ -145,21 +146,7 @@ async fn main() {
 
 #[handler]
 async fn test(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
-    // tokio::time::sleep(Duration::from_secs(60)).await;
-    // let params: PlexParams = req.extract().await.unwrap();
-    // let plex_client = PlexClient::new(req, params.clone());
-    // // dbg!(&upstream_res);
-    // let mut container: MediaContainerWrapper<MediaContainer> =
-    //     from_reqwest_response(upstream_res).await.unwrap().clone();
-    // TransformBuilder::new(plex_client, params)
-    //     .with_transform(HubStyleTransform)
-    //     .with_transform(HubMixTransform)
-    //     .with_transform(LimitTransform { limit: 1 })
-    //     .with_filter(PermissionFilter)
-    //     .with_filter(WatchedFilter)
-    //     .apply_to(&mut container)
-    //     .await;
-    res.render("sup");
+    return res.render("sup");
 }
 
 #[handler]
@@ -171,8 +158,8 @@ async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     let content_directory_id_size =
         params.clone().content_directory_id.unwrap().len();
     if content_directory_id_size > usize::try_from(1).unwrap() {
-        let upstream_res = plex_client.request(req).await;
-        let container = from_salvo_response(upstream_res).await.unwrap();
+        let upstream_res = plex_client.request(req).await.unwrap();
+        let container = from_reqwest_response(upstream_res).await.unwrap();
         res.render(container);
     }
 
@@ -214,12 +201,10 @@ async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
         );
     }
 
-    let upstream_res: Response = plex_client.request(req).await;
-    // dbg!(upstream_res.take_body().);
-    // return res.render("sup");
+    let upstream_res = plex_client.request(req).await.unwrap();
     let mut container: MediaContainerWrapper<MediaContainer> =
-        from_salvo_response(upstream_res).await.unwrap();
-    
+        from_reqwest_response(upstream_res).await.unwrap();
+
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubStyleTransform)
         .with_transform(HubMixTransform)
@@ -230,7 +215,6 @@ async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
         .with_filter(WatchedFilter)
         .apply_to(&mut container)
         .await;
-    // dbg!(&container.media_container.children().len());
     res.render(container);
 }
 
@@ -249,9 +233,9 @@ async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
         );
     }
 
-    let upstream_res: Response = plex_client.request(req).await;
+    let upstream_res = plex_client.request(req).await.unwrap();
     let mut container: MediaContainerWrapper<MediaContainer> =
-        from_salvo_response(upstream_res).await.unwrap();
+        from_reqwest_response(upstream_res).await.unwrap();
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubStyleTransform)
         .with_transform(LimitTransform {

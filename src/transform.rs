@@ -262,7 +262,7 @@ impl Filter for CollectionHubPermissionFilter {
         options: PlexParams,
     ) -> bool {
         tracing::debug!("filter collection permissions");
-        // return true;
+
         if item.is_hub() && !item.is_collection_hub() {
             return true;
         }

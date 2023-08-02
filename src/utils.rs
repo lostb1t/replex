@@ -134,6 +134,7 @@ pub async fn from_reqwest_response(
 ) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
     let content_type = get_content_type_from_headers(res.headers());
     let bytes = res.bytes().await.unwrap();
+
     let result = match from_bytes(bytes, content_type) {
         Ok(result) => result,
         Err(error) => {
@@ -178,7 +179,7 @@ pub async fn from_salvo_response(
     Ok(result)
 }
 
-pub fn from_bytes(
+pub fn from_bytes(  
     bytes: bytes::Bytes,
     content_type: ContentType,
 ) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
