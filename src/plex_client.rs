@@ -14,26 +14,27 @@ use futures_util::TryStreamExt;
 use hyper::body::Body;
 use moka::future::Cache;
 use moka::future::ConcurrentCacheExt;
+use once_cell::sync::Lazy;
 use once_cell::sync::OnceCell;
 use reqwest::header;
+use reqwest::header::HeaderValue;
 use reqwest::Client;
 use salvo::http::ReqBody;
 use salvo::Error;
 use salvo::Request;
 use salvo::Response;
-use once_cell::sync::Lazy;
 // use hyper::client::HttpConnector;
 
 use salvo::http::ResBody;
 
-
-static CACHE: Lazy<Cache<String, MediaContainerWrapper<MediaContainer>>> = Lazy::new(|| {
-    let c: Config = Config::figment().extract().unwrap();
-    Cache::builder()
-    .max_capacity(10000)
-    .time_to_live(Duration::from_secs(c.cache_ttl))
-    .build()
-});
+static CACHE: Lazy<Cache<String, MediaContainerWrapper<MediaContainer>>> =
+    Lazy::new(|| {
+        let c: Config = Config::figment().extract().unwrap();
+        Cache::builder()
+            .max_capacity(10000)
+            .time_to_live(Duration::from_secs(c.cache_ttl))
+            .build()
+    });
 
 #[derive(Debug, Clone)]
 pub struct PlexClient {
@@ -77,12 +78,21 @@ impl PlexClient {
         Ok(res)
     }
 
-    // TODO: Should return a reqw response
-    pub async fn request(&self, req: &mut Request) -> Response {
-        let path = req.uri().path();
-        let upstream = format!("{}{}", self.host.clone(), path);
-        let proxy = PlexProxy::new(upstream);
-        proxy.request(req).await
+    pub async fn request(
+        &self,
+        req: &mut Request,
+    ) -> Result<reqwest::Response, Error> {
+        let uri = format!("{}{}", self.host, &req.uri_mut());
+        let mut headers = req.headers_mut().to_owned();
+        headers.insert("Accept-Encoding", HeaderValue::from_static("identity"));
+        let res = self
+            .http_client
+            .get(uri)
+            .headers(headers)
+            .send()
+            .await
+            .map_err(Error::other)?;
+        Ok(res)
     }
 
     // pub fn request(&self, req) -> hyper::client::ResponseFuture {

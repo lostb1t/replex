@@ -26,7 +26,7 @@ docker-run:
 
 
 run:
-	REPLEX_CACHE_TTL=0 REPLEX_HOST=http://46.4.30.217:42405 RUST_LOG="info,replex=info" cargo watch -x run
+	REPLEX_CACHE_TTL=3600 REPLEX_HOST=http://46.4.30.217:42405 RUST_LOG="info,replex=info" cargo watch -x run
 
 
 fix:

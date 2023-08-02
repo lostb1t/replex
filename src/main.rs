@@ -2,8 +2,6 @@
 extern crate tracing;
 // extern crate tracing_subscriber;
 
-use std::time::Duration;
-
 use itertools::Itertools;
 use opentelemetry::sdk::export::trace::stdout;
 use opentelemetry_otlp::WithExportConfig;
@@ -19,20 +17,21 @@ use replex::utils::*;
 use salvo::cache::{Cache, MemoryStore};
 use salvo::cors::Cors;
 use salvo::prelude::*;
+use salvo::proxy::Proxy as SalvoProxy;
+use salvo::test::ResponseExt;
+use std::time::Duration;
 use tonic::metadata::MetadataMap;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::prelude::*;
 
-// `tonic::metadata::MetadataMap` and `tonic::metadata::map::MetadataMap` ha
-// fn cache() -> salvo::cache::Cache<salvo::cache::MemoryStore<moka::sync::Cache>, RequestIssuer> {
-//     let config: Config = Config::figment().extract().unwrap();
-//     Cache::new(
-//         MemoryStore::builder()
-//             .time_to_live(Duration::from_secs(config.cache_ttl))
-//             .build(),
-//         RequestIssuer::default(),
-//     )
-// }
+pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer>  {
+    Cache::new(
+        MemoryStore::builder()
+            .time_to_live(Duration::from_secs(5))
+            .build(),
+        RequestIssuer::default(),
+    )
+}
 
 #[tokio::main]
 async fn main() {
@@ -41,7 +40,6 @@ async fn main() {
         tracing::error!("REPLEX_HOST is required. Exiting");
         return;
     }
-
 
     // TODO: rework this a bit: https://docs.rs/tracing-subscriber/latest/tracing_subscriber/layer/#runtime-configuration-with-layers
     let fmt_layer = tracing_subscriber::fmt::layer();
@@ -61,7 +59,9 @@ async fn main() {
                         opentelemetry_otlp::new_exporter()
                             .tonic()
                             .with_tls_config(Default::default())
-                            .with_endpoint("https://otlp.eu01.nr-data.net:443/v1/traces")
+                            .with_endpoint(
+                                "https://otlp.eu01.nr-data.net:443/v1/traces",
+                            )
                             .with_metadata(map)
                             .with_timeout(Duration::from_secs(3)),
                     )
@@ -77,50 +77,26 @@ async fn main() {
         .with(fmt_layer)
         .init();
 
-    // let cache = {
-    //     Cache::new(
-    //         MemoryStore::builder()
-    //             .time_to_live(Duration::from_secs(config.cache_ttl))
-    //             .build(),
-    //         RequestIssuer::default(),
-    //     )
-    // };
-
     let router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
         .hoop(Timeout::new(Duration::from_secs(60)))
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
-                .hoop(Cache::new(
-                    MemoryStore::builder()
-                        .time_to_live(Duration::from_secs(config.cache_ttl))
-                        .build(),
-                    RequestIssuer::default(),
-                ))
+                .hoop(default_cache())
                 .get(get_hubs_promoted),
         )
         .push(
             Router::new()
                 .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
-                .hoop(Cache::new(
-                    MemoryStore::builder()
-                        .time_to_live(Duration::from_secs(config.cache_ttl))
-                        .build(),
-                    RequestIssuer::default(),
-                ))
+                .hoop(default_cache())
                 .get(get_hubs_sections),
         )
-        .push(Router::new().path("test").get(test))
+        .push(Router::new().path("/test").get(test))
         .push(
             Router::new()
                 .path("/replex/library/collections/<ids>/children")
-                .hoop(Cache::new(
-                    MemoryStore::builder()
-                        .time_to_live(Duration::from_secs(config.cache_ttl))
-                        .build(),
-                    RequestIssuer::default(),
-                ))
+                .hoop(default_cache())
                 .get(get_collections_children),
         )
         .push(
@@ -144,28 +120,11 @@ async fn main() {
 
 #[handler]
 async fn test(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
-    // tokio::time::sleep(Duration::from_secs(60)).await;
-    let params: PlexParams = req.extract().await.unwrap();
-    let plex_client = PlexClient::new(req, params.clone());
-    let upstream_res: reqwest::Response = plex_client.get("/hubs/promoted?contentDirectoryID=1&pinnedContentDirectoryID=1%2C4%2C16&includeMeta=1&excludeFields=summary&count=12&includeStations=1&includeLibraryPlaylists=1&includeRecentChannels=1&excludeContinueWatching=1&X-Plex-Product=Plex%20Web&X-Plex-Version=4.108.0&X-Plex-Client-Identifier=rdit5lbvnrpxnvj2329z4ln5&X-Plex-Platform=Safari&X-Plex-Platform-Version=16.3&X-Plex-Features=external-media%2Cindirect-media%2Chub-style-list&X-Plex-Model=bundled&X-Plex-Device=OSX&X-Plex-Device-Name=Safari&X-Plex-Device-Screen-Resolution=1324x795%2C1440x900&X-Plex-Token=cxA4Pw4MjMPGLfCxmF7d&X-Plex-Provider-Version=6.3&X-Plex-Text-Format=plain&X-Plex-Drm=fairplay&X-Plex-Language=en-GB".to_string()).await.unwrap();
-    // dbg!(&upstream_res);
-    let mut container: MediaContainerWrapper<MediaContainer> =
-        from_reqwest_response(upstream_res).await.unwrap().clone();
-    TransformBuilder::new(plex_client, params)
-        .with_transform(StyleTransform::default())
-        .with_filter(CollectionPermissionFilter::default())
-        .apply_to(&mut container)
-        .await;
-    res.render(container);
+    return res.render("sup");
 }
 
 #[handler]
-async fn get_hubs_promoted(
-    req: &mut Request,
-    _depot: &mut Depot,
-    res: &mut Response,
-) {
-    let config: Config = Config::figment().extract().unwrap();
+async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     let params: PlexParams = req.extract().await.unwrap();
     let plex_client = PlexClient::new(req, params.clone());
 
@@ -173,8 +132,8 @@ async fn get_hubs_promoted(
     let content_directory_id_size =
         params.clone().content_directory_id.unwrap().len();
     if content_directory_id_size > usize::try_from(1).unwrap() {
-        let upstream_res = plex_client.request(req).await;
-        let container = from_salvo_response(upstream_res).await.unwrap();
+        let upstream_res = plex_client.request(req).await.unwrap();
+        let container = from_reqwest_response(upstream_res).await.unwrap();
         res.render(container);
     }
 
@@ -208,40 +167,37 @@ async fn get_hubs_promoted(
     );
 
     // Hack, as the list could be smaller when removing watched items. So we request more.
-    let mut options = ReplexOptions::default();
     if let Some(original_count) = params.clone().count {
-        // let count_number: i32 = original_count.parse().unwrap();
         add_query_param_salvo(
             req,
             "count".to_string(),
             (original_count * 2).to_string(),
         );
-        options = ReplexOptions {
-            limit: Some(original_count),
-            platform: params.clone().platform,
-            include_watched: config.include_watched,
-        };
     }
 
-    let upstream_res: Response = plex_client.request(req).await;
+    let upstream_res = plex_client.request(req).await.unwrap();
     let mut container: MediaContainerWrapper<MediaContainer> =
-        from_salvo_response(upstream_res).await.unwrap();
-    container = container.replex(plex_client, options).await;
+        from_reqwest_response(upstream_res).await.unwrap();
+
+    TransformBuilder::new(plex_client, params.clone())
+        .with_transform(HubStyleTransform)
+        .with_transform(HubMixTransform)
+        .with_transform(LimitTransform {
+            limit: params.clone().count.unwrap(),
+        })
+        .with_filter(CollectionHubPermissionFilter)
+        .with_filter(WatchedFilter)
+        .apply_to(&mut container)
+        .await;
     res.render(container);
 }
 
 #[handler]
-async fn get_hubs_sections(
-    req: &mut Request,
-    _depot: &mut Depot,
-    res: &mut Response,
-) {
-    let config: Config = Config::figment().extract().unwrap();
+async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
     let params: PlexParams = req.extract().await.unwrap();
     let plex_client = PlexClient::new(req, params.clone());
 
     // Hack, as the list could be smaller when removing watched items. So we request more.
-    let mut options = ReplexOptions::default();
     if let Some(original_count) = params.clone().count {
         // let count_number: i32 = original_count.parse().unwrap();
         add_query_param_salvo(
@@ -249,17 +205,20 @@ async fn get_hubs_sections(
             "count".to_string(),
             (original_count * 2).to_string(),
         );
-        options = ReplexOptions {
-            limit: Some(original_count),
-            platform: params.clone().platform,
-            include_watched: config.include_watched,
-        };
     }
 
-    let upstream_res: Response = plex_client.request(req).await;
+    let upstream_res = plex_client.request(req).await.unwrap();
     let mut container: MediaContainerWrapper<MediaContainer> =
-        from_salvo_response(upstream_res).await.unwrap();
-    container = container.replex(plex_client, options).await;
+        from_reqwest_response(upstream_res).await.unwrap();
+    TransformBuilder::new(plex_client, params.clone())
+        .with_transform(HubStyleTransform)
+        .with_transform(LimitTransform {
+            limit: params.clone().count.unwrap(),
+        })
+        .with_filter(CollectionHubPermissionFilter)
+        .with_filter(WatchedFilter)
+        .apply_to(&mut container)
+        .await;
     res.render(container); // TODO: FIx XML
 }
 
@@ -269,7 +228,6 @@ async fn get_collections_children(
     _depot: &mut Depot,
     res: &mut Response,
 ) {
-    let config: Config = Config::figment().extract().unwrap();
     let params: PlexParams = req.extract().await.unwrap();
     let collection_ids = req.param::<String>("ids").unwrap();
     let collection_ids: Vec<u32> = collection_ids
@@ -278,8 +236,6 @@ async fn get_collections_children(
         .collect();
     let collection_ids_len: i32 = collection_ids.len() as i32;
     let plex_client = PlexClient::new(req, params.clone());
-    let mut children: Vec<MetaData> = vec![];
-    let reversed: Vec<u32> = collection_ids.iter().copied().rev().collect();
 
     let mut offset: Option<i32> = None;
     let mut original_offset: Option<i32> = None;
@@ -296,41 +252,20 @@ async fn get_collections_children(
         limit = Some(limit.unwrap() / collection_ids_len);
     }
 
-    // dbg!(&offset);
-    let mut total_size: i32 = 0;
-    for id in reversed {
-        let mut c = plex_client
-            .get_collection_children(id, offset.clone(), limit.clone())
-            .await
-            .unwrap();
-        total_size += c.media_container.total_size.unwrap();
-        match children.is_empty() {
-            false => {
-                children = children
-                    .into_iter()
-                    .interleave(c.media_container.children())
-                    .collect::<Vec<MetaData>>();
-            }
-            true => children.append(&mut c.media_container.children()),
-        }
-    }
-
+    // create a stub
     let mut container: MediaContainerWrapper<MediaContainer> =
         MediaContainerWrapper::default();
     container.content_type = get_content_type_from_headers(req.headers_mut());
-
-    // so not change the child type, metadata is needed for collections
-    container.media_container.metadata = children;
     let size = container.media_container.children().len();
     container.media_container.size = Some(size.try_into().unwrap());
-    container.media_container.total_size = Some(total_size);
     container.media_container.offset = original_offset;
-
-    let options = ReplexOptions {
-        limit: original_limit,
-        platform: params.clone().platform,
-        include_watched: config.include_watched,
-    };
-    container = container.replex(plex_client, options).await;
+    TransformBuilder::new(plex_client, params.clone())
+        .with_transform(LibraryMixTransform {
+            collection_ids,
+            offset,
+            limit,
+        })
+        .apply_to(&mut container)
+        .await;
     res.render(container); // TODO: FIx XML
 }

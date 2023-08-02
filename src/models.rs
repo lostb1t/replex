@@ -340,7 +340,7 @@ where
 }
 
 impl MetaData {
-    pub fn test(&mut self) -> &mut Vec<MetaData> {
+    pub fn children_mut(&mut self) -> &mut Vec<MetaData> {
         if !self.metadata.is_empty() {
             return &mut self.metadata;
         } else if !self.video.is_empty() {
@@ -348,7 +348,7 @@ impl MetaData {
         } else if !self.directory.is_empty() {
             return &mut self.directory;
         };
-        return &mut self.metadata;
+        &mut self.metadata
     }
 
     pub fn is_hub(&self) -> bool {
@@ -367,59 +367,6 @@ impl MetaData {
                 .clone()
                 .unwrap()
                 .starts_with("hub.custom.collection")
-    }
-
-    // pub async fn replex(&mut self, plex: &PlexClient) -> MetaData {
-    //     if self.context.clone().unwrap_or_default().starts_with("hub.custom.collection") {
-    //         self.r#type = "mixed".to_string();
-    //         self.apply_hub_style(&plex).await;
-    //     }
-    //     self.clone()
-    // }
-
-    pub async fn apply_hub_style(&mut self, plex: &PlexClient, options: &ReplexOptions) {
-        if self.is_collection_hub() {
-            let mut collection_details = plex
-                .clone()
-                .get_cached(
-                    plex.get_collection(get_collection_id_from_child_path(
-                        self.key.clone(),
-                    )),
-                    format!("collection:{}", self.key.clone()).to_string(),
-                )
-                .await
-                .unwrap();
-            if collection_details
-                .media_container
-                .children()
-                .get(0)
-                .unwrap()
-                .has_label("REPLEXHERO".to_string())
-            {
-                self.style = Some("hero".to_string());
-                // dbg!(&options.platform);
-                // for android, as it doesnt listen to hero style on home..... so we make it a clip
-                if let Some(platform) = &options.platform {
-                    if platform.to_lowercase() == "android" {
-                        // dbg!("We got android");
-                        // self.meta = Some(Meta {
-                        //     r#type: None,
-                        //     display_fields: vec![
-                        //         DisplayField {
-                        //             r#type: Some("movie".to_string()),
-                        //             fields: vec!["title".to_string(), "year".to_string()],
-                        //         },
-                        //         DisplayField {
-                        //             r#type: Some("show".to_string()),
-                        //             fields: vec!["title".to_string(), "year".to_string()],
-                        //         },
-                        //     ],
-                        // });
-                        self.r#type = "clip".to_string();
-                    }
-                }
-            }
-        }
     }
 
     pub fn has_label(&self, name: String) -> bool {
@@ -442,7 +389,7 @@ impl MetaData {
         false
     }
 
-    fn remove_watched(&mut self) {
+    pub fn remove_watched(&mut self) {
         let new_children: Vec<MetaData> = self
             .children()
             .into_iter()
@@ -560,6 +507,10 @@ pub struct Meta {
 
 
 impl MediaContainer {
+    pub fn is_hub(&self) -> bool {
+        !self.hub.is_empty()
+    }
+
     pub fn set_type(&mut self, value: String) {
         for hub in &mut self.hub {
             hub.r#type = value.clone();
@@ -579,7 +530,7 @@ impl MediaContainer {
         self.size = Some(len);
     }
 
-    pub fn set_test(&mut self, value: &mut Vec<MetaData>) {
+    pub fn set_children_mut(&mut self, value: &mut Vec<MetaData>) {
         let len: i32 = value.len().try_into().unwrap();
         if !self.metadata.is_empty() {
             self.metadata = value.to_owned();
@@ -593,7 +544,7 @@ impl MediaContainer {
         self.size = Some(len);
     }
 
-    pub fn test(&mut self) -> &mut Vec<MetaData> {
+    pub fn children_mut(&mut self) -> &mut Vec<MetaData> {
         if !self.metadata.is_empty() {
             return &mut self.metadata;
         } else if !self.hub.is_empty() {
@@ -603,7 +554,7 @@ impl MediaContainer {
         } else if !self.directory.is_empty() {
             return &mut self.directory;
         };
-        return &mut self.metadata;
+        &mut self.metadata
     }
 
     pub fn children(&mut self) -> Vec<MetaData> {
@@ -638,24 +589,13 @@ pub struct MediaContainerWrapper<T> {
     pub content_type: ContentType,
 }
 
+// impl Default for MediaContainerWrapper {
+//     fn default() -> Self { limit: None }
+// }
+
 #[async_trait]
 pub trait FromResponse<T>: Sized {
     async fn from_response(resp: T) -> Result<Self>;
-}
-
-// TODO: Merge hub keys when mixed
-fn merge_children_keys(mut key_left: String, mut key_right: String) -> String {
-    key_left = key_left.replace("/hubs/library/collections/", "");
-    key_left = key_left.replace("/library/collections/", "");
-    key_left = key_left.replace("/children", "");
-    key_right = key_right.replace("/hubs/library/collections/", "");
-    key_right = key_right.replace("/library/collections/", "");
-    key_right = key_right.replace("/children", "");
-
-    format!(
-        "/replex/library/collections/{},{}/children",
-        key_right, key_left
-    )
 }
 
 impl MediaContainerWrapper<MediaContainer> {
@@ -665,181 +605,6 @@ impl MediaContainerWrapper<MediaContainer> {
 
     pub fn is_section_hub(&self) -> bool {
         self.is_hub() && self.media_container.library_section_id.is_some()
-    }
-
-    /// TODO: use filter an map. And chain them for performance
-    pub async fn replex(mut self, plex: PlexClient, options: ReplexOptions) -> Self {
-        let config: Config = Config::figment().extract().unwrap();
-
-        // needs to come before process hubs as it will set some valeus to none
-        self = self.fix_permissions(&plex).await;
-
-        if self.is_hub() {
-            self = self.process_hubs(&plex, &options).await;
-        }
-
-        if !options.include_watched {
-            self = self.remove_watched();
-        }
-
-        if options.limit.is_some() {
-            self = self.limit(options.limit.unwrap());
-        }
-
-        self
-    }
-
-    pub fn limit(mut self, limit: i32) -> Self {
-        // let mut children: Vec<MetaData> = vec![];
-        // for mut child in self.media_container.children() {
-        //     child.truncate(limit);
-        //     children.push(child);
-        // }
-        let len = limit as usize;
-        if self.is_hub() {
-            let mut hubs: Vec<MetaData> = vec![];
-            for mut hub in self.media_container.children() {
-                let mut children = hub.children();
-                children.truncate(len);
-                hub.set_children(children);
-                hubs.push(hub);
-            }
-            self.media_container.set_children(hubs);
-        } else {
-            let mut children = self.media_container.children();
-            children.truncate(len);
-            self.media_container.set_children(children);
-        }
-        self
-    }
-
-    // TODO: This should be a trait so we dont repeat ourselfs
-    pub fn remove_watched(mut self) -> Self {
-        debug!("Removing watched");
-        let mut children: Vec<MetaData> = vec![];
-        if self.is_hub() {
-            for mut child in self.media_container.children() {
-                child.remove_watched();
-                children.push(child);
-            }
-        } else {
-            children = self
-                .media_container
-                .children()
-                .into_iter()
-                .filter(|c| !c.is_watched())
-                .collect::<Vec<MetaData>>();
-        }
-        self.media_container.set_children(children);
-        self
-    }
-
-    // TODO: Only works for hubs. Make it generic or name it specific for hubs
-    pub async fn process_hubs(mut self, plex: &PlexClient, options: &ReplexOptions) -> Self {
-        let collections = self.media_container.children();
-        let mut new_collections: Vec<MetaData> = vec![];
-        for mut hub in collections {
-            if !hub.is_collection_hub() {
-                new_collections.push(hub);
-                continue;
-            }
-
-            hub.apply_hub_style(plex, &options).await;
-            if self.is_section_hub() {
-                new_collections.push(hub);
-                continue;
-            }
-            let p = new_collections.iter().position(|v| v.title == hub.title);
-
-            if hub.r#type != "clip" {
-                hub.r#type = "mixed".to_string();
-            }
-
-            match p {
-                Some(v) => {
-                    new_collections[v].key =
-                        merge_children_keys(new_collections[v].key.clone(), hub.key.clone());
-                    let c = new_collections[v].children();
-                    // let h = hub.metadata;
-                    new_collections[v].set_children(
-                        c.into_iter()
-                            .interleave(hub.children())
-                            .collect::<Vec<MetaData>>(),
-                    );
-                }
-                None => new_collections.push(hub),
-            }
-        }
-
-        let size = new_collections.len();
-        self.media_container.size = Some(size.try_into().unwrap());
-        self.media_container.set_children(new_collections);
-        self
-    }
-
-    pub async fn apply_hub_style(&mut self, plex: &PlexClient, options: &ReplexOptions) -> &Self {
-        let mut metadata: Vec<MetaData> = vec![];
-        for mut hub in self.media_container.children() {
-            if hub.style.is_some() {
-                hub.apply_hub_style(plex, options).await;
-                metadata.push(hub);
-            }
-        }
-        self.media_container.set_children(metadata);
-        self
-    }
-
-    /// collection hubs dont follow plex restrictions.
-    /// We fix that by checking the collection endpoint. As that does listen to plex restrictions
-    pub async fn fix_permissions(&mut self, plex: &PlexClient) -> Self {
-        debug!("Fixing hub permissions");
-        let collections = self.media_container.children();
-        let mut custom_collections: Vec<MetaData> = vec![];
-        let mut processed_section_ids: Vec<u32> = vec![];
-
-        for mut metadata in collections.clone() {
-            if metadata.is_hub() && !metadata.is_collection_hub() {
-                continue;
-            }
-            // dbg!(&metadata);
-            let section_id: u32 = metadata.library_section_id.unwrap_or_else(|| {
-                metadata
-                    .children()
-                    .get(0)
-                    .unwrap()
-                    .library_section_id
-                    .expect("Missing Library section id")
-            });
-
-            if processed_section_ids.contains(&section_id) {
-                continue;
-            }
-
-            processed_section_ids.push(section_id);
-
-            // let mut c = plex.get_section_collections(section_id).await.unwrap();
-            let mut c = plex.clone().get_cached(
-                plex.get_section_collections(section_id),
-                format!("sectioncollections:{}", section_id).to_string(),
-            ).await.unwrap();
-
-            custom_collections.append(&mut c.media_container.test());
-        }
-
-        let custom_collections_keys: Vec<String> =
-            custom_collections.iter().map(|c| c.key.clone()).collect();
-
-        let new_collections: Vec<MetaData> = collections
-            .into_iter()
-            .filter(|c| !c.is_collection_hub() || custom_collections_keys.contains(&c.key))
-            .collect();
-
-        let mut new = self.clone();
-        let size = new_collections.len();
-        //new.media_container.hub = new_collections; // uch need to know if this is a hub or not
-        new.media_container.set_children(new_collections);
-        new.media_container.size = Some(size.try_into().unwrap());
-        new
     }
 }
 

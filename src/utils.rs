@@ -134,6 +134,7 @@ pub async fn from_reqwest_response(
 ) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
     let content_type = get_content_type_from_headers(res.headers());
     let bytes = res.bytes().await.unwrap();
+
     let result = match from_bytes(bytes, content_type) {
         Ok(result) => result,
         Err(error) => {
@@ -178,7 +179,7 @@ pub async fn from_salvo_response(
     Ok(result)
 }
 
-pub fn from_bytes(
+pub fn from_bytes(  
     bytes: bytes::Bytes,
     content_type: ContentType,
 ) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
@@ -229,4 +230,19 @@ pub async fn to_string(
         // ContentType::Xml => Ok("".to_owned()),
         ContentType::Xml => Ok(to_xml_str(&container.media_container).unwrap()),
     }
+}
+
+// TODO: Merge hub keys when mixed
+pub fn merge_children_keys(mut key_left: String, mut key_right: String) -> String {
+    key_left = key_left.replace("/hubs/library/collections/", "");
+    key_left = key_left.replace("/library/collections/", "");
+    key_left = key_left.replace("/children", "");
+    key_right = key_right.replace("/hubs/library/collections/", "");
+    key_right = key_right.replace("/library/collections/", "");
+    key_right = key_right.replace("/children", "");
+
+    format!(
+        "/replex/library/collections/{},{}/children",
+        key_right, key_left
+    )
 }

@@ -43,6 +43,7 @@ bincode = "1.3.3"
 once_cell = "1.18.0"
 moka = { version = "0.11.2", features = ["future"] }
 tonic = {version = "0.8.0", features = ["tls", "tls-roots"]}
+async-recursion = "1.0.4"
 
 [dev-dependencies]
 async-std = { version = "^1.12", features = ["attributes"] }
@@ -54,3 +55,6 @@ rstest = "0.16.0"
 
 #[replace]
 #"salvo-proxy:0.49.0" = { path = "../salvo/crates/proxy" }
+
+[profile.release]
+debug = true
