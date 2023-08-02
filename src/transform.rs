@@ -6,7 +6,7 @@ use futures_util::{
 use itertools::Itertools;
 use std::sync::Arc;
 // use crate::models::*;
-use crate::{models::*, plex_client::PlexClient, utils::*, config::Config};
+use crate::{config::Config, models::*, plex_client::PlexClient, utils::*};
 use async_recursion::async_recursion;
 use typed_builder::TypedBuilder;
 
@@ -210,15 +210,16 @@ impl TransformBuilder {
         //     ).await
         // }
         for t in self.transforms.clone() {
-            let futures = container.media_container.children_mut().iter_mut().map(
-                |x: &mut MetaData| {
-                    t.transform_metadata(
-                        x,
-                        self.plex_client.clone(),
-                        self.options.clone(),
-                    )
-                },
-            );
+            let futures =
+                container.media_container.children_mut().iter_mut().map(
+                    |x: &mut MetaData| {
+                        t.transform_metadata(
+                            x,
+                            self.plex_client.clone(),
+                            self.options.clone(),
+                        )
+                    },
+                );
             future::join_all(futures).await;
 
             // dont use join as it needs ti be executed in order
@@ -237,19 +238,23 @@ impl TransformBuilder {
 
         if container.media_container.size.is_some() {
             container.media_container.size = Some(
-                container.media_container.children_mut().len().try_into().unwrap(),
+                container
+                    .media_container
+                    .children_mut()
+                    .len()
+                    .try_into()
+                    .unwrap(),
             );
         }
-        
     }
 }
 
 // const T: usize;
 #[derive(Default)]
-pub struct PermissionFilter;
+pub struct CollectionHubPermissionFilter;
 
 #[async_trait]
-impl Filter for PermissionFilter {
+impl Filter for CollectionHubPermissionFilter {
     async fn filter_metadata(
         &self,
         item: &mut MetaData,
@@ -266,7 +271,7 @@ impl Filter for PermissionFilter {
         }
         let section_id: u32 = item.library_section_id.unwrap_or_else(|| {
             item.clone()
-                .children_mut()
+                .children()
                 .get(0)
                 .unwrap()
                 .library_section_id
@@ -283,15 +288,18 @@ impl Filter for PermissionFilter {
             .await
             .unwrap();
         // dbg!(&custom_collections);
-        let custom_collections_keys: Vec<String> = custom_collections
+        let custom_collections_ids: Vec<String> = custom_collections
             .media_container
-            .children_mut()
+            .children()
             .iter()
-            .map(|c| c.key.clone())
+            .map(|c| {
+                c.rating_key.clone().unwrap()
+            })
             .collect();
-        // dbg!(&custom_collections_keys);
-        //dbg!(&item.key);
-        custom_collections_keys.contains(&item.key)
+
+        custom_collections_ids.contains(
+            &item.hub_identifier.clone().unwrap().split('.').last().unwrap().to_owned()
+        )
     }
 }
 

@@ -206,7 +206,6 @@ async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     );
 
     // Hack, as the list could be smaller when removing watched items. So we request more.
-    let mut options = ReplexOptions::default();
     if let Some(original_count) = params.clone().count {
         add_query_param_salvo(
             req,
@@ -216,18 +215,22 @@ async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     }
 
     let upstream_res: Response = plex_client.request(req).await;
+    // dbg!(upstream_res.take_body().);
+    // return res.render("sup");
     let mut container: MediaContainerWrapper<MediaContainer> =
         from_salvo_response(upstream_res).await.unwrap();
+    
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubStyleTransform)
         .with_transform(HubMixTransform)
         .with_transform(LimitTransform {
             limit: params.clone().count.unwrap(),
         })
-        .with_filter(PermissionFilter)
+        .with_filter(CollectionHubPermissionFilter)
         .with_filter(WatchedFilter)
         .apply_to(&mut container)
         .await;
+    // dbg!(&container.media_container.children().len());
     res.render(container);
 }
 
@@ -254,7 +257,7 @@ async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
         .with_transform(LimitTransform {
             limit: params.clone().count.unwrap(),
         })
-        .with_filter(PermissionFilter)
+        .with_filter(CollectionHubPermissionFilter)
         .with_filter(WatchedFilter)
         .apply_to(&mut container)
         .await;
@@ -304,7 +307,6 @@ async fn get_collections_children(
             offset,
             limit,
         })
-        .with_filter(PermissionFilter)
         .apply_to(&mut container)
         .await;
     res.render(container); // TODO: FIx XML
