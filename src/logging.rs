@@ -27,6 +27,11 @@ impl Handler for Logger {
             version = ?req.version(),
             method = %req.method(),
             path = %req.uri(),
+            span.kind = "server",
+            service.name = "replex",
+            name = tracing::field::Empty,
+            otel.status_code = tracing::field::Empty,
+            otel.status_description = tracing::field::Empty,
         );
 
         async move {
