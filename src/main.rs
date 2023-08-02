@@ -35,16 +35,20 @@ pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
 
 #[tokio::main]
 async fn main() {
+    // console_subscriber::init();
+
     let config: Config = Config::figment().extract().unwrap();
     if config.host.is_none() {
         tracing::error!("REPLEX_HOST is required. Exiting");
         return;
     }
 
-    // TODO: rework this a bit: https://docs.rs/tracing-subscriber/latest/tracing_subscriber/layer/#runtime-configuration-with-layers
+    // TODO: rework this a bit: https://github.com/Pothulapati/tracing/blob/81d333c1ff7c74f64f26ff309cfdd831cb363241/examples/examples/toggle-layers.rs
     let fmt_layer = tracing_subscriber::fmt::layer();
+    let console_layer = console_subscriber::spawn();
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::from_default_env())
+        .with(console_layer)
         .with({
             let otlp;
             if config.newrelic_api_key.is_some() {

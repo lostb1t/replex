@@ -268,8 +268,11 @@ pub struct MetaData {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Metadata")]
     pub metadata: Vec<MetaData>,
-    #[serde(rename = "Directory", default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        rename = "Directory",
+        default,
+        skip_serializing_if = "Vec::is_empty"
+    )]
     #[yaserde(rename = "Directory")]
     pub directory: Vec<MetaData>, // only avaiable in XML
     #[serde(rename = "Video", default)]
