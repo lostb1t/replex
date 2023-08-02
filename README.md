@@ -46,6 +46,41 @@ add your proxy url to plex "Custom server access URLs" (ex http://0.0.0.0:80)
 
 then access your proxy url http://0.0.0.0:80
 
+Docker compose example including plex:
+
+```yml
+version: "3"
+services:
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - VERSION=docker
+      # claim from https://plex.tv/claim 
+      - PLEX_CLAIM=
+    ports:
+      - 32400:32400
+     volumes:
+       - /path/to/library:/config
+       - /path/to/tvseries:/tv
+       - /path/to/movies:/movies
+    restart: unless-stopped
+  replex:
+    image: ghcr.io/sarendsen/replex:latest
+    container_name: replex
+    environment:
+      REPLEX_HOST: http://plex:32400
+      TEST: plex
+    ports:
+      - 3001:80
+    restart: unless-stopped
+    depends_on:
+      - plex
+```
+
 ## Remote access (force clients to use the proxy)
 
 Because this app sits before Plex the builtin remote access (and auto SSL) will not work and needs to be disabled.
