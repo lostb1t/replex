@@ -25,7 +25,7 @@ pub struct Config {
 }
 
 fn default_cache_ttl() -> u64 {
-    60 * 60
+    5 * 60
 }
 
 impl Config {

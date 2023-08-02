@@ -21,12 +21,12 @@ docker-run:
 # run:
 # 	REPLEX_HOST=http://46.4.30.217:42405 REPLEX_NEWRELIC_API_KEY="NRAK-URAH851PRF8TQX5U69OOPDY4T8U" RUST_LOG="info,replex=debug" cargo run
 
-run:
-	REPLEX_CACHE_TTL=0 REPLEX_HOST=http://46.4.30.217:42405 REPLEX_NEWRELIC_API_KEY="eu01xx2d3c6a5e537373a8f8b52003b3FFFFNRAL" RUST_LOG="debug,replex=debug" cargo watch -x run
-
-
 # run:
-# 	REPLEX_CACHE_TTL=0 REPLEX_HOST=http://46.4.30.217:42405 RUST_LOG="debug,replex=info" cargo watch -x run
+# 	REPLEX_CACHE_TTL=0 REPLEX_HOST=https://46-4-30-217.01b0839de64b49138531cab1bf32f7c2.plex.direct:42405 REPLEX_NEWRELIC_API_KEY="eu01xx2d3c6a5e537373a8f8b52003b3FFFFNRAL" RUST_LOG="debug,replex=debug" cargo watch -x run
+
+
+run:
+	REPLEX_CACHE_TTL=0 REPLEX_HOST=https://46-4-30-217.01b0839de64b49138531cab1bf32f7c2.plex.direct:42405 RUST_LOG="info,replex=info" cargo watch -x run
 
 
 fix:

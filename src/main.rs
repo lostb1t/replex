@@ -266,6 +266,7 @@ async fn get_collections_children(
             offset,
             limit,
         })
+        .with_filter(WatchedFilter)
         .apply_to(&mut container)
         .await;
     res.render(container); // TODO: FIx XML
