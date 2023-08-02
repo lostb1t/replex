@@ -45,39 +45,40 @@ async fn main() {
 
     // TODO: rework this a bit: https://github.com/Pothulapati/tracing/blob/81d333c1ff7c74f64f26ff309cfdd831cb363241/examples/examples/toggle-layers.rs
     let fmt_layer = tracing_subscriber::fmt::layer();
-    let console_layer = console_subscriber::spawn();
+    let console_layer = match config.enable_console {
+        true => Some(console_subscriber::spawn()),
+        false => None,
+    }; 
+
+    let otlp_layer = if config.newrelic_api_key.is_some() {
+        let mut map = MetadataMap::with_capacity(3);
+        map.insert(
+            "api-key",
+            config.newrelic_api_key.unwrap().parse().unwrap(),
+        );
+        let tracer = opentelemetry_otlp::new_pipeline()
+            .tracing()
+            .with_exporter(
+                opentelemetry_otlp::new_exporter()
+                    .tonic()
+                    .with_tls_config(Default::default())
+                    .with_endpoint(
+                        "https://otlp.eu01.nr-data.net:443/v1/traces",
+                    )
+                    .with_metadata(map)
+                    .with_timeout(Duration::from_secs(3)),
+            )
+            .install_batch(opentelemetry::runtime::Tokio)
+            .unwrap();
+        Some(tracing_opentelemetry::layer().with_tracer(tracer))
+    } else {
+        None
+    };
+
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::from_default_env())
         .with(console_layer)
-        .with({
-            let otlp;
-            if config.newrelic_api_key.is_some() {
-                let mut map = MetadataMap::with_capacity(3);
-                map.insert(
-                    "api-key",
-                    config.newrelic_api_key.unwrap().parse().unwrap(),
-                );
-                let tracer = opentelemetry_otlp::new_pipeline()
-                    .tracing()
-                    .with_exporter(
-                        opentelemetry_otlp::new_exporter()
-                            .tonic()
-                            .with_tls_config(Default::default())
-                            .with_endpoint(
-                                "https://otlp.eu01.nr-data.net:443/v1/traces",
-                            )
-                            .with_metadata(map)
-                            .with_timeout(Duration::from_secs(3)),
-                    )
-                    .install_batch(opentelemetry::runtime::Tokio)
-                    .unwrap();
-                otlp = tracing_opentelemetry::layer().with_tracer(tracer);
-            } else {
-                let tracer = stdout::new_pipeline().install_simple();
-                otlp = tracing_opentelemetry::layer().with_tracer(tracer);
-            }
-            otlp
-        })
+        .with(otlp_layer)
         .with(fmt_layer)
         .init();
 

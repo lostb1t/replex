@@ -22,6 +22,11 @@ pub struct Config {
     pub ssl_enable: bool,
     pub ssl_domain: Option<String>,
     pub newrelic_api_key: Option<String>,
+    #[serde(
+        default = "default_as_false",
+        deserialize_with = "figment::util::bool_from_str_or_int"
+    )]
+    pub enable_console: bool
 }
 
 fn default_cache_ttl() -> u64 {
