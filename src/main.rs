@@ -15,16 +15,15 @@ use replex::transform::*;
 use replex::url::*;
 use replex::utils::*;
 use salvo::cache::{Cache, MemoryStore};
+use salvo::compression::Compression;
 use salvo::cors::Cors;
 use salvo::prelude::*;
-use salvo::proxy::Proxy as SalvoProxy;
-use salvo::test::ResponseExt;
 use std::time::Duration;
 use tonic::metadata::MetadataMap;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::prelude::*;
 
-pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer>  {
+pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
     let config: Config = Config::figment().extract().unwrap();
     Cache::new(
         MemoryStore::builder()
@@ -81,6 +80,7 @@ async fn main() {
     let router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
         .hoop(Timeout::new(Duration::from_secs(60)))
+        .hoop(Compression::new().enable_gzip(CompressionLevel::Fastest))
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)

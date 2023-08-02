@@ -177,6 +177,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "async-compression"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "62b74f44609f0f91493e3082d3734d98497e094777144380ea4db9f9905dd5b6"
+dependencies = [
+ "flate2",
+ "futures-core",
+ "memchr",
+ "pin-project-lite",
+ "tokio",
+]
+
+[[package]]
 name = "async-executor"
 version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -466,15 +479,6 @@ dependencies = [
  "lalrpop",
  "lalrpop-util",
  "regex",
-]
-
-[[package]]
-name = "bincode"
-version = "1.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1f45e9417d87227c7a56d22e471c6206462cba514c7590c09aff4cf6d1ddcad"
-dependencies = [
- "serde",
 ]
 
 [[package]]
@@ -2825,7 +2829,6 @@ dependencies = [
  "async-std",
  "async-trait",
  "axum-test-helper",
- "bincode",
  "bytes",
  "derive_more",
  "env_logger",
@@ -2861,7 +2864,6 @@ dependencies = [
  "tracing",
  "tracing-opentelemetry",
  "tracing-subscriber",
- "typed-builder",
  "url",
  "yaserde",
  "yaserde_derive",
@@ -2873,6 +2875,7 @@ version = "0.11.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cde824a14b7c14f85caff81225f411faacc04a2013f41670f41443742b1c1c55"
 dependencies = [
+ "async-compression",
  "base64 0.21.2",
  "bytes",
  "encoding_rs",
@@ -3078,6 +3081,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "58461bb9a4af0cc0916fec5ff1b465c4cafb933c49c038e7ea9862b5f9645d55"
 dependencies = [
  "salvo-cache",
+ "salvo-compression",
  "salvo-cors",
  "salvo-otel",
  "salvo-proxy",
@@ -3095,6 +3099,25 @@ dependencies = [
  "moka",
  "salvo_core",
  "tracing",
+]
+
+[[package]]
+name = "salvo-compression"
+version = "0.49.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f993b820ed1f68047e0db3a7a1b4bcb9ca3acd84d86a88be7eee8a627695fe70"
+dependencies = [
+ "brotli",
+ "bytes",
+ "flate2",
+ "futures-util",
+ "indexmap 2.0.0",
+ "salvo_core",
+ "tokio",
+ "tokio-stream",
+ "tokio-util",
+ "tracing",
+ "zstd",
 ]
 
 [[package]]
@@ -4117,26 +4140,6 @@ dependencies = [
  "rand 0.8.5",
  "thiserror",
  "utf-8",
-]
-
-[[package]]
-name = "typed-builder"
-version = "0.15.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "98d9e1c147896ed2835fccc41d0600d0b6ca68261e6ccd3691e51659ae9153b8"
-dependencies = [
- "typed-builder-macro",
-]
-
-[[package]]
-name = "typed-builder-macro"
-version = "0.15.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6dba2e999a7ccbeb42ede7c9824fc9d4660794e5bcd456e5d60ac17baad6e083"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.27",
 ]
 
 [[package]]

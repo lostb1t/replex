@@ -5,12 +5,10 @@ use futures_util::{
 };
 use itertools::Itertools;
 use std::sync::Arc;
-// use crate::models::*;
 use crate::{config::Config, models::*, plex_client::PlexClient, utils::*};
 use async_recursion::async_recursion;
-use typed_builder::TypedBuilder;
 
-// TODO: Maybe rename to *_metadata and *_hubs
+
 #[async_trait]
 pub trait Transform: Send + Sync + 'static {
     async fn transform_metadata(
@@ -443,10 +441,6 @@ impl Transform for LibraryMixTransform {
                 true => children.append(&mut c.media_container.children()),
             }
         }
-
-        // if self.remove_watched {
-        //     children = LimitTransform {limit: original_limit.unwrap()
-        // };
 
         // always metadata library
         item.metadata = children;

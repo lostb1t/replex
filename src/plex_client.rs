@@ -84,7 +84,7 @@ impl PlexClient {
     ) -> Result<reqwest::Response, Error> {
         let uri = format!("{}{}", self.host, &req.uri_mut());
         let mut headers = req.headers_mut().to_owned();
-        headers.insert("Accept-Encoding", HeaderValue::from_static("identity"));
+        // headers.insert("Accept-Encoding", HeaderValue::from_static("identity"));
         let res = self
             .http_client
             .get(uri)
@@ -237,6 +237,7 @@ impl PlexClient {
         Self {
             http_client: reqwest::Client::builder()
                 .default_headers(headers)
+                .gzip(true)
                 .build()
                 .unwrap(),
             host: config.host.unwrap(),

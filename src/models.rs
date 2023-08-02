@@ -1,7 +1,5 @@
-
-
-use std::str::FromStr;
 use salvo::prelude::*;
+use std::str::FromStr;
 
 extern crate mime;
 use crate::config::*;
@@ -10,17 +8,15 @@ use crate::plex_client::PlexClient;
 use crate::utils::*;
 use anyhow::Result;
 use async_trait::async_trait;
-use serde_aux::prelude::{
-    deserialize_string_from_number,
-};
+use serde_aux::prelude::deserialize_string_from_number;
+// use smartstring::alias::String;
 // use hyper::Body;
 use itertools::Itertools;
+use salvo::http::ReqBody;
+use salvo::http::ResBody;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_with::serde_as;
 use tracing::debug;
-use salvo::http::ReqBody;
-use salvo::http::ResBody;
-
 
 use salvo::macros::Extractible;
 // use replex::settings::*;
@@ -36,7 +32,7 @@ pub type HyperResponse = hyper::Response<ResBody>;
 pub struct ReplexOptions {
     pub limit: Option<i32>,
     pub platform: Option<String>,
-    #[serde( default = "default_as_false")]
+    #[serde(default = "default_as_false")]
     pub include_watched: bool,
 }
 
@@ -72,9 +68,6 @@ pub struct PlexParams {
     // pub accept: ContentType,
 }
 
-
-
-
 pub fn deserialize_comma_seperated_number<'de, D>(
     deserializer: D,
 ) -> Result<Option<Vec<i32>>, D::Error>
@@ -83,7 +76,8 @@ where
 {
     match Deserialize::deserialize(deserializer)? {
         Some::<String>(s) => {
-            let r: Vec<i32> = s.split(',').map(|s| s.parse().unwrap()).collect();
+            let r: Vec<i32> =
+                s.split(',').map(|s| s.parse().unwrap()).collect();
             Ok(Some(r))
         }
         None => Ok(None),
@@ -283,8 +277,11 @@ pub struct MetaData {
     #[yaserde(rename = "Video")]
     pub video: Vec<MetaData>, // again only xml, but its the same as directory and metadata
     #[yaserde(attribute, rename = "childCount")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default, deserialize_with = "deserialize_option_string_from_number")]
+    #[serde(
+        default,
+        deserialize_with = "deserialize_option_string_from_number",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub child_count: Option<String>,
     #[yaserde(attribute)]
     #[yaserde(rename = "skipChildren")]
@@ -310,25 +307,7 @@ pub struct MetaData {
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub originally_available_at: Option<String>,
-    // #[yaserde( attribute)]
-    // #[serde(skip_serializing_if = "Option::is_none")]
-    // pub rating: Option<f64>,
-    // #[yaserde(rename = "audienceRating" attribute)]
-    // #[serde(rename = "audienceRating", skip_serializing_if = "Option::is_none")]
-    // pub audience_rating: Option<f64>,
-    // #[yaserde(attribute)]
-    // #[serde(skip_serializing_if = "Option::is_none")]
-    // pub index: Option<i32>,
-    // #[yaserde(rename = "primaryExtraKey", attribute)]
-    // #[serde(skip_serializing_if = "Option::is_none")]
-    // pub primary_extra_key: Option<String>,
 }
-
-// impl YaDeserialize for MetaData {
-//     fn deserialize<R: Read>(reader: &mut yaserde::de::Deserializer<R>) -> Result<Self, String> {
-//       // deserializer code
-//     }
-//   }
 
 pub(crate) fn deserialize_option_string_from_number<'de, D>(
     deserializer: D,
@@ -380,27 +359,16 @@ impl MetaData {
     }
 
     pub fn is_watched(&self) -> bool {
-        if self.view_count.is_some() && self.view_count.unwrap_or_default() > 0 {
+        if self.view_count.is_some() && self.view_count.unwrap_or_default() > 0
+        {
             return true;
         }
-        if self.viewed_leaf_count.is_some() && self.viewed_leaf_count.unwrap_or_default() > 0 {
+        if self.viewed_leaf_count.is_some()
+            && self.viewed_leaf_count.unwrap_or_default() > 0
+        {
             return true;
         }
         false
-    }
-
-    pub fn remove_watched(&mut self) {
-        let new_children: Vec<MetaData> = self
-            .children()
-            .into_iter()
-            .filter(|c| !c.is_watched())
-            .collect::<Vec<MetaData>>();
-
-        let size = new_children.len();
-        self.size = Some(size.try_into().unwrap());
-        // trace!("mangled promoted container {:#?}", container);
-        self.set_children(new_children);
-        //self
     }
 
     // TODO: Does not work when using a new instance
@@ -428,7 +396,9 @@ impl MetaData {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default)]
+#[derive(
+    Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default,
+)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 #[yaserde(root = "MediaContainer")]
@@ -452,7 +422,10 @@ pub struct MediaContainer {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub identifier: Option<String>,
     #[yaserde(attribute, rename = "librarySectionID")]
-    #[serde(rename = "librarySectionID", skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "librarySectionID",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub library_section_id: Option<u32>,
     #[yaserde(attribute)]
     #[yaserde(rename = "librarySectionTitle")]
@@ -481,7 +454,9 @@ pub struct MediaContainer {
     pub directory: Vec<MetaData>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default)]
+#[derive(
+    Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default,
+)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 pub struct DisplayField {
@@ -493,7 +468,9 @@ pub struct DisplayField {
     pub fields: Vec<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default)]
+#[derive(
+    Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default,
+)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 pub struct Meta {
@@ -504,7 +481,6 @@ pub struct Meta {
     #[yaserde(rename = "type")]
     pub r#type: Option<String>,
 }
-
 
 impl MediaContainer {
     pub fn is_hub(&self) -> bool {
@@ -572,11 +548,8 @@ impl MediaContainer {
     // pub fn children_type()
 }
 
-
 /// NOTICE: Cant set yaserde on this? it will complain about a generic
-#[derive(
-    Debug, Serialize, Deserialize, Clone, Default
-)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 pub struct MediaContainerWrapper<T> {
@@ -607,4 +580,3 @@ impl MediaContainerWrapper<MediaContainer> {
         self.is_hub() && self.media_container.library_section_id.is_some()
     }
 }
-
