@@ -503,6 +503,28 @@ impl Filter for WatchedFilter {
     }
 }
 
+
+#[derive(Default, Debug)]
+pub struct HubSectionDirectoryTransform;
+
+/// Some sections return a directory instead of video. We dont want that
+#[async_trait]
+impl Transform for HubSectionDirectoryTransform {
+    async fn transform_metadata(
+        &self,
+        item: &mut MetaData,
+        plex_client: PlexClient,
+        options: PlexParams,
+    ) {
+        if item.is_hub() && !item.directory.is_empty() {
+            let childs = item.children();
+            item.directory = vec![];
+            item.video = childs;
+        }
+    }
+}
+
+
 // #[derive(Default)]
 // pub struct WatchedFilter;
 

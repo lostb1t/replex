@@ -212,6 +212,7 @@ async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
     let mut container: MediaContainerWrapper<MediaContainer> =
         from_reqwest_response(upstream_res).await.unwrap();
     TransformBuilder::new(plex_client, params.clone())
+        .with_transform(HubSectionDirectoryTransform)
         .with_transform(HubStyleTransform)
         .with_transform(LimitTransform {
             limit: params.clone().count.unwrap(),
