@@ -22,7 +22,6 @@ services:
     container_name: replex
     environment:
       REPLEX_HOST: http://plex:32400
-      TEST: plex
     ports:
       - 3001:80
     restart: unless-stopped
