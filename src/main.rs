@@ -24,16 +24,14 @@ use tonic::metadata::MetadataMap;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::prelude::*;
 
-// `tonic::metadata::MetadataMap` and `tonic::metadata::map::MetadataMap` ha
-// fn cache() -> salvo::cache::Cache<salvo::cache::MemoryStore<moka::sync::Cache>, RequestIssuer> {
-//     let config: Config = Config::figment().extract().unwrap();
-//     Cache::new(
-//         MemoryStore::builder()
-//             .time_to_live(Duration::from_secs(config.cache_ttl))
-//             .build(),
-//         RequestIssuer::default(),
-//     )
-// }
+pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer>  {
+    Cache::new(
+        MemoryStore::builder()
+            .time_to_live(Duration::from_secs(5))
+            .build(),
+        RequestIssuer::default(),
+    )
+}
 
 #[tokio::main]
 async fn main() {
@@ -79,50 +77,26 @@ async fn main() {
         .with(fmt_layer)
         .init();
 
-    // let cache = {
-    //     Cache::new(
-    //         MemoryStore::builder()
-    //             .time_to_live(Duration::from_secs(config.cache_ttl))
-    //             .build(),
-    //         RequestIssuer::default(),
-    //     )
-    // };
-
     let router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
         .hoop(Timeout::new(Duration::from_secs(60)))
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
-                // .hoop(Cache::new(
-                //     MemoryStore::builder()
-                //         .time_to_live(Duration::from_secs(config.cache_ttl))
-                //         .build(),
-                //     RequestIssuer::default(),
-                // ))
+                .hoop(default_cache())
                 .get(get_hubs_promoted),
         )
         .push(
             Router::new()
                 .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
-                .hoop(Cache::new(
-                    MemoryStore::builder()
-                        .time_to_live(Duration::from_secs(config.cache_ttl))
-                        .build(),
-                    RequestIssuer::default(),
-                ))
+                .hoop(default_cache())
                 .get(get_hubs_sections),
         )
         .push(Router::new().path("/test").get(test))
         .push(
             Router::new()
                 .path("/replex/library/collections/<ids>/children")
-                .hoop(Cache::new(
-                    MemoryStore::builder()
-                        .time_to_live(Duration::from_secs(config.cache_ttl))
-                        .build(),
-                    RequestIssuer::default(),
-                ))
+                .hoop(default_cache())
                 .get(get_collections_children),
         )
         .push(
