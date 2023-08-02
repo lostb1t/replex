@@ -5,10 +5,10 @@ RUN USER=root cargo new --bin replex
 COPY Cargo.toml Cargo.lock ./replex/
 
 WORKDIR /app/src/replex
-RUN cargo build --release
+RUN RUSTFLAGS="--cfg tokio_unstable" cargo build --release
 
 COPY ./ ./
-RUN cargo build --release
+RUN RUSTFLAGS="--cfg tokio_unstable" cargo build --release
 
 FROM debian:bullseye-slim as replex
 RUN apt update \
