@@ -25,9 +25,10 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::prelude::*;
 
 pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer>  {
+    let config: Config = Config::figment().extract().unwrap();
     Cache::new(
         MemoryStore::builder()
-            .time_to_live(Duration::from_secs(5))
+            .time_to_live(Duration::from_secs(config.cache_ttl))
             .build(),
         RequestIssuer::default(),
     )
