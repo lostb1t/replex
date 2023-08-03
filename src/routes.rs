@@ -2,6 +2,7 @@ use crate::cache::*;
 use crate::config::Config;
 use crate::logging::*;
 use crate::models::*;
+use crate::proxy::Proxy as TestProxy;
 use crate::plex_client::*;
 use itertools::Itertools;
 use opentelemetry::sdk::export::trace::stdout;
@@ -58,7 +59,7 @@ pub fn route() -> Router {
         )
         .push(
             Router::with_path("<**rest>")
-                .handle(SalvoProxy::new(config.host.unwrap())),
+                .handle(TestProxy::new(config.host.unwrap())),
         )
 }
 

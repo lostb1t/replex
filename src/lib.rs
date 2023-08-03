@@ -13,6 +13,7 @@ pub mod transform;
 pub mod logging;
 pub mod cache;
 pub mod routes;
+pub mod proxy;
 
 #[cfg(test)]
 mod test_helpers;
