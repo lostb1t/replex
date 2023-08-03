@@ -29,7 +29,7 @@ jobs:
   build:
     name: Push docker build
     #runs-on: ubuntu-20.04
-    runs-on: macos-latest
+    runs-on: buildjet-4vcpu-ubuntu-2204-arm
     # needs: [
     #    test,
     # ]
@@ -40,8 +40,15 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      # - name: Set up QEMU
-      #   uses: docker/setup-qemu-action@v2
+      - uses: buildjet/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Log in to GitHub Container Registry
