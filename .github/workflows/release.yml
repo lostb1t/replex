@@ -71,6 +71,5 @@ jobs:
           file: docker/Dockerfile.github
           platforms: linux/amd64,linux/arm64
           push: true 
-          target: replex
           tags: | 
             ghcr.io/sarendsen/replex:latest
