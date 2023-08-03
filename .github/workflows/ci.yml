@@ -63,7 +63,7 @@ jobs:
 
       - name: Build
         run: cargo build --release
-      - name: Buimd images and push
+      - name: Build images
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -71,6 +71,5 @@ jobs:
           # platforms: linux/amd64
           platforms: linux/arm64,linux/amd64
           push: true 
-          target: replex
           tags: | 
             ghcr.io/sarendsen/replex:${{ steps.docker-tag.outputs.tag }}
