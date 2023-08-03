@@ -3,7 +3,6 @@ use std::time::Duration;
 
 use crate::config::Config;
 use crate::models::*;
-use crate::proxy::PlexProxy;
 use crate::utils::*;
 use anyhow::Result;
 
@@ -45,7 +44,7 @@ pub struct PlexClient {
     // /// `X-Plex-Platform` header value.
     // ///
     // /// Platform name, e.g. iOS, macOS, etc.
-    pub x_plex_platform: String,
+    pub x_plex_platform: Option<String>,
 
     // /// `X-Plex-Device-Name` header value.
     // ///
@@ -213,8 +212,7 @@ impl PlexClient {
             .expect("Expected to have an plex client identifier header");
         let platform = params
             .clone()
-            .platform
-            .expect("Expected to have an plex platform header");
+            .platform;
 
         let mut headers = header::HeaderMap::new();
         headers.insert(
@@ -227,14 +225,15 @@ impl PlexClient {
                 .unwrap(),
         );
         headers.insert(
-            "X-Plex-Platform",
-            header::HeaderValue::from_str(platform.clone().as_str()).unwrap(),
-        );
-        headers.insert(
             "Accept",
             header::HeaderValue::from_static("application/json"),
         );
-
+        if let Some(i) = platform.clone() {
+            headers.insert(
+                "X-Plex-Platform",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
         Self {
             http_client: reqwest::Client::builder()
                 .default_headers(headers)
@@ -250,3 +249,24 @@ impl PlexClient {
         }
     }
 }
+
+
+// #[cfg(test)]
+// mod tests {
+//     use salvo::prelude::*;
+//     use salvo::test::{ResponseExt, TestClient};
+//     use crate::test_helpers::*;
+
+//     #[tokio::test]
+//     async fn test_hello_world() {
+//         let service = Service::new(super::route());
+
+//         let content = TestClient::get(format!("http://127.0.0.1:5800/{}", "hubs/promoted"))
+//             .send((&service))
+//             .await
+//             .take_string()
+//             .await
+//             .unwrap();
+//         assert_eq!(content, "Hello World");
+//     }
+// }

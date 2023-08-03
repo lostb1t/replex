@@ -1,15 +1,15 @@
 
-// use axum_test_helper::TestClient;
 // use httpmock::prelude::*;
 // use pretty_assertions::assert_eq;
 // extern crate jsonxf;
 // use replex::config::*;
-// use replex::proxy::*;
 // use replex::url::*;
 // use rstest::rstest;
 // use std::env;
 // use std::fs;
 // use std::net::SocketAddr;
+// use salvo::prelude::*;
+// use salvo::test::{ResponseExt, TestClient};
 
 // fn get_mock_server() -> MockServer {
 //     // let config: Config = Config::figment().extract().unwrap();
@@ -74,9 +74,20 @@
 //         format!("http://{}", mock_server.address().to_string()),
 //     );
 //     // let config: Config = Config::figment().extract().unwrap();
-//     let proxy = Proxy::default();
-//     let router = router(proxy);
-//     let client = TestClient::new(router);
+//     // let proxy = Proxy::default();
+//     // let router = router(proxy);
+//     // let client = TestClient::new(router);
+
+//     let service = Service::new(replex::route());
+
+//     let content = TestClient::get(format!("http://127.0.0.1:5800/{}", "hubs/promoted"))
+//         .send((&service))
+//         .await
+//         .take_string()
+//         .await
+//         .unwrap();
+//     assert_eq!(content, "Hello World");
+
 //     // let path = format!("http://{}{}", client.addr, path);
 //     let res = client
 //         .get(&path)

@@ -51,13 +51,14 @@ axum-test-helper = "0.3.0"
 httpmock = "0.6.7"
 jsonxf = "1.1.1"
 pretty_assertions = "1.3.0"
-rstest = "0.16.0"
+rstest = "0.18.1"
+#replex = { path = ".", features = ["test"] }
+
+#[features]
+#test = []
 
 #[replace]
 #"salvo-proxy:0.49.0" = { path = "../salvo/crates/proxy" }
-
-#[build]
-#rustflags = ["--cfg", "tokio_unstable"]
 
 [profile.release]
 debug = true
