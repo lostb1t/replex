@@ -128,6 +128,7 @@ impl PlexClient {
             path =
                 format!("{}?X-Plex-Container-Start={}", path, offset.unwrap());
         }
+
         if limit.is_some() {
             path = format!("{}&X-Plex-Container-Size={}", path, limit.unwrap());
         }
@@ -238,6 +239,7 @@ impl PlexClient {
             http_client: reqwest::Client::builder()
                 .default_headers(headers)
                 .gzip(true)
+                .timeout(Duration::from_secs(30))
                 .build()
                 .unwrap(),
             host: config.host.unwrap(),

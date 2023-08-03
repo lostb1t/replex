@@ -1,3 +1,5 @@
+use crate::{config::Config, models::*, plex_client::PlexClient, utils::*};
+use async_recursion::async_recursion;
 use async_trait::async_trait;
 use futures_util::{
     future::{self, join_all, LocalBoxFuture},
@@ -5,9 +7,6 @@ use futures_util::{
 };
 use itertools::Itertools;
 use std::sync::Arc;
-use crate::{config::Config, models::*, plex_client::PlexClient, utils::*};
-use async_recursion::async_recursion;
-
 
 #[async_trait]
 pub trait Transform: Send + Sync + 'static {
@@ -229,6 +228,39 @@ impl TransformBuilder {
             .await
         }
 
+        // let mut set = tokio::task::JoinSet::new();
+        // for t in self.transforms.clone() {
+        //     for item in container.media_container.children_mut() {
+        //             set.spawn(t.transform_metadata(
+        //                 item,
+        //                 self.plex_client.clone(),
+        //                 self.options.clone(),
+        //             )
+        //         );
+        //     };
+        //     // let futures =
+        //     //     container.media_container.children_mut().iter_mut().map(
+        //     //         |x: &mut MetaData| {
+        //     //             t.transform_metadata(
+        //     //                 x,
+        //     //                 self.plex_client.clone(),
+        //     //                 self.options.clone(),
+        //     //             )
+        //     //         },
+        //     //     );
+
+        //     //future::join_all(futures).await;
+        //     // future::try_join_all(futures).await;
+
+        //     // dont use join as it needs ti be executed in order
+        //     t.transform_mediacontainer(
+        //         &mut container.media_container,
+        //         self.plex_client.clone(),
+        //         self.options.clone(),
+        //     )
+        //     .await
+        // }
+
         // filter behind transform as transform can load in additional data
         let children = container.media_container.children_mut();
         let new_children = self.apply_to_metadata(children).await;
@@ -290,13 +322,18 @@ impl Filter for CollectionHubPermissionFilter {
             .media_container
             .children()
             .iter()
-            .map(|c| {
-                c.rating_key.clone().unwrap()
-            })
+            .map(|c| c.rating_key.clone().unwrap())
             .collect();
 
         custom_collections_ids.contains(
-            &item.hub_identifier.clone().unwrap().split('.').last().unwrap().to_owned()
+            &item
+                .hub_identifier
+                .clone()
+                .unwrap()
+                .split('.')
+                .last()
+                .unwrap()
+                .to_owned(),
         )
     }
 }
@@ -369,17 +406,15 @@ impl Transform for HubMixTransform {
         plex_client: PlexClient,
         options: PlexParams,
     ) {
-        // dbg!("yes");
-        // return;
         let mut new_hubs: Vec<MetaData> = vec![];
+        // let mut library_section_id: Vec<Option<u32>> = vec![]; //librarySectionID
         for mut hub in item.children_mut() {
             let p = new_hubs.iter().position(|v| v.title == hub.title);
 
             if hub.r#type != "clip" {
                 hub.r#type = "mixed".to_string();
             }
-            // dbg!(&new_hubs.len());
-
+            //hub.library_section_id.push(hub.children()[0].library_section_id);
             match p {
                 Some(v) => {
                     new_hubs[v].key = merge_children_keys(
@@ -403,7 +438,7 @@ impl Transform for HubMixTransform {
 }
 
 #[derive(Default, Debug)]
-pub struct LibraryMixTransform {
+pub struct LibraryMixUnwatchedTransform {
     pub collection_ids: Vec<u32>,
     pub offset: Option<i32>,
     pub limit: Option<i32>,
@@ -411,7 +446,7 @@ pub struct LibraryMixTransform {
 }
 
 #[async_trait]
-impl Transform for LibraryMixTransform {
+impl Transform for LibraryMixUnwatchedTransform {
     async fn transform_mediacontainer(
         &self,
         item: &mut MediaContainer,
@@ -419,8 +454,6 @@ impl Transform for LibraryMixTransform {
         options: PlexParams,
     ) {
         let mut children: Vec<MetaData> = vec![];
-        let mut total_size: i32 = 0;
-        // let reversed: Vec<u32> = collection_ids.iter().copied().rev().collect();
         for id in self.collection_ids.clone() {
             let mut c = plex_client
                 .get_collection_children(
@@ -430,7 +463,7 @@ impl Transform for LibraryMixTransform {
                 )
                 .await
                 .unwrap();
-            total_size += c.media_container.total_size.unwrap();
+            // total_size += c.media_container.total_size.unwrap();
             match children.is_empty() {
                 false => {
                     children = children
@@ -442,9 +475,15 @@ impl Transform for LibraryMixTransform {
             }
         }
 
+        // let filter = WatchedFilter::default();
+        let unwatched: Vec<MetaData> = children
+            .into_iter()
+            .filter(|x| !x.is_watched())
+            .collect();
+
         // always metadata library
-        item.metadata = children;
-        item.total_size = Some(total_size);
+        item.total_size = Some(unwatched.len() as i32);
+        item.metadata = unwatched;
     }
 }
 
@@ -503,7 +542,6 @@ impl Filter for WatchedFilter {
     }
 }
 
-
 #[derive(Default, Debug)]
 pub struct HubSectionDirectoryTransform;
 
@@ -523,7 +561,6 @@ impl Transform for HubSectionDirectoryTransform {
         }
     }
 }
-
 
 // #[derive(Default)]
 // pub struct WatchedFilter;
