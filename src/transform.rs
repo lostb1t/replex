@@ -406,6 +406,7 @@ impl Transform for HubMixTransform {
         plex_client: PlexClient,
         options: PlexParams,
     ) {
+        let config: Config = Config::figment().extract().unwrap();
         let mut new_hubs: Vec<MetaData> = vec![];
         // let mut library_section_id: Vec<Option<u32>> = vec![]; //librarySectionID
         for mut hub in item.children_mut() {
@@ -415,6 +416,24 @@ impl Transform for HubMixTransform {
                 hub.r#type = "mixed".to_string();
             }
             //hub.library_section_id.push(hub.children()[0].library_section_id);
+            // let unwatched = hub.children().iter_mut().filter_map(|x| {
+            //     async move { 
+            //         if WatchedFilter::default().filter_metadata(
+            //             x,
+            //             plex_client,
+            //             options,
+            //         ).await {
+            //             x
+            //         } else {
+            //             None
+            //         }
+            //     }
+            // }).collect();
+            let mut children = hub.children();
+            if !config.include_watched {
+                children.retain(|x| !x.is_watched());
+            }
+
             match p {
                 Some(v) => {
                     new_hubs[v].key = merge_children_keys(
@@ -424,7 +443,7 @@ impl Transform for HubMixTransform {
                     let c = new_hubs[v].children();
                     new_hubs[v].set_children(
                         c.into_iter()
-                            .interleave(hub.children())
+                            .interleave(children)
                             .collect::<Vec<MetaData>>(),
                     );
                 }
@@ -438,7 +457,7 @@ impl Transform for HubMixTransform {
 }
 
 #[derive(Default, Debug)]
-pub struct LibraryMixUnwatchedTransform {
+pub struct LibraryMixTransform {
     pub collection_ids: Vec<u32>,
     pub offset: Option<i32>,
     pub limit: Option<i32>,
@@ -446,14 +465,16 @@ pub struct LibraryMixUnwatchedTransform {
 }
 
 #[async_trait]
-impl Transform for LibraryMixUnwatchedTransform {
+impl Transform for LibraryMixTransform {
     async fn transform_mediacontainer(
         &self,
         item: &mut MediaContainer,
         plex_client: PlexClient,
         options: PlexParams,
     ) {
+        let config: Config = Config::figment().extract().unwrap();
         let mut children: Vec<MetaData> = vec![];
+
         for id in self.collection_ids.clone() {
             let mut c = plex_client
                 .get_collection_children(
@@ -463,6 +484,9 @@ impl Transform for LibraryMixUnwatchedTransform {
                 )
                 .await
                 .unwrap();
+            if !config.include_watched {
+                c.media_container.children_mut().retain(|x| !x.is_watched());
+            }
             // total_size += c.media_container.total_size.unwrap();
             match children.is_empty() {
                 false => {
@@ -475,15 +499,9 @@ impl Transform for LibraryMixUnwatchedTransform {
             }
         }
 
-        // let filter = WatchedFilter::default();
-        let unwatched: Vec<MetaData> = children
-            .into_iter()
-            .filter(|x| !x.is_watched())
-            .collect();
-
         // always metadata library
-        item.total_size = Some(unwatched.len() as i32);
-        item.metadata = unwatched;
+        item.total_size = Some(children.len() as i32);
+        item.metadata = children;
     }
 }
 
@@ -592,5 +610,3 @@ impl Transform for HubSectionDirectoryTransform {
 //         self
 //     }
 // }
-
-

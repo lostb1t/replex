@@ -135,7 +135,6 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
             limit: params.clone().count.unwrap(),
         })
         .with_filter(CollectionHubPermissionFilter)
-        .with_filter(WatchedFilter)
         .apply_to(&mut container)
         .await;
     res.render(container);
@@ -200,7 +199,7 @@ pub async fn get_collections_children(
 
     // filtering of watched happens in the transform
     TransformBuilder::new(plex_client, params.clone())
-        .with_transform(LibraryMixUnwatchedTransform {
+        .with_transform(LibraryMixTransform {
             collection_ids,
             offset,
             limit,
