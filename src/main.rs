@@ -10,7 +10,7 @@ use replex::config::Config;
 use replex::logging::*;
 use replex::models::*;
 use replex::plex_client::*;
-use replex::proxy::PlexProxy;
+// use replex::proxy::PlexProxy;
 use replex::transform::*;
 use replex::url::*;
 use replex::utils::*;
@@ -18,6 +18,7 @@ use salvo::cache::{Cache, MemoryStore};
 use salvo::compression::Compression;
 use salvo::cors::Cors;
 use salvo::prelude::*;
+use salvo::proxy::Proxy as SalvoProxy;
 use std::time::Duration;
 use tonic::metadata::MetadataMap;
 use tracing_subscriber::layer::SubscriberExt;
@@ -35,45 +36,50 @@ pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
 
 #[tokio::main]
 async fn main() {
+    // console_subscriber::init();
+
     let config: Config = Config::figment().extract().unwrap();
     if config.host.is_none() {
         tracing::error!("REPLEX_HOST is required. Exiting");
         return;
     }
 
-    // TODO: rework this a bit: https://docs.rs/tracing-subscriber/latest/tracing_subscriber/layer/#runtime-configuration-with-layers
+    // TODO: rework this a bit: https://github.com/Pothulapati/tracing/blob/81d333c1ff7c74f64f26ff309cfdd831cb363241/examples/examples/toggle-layers.rs
     let fmt_layer = tracing_subscriber::fmt::layer();
+    let console_layer = match config.enable_console {
+        true => Some(console_subscriber::spawn()),
+        false => None,
+    };
+
+    let otlp_layer = if config.newrelic_api_key.is_some() {
+        let mut map = MetadataMap::with_capacity(3);
+        map.insert(
+            "api-key",
+            config.newrelic_api_key.unwrap().parse().unwrap(),
+        );
+        let tracer = opentelemetry_otlp::new_pipeline()
+            .tracing()
+            .with_exporter(
+                opentelemetry_otlp::new_exporter()
+                    .tonic()
+                    .with_tls_config(Default::default())
+                    .with_endpoint(
+                        "https://otlp.eu01.nr-data.net:443/v1/traces",
+                    )
+                    .with_metadata(map)
+                    .with_timeout(Duration::from_secs(3)),
+            )
+            .install_batch(opentelemetry::runtime::Tokio)
+            .unwrap();
+        Some(tracing_opentelemetry::layer().with_tracer(tracer))
+    } else {
+        None
+    };
+
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::from_default_env())
-        .with({
-            let otlp;
-            if config.newrelic_api_key.is_some() {
-                let mut map = MetadataMap::with_capacity(3);
-                map.insert(
-                    "api-key",
-                    config.newrelic_api_key.unwrap().parse().unwrap(),
-                );
-                let tracer = opentelemetry_otlp::new_pipeline()
-                    .tracing()
-                    .with_exporter(
-                        opentelemetry_otlp::new_exporter()
-                            .tonic()
-                            .with_tls_config(Default::default())
-                            .with_endpoint(
-                                "https://otlp.eu01.nr-data.net:443/v1/traces",
-                            )
-                            .with_metadata(map)
-                            .with_timeout(Duration::from_secs(3)),
-                    )
-                    .install_batch(opentelemetry::runtime::Tokio)
-                    .unwrap();
-                otlp = tracing_opentelemetry::layer().with_tracer(tracer);
-            } else {
-                let tracer = stdout::new_pipeline().install_simple();
-                otlp = tracing_opentelemetry::layer().with_tracer(tracer);
-            }
-            otlp
-        })
+        .with(console_layer)
+        .with(otlp_layer)
         .with(fmt_layer)
         .init();
 
@@ -84,13 +90,13 @@ async fn main() {
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
-                .hoop(default_cache())
+                // .hoop(default_cache())
                 .get(get_hubs_promoted),
         )
         .push(
             Router::new()
                 .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
-                .hoop(default_cache())
+                // .hoop(default_cache())
                 .get(get_hubs_sections),
         )
         .push(Router::new().path("/test").get(test))
@@ -102,7 +108,7 @@ async fn main() {
         )
         .push(
             Router::with_path("<**rest>")
-                .handle(PlexProxy::new(config.host.unwrap())),
+                .handle(SalvoProxy::new(config.host.unwrap())),
         );
 
     if config.ssl_enable && config.ssl_domain.is_some() {
@@ -236,23 +242,11 @@ async fn get_collections_children(
         .split(',')
         .map(|v| v.parse().unwrap())
         .collect();
-    let collection_ids_len: i32 = collection_ids.len() as i32;
     let plex_client = PlexClient::new(req, params.clone());
 
-    let mut offset: Option<i32> = None;
-    let mut original_offset: Option<i32> = None;
-    if let Some(i) = params.clone().container_start {
-        offset = Some(i);
-        original_offset = offset;
-        offset = Some(offset.unwrap() / collection_ids_len);
-    }
-    let mut limit: Option<i32> = None;
-    let mut original_limit: Option<i32> = None;
-    if let Some(i) = params.clone().container_size {
-        limit = Some(i);
-        original_limit = limit;
-        limit = Some(limit.unwrap() / collection_ids_len);
-    }
+    // We dont listen to pagination. We have a hard max of 250 per collection
+    let limit = Some(250); // plex its max
+    let offset = Some(0);
 
     // create a stub
     let mut container: MediaContainerWrapper<MediaContainer> =
@@ -260,14 +254,15 @@ async fn get_collections_children(
     container.content_type = get_content_type_from_headers(req.headers_mut());
     let size = container.media_container.children().len();
     container.media_container.size = Some(size.try_into().unwrap());
-    container.media_container.offset = original_offset;
+    container.media_container.offset = offset;
+
+    // filtering of watched happens in the transform
     TransformBuilder::new(plex_client, params.clone())
-        .with_transform(LibraryMixTransform {
+        .with_transform(LibraryMixUnwatchedTransform {
             collection_ids,
             offset,
             limit,
         })
-        .with_filter(WatchedFilter)
         .apply_to(&mut container)
         .await;
     res.render(container); // TODO: FIx XML

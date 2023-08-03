@@ -1,0 +1,5 @@
+[run]
+rustflags = ["--cfg", "tokio_unstable"]
+
+[build]
+rustflags = ["--cfg", "tokio_unstable"]

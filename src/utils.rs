@@ -243,6 +243,6 @@ pub fn merge_children_keys(mut key_left: String, mut key_right: String) -> Strin
 
     format!(
         "/replex/library/collections/{},{}/children",
-        key_right, key_left
+        key_left, key_right // order is important. As thhis order is used to generated the library collections
     )
 }
