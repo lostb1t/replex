@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM --platform=linux/amd64 debian:bullseye-slim
 RUN apt update \
     && apt install -y openssl ca-certificates \
     && apt clean \
