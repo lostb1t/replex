@@ -199,11 +199,7 @@ pub async fn get_collections_children(
 
     // filtering of watched happens in the transform
     TransformBuilder::new(plex_client, params.clone())
-<<<<<<< HEAD
         .with_transform(LibraryMixTransform {
-=======
-        .with_transform(LibraryMixUnwatchedTransform {
->>>>>>> d2c34f3 (Rework tests)
             collection_ids,
             offset,
             limit,

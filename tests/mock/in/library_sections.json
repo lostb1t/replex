@@ -1,0 +1,101 @@
+{
+    "MediaContainer": {
+        "size": 2,
+        "allowSync": false,
+        "title1": "Plex Library",
+        "Directory": [
+            {
+                "allowSync": false,
+                "art": "/:/resources/movie-fanart.jpg",
+                "composite": "/library/sections/1/composite/1691062006",
+                "filters": true,
+                "refreshing": false,
+                "thumb": "/:/resources/movie.png",
+                "key": "1",
+                "type": "movie",
+                "title": "Movies",
+                "agent": "tv.plex.agents.movie",
+                "scanner": "Plex Movie",
+                "language": "en-US",
+                "uuid": "50e9259e-debb-4805-b15f-d0be38a6c669",
+                "updatedAt": 1691062062,
+                "createdAt": 1667685029,
+                "scannedAt": 1691062006,
+                "content": true,
+                "directory": true,
+                "contentChangedAt": 158918358944,
+                "hidden": 0,
+                "Location": [
+                    {
+                        "id": 34,
+                        "path": "/mnt/ceph/media/movies-foreign"
+                    },
+                    {
+                        "id": 35,
+                        "path": "/mnt/unionfs/Media/Movies-Foreign"
+                    },
+                    {
+                        "id": 31,
+                        "path": "/mnt/unionfs/Media/Movies-4K"
+                    },
+                    {
+                        "id": 29,
+                        "path": "/mnt/ceph/media/movies-4k"
+                    },
+                    {
+                        "id": 16,
+                        "path": "/mnt/ceph/media/movies"
+                    },
+                    {
+                        "id": 1,
+                        "path": "/mnt/unionfs/Media/Movies"
+                    }
+                ]
+            },
+            {
+                "allowSync": false,
+                "art": "/:/resources/show-fanart.jpg",
+                "composite": "/library/sections/4/composite/1691062468",
+                "filters": true,
+                "refreshing": false,
+                "thumb": "/:/resources/show.png",
+                "key": "4",
+                "type": "show",
+                "title": "Shows",
+                "agent": "tv.plex.agents.series",
+                "scanner": "Plex TV Series",
+                "language": "en-US",
+                "uuid": "80065a44-7df3-402d-a7de-ece85c71cb71",
+                "updatedAt": 1691062534,
+                "createdAt": 1667685163,
+                "scannedAt": 1691062468,
+                "content": true,
+                "directory": true,
+                "contentChangedAt": 158918359836,
+                "hidden": 0,
+                "Location": [
+                    {
+                        "id": 36,
+                        "path": "/mnt/ceph/media/tv-non-english"
+                    },
+                    {
+                        "id": 32,
+                        "path": "/mnt/ceph/media/tv-4k"
+                    },
+                    {
+                        "id": 33,
+                        "path": "/mnt/unionfs/Media/TV-4K"
+                    },
+                    {
+                        "id": 23,
+                        "path": "/mnt/ceph/media/tv"
+                    },
+                    {
+                        "id": 4,
+                        "path": "/mnt/unionfs/Media/TV"
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -64,10 +64,14 @@ pub struct PlexClient {
 }
 
 impl PlexClient {
+    pub fn build_uri(&self, path: String) -> String {
+        format!("{}{}", self.host.clone(), path)
+    }
+
     // TODO: Handle 404s/500 etc
     // TODO: Map reqwest response and error to salvo
     pub async fn get(&self, path: String) -> Result<reqwest::Response, Error> {
-        let uri = format!("{}{}", self.host, path);
+        let uri = self.build_uri(path).clone();
         let res = self
             .http_client
             .get(uri)
@@ -150,6 +154,19 @@ impl PlexClient {
         Ok(container)
     }
 
+    pub async fn get_section_labels(
+        &self,
+        id: i32,
+    ) -> Result<MediaContainerWrapper<MediaContainer>> {
+        let resp = self
+            .get(format!("/library/sections/{}/label", id))
+            .await
+            .unwrap();
+        let container: MediaContainerWrapper<MediaContainer> =
+            from_reqwest_response(resp).await.unwrap();
+        Ok(container)
+    }
+
     pub async fn get_item_by_key(
         self,
         key: String,
@@ -166,6 +183,22 @@ impl PlexClient {
         name: String,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
         let cache_key = self.generate_cache_key(name.clone());
+        let cached = self.get_cache(&cache_key).await.unwrap();
+
+        if cached.is_some() {
+            return Ok(cached.unwrap());
+        }
+        let r = f.await.unwrap();
+        self.insert_cache(cache_key, r.clone()).await;
+        Ok(r)
+    }
+
+    pub async fn get_cached_anonymous(
+        self,
+        f: impl Future<Output = Result<MediaContainerWrapper<MediaContainer>>>,
+        name: String,
+    ) -> Result<MediaContainerWrapper<MediaContainer>> {
+        let cache_key = name;
         let cached = self.get_cache(&cache_key).await.unwrap();
 
         if cached.is_some() {
@@ -248,6 +281,38 @@ impl PlexClient {
             cache: CACHE.clone(),
         }
     }
+    
+    pub fn dummy() -> Self {
+        let config: Config = Config::figment().extract().unwrap();
+        let mut headers = header::HeaderMap::new();
+        headers.insert(
+            "X-Plex-Token",
+            header::HeaderValue::from_str("DUMMY").unwrap(),
+        );
+        headers.insert(
+            "X-Plex-Client-Identifier",
+            header::HeaderValue::from_str("DUMMY")
+                .unwrap(),
+        );
+        headers.insert(
+            "Accept",
+            header::HeaderValue::from_static("application/json"),
+        );
+        Self {
+            http_client: reqwest::Client::builder()
+                .default_headers(headers)
+                .gzip(true)
+                .timeout(Duration::from_secs(30))
+                .build()
+                .unwrap(),
+            host: config.host.unwrap(),
+            x_plex_token: "DUMMY".to_string(),
+            x_plex_client_identifier: "DUMMY".to_string(),
+            x_plex_platform: None,
+            cache: CACHE.clone(),
+        }        
+    }
+
 }
 
 

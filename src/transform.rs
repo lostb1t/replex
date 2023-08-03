@@ -350,6 +350,10 @@ impl Transform for HubStyleTransform {
         options: PlexParams,
     ) {
         if item.is_collection_hub() {
+            // let plexherokey = plexherokey(get_collection_id_from_child_path(
+            //     item.key.clone(),
+            // ), plex_client);
+
             let mut collection_details = plex_client
                 .clone()
                 .get_cached(
@@ -610,5 +614,3 @@ impl Transform for HubSectionDirectoryTransform {
 //         self
 //     }
 // }
-
-

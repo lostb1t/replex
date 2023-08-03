@@ -1,4 +1,7 @@
 use httpmock::prelude::*;
+
+// simulate_standalone_server();
+
 pub(crate) fn get_mock_server() -> MockServer {
     // let config: Config = Config::figment().extract().unwrap();
     // dbg!(config);
@@ -43,6 +46,14 @@ pub(crate) fn get_mock_server() -> MockServer {
         then.status(200)
             .header("content-type", "application/json")
             .body_from_file("tests/mock/in/hubs_promoted_6_7.json");
+    });
+
+    let _ = mock_server.mock(|when, then| {
+        when.method(GET)
+            .path("/library/sections");
+        then.status(200)
+            .header("content-type", "application/json")
+            .body_from_file("tests/mock/in/library_sections.json");
     });
 
     return mock_server;

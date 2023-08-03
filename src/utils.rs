@@ -22,7 +22,7 @@ use salvo::{
 };
 
 use crate::models::*;
-
+use crate::plex_client::PlexClient;
 
 pub fn get_collection_id_from_child_path(path: String) -> i32 {
     let mut path = path.replace("/library/collections/", "");
@@ -30,7 +30,11 @@ pub fn get_collection_id_from_child_path(path: String) -> i32 {
     path.parse().unwrap()
 }
 
-pub fn add_query_param_salvo(req: &mut SalvoRequest, param: String, value: String) {
+pub fn add_query_param_salvo(
+    req: &mut SalvoRequest,
+    param: String,
+    value: String,
+) {
     let mut uri = pathetic::Uri::default()
         .with_path(req.uri_mut().path())
         .with_query(req.uri_mut().query());
@@ -46,19 +50,15 @@ pub fn add_query_param_salvo(req: &mut SalvoRequest, param: String, value: Strin
 }
 
 #[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    EnumString,
-    EnumDisplay,
-    Serialize,
-    Deserialize,
+    Debug, Clone, PartialEq, Eq, EnumString, EnumDisplay, Serialize, Deserialize,
 )]
 pub enum ContentType {
     #[strum(serialize = "application/json", serialize = "text/json")]
     Json,
-    #[strum(serialize = "text/xml;charset=utf-8", serialize = "application/xml")]
+    #[strum(
+        serialize = "text/xml;charset=utf-8",
+        serialize = "application/xml"
+    )]
     Xml,
 }
 
@@ -68,8 +68,11 @@ impl Default for ContentType {
     }
 }
 
-pub fn get_content_type_from_headers(headers: &HeaderMap<HeaderValue>) -> ContentType {
-    let default_header_value = HeaderValue::from_static("text/xml;charset=utf-8");
+pub fn get_content_type_from_headers(
+    headers: &HeaderMap<HeaderValue>,
+) -> ContentType {
+    let default_header_value =
+        HeaderValue::from_static("text/xml;charset=utf-8");
     let accept_header = headers.get("accept");
     let content_type_header = headers.get("content-type");
 
@@ -102,7 +105,6 @@ pub fn mime_to_content_type(mime: Mime) -> ContentType {
         _ => ContentType::Xml,
     }
 }
-
 
 pub fn from_string(
     string: String,
@@ -139,7 +141,8 @@ pub async fn from_reqwest_response(
         Ok(result) => result,
         Err(error) => {
             error!("Problem deserializing: {:?}", error);
-            let container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
+            let container: MediaContainerWrapper<MediaContainer> =
+                MediaContainerWrapper::default();
             container // TOOD: Handle this higher up
         }
     };
@@ -155,7 +158,8 @@ pub async fn from_hyper_response(
         Ok(result) => result,
         Err(error) => {
             error!("Problem deserializing: {:?}", error);
-            let container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
+            let container: MediaContainerWrapper<MediaContainer> =
+                MediaContainerWrapper::default();
             container // TOOD: Handle this higher up
         }
     };
@@ -172,14 +176,15 @@ pub async fn from_salvo_response(
         Ok(result) => result,
         Err(error) => {
             error!("Problem deserializing: {:?}", error);
-            let container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
+            let container: MediaContainerWrapper<MediaContainer> =
+                MediaContainerWrapper::default();
             container // TOOD: Handle this higher up
         }
     };
     Ok(result)
 }
 
-pub fn from_bytes(  
+pub fn from_bytes(
     bytes: bytes::Bytes,
     content_type: ContentType,
 ) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
@@ -233,7 +238,10 @@ pub async fn to_string(
 }
 
 // TODO: Merge hub keys when mixed
-pub fn merge_children_keys(mut key_left: String, mut key_right: String) -> String {
+pub fn merge_children_keys(
+    mut key_left: String,
+    mut key_right: String,
+) -> String {
     key_left = key_left.replace("/hubs/library/collections/", "");
     key_left = key_left.replace("/library/collections/", "");
     key_left = key_left.replace("/children", "");
@@ -243,6 +251,7 @@ pub fn merge_children_keys(mut key_left: String, mut key_right: String) -> Strin
 
     format!(
         "/replex/library/collections/{},{}/children",
-        key_left, key_right // order is important. As thhis order is used to generated the library collections
+        key_left,
+        key_right // order is important. As thhis order is used to generated the library collections
     )
 }
