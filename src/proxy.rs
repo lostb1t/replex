@@ -180,29 +180,28 @@ where
             let response_upgrade_type = get_upgrade_type(response.headers());
 
             if request_upgrade_type.as_deref() == response_upgrade_type {
-                return Err(Error::other("websockets disabled"));
-                // let mut response_upgraded = response
-                //     .upgrade()
-                //     .await
-                //     .map_err(|e| Error::other(format!("response does not have an upgrade extension. {}", e)))?;
-                // if let Some(request_upgraded) = request_upgraded {
-                //     tokio::spawn(async move {
-                //         match request_upgraded.await {
-                //             Ok(request_upgraded) => {
-                //                 let mut request_upgraded = TokioIo::new(request_upgraded);
-                //                 if let Err(e) = copy_bidirectional(&mut response_upgraded, &mut request_upgraded).await
-                //                 {
-                //                     tracing::error!(error = ?e, "coping between upgraded connections failed");
-                //                 }
-                //             }
-                //             Err(e) => {
-                //                 tracing::error!(error = ?e, "upgrade request failed");
-                //             }
-                //         }
-                //     });
-                // } else {
-                //     return Err(Error::other("request does not have an upgrade extension"));
-                // }
+                let mut response_upgraded = response
+                    .upgrade()
+                    .await
+                    .map_err(|e| Error::other(format!("response does not have an upgrade extension. {}", e)))?;
+                if let Some(request_upgraded) = request_upgraded {
+                    tokio::spawn(async move {
+                        match request_upgraded.await {
+                            Ok(request_upgraded) => {
+                                let mut request_upgraded = TokioIo::new(request_upgraded);
+                                if let Err(e) = copy_bidirectional(&mut response_upgraded, &mut request_upgraded).await
+                                {
+                                    tracing::error!(error = ?e, "coping between upgraded connections failed");
+                                }
+                            }
+                            Err(e) => {
+                                tracing::error!(error = ?e, "upgrade request failed");
+                            }
+                        }
+                    });
+                } else {
+                    return Err(Error::other("request does not have an upgrade extension"));
+                }
             } else {
                 return Err(Error::other("upgrade type mismatch"));
             }

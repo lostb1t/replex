@@ -37,26 +37,26 @@ pub fn route() -> Router {
         .hoop(Logger::new())
         .hoop(Timeout::new(Duration::from_secs(60)))
         .hoop(Compression::new().enable_gzip(CompressionLevel::Fastest))
-        .push(
-            Router::new()
-                .path(PLEX_HUBS_PROMOTED)
-                .hoop(default_cache())
-                .get(get_hubs_promoted),
-        )
-        .push(
-            Router::new()
-                .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
-                .hoop(default_cache())
-                .get(get_hubs_sections),
-        )
-        .push(Router::new().path("/test").get(test))
-        .push(Router::new().path("/hello").get(hello))
-        .push(
-            Router::new()
-                .path("/replex/library/collections/<ids>/children")
-                .hoop(default_cache())
-                .get(get_collections_children),
-        )
+        // .push(
+        //     Router::new()
+        //         .path(PLEX_HUBS_PROMOTED)
+        //         .hoop(default_cache())
+        //         .get(get_hubs_promoted),
+        // )
+        // .push(
+        //     Router::new()
+        //         .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
+        //         .hoop(default_cache())
+        //         .get(get_hubs_sections),
+        // )
+        // .push(Router::new().path("/test").get(test))
+        // .push(Router::new().path("/hello").get(hello))
+        // .push(
+        //     Router::new()
+        //         .path("/replex/library/collections/<ids>/children")
+        //         .hoop(default_cache())
+        //         .get(get_collections_children),
+        // )
         .push(
             Router::with_path("<**rest>")
                 .handle(TestProxy::new(config.host.unwrap())),

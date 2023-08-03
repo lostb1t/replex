@@ -2830,6 +2830,7 @@ dependencies = [
  "strum",
  "strum_macros",
  "tokio",
+ "tokio-io-timeout",
  "tonic 0.8.3",
  "tracing",
  "tracing-opentelemetry",
