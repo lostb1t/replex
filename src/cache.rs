@@ -90,8 +90,10 @@ impl CacheIssuer for RequestIssuer {
             // TODO: Implement
             key.push('|');
             key.push_str(req.header("X-Plex-Token").unwrap_or_default());
-            key.push('|');
-            key.push_str(req.first_accept().unwrap().to_string().as_str());
+            if let Some(i) = req.first_accept() {
+                key.push('|');
+                key.push_str(i.to_string().as_str());
+            }
         }
         Some(key)
     }

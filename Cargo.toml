@@ -24,7 +24,6 @@ bytes = "1.4.0"
 mime = "0.3.16"
 async-trait = "0.1"
 futures-util = "0.3.26"
-env_logger = "0.10.0"
 opentelemetry = { version = "0.19.0", features = [ "trace", "rt-tokio" ] }
 opentelemetry-otlp = { version = "0.12.0", features = ["reqwest-client", "reqwest-rustls", "http-proto", "tls"] }
 tracing-opentelemetry = "0.19.0"
@@ -34,11 +33,8 @@ serde_with = { version = "3.0", features = ["json"] }
 futures = "0.3.28"
 figment = { version = "0.10.10", features = ["env"] }
 salvo = { version = "0.49.1", features = ["websocket", "proxy", "cors", "acme", "cache", "timeout", "otel", "compression"] }
-hyper-reverse-proxy = { git = "https://github.com/felipenoris/hyper-reverse-proxy.git"}
-hyper-trust-dns = "0.5.0"
 reqwest = { version = "0.11", features = ["gzip", "json"] }
 http-body-util = "0.1.0-rc.3"
-#bincode = "1.3.3"
 once_cell = "1.18.0"
 moka = { version = "0.11.2", features = ["future"] }
 tonic = {version = "0.8.0", features = ["tls", "tls-roots"]}
@@ -51,13 +47,14 @@ axum-test-helper = "0.3.0"
 httpmock = "0.6.7"
 jsonxf = "1.1.1"
 pretty_assertions = "1.3.0"
-rstest = "0.16.0"
+rstest = "0.18.1"
+#replex = { path = ".", features = ["test"] }
+
+#[features]
+#test = []
 
 #[replace]
 #"salvo-proxy:0.49.0" = { path = "../salvo/crates/proxy" }
-
-#[build]
-#rustflags = ["--cfg", "tokio_unstable"]
 
 [profile.release]
 debug = true
