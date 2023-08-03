@@ -29,7 +29,14 @@ jobs:
   #       shell: bash
 
   release:
-    name: Tag and release latest version
+    name: release latest version
+    # TODO: implement marrix https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
+    # strategy:
+    #   fail-fast: false
+    #   matrix:
+    #     platform:
+    #       - linux/amd64
+    #       - linux/arm64
     runs-on: ubuntu-20.04
     # needs: [
     #    test,

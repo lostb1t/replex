@@ -90,13 +90,13 @@ async fn main() {
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
-                // .hoop(default_cache())
+                .hoop(default_cache())
                 .get(get_hubs_promoted),
         )
         .push(
             Router::new()
                 .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
-                // .hoop(default_cache())
+                .hoop(default_cache())
                 .get(get_hubs_sections),
         )
         .push(Router::new().path("/test").get(test))
