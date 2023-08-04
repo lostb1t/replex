@@ -16,6 +16,7 @@ use salvo::cors::Cors;
 use salvo::prelude::*;
 use salvo::proxy::Proxy as SalvoProxy;
 use std::time::Duration;
+use tokio::task::JoinSet;
 use tonic::metadata::MetadataMap;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::prelude::*;
@@ -91,18 +92,30 @@ async fn test(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
             Some("com.plexapp.plugins.library".to_string());
         return res.render(container);
     }
-    
+
     // first directory, load everything here because we wanna reemiiiixxx
 
-    for id in params.clone().content_directory_id.unwrap() {
-        add_query_param_salvo(
-            req,
-            "contentDirectoryID".to_string(),
-            id,
-        );
-        let u = plex_client.request(req).await.unwrap();
-        let mut c: MediaContainerWrapper<MediaContainer> =
-            from_reqwest_response(u).await.unwrap();
+
+    let mut set = JoinSet::new();
+    for id in params.clone().pinned_content_directory_id.unwrap() {
+        add_query_param_salvo(req, "contentDirectoryID".to_string(), id);
+        set.spawn({
+            dbg!("run");
+            let u = plex_client.request(req).await.unwrap();
+            from_reqwest_response(u)
+        });
+        // let mut c: MediaContainerWrapper<MediaContainer> =
+        //     from_reqwest_response(u).await.unwrap();
+        // container.media_container.hub.append(c.media_container.children_mut());
+    }
+
+    let mut container: MediaContainerWrapper<MediaContainer> =
+        MediaContainerWrapper::default();
+    container.content_type =
+            get_content_type_from_headers(req.headers_mut());
+
+    while let Some(res) = set.join_next().await {
+        container.media_container.hub.append(res.unwrap().unwrap().media_container.children_mut());
     }
 
     // Hack, as the list could be smaller when removing watched items. So we request more.
@@ -114,9 +127,9 @@ async fn test(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
         );
     }
 
-    let upstream_res = plex_client.request(req).await.unwrap();
-    let mut container: MediaContainerWrapper<MediaContainer> =
-        from_reqwest_response(upstream_res).await.unwrap();
+    // let upstream_res = plex_client.request(req).await.unwrap();
+    // let mut container: MediaContainerWrapper<MediaContainer> =
+    //     from_reqwest_response(upstream_res).await.unwrap();
 
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubStyleTransform)
@@ -134,9 +147,6 @@ async fn hello(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
     return res.render("Hello world!");
 }
 
-// TODO: Seems like loading in invidual sections of the hubs is faster then all in one endpoint
-// load in all hubs with indivudial endpoints and merge them. 
-// Another pro point is that we can async these calls. So even faster.
 #[handler]
 pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     let params: PlexParams = req.extract().await.unwrap();
@@ -165,7 +175,7 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
             Some("com.plexapp.plugins.library".to_string());
         return res.render(container);
     }
-    
+
     // first directory, load everything here because we wanna reemiiiixxx
     add_query_param_salvo(
         req,
