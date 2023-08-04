@@ -1,2 +1,3 @@
 branches: ["main"]
 tagFormat: ${version}
+plugins: ["@semantic-release/github"]

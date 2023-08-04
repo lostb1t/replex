@@ -47,7 +47,7 @@ jobs:
 
   release:
     if: needs.get-next-version.outputs.new-release-published == 'true'
-    name: Release
+    name: Build and Release
     # TODO: implement marrix https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
     # strategy:
     #   fail-fast: false
@@ -106,3 +106,7 @@ jobs:
           push: true 
           tags: | 
             ghcr.io/sarendsen/replex:latest
+      - name: Invoke semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        run: npx semantic-release
