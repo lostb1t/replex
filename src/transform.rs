@@ -72,6 +72,7 @@ impl TransformBuilder {
     #[inline]
     pub fn with_transform<T: Transform>(mut self, transform: T) -> Self {
         self.transforms.push(Arc::new(transform));
+        // self.transforms.insert(0, Arc::new(transform));
         self
     }
 
@@ -206,20 +207,41 @@ impl TransformBuilder {
         //         self.options.clone(),
         //     ).await
         // }
-        for t in self.transforms.clone() {
-            let futures =
-                container.media_container.children_mut().iter_mut().map(
-                    |x: &mut MetaData| {
-                        t.transform_metadata(
-                            x,
-                            self.plex_client.clone(),
-                            self.options.clone(),
-                        )
-                    },
-                );
-            future::join_all(futures).await;
+        // for t in self.transforms.clone() {
+        //     let futures =
+        //         container.media_container.children_mut().iter_mut().map(
+        //             |x: &mut MetaData| {
+        //                 t.transform_metadata(
+        //                     x,
+        //                     self.plex_client.clone(),
+        //                     self.options.clone(),
+        //                 )
+        //             },
+        //         );
+        //     future::join_all(futures).await;
 
-            // dont use join as it needs ti be executed in order
+        //     // dont use join as it needs ti be executed in order
+        //     t.transform_mediacontainer(
+        //         &mut container.media_container,
+        //         self.plex_client.clone(),
+        //         self.options.clone(),
+        //     )
+        //     .await
+        // }
+
+
+        for item in container.media_container.children_mut() {
+            for t in self.transforms.clone() {
+                t.transform_metadata(
+                    item,
+                    self.plex_client.clone(),
+                    self.options.clone(),
+                ).await;
+            };
+        };
+
+        for t in self.transforms.clone() {
+            // dbg!(&t);
             t.transform_mediacontainer(
                 &mut container.media_container,
                 self.plex_client.clone(),
@@ -227,6 +249,12 @@ impl TransformBuilder {
             )
             .await
         }
+
+            // future::join_all(futures).await;
+
+            // dont use join as it needs ti be executed in order
+
+        // }
 
         // let mut set = tokio::task::JoinSet::new();
         // for t in self.transforms.clone() {

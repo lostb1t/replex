@@ -11,7 +11,7 @@ docker-build:
 # 	docker buildx build -t ghcr.io/sarendsen/replexnonginx:latest --platform linux/amd64 --target replex . -f docker/Dockerfile
 
 docker-run:
-	docker run --rm -it -p 3001:80 -e REPLEX_HOST="http://46.4.30.217:42405" ghcr.io/sarendsen/replex:pr-9
+	docker run --rm -it -p 3001:80 -e REPLEX_HOST="http://46.4.30.217:42405" ghcr.io/sarendsen/replex:latest
 
 # push-docker:
 # 	docker push ghcr.io/sarendsen/replex:latest
@@ -26,7 +26,7 @@ docker-run:
 
 
 run:
-	REPLEX_ENABLE_CONSOLE=0 REPLEX_CACHE_TTL=0 REPLEX_HOST=https://46-4-30-217.01b0839de64b49138531cab1bf32f7c2.plex.direct:42405 RUST_LOG="info,replex=info" cargo watch -x run
+	REPLEX_ENABLE_CONSOLE=0 REPLEX_CACHE_TTL=0 REPLEX_HOST=https://46-4-30-217.01b0839de64b49138531cab1bf32f7c2.plex.direct:42405 cargo watch -x run
 
 
 fix:

@@ -7,9 +7,8 @@ Remix your plex recommendations.
 ## Features
 
 - Merge recommendations on home into one from different libraries. Aka have movies and shows in a single row.
-- Hide watched items from recommendations.
+- Remove watched items from recommendations.
 - Choose between styles, shelf (default) or hero.
-- Plex doesnt apply user restrictions to collection recommendations. this proxy fixes that so you can have unique rows for every user.
 - Works on every client/app not only plex web!
 - Plays nice with PMM (and without).
 
