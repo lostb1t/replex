@@ -21,6 +21,7 @@ use salvo::compression::Compression;
 use salvo::cors::Cors;
 use salvo::prelude::*;
 use salvo::proxy::Proxy as SalvoProxy;
+use std::env;
 use std::time::Duration;
 use tonic::metadata::MetadataMap;
 use tracing_subscriber::layer::SubscriberExt;
@@ -33,6 +34,11 @@ async fn main() {
     if config.host.is_none() {
         tracing::error!("REPLEX_HOST is required. Exiting");
         return;
+    }
+
+    // set default log level
+    if let Err(i) = env::var("RUST_LOG") {
+        env::set_var("RUST_LOG", "info")
     }
 
     let fmt_layer = tracing_subscriber::fmt::layer();
@@ -75,14 +81,14 @@ async fn main() {
 
 
     // spawn our background task
-    // plex_client = PlexClient::new();
-    tokio::spawn(async move {
-        let mut interval = time::interval(Duration::from_secs(5));
-        loop {
-            interval.tick().await;
-            // dbg!("we are being runned");
-        }
-    });
+    // let mut plex_client = PlexClient::dummy();
+    // tokio::spawn(async move {
+    //     let mut interval = time::interval(Duration::from_secs(60));
+    //     loop {
+    //         interval.tick().await;
+    //         dbg!("we are being runned");
+    //     }
+    // });
 
     let router = route();
     if config.ssl_enable && config.ssl_domain.is_some() {

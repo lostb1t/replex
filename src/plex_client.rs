@@ -156,6 +156,19 @@ impl PlexClient {
         Ok(container)
     }
 
+    pub async fn get_hubs(
+        &self,
+        id: i32,
+    ) -> Result<MediaContainerWrapper<MediaContainer>> {
+        let resp = self
+            .get("/hubs".to_string())
+            .await
+            .unwrap();
+        let container: MediaContainerWrapper<MediaContainer> =
+            from_reqwest_response(resp).await.unwrap();
+        Ok(container)
+    }
+
     pub async fn get_item_by_key(
         self,
         key: String,
@@ -201,9 +214,7 @@ impl PlexClient {
     fn generate_cache_key(&self, name: String) -> String {
         format!("{}:{}", name, self.x_plex_token)
     }
-}
 
-impl PlexClient {
     pub fn from_request(req: &Request, params: PlexParams) -> Self {
         let config: Config = Config::figment().extract().unwrap();
         let token = params
@@ -250,6 +261,49 @@ impl PlexClient {
             cache: CACHE.clone(),
         }
     }
+
+    pub fn dummy() -> Self {
+        let config: Config = Config::figment().extract().unwrap();
+        let token = "DUMMY".to_string();
+        let client_identifier = "DUMMY".to_string();
+        let platform: Option<String> = None;
+
+        // Dont do the headers here. Do it in prepare function
+        let mut headers = header::HeaderMap::new();
+        headers.insert(
+            "X-Plex-Token",
+            header::HeaderValue::from_str(token.clone().as_str()).unwrap(),
+        );
+        headers.insert(
+            "X-Plex-Client-Identifier",
+            header::HeaderValue::from_str(client_identifier.clone().as_str())
+                .unwrap(),
+        );
+        headers.insert(
+            "Accept",
+            header::HeaderValue::from_static("application/json"),
+        );
+        if let Some(i) = platform.clone() {
+            headers.insert(
+                "X-Plex-Platform",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+        Self {
+            http_client: reqwest::Client::builder()
+                .default_headers(headers)
+                .gzip(true)
+                .timeout(Duration::from_secs(30))
+                .build()
+                .unwrap(),
+            host: config.host.unwrap(),
+            x_plex_token: token,
+            x_plex_client_identifier: client_identifier,
+            x_plex_platform: platform,
+            cache: CACHE.clone(),
+        }
+    }
+
 }
 
 // #[cfg(test)]

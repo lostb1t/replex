@@ -41,6 +41,7 @@ pub fn route() -> Router {
                 .path(PLEX_HUBS_PROMOTED)
                 .hoop(default_cache())
                 .get(get_hubs_promoted),
+                // .get(test),
         )
         .push(
             Router::new()
@@ -48,7 +49,7 @@ pub fn route() -> Router {
                 .hoop(default_cache())
                 .get(get_hubs_sections),
         )
-        .push(Router::new().path("/test").get(test))
+        // .push(Router::new().path("/test").get(test))
         .push(Router::new().path("/hello").get(hello))
         .push(
             Router::new()
@@ -64,7 +65,12 @@ pub fn route() -> Router {
 
 #[handler]
 async fn test(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
-    return res.render("sup");
+    let params: PlexParams = req.extract().await.unwrap();
+    let plex_client = PlexClient::from_request(req, params.clone());
+    let upstream_res = plex_client.request(req).await.unwrap();
+    let mut container: MediaContainerWrapper<MediaContainer> =
+        from_reqwest_response(upstream_res).await.unwrap();
+    res.render(container);
 }
 
 #[handler]
@@ -80,7 +86,6 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     // not sure anymore why i have this lol
     let content_directory_id_size =
         params.clone().content_directory_id.unwrap().len();
-    dbg!(&content_directory_id_size);
     if content_directory_id_size > usize::try_from(1).unwrap() {
         let upstream_res = plex_client.request(req).await.unwrap();
         let container = from_reqwest_response(upstream_res).await.unwrap();
@@ -126,7 +131,6 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     }
 
     let upstream_res = plex_client.request(req).await.unwrap();
-    // let mut container: MediaContainerWrapper<MediaContainer>
     let mut container: MediaContainerWrapper<MediaContainer> =
         from_reqwest_response(upstream_res).await.unwrap();
 
