@@ -37,26 +37,26 @@ pub fn route() -> Router {
         .hoop(Logger::new())
         .hoop(Timeout::new(Duration::from_secs(60)))
         .hoop(Compression::new().enable_gzip(CompressionLevel::Fastest))
-        // .push(
-        //     Router::new()
-        //         .path(PLEX_HUBS_PROMOTED)
-        //         .hoop(default_cache())
-        //         .get(get_hubs_promoted),
-        // )
-        // .push(
-        //     Router::new()
-        //         .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
-        //         .hoop(default_cache())
-        //         .get(get_hubs_sections),
-        // )
-        // .push(Router::new().path("/test").get(test))
-        // .push(Router::new().path("/hello").get(hello))
-        // .push(
-        //     Router::new()
-        //         .path("/replex/library/collections/<ids>/children")
-        //         .hoop(default_cache())
-        //         .get(get_collections_children),
-        // )
+        .push(
+            Router::new()
+                .path(PLEX_HUBS_PROMOTED)
+                .hoop(default_cache())
+                .get(get_hubs_promoted),
+        )
+        .push(
+            Router::new()
+                .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
+                .hoop(default_cache())
+                .get(get_hubs_sections),
+        )
+        .push(Router::new().path("/test").get(test))
+        .push(Router::new().path("/hello").get(hello))
+        .push(
+            Router::new()
+                .path("/replex/library/collections/<ids>/children")
+                .hoop(default_cache())
+                .get(get_collections_children),
+        )
         .push(
             Router::with_path("<**rest>")
                 .handle(TestProxy::new(config.host.unwrap())),
@@ -129,15 +129,15 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     let mut container: MediaContainerWrapper<MediaContainer> =
         from_reqwest_response(upstream_res).await.unwrap();
 
-    TransformBuilder::new(plex_client, params.clone())
-        .with_transform(HubStyleTransform)
-        .with_transform(HubMixTransform)
-        .with_transform(LimitTransform {
-            limit: params.clone().count.unwrap(),
-        })
-        .with_filter(CollectionHubPermissionFilter)
-        .apply_to(&mut container)
-        .await;
+    // TransformBuilder::new(plex_client, params.clone())
+    //     .with_transform(HubStyleTransform)
+    //     .with_transform(HubMixTransform)
+    //     .with_transform(LimitTransform {
+    //         limit: params.clone().count.unwrap(),
+    //     })
+    //     .with_filter(CollectionHubPermissionFilter)
+    //     .apply_to(&mut container)
+    //     .await;
     res.render(container);
 }
 
@@ -159,16 +159,16 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
     let upstream_res = plex_client.request(req).await.unwrap();
     let mut container: MediaContainerWrapper<MediaContainer> =
         from_reqwest_response(upstream_res).await.unwrap();
-    TransformBuilder::new(plex_client, params.clone())
-        .with_transform(HubSectionDirectoryTransform)
-        .with_transform(HubStyleTransform)
-        .with_transform(LimitTransform {
-            limit: params.clone().count.unwrap(),
-        })
-        .with_filter(CollectionHubPermissionFilter)
-        .with_filter(WatchedFilter)
-        .apply_to(&mut container)
-        .await;
+    // TransformBuilder::new(plex_client, params.clone())
+    //     .with_transform(HubSectionDirectoryTransform)
+    //     .with_transform(HubStyleTransform)
+    //     .with_transform(LimitTransform {
+    //         limit: params.clone().count.unwrap(),
+    //     })
+    //     .with_filter(CollectionHubPermissionFilter)
+    //     .with_filter(WatchedFilter)
+    //     .apply_to(&mut container)
+    //     .await;
     res.render(container); // TODO: FIx XML
 }
 
@@ -199,14 +199,14 @@ pub async fn get_collections_children(
     container.media_container.offset = offset;
 
     // filtering of watched happens in the transform
-    TransformBuilder::new(plex_client, params.clone())
-        .with_transform(LibraryMixTransform {
-            collection_ids,
-            offset,
-            limit,
-        })
-        .apply_to(&mut container)
-        .await;
+    // TransformBuilder::new(plex_client, params.clone())
+    //     .with_transform(LibraryMixTransform {
+    //         collection_ids,
+    //         offset,
+    //         limit,
+    //     })
+    //     .apply_to(&mut container)
+    //     .await;
     res.render(container); // TODO: FIx XML
 }
 
