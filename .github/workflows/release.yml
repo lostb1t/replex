@@ -45,7 +45,6 @@ jobs:
   #       run: make run-tests
   #       shell: bash
 
-
   release:
     if: needs.get-next-version.outputs.new-release-published == 'true'
     name: Release
