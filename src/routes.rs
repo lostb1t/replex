@@ -4,9 +4,6 @@ use crate::logging::*;
 use crate::models::*;
 use crate::plex_client::*;
 use itertools::Itertools;
-use opentelemetry::sdk::export::trace::stdout;
-use opentelemetry_otlp::WithExportConfig;
-// use replex::proxy::PlexProxy;
 use crate::transform::*;
 use crate::url::*;
 use crate::utils::*;
@@ -16,10 +13,7 @@ use salvo::cors::Cors;
 use salvo::prelude::*;
 use salvo::proxy::Proxy as SalvoProxy;
 use std::time::Duration;
-use tokio::task::JoinSet;
-use tonic::metadata::MetadataMap;
-use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::prelude::*;
+
 
 pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
     let config: Config = Config::figment().extract().unwrap();
@@ -66,79 +60,10 @@ pub fn route() -> Router {
 
 #[handler]
 async fn test(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
-    let params: PlexParams = req.extract().await.unwrap();
-    let plex_client = PlexClient::from_request(req, params.clone());
-
-    // not sure anymore why i have this lol
-    let content_directory_id_size =
-        params.clone().content_directory_id.unwrap().len();
-    if content_directory_id_size > usize::try_from(1).unwrap() {
-        let upstream_res = plex_client.request(req).await.unwrap();
-        let container = from_reqwest_response(upstream_res).await.unwrap();
-        res.render(container);
-    }
-
-    if params.clone().content_directory_id.unwrap()[0]
-        != params.clone().pinned_content_directory_id.unwrap()[0]
-    {
-        // We only fill the first one.
-        let mut container: MediaContainerWrapper<MediaContainer> =
-            MediaContainerWrapper::default();
-        container.content_type =
-            get_content_type_from_headers(req.headers_mut());
-        container.media_container.size = Some(0);
-        container.media_container.allow_sync = Some(true);
-        container.media_container.identifier =
-            Some("com.plexapp.plugins.library".to_string());
-        return res.render(container);
-    }
-
-    // first directory, load everything here because we wanna reemiiiixxx
-
-
-    let mut set = JoinSet::new();
-    for id in params.clone().pinned_content_directory_id.unwrap() {
-        add_query_param_salvo(req, "contentDirectoryID".to_string(), id);
-        set.spawn({
-            dbg!("run");
-            let u = plex_client.request(req).await.unwrap();
-            from_reqwest_response(u)
-        });
-        // let mut c: MediaContainerWrapper<MediaContainer> =
-        //     from_reqwest_response(u).await.unwrap();
-        // container.media_container.hub.append(c.media_container.children_mut());
-    }
-
     let mut container: MediaContainerWrapper<MediaContainer> =
         MediaContainerWrapper::default();
-    container.content_type =
-            get_content_type_from_headers(req.headers_mut());
+    container.content_type = get_content_type_from_headers(req.headers_mut());
 
-    while let Some(res) = set.join_next().await {
-        container.media_container.hub.append(res.unwrap().unwrap().media_container.children_mut());
-    }
-
-    // Hack, as the list could be smaller when removing watched items. So we request more.
-    if let Some(original_count) = params.clone().count {
-        add_query_param_salvo(
-            req,
-            "count".to_string(),
-            (original_count * 2).to_string(),
-        );
-    }
-
-    // let upstream_res = plex_client.request(req).await.unwrap();
-    // let mut container: MediaContainerWrapper<MediaContainer> =
-    //     from_reqwest_response(upstream_res).await.unwrap();
-
-    TransformBuilder::new(plex_client, params.clone())
-        .with_transform(HubStyleTransform)
-        .with_transform(HubMixTransform)
-        .with_transform(HubChildrenLimitTransform {
-            limit: params.clone().count.unwrap(),
-        })
-        .apply_to(&mut container)
-        .await;
     res.render(container);
 }
 

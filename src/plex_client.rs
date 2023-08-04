@@ -89,7 +89,7 @@ impl PlexClient {
         // let l = &req.uri_mut().path_and_query();
         // dbg!(&self.host);
         // dbg!(&req.));
-        let mut headers = req.headers_mut().to_owned();
+        let headers = req.headers_mut().to_owned();
         let res = self
             .http_client
             .get(uri)
