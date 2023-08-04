@@ -55,7 +55,7 @@ pub struct PlexClient {
     /// UUID, serial number, or other number unique per device.
     ///
     /// **N.B.** Should be unique for each of your devices.
-    pub x_plex_client_identifier: String,
+    pub x_plex_client_identifier: Option<String>,
 
     /// `X-Plex-Token` header value.
     ///
@@ -221,10 +221,7 @@ impl PlexClient {
             .clone()
             .token
             .expect("Expected to have an token in header or query");
-        let client_identifier = params
-            .clone()
-            .client_identifier
-            .expect("Expected to have an plex client identifier header");
+        let client_identifier = params.clone().client_identifier;
         let platform = params.clone().platform;
 
         let mut headers = header::HeaderMap::new();
@@ -232,11 +229,13 @@ impl PlexClient {
             "X-Plex-Token",
             header::HeaderValue::from_str(token.clone().as_str()).unwrap(),
         );
-        headers.insert(
-            "X-Plex-Client-Identifier",
-            header::HeaderValue::from_str(client_identifier.clone().as_str())
-                .unwrap(),
-        );
+        if let Some(i) = client_identifier.clone() {
+            headers.insert(
+                "X-Plex-Client-Identifier",
+                header::HeaderValue::from_str(i.as_str())
+                    .unwrap(),
+            );
+        }
         headers.insert(
             "Accept",
             header::HeaderValue::from_static("application/json"),
@@ -265,7 +264,7 @@ impl PlexClient {
     pub fn dummy() -> Self {
         let config: Config = Config::figment().extract().unwrap();
         let token = "DUMMY".to_string();
-        let client_identifier = "DUMMY".to_string();
+        let client_identifier: Option<String> = None;
         let platform: Option<String> = None;
 
         // Dont do the headers here. Do it in prepare function
@@ -273,11 +272,6 @@ impl PlexClient {
         headers.insert(
             "X-Plex-Token",
             header::HeaderValue::from_str(token.clone().as_str()).unwrap(),
-        );
-        headers.insert(
-            "X-Plex-Client-Identifier",
-            header::HeaderValue::from_str(client_identifier.clone().as_str())
-                .unwrap(),
         );
         headers.insert(
             "Accept",
