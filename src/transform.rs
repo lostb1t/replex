@@ -438,24 +438,20 @@ impl Transform for HubMixTransform {
         let mut new_hubs: Vec<MetaData> = vec![];
         // let mut library_section_id: Vec<Option<u32>> = vec![]; //librarySectionID
         for mut hub in item.children_mut() {
-            let mut children = hub.children();
             if !config.include_watched {
-                children.retain(|x| !x.is_watched());
+                hub.children_mut().retain(|x| !x.is_watched());
             }
 
             // we only process collection hubs
             if !hub.is_collection_hub() {
-                hub.set_children(children);
                 new_hubs.push(hub.to_owned());
                 continue
             }
 
             let p = new_hubs.iter().position(|v| v.title == hub.title);
-            // dbg!(&hub.context);
             if hub.r#type != "clip" {
                 hub.r#type = "mixed".to_string();
             }
-
             match p {
                 Some(v) => {
                     new_hubs[v].key = merge_children_keys(
@@ -465,15 +461,13 @@ impl Transform for HubMixTransform {
                     let c = new_hubs[v].children();
                     new_hubs[v].set_children(
                         c.into_iter()
-                            .interleave(children)
+                            .interleave(hub.children())
                             .collect::<Vec<MetaData>>(),
                     );
                 }
                 None => new_hubs.push(hub.to_owned()),
             }
-            // dbg!(&new_hubs.get(0).unwrap().title);
         }
-        // dbg!(&new_hubs.len());
         item.set_children_mut(&mut new_hubs);
     }
 }
