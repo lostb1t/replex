@@ -99,15 +99,6 @@ where
     }
 }
 
-// impl Default for Mime {
-//     fn default() -> Self { limit: None }
-// }
-
-// #[derive(Debug, Clone)]
-// pub struct App {
-//     proxy: Proxy,
-//     plex: PlexClient,
-// }
 
 #[derive(
     Debug,
@@ -171,12 +162,37 @@ pub struct MetaData {
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub view_group: Option<String>,
+    #[yaserde(attribute, rename = "addedAt")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub added_at: Option<u32>,
+    #[yaserde(attribute, rename = "updatedAt")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub updated_at: Option<u32>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub view_mode: Option<u32>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub art: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub index: Option<u32>,
+    #[yaserde(attribute, rename = "parentYear")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parent_year: Option<i32>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "parentThumb")]
+    pub parent_thumb: Option<String>,
+    #[yaserde(attribute, rename = "parentIndex")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parent_index: Option<u32>,
+    #[yaserde(attribute, rename = "parentGuid")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parent_guid: Option<String>,
+    #[yaserde(attribute, rename = "parentStudio")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parent_studio: Option<String>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[yaserde(rename = "parentKey")]
