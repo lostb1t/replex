@@ -26,7 +26,7 @@ docker-run:
 
 
 run:
-	REPLEX_ENABLE_CONSOLE=1 REPLEX_CACHE_TTL=0 REPLEX_HOST=https://46-4-30-217.01b0839de64b49138531cab1bf32f7c2.plex.direct:42405 RUST_LOG="info,replex=info,tokio=trace,runtime=trace" cargo watch -x run
+	REPLEX_ENABLE_CONSOLE=0 REPLEX_CACHE_TTL=0 REPLEX_HOST=https://46-4-30-217.01b0839de64b49138531cab1bf32f7c2.plex.direct:42405 RUST_LOG="info" cargo watch -x run
 
 
 fix:

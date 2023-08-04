@@ -9,6 +9,7 @@ use replex::cache::*;
 use replex::config::Config;
 use replex::logging::*;
 use replex::models::*;
+use replex::plex_client;
 use replex::routes::*;
 use replex::plex_client::*;
 // use replex::proxy::PlexProxy;
@@ -24,6 +25,7 @@ use std::time::Duration;
 use tonic::metadata::MetadataMap;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::prelude::*;
+use tokio::{task, time};
 
 #[tokio::main]
 async fn main() {
@@ -71,6 +73,16 @@ async fn main() {
         .with(fmt_layer)
         .init();
 
+
+    // spawn our background task
+    // plex_client = PlexClient::new();
+    tokio::spawn(async move {
+        let mut interval = time::interval(Duration::from_secs(5));
+        loop {
+            interval.tick().await;
+            // dbg!("we are being runned");
+        }
+    });
 
     let router = route();
     if config.ssl_enable && config.ssl_domain.is_some() {

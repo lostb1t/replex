@@ -40,9 +40,6 @@ moka = { version = "0.11.2", features = ["future"] }
 tonic = {version = "0.8.0", features = ["tls", "tls-roots"]}
 async-recursion = "1.0.4"
 console-subscriber = "0.1.10"
-percent-encoding = "2.3.0"
-fastrand = "2.0.0"
-tokio-io-timeout = "1.2.0"
 
 [dev-dependencies]
 async-std = { version = "^1.12", features = ["attributes"] }

@@ -2,7 +2,6 @@ use crate::cache::*;
 use crate::config::Config;
 use crate::logging::*;
 use crate::models::*;
-use crate::proxy::Proxy as TestProxy;
 use crate::plex_client::*;
 use itertools::Itertools;
 use opentelemetry::sdk::export::trace::stdout;
@@ -59,7 +58,7 @@ pub fn route() -> Router {
         )
         .push(
             Router::with_path("<**rest>")
-                .handle(TestProxy::new(config.host.unwrap())),
+                .handle(SalvoProxy::new(config.host.unwrap())),
         )
 }
 
@@ -76,11 +75,12 @@ async fn hello(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
 #[handler]
 pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     let params: PlexParams = req.extract().await.unwrap();
-    let plex_client = PlexClient::new(req, params.clone());
+    let plex_client = PlexClient::from_request(req, params.clone());
 
     // not sure anymore why i have this lol
     let content_directory_id_size =
         params.clone().content_directory_id.unwrap().len();
+    dbg!(&content_directory_id_size);
     if content_directory_id_size > usize::try_from(1).unwrap() {
         let upstream_res = plex_client.request(req).await.unwrap();
         let container = from_reqwest_response(upstream_res).await.unwrap();
@@ -126,25 +126,25 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     }
 
     let upstream_res = plex_client.request(req).await.unwrap();
+    // let mut container: MediaContainerWrapper<MediaContainer>
     let mut container: MediaContainerWrapper<MediaContainer> =
         from_reqwest_response(upstream_res).await.unwrap();
 
-    // TransformBuilder::new(plex_client, params.clone())
-    //     .with_transform(HubStyleTransform)
-    //     .with_transform(HubMixTransform)
-    //     .with_transform(LimitTransform {
-    //         limit: params.clone().count.unwrap(),
-    //     })
-    //     .with_filter(CollectionHubPermissionFilter)
-    //     .apply_to(&mut container)
-    //     .await;
+    TransformBuilder::new(plex_client, params.clone())
+        .with_transform(HubStyleTransform)
+        .with_transform(HubMixTransform)
+        .with_transform(LimitTransform {
+            limit: params.clone().count.unwrap(),
+        })
+        .apply_to(&mut container)
+        .await;
     res.render(container);
 }
 
 #[handler]
 pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
     let params: PlexParams = req.extract().await.unwrap();
-    let plex_client = PlexClient::new(req, params.clone());
+    let plex_client = PlexClient::from_request(req, params.clone());
 
     // Hack, as the list could be smaller when removing watched items. So we request more.
     if let Some(original_count) = params.clone().count {
@@ -159,16 +159,16 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
     let upstream_res = plex_client.request(req).await.unwrap();
     let mut container: MediaContainerWrapper<MediaContainer> =
         from_reqwest_response(upstream_res).await.unwrap();
-    // TransformBuilder::new(plex_client, params.clone())
-    //     .with_transform(HubSectionDirectoryTransform)
-    //     .with_transform(HubStyleTransform)
-    //     .with_transform(LimitTransform {
-    //         limit: params.clone().count.unwrap(),
-    //     })
-    //     .with_filter(CollectionHubPermissionFilter)
-    //     .with_filter(WatchedFilter)
-    //     .apply_to(&mut container)
-    //     .await;
+    TransformBuilder::new(plex_client, params.clone())
+        .with_transform(HubSectionDirectoryTransform)
+        .with_transform(HubStyleTransform)
+        .with_transform(LimitTransform {
+            limit: params.clone().count.unwrap(),
+        })
+        // .with_filter(CollectionHubPermissionFilter)
+        .with_filter(WatchedFilter)
+        .apply_to(&mut container)
+        .await;
     res.render(container); // TODO: FIx XML
 }
 
@@ -184,7 +184,7 @@ pub async fn get_collections_children(
         .split(',')
         .map(|v| v.parse().unwrap())
         .collect();
-    let plex_client = PlexClient::new(req, params.clone());
+    let plex_client = PlexClient::from_request(req, params.clone());
 
     // We dont listen to pagination. We have a hard max of 250 per collection
     let limit = Some(250); // plex its max
@@ -199,25 +199,25 @@ pub async fn get_collections_children(
     container.media_container.offset = offset;
 
     // filtering of watched happens in the transform
-    // TransformBuilder::new(plex_client, params.clone())
-    //     .with_transform(LibraryMixTransform {
-    //         collection_ids,
-    //         offset,
-    //         limit,
-    //     })
-    //     .apply_to(&mut container)
-    //     .await;
+    TransformBuilder::new(plex_client, params.clone())
+        .with_transform(LibraryMixTransform {
+            collection_ids,
+            offset,
+            limit,
+        })
+        .apply_to(&mut container)
+        .await;
     res.render(container); // TODO: FIx XML
 }
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::test_helpers::*;
+    use rstest::rstest;
     use salvo::prelude::*;
     use salvo::test::{ResponseExt, TestClient};
-    use rstest::rstest;
     use std::env;
-    use super::*;
 
     #[rstest]
     #[case::hubs_sections(

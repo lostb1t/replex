@@ -81,9 +81,15 @@ impl PlexClient {
         &self,
         req: &mut Request,
     ) -> Result<reqwest::Response, Error> {
-        let uri = format!("{}{}", self.host, &req.uri_mut());
+        let uri = format!(
+            "{}{}",
+            self.host,
+            &req.uri_mut().path_and_query().unwrap()
+        );
+        // let l = &req.uri_mut().path_and_query();
+        // dbg!(&self.host);
+        // dbg!(&req.));
         let mut headers = req.headers_mut().to_owned();
-        // headers.insert("Accept-Encoding", HeaderValue::from_static("identity"));
         let res = self
             .http_client
             .get(uri)
@@ -198,9 +204,7 @@ impl PlexClient {
 }
 
 impl PlexClient {
-    pub fn new(req: &mut Request, params: PlexParams) -> Self {
-        // TODO: Split it into a function from_request
-        // TODO: Dont need request
+    pub fn from_request(req: &Request, params: PlexParams) -> Self {
         let config: Config = Config::figment().extract().unwrap();
         let token = params
             .clone()
@@ -210,9 +214,7 @@ impl PlexClient {
             .clone()
             .client_identifier
             .expect("Expected to have an plex client identifier header");
-        let platform = params
-            .clone()
-            .platform;
+        let platform = params.clone().platform;
 
         let mut headers = header::HeaderMap::new();
         headers.insert(
@@ -249,7 +251,6 @@ impl PlexClient {
         }
     }
 }
-
 
 // #[cfg(test)]
 // mod tests {
