@@ -1,1 +1,2 @@
 branches: ["main"]
+tagFormat: ${version}
