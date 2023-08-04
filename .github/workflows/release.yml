@@ -29,7 +29,8 @@ concurrency:
 
 jobs:
   get-next-version:
-      uses: semantic-release-action/next-release-version/.github/workflows/next-release-version.yml@v4
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch' 
+    uses: semantic-release-action/next-release-version/.github/workflows/next-release-version.yml@v4
 
   # test:
   #   name: Test
@@ -45,7 +46,7 @@ jobs:
   #       shell: bash
 
   release:
-    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch' 
+    if: needs.get-next-version.outputs.new-release-published == 'true'
     name: Release
     # TODO: implement marrix https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
     # strategy:
