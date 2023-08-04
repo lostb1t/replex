@@ -38,12 +38,12 @@ Example: an collection named "Trending" in a Movie library will be merged with a
 Run the docker image with REPLEX_HOST set to your plex instance.
 
 ```
-docker run --rm -it -p 80:80 -e REPLEX_HOST="http://10.0.0.3:42405" ghcr.io/sarendsen/replex:latest
+docker run --rm -it -p 3001:80 -e REPLEX_HOST="http://10.0.0.3:42405" ghcr.io/sarendsen/replex:latest
 ```
 
-add your proxy url to plex "Custom server access URLs" (ex http://0.0.0.0:80)
+add your proxy url to plex "Custom server access URLs" (ex http://0.0.0.0:3001)
 
-then access your proxy url http://0.0.0.0:80
+then access your proxy url http://0.0.0.0:3001
 
 Docker compose example including plex:
 
