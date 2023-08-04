@@ -2,7 +2,10 @@ name: Release
 
 on:
   workflow_dispatch:
-  pull_request:
+  # pull_request:
+  pull_request_target:
+    types:
+      - closed
     branches:
       - main
     paths-ignore:
@@ -42,6 +45,7 @@ jobs:
   #       shell: bash
 
   release:
+    if: github.event.pull_request.merged == true
     name: Release
     # TODO: implement marrix https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
     # strategy:
