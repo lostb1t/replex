@@ -78,6 +78,9 @@ async fn hello(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
     return res.render("Hello world!");
 }
 
+// TODO: Seems like loading in invidual sections of the hubs is faster then all in one endpoint
+// load in all hubs with indivudial endpoints and merge them. 
+// Another pro point is that we can async these calls. So even faster.
 #[handler]
 pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     let params: PlexParams = req.extract().await.unwrap();
@@ -106,7 +109,7 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
             Some("com.plexapp.plugins.library".to_string());
         return res.render(container);
     }
-
+    
     // first directory, load everything here because we wanna reemiiiixxx
     add_query_param_salvo(
         req,
@@ -137,7 +140,7 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubStyleTransform)
         .with_transform(HubMixTransform)
-        .with_transform(LimitTransform {
+        .with_transform(HubChildrenLimitTransform {
             limit: params.clone().count.unwrap(),
         })
         .apply_to(&mut container)
@@ -166,7 +169,7 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubSectionDirectoryTransform)
         .with_transform(HubStyleTransform)
-        .with_transform(LimitTransform {
+        .with_transform(HubChildrenLimitTransform {
             limit: params.clone().count.unwrap(),
         })
         // .with_filter(CollectionHubPermissionFilter)

@@ -1,26 +1,10 @@
 #[macro_use]
 extern crate tracing;
-// extern crate tracing_subscriber;
 
-use itertools::Itertools;
-use opentelemetry::sdk::export::trace::stdout;
 use opentelemetry_otlp::WithExportConfig;
-use replex::cache::*;
 use replex::config::Config;
-use replex::logging::*;
-use replex::models::*;
-use replex::plex_client;
 use replex::routes::*;
-use replex::plex_client::*;
-// use replex::proxy::PlexProxy;
-use replex::transform::*;
-use replex::url::*;
-use replex::utils::*;
-use salvo::cache::{Cache, MemoryStore};
-use salvo::compression::Compression;
-use salvo::cors::Cors;
 use salvo::prelude::*;
-use salvo::proxy::Proxy as SalvoProxy;
 use std::env;
 use std::time::Duration;
 use tonic::metadata::MetadataMap;

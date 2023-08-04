@@ -229,6 +229,15 @@ impl TransformBuilder {
         //     .await
         // }
 
+        for t in self.transforms.clone() {
+            // dbg!(&t);
+            t.transform_mediacontainer(
+                &mut container.media_container,
+                self.plex_client.clone(),
+                self.options.clone(),
+            )
+            .await
+        }
 
         for item in container.media_container.children_mut() {
             for t in self.transforms.clone() {
@@ -240,15 +249,6 @@ impl TransformBuilder {
             };
         };
 
-        for t in self.transforms.clone() {
-            // dbg!(&t);
-            t.transform_mediacontainer(
-                &mut container.media_container,
-                self.plex_client.clone(),
-                self.options.clone(),
-            )
-            .await
-        }
 
             // future::join_all(futures).await;
 
@@ -382,7 +382,7 @@ impl Transform for HubStyleTransform {
                 .clone()
                 .get_cached(
                     plex_client.get_collection(
-                        get_collection_id_from_child_path(item.key.clone()),
+                        get_collection_id_from_hub(item),
                     ),
                     format!("collection:{}", item.key.clone()).to_string(),
                 )
@@ -438,28 +438,22 @@ impl Transform for HubMixTransform {
         let mut new_hubs: Vec<MetaData> = vec![];
         // let mut library_section_id: Vec<Option<u32>> = vec![]; //librarySectionID
         for mut hub in item.children_mut() {
-            let p = new_hubs.iter().position(|v| v.title == hub.title);
-
-            if hub.r#type != "clip" {
-                hub.r#type = "mixed".to_string();
-            }
-            //hub.library_section_id.push(hub.children()[0].library_section_id);
-            // let unwatched = hub.children().iter_mut().filter_map(|x| {
-            //     async move { 
-            //         if WatchedFilter::default().filter_metadata(
-            //             x,
-            //             plex_client,
-            //             options,
-            //         ).await {
-            //             x
-            //         } else {
-            //             None
-            //         }
-            //     }
-            // }).collect();
             let mut children = hub.children();
             if !config.include_watched {
                 children.retain(|x| !x.is_watched());
+            }
+
+            // we only process collection hubs
+            if !hub.is_collection_hub() {
+                hub.set_children(children);
+                new_hubs.push(hub.to_owned());
+                continue
+            }
+
+            let p = new_hubs.iter().position(|v| v.title == hub.title);
+            // dbg!(&hub.context);
+            if hub.r#type != "clip" {
+                hub.r#type = "mixed".to_string();
             }
 
             match p {
@@ -534,29 +528,20 @@ impl Transform for LibraryMixTransform {
 }
 
 #[derive(Default, Debug)]
-pub struct LimitTransform {
+pub struct HubChildrenLimitTransform {
     pub limit: i32,
 }
 
 #[async_trait]
-impl Transform for LimitTransform {
-    async fn transform_mediacontainer(
+impl Transform for HubChildrenLimitTransform {
+    async fn transform_metadata(
         &self,
-        item: &mut MediaContainer,
+        item: &mut MetaData,
         plex_client: PlexClient,
         options: PlexParams,
     ) {
         let len = self.limit as usize;
-        if item.is_hub() {
-            let mut hubs: Vec<MetaData> = vec![];
-            for mut hub in item.children() {
-                let mut children = hub.children();
-                children.truncate(len);
-                hub.set_children(children);
-                hubs.push(hub);
-            }
-            item.set_children(hubs);
-        } else {
+        if item.is_collection_hub() {
             let mut children = item.children();
             children.truncate(len);
             item.set_children(children);
