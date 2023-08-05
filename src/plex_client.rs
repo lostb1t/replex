@@ -93,6 +93,7 @@ impl PlexClient {
         let res = self
             .http_client
             .get(uri)
+            .cache(Duration::from_secs(0))
             .headers(headers)
             .send()
             .await
@@ -103,6 +104,12 @@ impl PlexClient {
     // pub fn request(&self, req) -> hyper::client::ResponseFuture {
     //     self.http_client.request(req)
     // }
+
+    // pub async fn get_section_collections() {
+
+    // }
+
+    // get("library/sections").cache(300, false).send();
 
     pub async fn get_section_collections(
         &self,
