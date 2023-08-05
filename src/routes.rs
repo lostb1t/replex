@@ -12,7 +12,7 @@ use salvo::compression::Compression;
 use salvo::cors::Cors;
 use salvo::prelude::*;
 use salvo::proxy::Proxy as SalvoProxy;
-use std::time::Duration;
+use tokio::time::{Duration};
 
 
 pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {

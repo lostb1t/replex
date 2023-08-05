@@ -3,6 +3,7 @@ use std::time::Duration;
 
 use crate::config::Config;
 use crate::models::*;
+use crate::http_client::Client;
 use crate::utils::*;
 use anyhow::Result;
 
@@ -17,7 +18,6 @@ use once_cell::sync::Lazy;
 use once_cell::sync::OnceCell;
 use reqwest::header;
 use reqwest::header::HeaderValue;
-use reqwest::Client;
 use salvo::http::ReqBody;
 use salvo::Error;
 use salvo::Request;
@@ -160,10 +160,7 @@ impl PlexClient {
         &self,
         id: i32,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
-        let resp = self
-            .get("/hubs".to_string())
-            .await
-            .unwrap();
+        let resp = self.get("/hubs".to_string()).await.unwrap();
         let container: MediaContainerWrapper<MediaContainer> =
             from_reqwest_response(resp).await.unwrap();
         Ok(container)
@@ -232,27 +229,28 @@ impl PlexClient {
         if let Some(i) = client_identifier.clone() {
             headers.insert(
                 "X-Plex-Client-Identifier",
-                header::HeaderValue::from_str(i.as_str())
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+        headers.insert(
+            "Accept",
+            header::HeaderValue::from_static("application/json"),
+        );
+        if let Some(i) = platform.clone() {
+            headers.insert(
+                "X-Plex-Platform",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+        Self {
+            http_client: Client::with_reqwest_client(
+                reqwest::Client::builder()
+                    .default_headers(headers)
+                    .gzip(true)
+                    .timeout(Duration::from_secs(30))
+                    .build()
                     .unwrap(),
-            );
-        }
-        headers.insert(
-            "Accept",
-            header::HeaderValue::from_static("application/json"),
-        );
-        if let Some(i) = platform.clone() {
-            headers.insert(
-                "X-Plex-Platform",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-        Self {
-            http_client: reqwest::Client::builder()
-                .default_headers(headers)
-                .gzip(true)
-                .timeout(Duration::from_secs(30))
-                .build()
-                .unwrap(),
+            ),
             host: config.host.unwrap(),
             x_plex_token: token,
             x_plex_client_identifier: client_identifier,
@@ -261,43 +259,46 @@ impl PlexClient {
         }
     }
 
-    pub fn dummy() -> Self {
-        let config: Config = Config::figment().extract().unwrap();
-        let token = "DUMMY".to_string();
-        let client_identifier: Option<String> = None;
-        let platform: Option<String> = None;
+    // pub fn dummy() -> Self {
+    //     let config: Config = Config::figment().extract().unwrap();
+    //     let token = "DUMMY".to_string();
+    //     let client_identifier: Option<String> = None;
+    //     let platform: Option<String> = None;
 
-        // Dont do the headers here. Do it in prepare function
-        let mut headers = header::HeaderMap::new();
-        headers.insert(
-            "X-Plex-Token",
-            header::HeaderValue::from_str(token.clone().as_str()).unwrap(),
-        );
-        headers.insert(
-            "Accept",
-            header::HeaderValue::from_static("application/json"),
-        );
-        if let Some(i) = platform.clone() {
-            headers.insert(
-                "X-Plex-Platform",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-        Self {
-            http_client: reqwest::Client::builder()
-                .default_headers(headers)
-                .gzip(true)
-                .timeout(Duration::from_secs(30))
-                .build()
-                .unwrap(),
-            host: config.host.unwrap(),
-            x_plex_token: token,
-            x_plex_client_identifier: client_identifier,
-            x_plex_platform: platform,
-            cache: CACHE.clone(),
-        }
-    }
-
+    //     // Dont do the headers here. Do it in prepare function
+    //     let mut headers = header::HeaderMap::new();
+    //     headers.insert(
+    //         "X-Plex-Token",
+    //         header::HeaderValue::from_str(token.clone().as_str()).unwrap(),
+    //     );
+    //     headers.insert(
+    //         "Accept",
+    //         header::HeaderValue::from_static("application/json"),
+    //     );
+    //     if let Some(i) = platform.clone() {
+    //         headers.insert(
+    //             "X-Plex-Platform",
+    //             header::HeaderValue::from_str(i.as_str()).unwrap(),
+    //         );
+    //     }
+    //     Self {
+    //         http_client: ClientBuilder::new(
+    //             reqwest::Client::builder()
+    //                 .default_headers(headers)
+    //                 .gzip(true)
+    //                 .timeout(Duration::from_secs(30))
+    //                 .build()
+    //                 .unwrap(),
+    //         )
+    //         .with(CacheMiddleware::new())
+    //         .build(),
+    //         host: config.host.unwrap(),
+    //         x_plex_token: token,
+    //         x_plex_client_identifier: client_identifier,
+    //         x_plex_platform: platform,
+    //         cache: CACHE.clone(),
+    //     }
+    // }
 }
 
 // #[cfg(test)]

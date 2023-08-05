@@ -378,6 +378,7 @@ impl Transform for HubStyleTransform {
         options: PlexParams,
     ) {
         if item.is_collection_hub() {
+            dbg!("calling");
             let mut collection_details = plex_client
                 .clone()
                 .get_cached(
