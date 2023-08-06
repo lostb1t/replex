@@ -2,10 +2,21 @@
 
 concurrency: 4
 base: 'http://0.0.0.0:80'
-iterations: 5
+iterations: 100
 rampup: 2
 
 plan:
   - name: Hubs promoted
     request:
-      url: /api/users.json
+      url: /hubs/promoted?contentDirectoryID=1&pinnedContentDirectoryID=1%2C4%2C16&includeMeta=1&excludeFields=summary&count=12&includeStations=1&includeLibraryPlaylists=1&includeRecentChannels=1&excludeContinueWatching=1&X-Plex-Product=Plex%20Web&X-Plex-Version=4.108.0&X-Plex-Client-Identifier=pxl0qgda8dgvhuz2jfe0wgli&X-Plex-Platform=Safari&X-Plex-Platform-Version=16.3&X-Plex-Features=external-media%2Cindirect-media%2Chub-style-list&X-Plex-Model=bundled&X-Plex-Device=OSX&X-Plex-Device-Name=Safari&X-Plex-Device-Screen-Resolution=1440x371%2C1440x900&X-Plex-Token={{ TOKEN }}&X-Plex-Provider-Version=6.3&X-Plex-Text-Format=plain&X-Plex-Drm=fairplay&X-Plex-Language=en-GB
+
+  - name: Hubs sections
+    request:
+      url: /hubs/sections/{{ item.id }}?count=12&includeLibraryPlaylists=1&includeStations=1&includeRecentChannels=1&includeMeta=1&includeExternalMetadata=1&excludeFields=summary&X-Plex-Product=Plex%20Web&X-Plex-Version=4.108.0&X-Plex-Client-Identifier=pxl0qgda8dgvhuz2jfe0wgli&X-Plex-Platform=Safari&X-Plex-Platform-Version=16.3&X-Plex-Features=external-media%2Cindirect-media%2Chub-style-list&X-Plex-Model=bundled&X-Plex-Device=OSX&X-Plex-Device-Name=Safari&X-Plex-Device-Screen-Resolution=1440x371%2C1440x900&X-Plex-Token={{ TOKEN }}&X-Plex-Provider-Version=6.3&X-Plex-Text-Format=plain&X-Plex-Drm=fairplay&X-Plex-Language=en-GB
+    with_items:
+      - { id: 1 }
+      - { id: 4 }
+
+  - name: replex collections
+    request:
+      url: /replex/library/collections/954153,934149/children?contentDirectoryID=1&pinnedContentDirectoryID=1%2C4%2C16&includeCollections=1&includeExternalMedia=1&includeAdvanced=1&includeMeta=1&X-Plex-Product=Plex%20Web&X-Plex-Version=4.108.0&X-Plex-Client-Identifier=pxl0qgda8dgvhuz2jfe0wgli&X-Plex-Platform=Safari&X-Plex-Platform-Version=16.3&X-Plex-Features=external-media%2Cindirect-media%2Chub-style-list&X-Plex-Model=bundled&X-Plex-Device=OSX&X-Plex-Device-Name=Safari&X-Plex-Device-Screen-Resolution=1440x371%2C1440x900&X-Plex-Container-Start=0&X-Plex-Container-Size=50&X-Plex-Token={{ TOKEN }}&X-Plex-Provider-Version=6.3&X-Plex-Text-Format=plain&X-Plex-Drm=fairplay&X-Plex-Language=en-GB
