@@ -1,10 +1,15 @@
 use salvo::prelude::*;
 use std::str::FromStr;
+use tmdb_api::movie::images::MovieImages;
+use tmdb_api::prelude::Command;
+use tmdb_api::tvshow::search::TVShowSearch;
+use tmdb_api::Client;
 
 extern crate mime;
 use crate::config::*;
 use crate::plex_client::PlexClient;
 
+use crate::tmdb::TMDB_CLIENT;
 use crate::utils::*;
 use anyhow::Result;
 use async_trait::async_trait;
@@ -99,6 +104,23 @@ where
     }
 }
 
+#[derive(
+    Debug,
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    YaDeserialize,
+    YaSerialize,
+    Default,
+    PartialOrd,
+)]
+#[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
+pub struct Guid {
+    #[yaserde(attribute)]
+    id: String,
+}
 
 #[derive(
     Debug,
@@ -326,6 +348,9 @@ pub struct MetaData {
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub originally_available_at: Option<String>,
+    #[serde(rename = "Guid", default, skip_serializing_if = "Vec::is_empty")]
+    #[yaserde(rename = "Guid", default, child)]
+    pub guids: Vec<Guid>,
 }
 
 pub(crate) fn deserialize_option_string_from_number<'de, D>(
@@ -338,6 +363,49 @@ where
 }
 
 impl MetaData {
+    pub async fn tmdb_banner(&self) -> Option<String> {
+        // can call tmdb resizer aswell: https://image.tmdb.org/t/p/w500/wwemzKWzjKYJFfCeiB57q3r4Bcm.png
+        if self.guids.is_empty() {
+            return None;
+        }
+
+        let mut tmdb_id: Option<u64> = None;
+        for guid in self.guids.clone() {
+            if guid.id.starts_with("tmdb") {
+                let mut _tmdb_id = guid.id;
+                _tmdb_id = _tmdb_id.replace("tmdb://", "");
+                tmdb_id = Some(_tmdb_id.parse().unwrap());
+                break;
+            }
+        }
+        tmdb_id?;
+
+        match self.r#type.as_str() {
+            "movie" => {
+                let cmd = MovieImages::new(tmdb_id.unwrap())
+                    .with_language(Some("en".to_string()));
+                let result = cmd.execute(&TMDB_CLIENT).await;
+                if result.is_err() {
+                    return None;
+                }
+                let images = result.unwrap();
+                if images.backdrops.is_empty() {
+                    return None;
+                }
+                return Some(format!("https://image.tmdb.org/t/p/w500/{}", images.backdrops[0].file_path));
+                // dbg!(&result);
+                // Some("test".to_string())
+            }
+            "show" => {
+                // let cmd = MovieImages::new(tmdb_id.unwrap());
+                // let result = cmd.execute(&TMDB_CLIENT).await;
+                // Some("test".to_string())
+                None
+            }
+            _ => None,
+        }
+    }
+
     pub fn children_mut(&mut self) -> &mut Vec<MetaData> {
         if !self.metadata.is_empty() {
             return &mut self.metadata;

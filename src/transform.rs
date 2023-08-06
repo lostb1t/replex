@@ -398,6 +398,14 @@ impl Transform for HubStyleTransform {
             {
                 item.style = Some("hero".to_string());
 
+                let config: Config = Config::figment().extract().unwrap();
+                if config.tmdb_api_key.is_some() {
+                    for child in item.children_mut() {
+                        let banner = child.tmdb_banner().await;
+                        dbg!(banner);
+                    }
+                }
+
                 // for android, as it doesnt listen to hero style on home..... so we make it a clip
                 if let Some(platform) = &options.platform {
                     if platform.to_lowercase() == "android" {
