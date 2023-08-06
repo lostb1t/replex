@@ -137,6 +137,10 @@ impl PlexClient {
         if limit.is_some() {
             path = format!("{}&X-Plex-Container-Size={}", path, limit.unwrap());
         }
+
+        // we want guids for banners
+        path = format!("{}&includeGuids=1", path);
+
         let resp = self.get(path).await.unwrap();
         let container: MediaContainerWrapper<MediaContainer> =
             from_reqwest_response(resp).await.unwrap();

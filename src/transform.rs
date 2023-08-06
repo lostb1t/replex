@@ -245,14 +245,14 @@ impl TransformBuilder {
                     item,
                     self.plex_client.clone(),
                     self.options.clone(),
-                ).await;
-            };
-        };
+                )
+                .await;
+            }
+        }
 
+        // future::join_all(futures).await;
 
-            // future::join_all(futures).await;
-
-            // dont use join as it needs ti be executed in order
+        // dont use join as it needs ti be executed in order
 
         // }
 
@@ -381,9 +381,8 @@ impl Transform for HubStyleTransform {
             let mut collection_details = plex_client
                 .clone()
                 .get_cached(
-                    plex_client.get_collection(
-                        get_collection_id_from_hub(item),
-                    ),
+                    plex_client
+                        .get_collection(get_collection_id_from_hub(item)),
                     format!("collection:{}", item.key.clone()).to_string(),
                 )
                 .await
@@ -397,14 +396,6 @@ impl Transform for HubStyleTransform {
                 .has_label("REPLEXHERO".to_string())
             {
                 item.style = Some("hero".to_string());
-
-                let config: Config = Config::figment().extract().unwrap();
-                if config.tmdb_api_key.is_some() {
-                    for child in item.children_mut() {
-                        let banner = child.tmdb_banner().await;
-                        dbg!(banner);
-                    }
-                }
 
                 // for android, as it doesnt listen to hero style on home..... so we make it a clip
                 if let Some(platform) = &options.platform {
@@ -453,7 +444,7 @@ impl Transform for HubMixTransform {
             // we only process collection hubs
             if !hub.is_collection_hub() {
                 new_hubs.push(hub.to_owned());
-                continue
+                continue;
             }
 
             let p = new_hubs.iter().position(|v| v.title == hub.title);
@@ -511,6 +502,7 @@ impl Transform for LibraryMixTransform {
             if !config.include_watched {
                 c.media_container.children_mut().retain(|x| !x.is_watched());
             }
+
             // total_size += c.media_container.total_size.unwrap();
             match children.is_empty() {
                 false => {
@@ -547,6 +539,51 @@ impl Transform for HubChildrenLimitTransform {
             let mut children = item.children();
             children.truncate(len);
             item.set_children(children);
+        }
+    }
+}
+
+#[derive(Default, Debug)]
+pub struct TMDBArtTransform;
+
+impl TMDBArtTransform {
+    pub async fn transform(&self, item: &mut MetaData) {
+        let banner = item.tmdb_banner().await;
+        if banner.is_some() {
+            item.art = banner;
+        }
+    }
+}
+
+#[async_trait]
+impl Transform for TMDBArtTransform {
+    async fn transform_metadata(
+        &self,
+        item: &mut MetaData,
+        plex_client: PlexClient,
+        options: PlexParams,
+    ) {
+        let config: Config = Config::figment().extract().unwrap();
+        if config.tmdb_api_key.is_some() {
+            if item.is_hub() {
+                // TOOD: Use tokio joinset
+                let mut children: Vec<MetaData> = vec![];
+                for child in item.children_mut() {
+                    let banner = child.tmdb_banner().await;
+                    if banner.is_some() {
+                        child.art = banner;
+                    }
+                    children.push(child.to_owned());
+                }
+                item.set_children(children);
+                
+                // item.set_children(item.children_mut()
+                //     .iter_mut()
+                //     .map(|x| async move { self.transform(x).await }).collect()
+                // );
+            } else {
+                self.transform(item).await;
+            }
         }
     }
 }

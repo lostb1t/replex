@@ -363,8 +363,8 @@ where
 }
 
 impl MetaData {
+    // TODO: Cache
     pub async fn tmdb_banner(&self) -> Option<String> {
-        // can call tmdb resizer aswell: https://image.tmdb.org/t/p/w500/wwemzKWzjKYJFfCeiB57q3r4Bcm.png
         if self.guids.is_empty() {
             return None;
         }
@@ -392,7 +392,11 @@ impl MetaData {
                 if images.backdrops.is_empty() {
                     return None;
                 }
-                return Some(format!("https://image.tmdb.org/t/p/w500/{}", images.backdrops[0].file_path));
+
+                return Some(format!(
+                    "https://image.tmdb.org/t/p/original{}",
+                    images.backdrops[0].file_path
+                ));
                 // dbg!(&result);
                 // Some("test".to_string())
             }
