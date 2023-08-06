@@ -1,0 +1,11 @@
+---
+
+concurrency: 4
+base: 'http://0.0.0.0:80'
+iterations: 5
+rampup: 2
+
+plan:
+  - name: Hubs promoted
+    request:
+      url: /api/users.json

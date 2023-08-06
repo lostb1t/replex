@@ -84,7 +84,7 @@ async fn main() {
             .await;
         Server::new(acceptor).serve(router).await;
     } else {
-        let acceptor = TcpListener::new("0.0.0.0:80").bind().await;
+        let acceptor = TcpListener::new(format!("0.0.0.0:{}", config.port)).bind().await;
         Server::new(acceptor).serve(router).await;
     }
 }

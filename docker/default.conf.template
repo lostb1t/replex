@@ -1,0 +1,66 @@
+upstream plex {
+    server ${PLEX};
+    keepalive 8;
+}
+
+upstream replex {
+    server 127.0.0.1:3001;
+    keepalive 8;
+}
+
+map $request_method $upstream_location {
+  PUT     ${REPLEX_HOST};
+  POST    ${REPLEX_HOST};
+  PATCH   ${REPLEX_HOST};
+  OPTIONS   ${REPLEX_HOST};
+  default http://127.0.0.1:3001;
+}
+
+## If there is no Upgrade header, then $connection_upgrade is close, otherwise it is upgrade
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
+server {
+    listen 0.0.0.0:80;
+    #listen 80;
+    #listen 0.0.0.0:443 ssl;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    #proxy_set_header X-NginX-Proxy true;
+    proxy_pass_request_headers on;
+    proxy_redirect off;
+    # TODO: Only allow same server and app.plex.tv
+    # add_header "Access-Control-Allow-Methods" "GET, POST, PUT, PATCH, OPTIONS, HEAD";
+    # proxy_set_header Origin '$http_origin';
+    #add header "Access-Control-Expose-Headers" "Location, Date";
+    #add_header "Access-Control-Allow-Methods" "GET, POST, PUT, PATCH, OPTIONS, HEAD";
+    #add_header 'Access-Control-Allow-Origin' "$http_origin" always;
+    #add_header "Access-Control-Allow-Origin" $http_origin;
+
+    location / {
+      proxy_pass ${PLEX_PROTOCOL}://plex;
+    }
+
+    location /hubs/search {
+      proxy_pass ${PLEX_PROTOCOL}://plex;
+    }
+
+    location /:/websockets {
+      proxy_pass ${PLEX_PROTOCOL}://plex;
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection $connection_upgrade;
+    }
+
+    location /hubs/ {
+      #proxy_pass ${PLEX_PROTOCOL}://$upstream_location;
+      proxy_pass $upstream_location;
+    }
+
+    location /replex/ {
+      #proxy_pass $scheme://replex;
+      proxy_pass http://replex;
+    }
+ }

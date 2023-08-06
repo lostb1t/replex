@@ -1,4 +1,4 @@
-FROM rust:latest as builder
+FROM rust:1.71-bookworm as builder
 
 WORKDIR /app/src
 RUN USER=root cargo new --bin replex
@@ -10,14 +10,18 @@ RUN cargo build --release
 COPY ./ ./
 RUN cargo build --release
 
-FROM debian:bullseye-slim as replex
+FROM nginx:bookworm as nginx
 RUN apt update \
     && apt install -y openssl ca-certificates \
     && apt clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+COPY --from=builder /app/src/replex/target/release/replex /app/
 
 WORKDIR /app
-COPY --from=builder /app/src/replex/target/release/replex ./
 
-EXPOSE 80
-CMD ["/app/replex"]
+COPY docker/default.conf.template /etc/nginx/templates/
+RUN echo "daemon off;" >> /etc/nginx/nginx.conf
+# RUN rm /etc/nginx/conf.d/default.conf
+COPY docker/start.sh start.sh
+STOPSIGNAL SIGQUIT
+CMD ./start.sh

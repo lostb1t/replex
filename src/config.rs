@@ -8,6 +8,8 @@ fn default_as_false() -> bool {
 #[derive(Debug, PartialEq, Deserialize)]
 pub struct Config {
     pub host: Option<String>,
+    #[serde(default = "default_port")]
+    pub port: u64,
     #[serde(
         default = "default_as_false",
         deserialize_with = "figment::util::bool_from_str_or_int"
@@ -31,6 +33,10 @@ pub struct Config {
 
 fn default_cache_ttl() -> u64 {
     5 * 60
+}
+
+fn default_port() -> u64 {
+    80
 }
 
 impl Config {
