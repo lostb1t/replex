@@ -93,7 +93,7 @@ jobs:
       - name: Prepare semantic-release for Rust
         run: semantic-release-cargo prepare ${{ needs.get-next-version.outputs.new-release-version }}
       - name: Build
-        run: cargo build --release
+        run: CARGO_TARGET_DIR=./ci-target cargo build --release
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2

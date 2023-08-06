@@ -18,13 +18,10 @@ Remix your plex recommendations.
 Settings are set via [environment variables](https://kinsta.com/knowledgebase/what-is-an-environment-variable/) 
 
 | Setting        	         | Default 	| Description                                                            	  |
-|--------------------------|-----------|----------------------------------------------------------------------------|
+|--------------------------|----------|---------------------------------------------------------------------------|
 | REPLEX_HOST              |        	| Plex target host to proxy                                             	  |
-| REPLEX_INCLUDE_WATCHED   | false    	| If set to false, hide watched items.                                       |
-| REPLEX_CACHE_TTL         | 300    	| Time to live for caches in seconds. Set to 0 to disable            	     |
-| REPLEX_SSL_ENABLE        | false    	| Enable automatic SSL generation. http will be disabled                     |
-|                          |           | (stored in /data/acme/letsencrypt so make sure to mount a volume)          |
-| REPLEX_SSL_DOMAIN        |           | Domain to request SSL certificate for when REPLEX_SSL_ENABLE is enabled   |
+| REPLEX_INCLUDE_WATCHED   | false    | If set to false, hide watched items.                                      |
+| REPLEX_CACHE_TTL         | 300    	| Time to live for caches in seconds. Set to 0 to disable            	      |
 
 ## hub style
 
