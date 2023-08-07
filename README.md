@@ -63,6 +63,7 @@ services:
 ```
 
 ## Settings
+
 Settings are set via [environment variables](https://kinsta.com/knowledgebase/what-is-an-environment-variable/) 
 
 | Setting        	         | Default 	| Description                                                            	  |
@@ -71,6 +72,11 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_INCLUDE_WATCHED   | false    | If set to false, hide watched items.                                      |
 | REPLEX_CACHE_TTL         | 300    	| Time to live for caches in seconds. Set to 0 to disable            	      |
 | REPLEX_TMDB_API_KEY      |     	    | Enables tmdb artwork for hero hubs instead of plex background artwork     |
+| REPLEX_SSL_ENABLE        | false    | Enable automatic SSL generation. http will be disabled                    |
+|                          |          | (stored in /data/acme/letsencrypt so make sure to mount a volume)         |
+| REPLEX_SSL_DOMAIN        |          | Domain to request SSL certificate for when REPLEX_SSL_ENABLE is enabled   |
+
+SSL only works for the regular image. And is kinda untested at this point.
 
 ## Mixing rows
 
