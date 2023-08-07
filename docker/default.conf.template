@@ -32,7 +32,7 @@ server {
     proxy_pass_request_headers on;
     proxy_redirect off;
     # TODO: Only allow same server and app.plex.tv
-    add_header "Access-Control-Allow-Methods" "GET, POST, PUT, PATCH, OPTIONS, HEAD";
+    #add_header "Access-Control-Allow-Methods" "GET, POST, PUT, PATCH, OPTIONS, HEAD";
     # proxy_set_header Origin '$http_origin';
     #add header "Access-Control-Expose-Headers" "Location, Date";
     #add_header "Access-Control-Allow-Methods" "GET, POST, PUT, PATCH, OPTIONS, HEAD";
@@ -43,10 +43,6 @@ server {
       proxy_pass ${PLEX_PROTOCOL}://plex;
     }
 
-    location /hubs/search {
-      proxy_pass ${PLEX_PROTOCOL}://plex;
-    }
-
     location /:/websockets {
       proxy_pass ${PLEX_PROTOCOL}://plex;
       proxy_http_version 1.1;
@@ -54,8 +50,11 @@ server {
       proxy_set_header Connection $connection_upgrade;
     }
 
-    location /hubs/ {
-      #proxy_pass ${PLEX_PROTOCOL}://$upstream_location;
+    location /hubs/promoted {
+      proxy_pass $upstream_location;
+    }
+
+    location /hubs/sections {
       proxy_pass $upstream_location;
     }
 
