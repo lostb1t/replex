@@ -76,7 +76,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 |                          |          | (stored in /data/acme/letsencrypt so make sure to mount a volume)         |
 | REPLEX_SSL_DOMAIN        |          | Domain to request SSL certificate for when REPLEX_SSL_ENABLE is enabled   |
 
-SSL only works for the regular image. And is kinda untested at this point.
+SSL only works with the regular docker image. And is kinda untested at this point.
 
 ## Mixing rows
 
