@@ -1,18 +1,17 @@
 config:
-  target: ws://0.0.0.0:80/:/websockets/notifications?X-Plex-Token={{TOKEN}}
-  engine: ws 
-  # phases:
-  #   - duration: 20
-  #     arrivalRate: 10
+  target: "http://0.0.0.0:80"
+  phases:
+    - duration: 2000
+      arrivalRate: 2
+  ensure:
+    p99: 300
+    maxErrorRate: 1
 
-  # target: "wss://echo.websocket.org"
-  # flow:
-  #   - send: "Hello world!"
-  # phases:
-  #   - duration: 20
-  #     arrivalRate: 10
 scenarios:
   - flow:
     - loop:
-      - send: "Hello world!"
-      count: 100
+      - get:
+          url: "/video/:/transcode/universal/session/qanh4vo5uszbspg7xjlie84b/0/10.m4s"
+      # count: 100
+
+#http://0.0.0.0:80/video/:/transcode/universal/session/qanh4vo5uszbspg7xjlie84b/0/10.m4s"

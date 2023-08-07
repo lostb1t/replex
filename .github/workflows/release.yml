@@ -106,6 +106,15 @@ jobs:
           push: true 
           tags: | 
             ghcr.io/sarendsen/replex:latest
+      - name: Build nginx images
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: docker/Dockerfile.nginx.github
+          platforms: linux/amd64,linux/arm64,linux/arm
+          push: true 
+          tags: | 
+            ghcr.io/sarendsen/replex-nginx:latest
       - name: Invoke semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
