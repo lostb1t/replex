@@ -74,8 +74,11 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 
 ## Mixing rows
 
-Collections with the same name from different libraries will be merged into one on the home screen,
+Custom collections with the same name from different libraries will be merged into one on the home screen,
 So an collection named "Trending" in the Movie library will be merged with an collection named "Trending" from a shows library on home.
+
+Note, this does not work on builtin recommandations. As i personally dont see then need of mixing those. 
+You can recreated the builtin rows with smart collections if you wish to have that functionality, or with PMM ofcourse.
 
 ## Hub style
 
