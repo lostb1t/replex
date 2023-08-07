@@ -9,6 +9,7 @@ Remix your plex recommendations.
 - Merge recommendations on home into one from different libraries. Aka have movies and shows in a single row.
 - Remove watched items from recommendations.
 - Choose between styles, shelf (default) or hero.
+- Use tmdb artwork for hero styles
 - Works on every client/app not only plex web!
 - Plays nice with PMM (and without).
 
