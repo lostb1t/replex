@@ -1,5 +1,137 @@
 use async_trait::async_trait;
-use salvo::{cache::CacheIssuer, Request, Depot};
+use moka::{future::Cache, future::ConcurrentCacheExt, Expiry};
+use once_cell::sync::Lazy;
+use salvo::{cache::CacheIssuer, Depot, Request};
+use serde::de::DeserializeOwned;
+use serde::{Deserialize, Deserializer, Serialize};
+use std::hash::Hash;
+use std::{
+    sync::Arc,
+    time::{Duration, Instant},
+};
+use std::error::Error;
+
+use crate::config::Config;
+
+// we close, this is a good example: https://github.com/getsentry/symbolicator/blob/170062d5bc7d4638a3e6af8a564cd881d798f1f0/crates/symbolicator-service/src/caching/memory.rs#L85
+
+pub type CacheKey = String;
+pub type CacheValue = (Expiration, Arc<Vec<u8>>);
+// pub type CacheValue = Arc<Vec<u8>>;
+pub type GlobalCacheType = Cache<CacheKey, CacheValue>;
+
+pub(crate) static GLOBAL_CACHE: Lazy<CacheManager> = Lazy::new(|| {
+    let expiry = CacheExpiry;
+
+    // let store: GlobalCacheType =
+    CacheManager::new(
+        Cache::builder()
+            .max_capacity(10000)
+            .expire_after(expiry)
+            .build(),
+    )
+});
+
+/// An enum to represent the expiration of a value.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Expiration {
+    /// The value never expires.
+    Never,
+    /// Global TTL from the config
+    Global,
+}
+
+impl Expiration {
+    /// Returns the duration of this expiration.
+    pub fn as_duration(&self) -> Option<Duration> {
+        let config: Config = Config::figment().extract().unwrap();
+        match self {
+            Expiration::Never => None,
+            Expiration::Global => Some(Duration::from_secs(config.cache_ttl)),
+        }
+    }
+}
+
+/// An expiry that implements `moka::Expiry` trait. `Expiry` trait provides the
+/// default implementations of three callback methods `expire_after_create`,
+/// `expire_after_read`, and `expire_after_update`.
+///
+/// In this example, we only override the `expire_after_create` method.
+pub struct CacheExpiry;
+
+impl Expiry<CacheKey, (Expiration, Arc<Vec<u8>>)> for CacheExpiry {
+    /// Returns the duration of the expiration of the value that was just
+    /// created.
+    fn expire_after_create(
+        &self,
+        _key: &CacheKey,
+        value: &(Expiration, Arc<Vec<u8>>),
+        _current_time: Instant,
+    ) -> Option<Duration> {
+        let duration = value.0.as_duration();
+        duration
+    }
+}
+
+#[derive(Clone)]
+pub struct CacheManager {
+    /// The instance of `moka::future::Cache`
+    // pub store: Arc<Cache<String, Arc<Vec<u8>>>>,
+    // pub inner: S,
+    pub inner: GlobalCacheType,
+}
+
+impl CacheManager {
+    /// Create a new manager from a pre-configured Cache
+    // pub fn new(store: Cache<String, Arc<Vec<u8>>>) -> Self {
+    pub fn new(cache: GlobalCacheType) -> Self {
+        Self {
+            inner: cache, // store: Arc::new(store),
+        }
+    }
+    /// Clears out the entire cache.
+    pub async fn clear(&self) -> anyhow::Result<()> {
+        self.inner.invalidate_all();
+        self.inner.sync();
+        Ok(())
+    }
+
+    pub async fn get<T>(&self, cache_key: &str) -> Option<T>
+    where
+        T: DeserializeOwned,
+    { 
+        match self.inner.get(cache_key) {
+            Some(d) => {
+                let result: T = bincode::deserialize(&d.1).unwrap();
+                Some(result)
+            },
+            None => None,
+        }
+    }
+
+    pub async fn insert<V>(
+        &self,
+        cache_key: String,
+        v: V,
+        expires: Expiration,
+    ) -> anyhow::Result<()>
+    where
+        V: Serialize,
+    {
+        
+        let value = (expires, Arc::new(bincode::serialize(&v)?));
+        // let bytes = bincode::serialize(&value)?;
+        self.inner.insert(cache_key, value).await;
+        self.inner.sync();
+        Ok(())
+    }
+
+    pub async fn delete(&self, cache_key: &str) -> anyhow::Result<()> {
+        self.inner.invalidate(cache_key).await;
+        self.inner.sync();
+        Ok(())
+    }
+}
 
 pub struct RequestIssuer {
     use_scheme: bool,
@@ -7,7 +139,7 @@ pub struct RequestIssuer {
     use_path: bool,
     use_query: bool,
     use_method: bool,
-    use_token: bool
+    use_token: bool,
 }
 impl Default for RequestIssuer {
     fn default() -> Self {
@@ -60,7 +192,11 @@ impl RequestIssuer {
 #[async_trait]
 impl CacheIssuer for RequestIssuer {
     type Key = String;
-    async fn issue(&self, req: &mut Request, _depot: &Depot) -> Option<Self::Key> {
+    async fn issue(
+        &self,
+        req: &mut Request,
+        _depot: &Depot,
+    ) -> Option<Self::Key> {
         let mut key = String::new();
         if self.use_scheme {
             if let Some(scheme) = req.uri().scheme_str() {

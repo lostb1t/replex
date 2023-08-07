@@ -3,10 +3,12 @@ use async_recursion::async_recursion;
 use async_trait::async_trait;
 use futures_util::{
     future::{self, join_all, LocalBoxFuture},
-    stream::FuturesUnordered,
+    stream::{FuturesUnordered, FuturesOrdered}, StreamExt,
 };
 use itertools::Itertools;
 use std::sync::Arc;
+use tokio::task::JoinSet;
+use tokio::time::Instant;
 
 #[async_trait]
 pub trait Transform: Send + Sync + 'static {
@@ -548,10 +550,17 @@ pub struct TMDBArtTransform;
 
 impl TMDBArtTransform {
     pub async fn transform(&self, item: &mut MetaData) {
-        let banner = item.tmdb_banner().await;
+        let banner = item.get_tmdb_banner().await;
         if banner.is_some() {
             item.art = banner;
         }
+    }
+    pub async fn apply_tmdb_banner(&self, item: &mut MetaData) -> MetaData {
+        let banner = item.get_tmdb_banner().await;
+        if banner.is_some() {
+            item.art = banner;
+        }
+        item.to_owned()
     }
 }
 
@@ -564,24 +573,37 @@ impl Transform for TMDBArtTransform {
         options: PlexParams,
     ) {
         let config: Config = Config::figment().extract().unwrap();
+
+        // let bla = async move |item| {
+        //     let banner = item.get_tmdb_banner().await;
+        //     if banner.is_some() {
+        //         item.art = banner;
+        //     }
+        //     item.to_owned()
+        // }
+
         if config.tmdb_api_key.is_some() {
-            if item.is_hub() {
-                // TOOD: Use tokio joinset
-                let mut children: Vec<MetaData> = vec![];
-                for child in item.children_mut() {
-                    let banner = child.tmdb_banner().await;
-                    if banner.is_some() {
-                        child.art = banner;
-                    }
-                    children.push(child.to_owned());
+            if item.is_hub() && item.style.clone().unwrap() == "hero" {
+                // let mut children: Vec<MetaData> = vec![];
+    
+                let mut futures = FuturesOrdered::new();
+                for child in item.children() {
+                    futures.push_back(async move {
+                        let mut c = child.clone();
+                        let banner = child.get_tmdb_banner().await;
+                        if banner.is_some() {
+                            c.art = banner;
+                        }
+                        return c
+                    });
                 }
+                // let now = Instant::now();
+
+                let children: Vec<MetaData>  = futures.collect().await;
                 item.set_children(children);
-                
-                // item.set_children(item.children_mut()
-                //     .iter_mut()
-                //     .map(|x| async move { self.transform(x).await }).collect()
-                // );
+
             } else {
+                // keep this blocking for now. AS its loaded in the background
                 self.transform(item).await;
             }
         }

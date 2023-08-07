@@ -22,10 +22,15 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_HOST              |        	| Plex target host to proxy                                             	  |
 | REPLEX_INCLUDE_WATCHED   | false    | If set to false, hide watched items.                                      |
 | REPLEX_CACHE_TTL         | 300    	| Time to live for caches in seconds. Set to 0 to disable            	      |
+| REPLEX_TMDB_API_KEY      |     	    | Enables tmdb artwork for hero hubs instead of plex background artwork     |
 
 ## hub style
 
 You can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection. 
+Plex uses an items background for hero styles rows. Often these dont have any text or are not suitable for hero artwork in general.
+You can use tmdb to automaticly load hero artwork by providing the env `REPLEX_TMDB_API_KEY`. This way you can keep your backgrounds and hero artwork seperated. 
+
+see https://developer.themoviedb.org/docs/getting-started on how to get an api key. 
 
 ## usage example
 

@@ -6,10 +6,11 @@ use tmdb_api::tvshow::search::TVShowSearch;
 use tmdb_api::Client;
 
 extern crate mime;
+use crate::cache::GLOBAL_CACHE;
 use crate::config::*;
 use crate::plex_client::PlexClient;
 
-use crate::tmdb::TMDB_CLIENT;
+use crate::tmdb::{TVShowImages, TMDB_CLIENT};
 use crate::utils::*;
 use anyhow::Result;
 use async_trait::async_trait;
@@ -363,8 +364,7 @@ where
 }
 
 impl MetaData {
-    // TODO: Cache
-    pub async fn tmdb_banner(&self) -> Option<String> {
+    pub async fn get_tmdb_banner(&self) -> Option<String> {
         if self.guids.is_empty() {
             return None;
         }
@@ -380,31 +380,84 @@ impl MetaData {
         }
         tmdb_id?;
 
+        // TODO: Dry....
+        // TODO: Foreign media often dont have "english" banners. Support native language banners
         match self.r#type.as_str() {
             "movie" => {
-                let cmd = MovieImages::new(tmdb_id.unwrap())
-                    .with_language(Some("en".to_string()));
-                let result = cmd.execute(&TMDB_CLIENT).await;
-                if result.is_err() {
-                    return None;
-                }
-                let images = result.unwrap();
-                if images.backdrops.is_empty() {
-                    return None;
+                let cache_key = format!("tmdb:movie:{:?}:banner", tmdb_id);
+                let cached_result: Option<Option<String>> =
+                    GLOBAL_CACHE.get(cache_key.as_str()).await;
+
+                if let Some(i) = cached_result {
+                    return i;
                 }
 
-                return Some(format!(
-                    "https://image.tmdb.org/t/p/original{}",
-                    images.backdrops[0].file_path
-                ));
-                // dbg!(&result);
-                // Some("test".to_string())
+                let cmd = MovieImages::new(tmdb_id.unwrap())
+                    .with_language(Some("en".to_string()));
+                let banner: Option<String> =
+                    match cmd.execute(&TMDB_CLIENT).await {
+                        Ok(res) => {
+                            if !res.backdrops.is_empty() {
+                                Some(format!(
+                                    "https://image.tmdb.org/t/p/original{}",
+                                    res.backdrops[0].file_path
+                                ))
+                            } else {
+                                None
+                            }
+                        }
+                        Err(_res) => {
+                            // tracing::warn!("Could not find {:?}", res);
+                            None
+                        }
+                    };
+
+                let _ = GLOBAL_CACHE
+                    .insert(
+                        cache_key,
+                        banner.clone(),
+                        crate::cache::Expiration::Never,
+                    )
+                    .await;
+                banner
             }
             "show" => {
-                // let cmd = MovieImages::new(tmdb_id.unwrap());
-                // let result = cmd.execute(&TMDB_CLIENT).await;
-                // Some("test".to_string())
-                None
+                let cache_key = format!("tmdb:tv:{:?}:banner", tmdb_id);
+                let cached_result: Option<Option<String>> =
+                    GLOBAL_CACHE.get(cache_key.as_str()).await;
+
+                if let Some(i) = cached_result {
+                    return i;
+                }
+
+                let cmd = TVShowImages::new(tmdb_id.unwrap())
+                    .with_language(Some("en".to_string()));
+                let banner: Option<String> =
+                    match cmd.execute(&TMDB_CLIENT).await {
+                        Ok(res) => {
+                            if !res.backdrops.is_empty() {
+                                Some(format!(
+                                    "https://image.tmdb.org/t/p/original{}",
+                                    res.backdrops[0].file_path
+                                ))
+                            } else {
+                                None
+                            }
+                        }
+                        Err(_res) => {
+                            // tracing::warn!("Could not find {:?}", res);
+                            None
+                        }
+                    };
+
+                let _ = GLOBAL_CACHE
+                    .insert(
+                        cache_key,
+                        banner.clone(),
+                        crate::cache::Expiration::Never,
+                    )
+                    .await;
+                banner
             }
             _ => None,
         }
