@@ -6,7 +6,7 @@ RUN apt update \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 WORKDIR /app
-COPY ./target/release/replex ./
+COPY ./ci-target/release/replex ./
 
 EXPOSE 80
 CMD ["/app/replex"]
