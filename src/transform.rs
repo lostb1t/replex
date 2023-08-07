@@ -654,6 +654,25 @@ impl Transform for HubSectionDirectoryTransform {
     }
 }
 
+#[derive(Default, Debug)]
+pub struct HubSectionKeyTransform;
+
+/// We point to replex so we can do some transform on the children calls
+#[async_trait]
+impl Transform for HubSectionKeyTransform {
+    async fn transform_metadata(
+        &self,
+        item: &mut MetaData,
+        plex_client: PlexClient,
+        options: PlexParams,
+    ) {
+       
+        if item.is_hub() {
+            item.key = format!("/replex{}", item.key);
+        }
+    }
+}
+
 // #[derive(Default)]
 // pub struct WatchedFilter;
 
