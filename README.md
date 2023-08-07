@@ -89,7 +89,8 @@ You can recreate the builtin rows with smart collections if you wish to have tha
 ## Hub style
 
 You can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection. 
-Plex uses an items background for hero styles rows. Often these dont have any text or are not suitable for hero artwork in general.
+Plex uses an the background artwork for hero elements. 
+Often these dont have any text or are not suitable for hero artwork in general.
 You can use tmdb to automaticly load hero artwork by providing the env `REPLEX_TMDB_API_KEY`. This way you can keep your backgrounds and hero artwork seperated. 
 
 see https://developer.themoviedb.org/docs/getting-started on how to get an api key. 
@@ -122,6 +123,6 @@ Paths are subject to change.
 ## Docker
 
 2 docker images are provided. 
-The regular image `replex` and and image including nginx `replex-nginx`. That routes non replex request directly to plex.
+The regular image `replex` and and image including nginx `replex-nginx`. That routes non replex request directly to plex. Or route it yourself like explained ankve.
 
 Some users report high CPU usage with the regular image. If you encounter this you can try the nginx image.
