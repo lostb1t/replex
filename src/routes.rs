@@ -115,6 +115,13 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
             .to_string(),
     );
 
+    // we want guids for banners
+    add_query_param_salvo(
+        req,
+        "includeGuids".to_string(),
+        "1".to_string(),
+    );
+
     // Hack, as the list could be smaller when removing watched items. So we request more.
     if let Some(original_count) = params.clone().count {
         add_query_param_salvo(
@@ -134,6 +141,7 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
         .with_transform(HubChildrenLimitTransform {
             limit: params.clone().count.unwrap(),
         })
+        .with_transform(TMDBArtTransform)
         .apply_to(&mut container)
         .await;
     res.render(container);
@@ -154,6 +162,13 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
         );
     }
 
+    // we want guids for banners
+    add_query_param_salvo(
+        req,
+        "includeGuids".to_string(),
+        "1".to_string(),
+    );
+
     let upstream_res = plex_client.request(req).await.unwrap();
     let mut container: MediaContainerWrapper<MediaContainer> =
         from_reqwest_response(upstream_res).await.unwrap();
@@ -163,6 +178,7 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
         .with_transform(HubChildrenLimitTransform {
             limit: params.clone().count.unwrap(),
         })
+        .with_transform(TMDBArtTransform)
         // .with_filter(CollectionHubPermissionFilter)
         .with_filter(WatchedFilter)
         .apply_to(&mut container)
@@ -203,6 +219,7 @@ pub async fn get_collections_children(
             offset,
             limit,
         })
+        .with_transform(TMDBArtTransform)
         .apply_to(&mut container)
         .await;
     res.render(container); // TODO: FIx XML

@@ -3,10 +3,12 @@ use async_recursion::async_recursion;
 use async_trait::async_trait;
 use futures_util::{
     future::{self, join_all, LocalBoxFuture},
-    stream::FuturesUnordered,
+    stream::{FuturesUnordered, FuturesOrdered}, StreamExt,
 };
 use itertools::Itertools;
 use std::sync::Arc;
+use tokio::task::JoinSet;
+use tokio::time::Instant;
 
 #[async_trait]
 pub trait Transform: Send + Sync + 'static {
@@ -245,14 +247,14 @@ impl TransformBuilder {
                     item,
                     self.plex_client.clone(),
                     self.options.clone(),
-                ).await;
-            };
-        };
+                )
+                .await;
+            }
+        }
 
+        // future::join_all(futures).await;
 
-            // future::join_all(futures).await;
-
-            // dont use join as it needs ti be executed in order
+        // dont use join as it needs ti be executed in order
 
         // }
 
@@ -381,9 +383,8 @@ impl Transform for HubStyleTransform {
             let mut collection_details = plex_client
                 .clone()
                 .get_cached(
-                    plex_client.get_collection(
-                        get_collection_id_from_hub(item),
-                    ),
+                    plex_client
+                        .get_collection(get_collection_id_from_hub(item)),
                     format!("collection:{}", item.key.clone()).to_string(),
                 )
                 .await
@@ -445,7 +446,7 @@ impl Transform for HubMixTransform {
             // we only process collection hubs
             if !hub.is_collection_hub() {
                 new_hubs.push(hub.to_owned());
-                continue
+                continue;
             }
 
             let p = new_hubs.iter().position(|v| v.title == hub.title);
@@ -503,6 +504,7 @@ impl Transform for LibraryMixTransform {
             if !config.include_watched {
                 c.media_container.children_mut().retain(|x| !x.is_watched());
             }
+
             // total_size += c.media_container.total_size.unwrap();
             match children.is_empty() {
                 false => {
@@ -539,6 +541,71 @@ impl Transform for HubChildrenLimitTransform {
             let mut children = item.children();
             children.truncate(len);
             item.set_children(children);
+        }
+    }
+}
+
+#[derive(Default, Debug)]
+pub struct TMDBArtTransform;
+
+impl TMDBArtTransform {
+    pub async fn transform(&self, item: &mut MetaData) {
+        let banner = item.get_tmdb_banner().await;
+        if banner.is_some() {
+            item.art = banner;
+        }
+    }
+    pub async fn apply_tmdb_banner(&self, item: &mut MetaData) -> MetaData {
+        let banner = item.get_tmdb_banner().await;
+        if banner.is_some() {
+            item.art = banner;
+        }
+        item.to_owned()
+    }
+}
+
+#[async_trait]
+impl Transform for TMDBArtTransform {
+    async fn transform_metadata(
+        &self,
+        item: &mut MetaData,
+        plex_client: PlexClient,
+        options: PlexParams,
+    ) {
+        let config: Config = Config::figment().extract().unwrap();
+
+        // let bla = async move |item| {
+        //     let banner = item.get_tmdb_banner().await;
+        //     if banner.is_some() {
+        //         item.art = banner;
+        //     }
+        //     item.to_owned()
+        // }
+
+        if config.tmdb_api_key.is_some() {
+            if item.is_hub() && item.style.clone().unwrap() == "hero" {
+                // let mut children: Vec<MetaData> = vec![];
+    
+                let mut futures = FuturesOrdered::new();
+                for child in item.children() {
+                    futures.push_back(async move {
+                        let mut c = child.clone();
+                        let banner = child.get_tmdb_banner().await;
+                        if banner.is_some() {
+                            c.art = banner;
+                        }
+                        return c
+                    });
+                }
+                // let now = Instant::now();
+
+                let children: Vec<MetaData>  = futures.collect().await;
+                item.set_children(children);
+
+            } else {
+                // keep this blocking for now. AS its loaded in the background
+                self.transform(item).await;
+            }
         }
     }
 }
