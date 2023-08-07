@@ -15,28 +15,8 @@ Remix your plex recommendations.
 
 !!This does not alter your plex data in anyway. it only alters outgoing api requests. All your collections or rows are kept intact!!
 
-## Settings
-Settings are set via [environment variables](https://kinsta.com/knowledgebase/what-is-an-environment-variable/) 
 
-| Setting        	         | Default 	| Description                                                            	  |
-|--------------------------|----------|---------------------------------------------------------------------------|
-| REPLEX_HOST              |        	| Plex target host to proxy                                             	  |
-| REPLEX_INCLUDE_WATCHED   | false    | If set to false, hide watched items.                                      |
-| REPLEX_CACHE_TTL         | 300    	| Time to live for caches in seconds. Set to 0 to disable            	      |
-| REPLEX_TMDB_API_KEY      |     	    | Enables tmdb artwork for hero hubs instead of plex background artwork     |
-
-## Hub style
-
-You can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection. 
-Plex uses an items background for hero styles rows. Often these dont have any text or are not suitable for hero artwork in general.
-You can use tmdb to automaticly load hero artwork by providing the env `REPLEX_TMDB_API_KEY`. This way you can keep your backgrounds and hero artwork seperated. 
-
-see https://developer.themoviedb.org/docs/getting-started on how to get an api key. 
-
-## Usage
-
-_Make sure that the collections you want to merge have the same name in your different libraries as the merge happens by name. 
-Example: an collection named "Trending" in a Movie library will be merged with an collection named "Trending" from a shows library on home._
+## Installation
 
 Run the docker image with REPLEX_HOST set to your plex instance.
 
@@ -81,6 +61,29 @@ services:
     depends_on:
       - plex
 ```
+
+## Settings
+Settings are set via [environment variables](https://kinsta.com/knowledgebase/what-is-an-environment-variable/) 
+
+| Setting        	         | Default 	| Description                                                            	  |
+|--------------------------|----------|---------------------------------------------------------------------------|
+| REPLEX_HOST              |        	| Plex target host to proxy                                             	  |
+| REPLEX_INCLUDE_WATCHED   | false    | If set to false, hide watched items.                                      |
+| REPLEX_CACHE_TTL         | 300    	| Time to live for caches in seconds. Set to 0 to disable            	      |
+| REPLEX_TMDB_API_KEY      |     	    | Enables tmdb artwork for hero hubs instead of plex background artwork     |
+
+## Mixing rows
+
+Collections with the same name from different libraries will be merged into one on the home screen,
+So an collection named "Trending" in the Movie library will be merged with an collection named "Trending" from a shows library on home.
+
+## Hub style
+
+You can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection. 
+Plex uses an items background for hero styles rows. Often these dont have any text or are not suitable for hero artwork in general.
+You can use tmdb to automaticly load hero artwork by providing the env `REPLEX_TMDB_API_KEY`. This way you can keep your backgrounds and hero artwork seperated. 
+
+see https://developer.themoviedb.org/docs/getting-started on how to get an api key. 
 
 ## Remote access (force clients to use the proxy)
 
