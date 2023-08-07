@@ -494,12 +494,11 @@ impl MetaData {
 
     pub fn has_label(&self, name: String) -> bool {
         for label in &self.labels {
-            if label.tag == name {
+            if label.tag.to_lowercase() == name.to_lowercase() {
                 return true;
             }
         }
         false
-        // collection_details.media_container.directory.get(0).unwrap().label.is_some()
     }
 
     pub fn is_watched(&self) -> bool {
