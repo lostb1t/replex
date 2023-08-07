@@ -9,13 +9,13 @@ Remix your plex recommendations.
 - Merge recommendations on home into one from different libraries. Aka have movies and shows in a single row.
 - Remove watched items from recommendations.
 - Choose between styles, shelf (default) or hero.
-- Use tmdb artwork for hero styles
+- Use tmdb artwork for hero styles.
 - Works on every client/app not only plex web!
 - Plays nice with PMM (and without).
 
 !!This does not alter your plex data in anyway. it only alters outgoing api requests. All your collections or rows are kept intact!!
 
-## settings
+## Settings
 Settings are set via [environment variables](https://kinsta.com/knowledgebase/what-is-an-environment-variable/) 
 
 | Setting        	         | Default 	| Description                                                            	  |
@@ -25,7 +25,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_CACHE_TTL         | 300    	| Time to live for caches in seconds. Set to 0 to disable            	      |
 | REPLEX_TMDB_API_KEY      |     	    | Enables tmdb artwork for hero hubs instead of plex background artwork     |
 
-## hub style
+## Hub style
 
 You can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection. 
 Plex uses an items background for hero styles rows. Often these dont have any text or are not suitable for hero artwork in general.
@@ -33,7 +33,7 @@ You can use tmdb to automaticly load hero artwork by providing the env `REPLEX_T
 
 see https://developer.themoviedb.org/docs/getting-started on how to get an api key. 
 
-## usage example
+## Usage
 
 _Make sure that the collections you want to merge have the same name in your different libraries as the merge happens by name. 
 Example: an collection named "Trending" in a Movie library will be merged with an collection named "Trending" from a shows library on home._
