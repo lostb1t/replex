@@ -26,7 +26,7 @@ pub(crate) static GLOBAL_CACHE: Lazy<CacheManager> = Lazy::new(|| {
     // let store: GlobalCacheType =
     CacheManager::new(
         Cache::builder()
-            .max_capacity(10000)
+            .max_capacity(100000)
             .expire_after(expiry)
             .build(),
     )
