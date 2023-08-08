@@ -7,10 +7,10 @@ use replex::routes::*;
 use salvo::prelude::*;
 use std::env;
 use std::time::Duration;
+use tokio::{task, time};
 use tonic::metadata::MetadataMap;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::prelude::*;
-use tokio::{task, time};
 
 #[tokio::main]
 async fn main() {
@@ -63,7 +63,6 @@ async fn main() {
         .with(fmt_layer)
         .init();
 
-
     // spawn our background task
     // let mut plex_client = PlexClient::dummy();
     // tokio::spawn(async move {
@@ -73,6 +72,9 @@ async fn main() {
     //         dbg!("we are being runned");
     //     }
     // });
+    let version =
+        env::var("CARGO_PKG_VERSION").unwrap_or("unknown".to_string());
+    tracing::info!("Replex version {}", version);
 
     let router = route();
     if config.ssl_enable && config.ssl_domain.is_some() {
@@ -84,7 +86,9 @@ async fn main() {
             .await;
         Server::new(acceptor).serve(router).await;
     } else {
-        let acceptor = TcpListener::new(format!("0.0.0.0:{}", config.port)).bind().await;
+        let acceptor = TcpListener::new(format!("0.0.0.0:{}", config.port))
+            .bind()
+            .await;
         Server::new(acceptor).serve(router).await;
     }
 }
