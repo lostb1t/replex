@@ -72,8 +72,7 @@ async fn main() {
     //         dbg!("we are being runned");
     //     }
     // });
-    let version =
-        env::var("CARGO_PKG_VERSION").unwrap_or("unknown".to_string());
+    let version = env!("CARGO_PKG_VERSION");
     tracing::info!("Replex version {}", version);
 
     let router = route();

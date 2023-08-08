@@ -691,15 +691,25 @@ impl Transform for UserStateTransform {
         options: PlexParams,
     ) {
         let config: Config = Config::figment().extract().unwrap();
-        if !config.disable_user_state {
+        if !config.disable_user_state && !config.disable_leaf_count {
             return
         }
         if item.is_hub() {
             for child in item.children_mut() {
-                child.user_state = Some(false);
+                if config.disable_user_state {
+                    child.user_state = Some(false);
+                }
+                if config.disable_leaf_count {
+                    child.leaf_count = None;
+                }
             }
         } else {
-            item.user_state = Some(false);
+            if config.disable_user_state {
+                item.user_state = Some(false);
+            }
+            if config.disable_leaf_count {
+                item.leaf_count = None;
+            }
         }
     }
 }
