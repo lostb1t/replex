@@ -46,7 +46,7 @@ jobs:
   #       shell: bash
 
   release:
-    if: needs.get-next-version.outputs.new-release-published == 'true'
+    # if: needs.get-next-version.outputs.new-release-published == 'true'
     name: Build and Release
     # TODO: implement marrix https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
     # strategy:
