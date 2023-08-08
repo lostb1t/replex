@@ -144,74 +144,42 @@ pub fn from_string(
 pub async fn from_reqwest_response(
     res: reqwest::Response,
 ) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
-    let content_type = get_content_type_from_headers(res.headers());
     let bytes = res.bytes().await.unwrap();
-
-    let result = match from_bytes(bytes, content_type) {
-        Ok(result) => result,
-        Err(error) => {
-            error!("Problem deserializing: {:?}", error);
-            let container: MediaContainerWrapper<MediaContainer> =
-                MediaContainerWrapper::default();
-            container // TOOD: Handle this higher up
-        }
-    };
-    Ok(result)
+    serde_json::from_reader(&*bytes).map_err(Error::other)
 }
 
 pub async fn from_hyper_response(
     res: HyperResponse,
 ) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
-    let content_type = get_content_type_from_headers(res.headers());
     let bytes = res.into_body().collect().await.unwrap().to_bytes();
-    let result = match from_bytes(bytes, content_type) {
-        Ok(result) => result,
-        Err(error) => {
-            error!("Problem deserializing: {:?}", error);
-            let container: MediaContainerWrapper<MediaContainer> =
-                MediaContainerWrapper::default();
-            container // TOOD: Handle this higher up
-        }
-    };
-    Ok(result)
+    serde_json::from_reader(&*bytes).map_err(Error::other)
 }
 
 pub async fn from_salvo_response(
     mut res: SalvoResponse,
 ) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
-    let content_type = get_content_type_from_headers(res.headers());
-    // let bytes = res.into_body().collect().await.unwrap().to_bytes();
     let bytes = res.take_bytes(None).await.unwrap();
-    let result = match from_bytes(bytes, content_type) {
-        Ok(result) => result,
-        Err(error) => {
-            error!("Problem deserializing: {:?}", error);
-            let container: MediaContainerWrapper<MediaContainer> =
-                MediaContainerWrapper::default();
-            container // TOOD: Handle this higher up
-        }
-    };
-    Ok(result)
+    serde_json::from_reader(&*bytes).map_err(Error::other)
 }
 
-pub fn from_bytes(
-    bytes: bytes::Bytes,
-    content_type: ContentType,
-) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
-    let result: MediaContainerWrapper<MediaContainer> = match content_type {
-        ContentType::Json => {
-            let mut c: MediaContainerWrapper<MediaContainer> =
-                serde_json::from_reader(&*bytes).unwrap();
-            c.content_type = ContentType::Json;
-            c
-        }
-        ContentType::Xml => MediaContainerWrapper {
-            media_container: yaserde::de::from_reader(&*bytes).unwrap(),
-            content_type: ContentType::Xml,
-        },
-    };
-    Ok(result)
-}
+// pub fn from_bytes(
+//     bytes: bytes::Bytes,
+//     content_type: ContentType,
+// ) -> Result<MediaContainerWrapper<MediaContainer>, Error> {    
+//     let result: MediaContainerWrapper<MediaContainer> = match content_type {
+//         ContentType::Json => {
+//             let mut c: MediaContainerWrapper<MediaContainer> =
+//                 serde_json::from_reader(&*bytes).expect("Expected proper json");
+//             c.content_type = ContentType::Json;
+//             c
+//         }
+//         ContentType::Xml => MediaContainerWrapper {
+//             media_container: yaserde::de::from_reader(&*bytes).unwrap(),
+//             content_type: ContentType::Xml,
+//         },
+//     };
+//     Ok(result)
+// }
 
 // Nice example of extracting response by content type: https://github.com/salvo-rs/salvo/blob/7122c3c009d7b94e7ecf155fb096f11884a8c01b/crates/core/src/test/response.rs#L47
 // TODO: use body not string

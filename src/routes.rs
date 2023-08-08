@@ -76,15 +76,17 @@ async fn hello(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
 pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     let params: PlexParams = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
+    let content_type = get_content_type_from_headers(req.headers_mut());
 
     // not sure anymore why i have this lol
-    let content_directory_id_size =
-        params.clone().content_directory_id.unwrap().len();
-    if content_directory_id_size > usize::try_from(1).unwrap() {
-        let upstream_res = plex_client.request(req).await.unwrap();
-        let container = from_reqwest_response(upstream_res).await.unwrap();
-        res.render(container);
-    }
+    // let content_directory_id_size =
+    //     params.clone().content_directory_id.unwrap().len();
+    // if content_directory_id_size > usize::try_from(1).unwrap() {
+    //     let upstream_res = plex_client.request(req).await.unwrap();
+    //     let mut container = from_reqwest_response(upstream_res).await.unwrap();
+    //     container.content_type = content_type.clone();
+    //     res.render(container);
+    // }
 
     if params.clone().content_directory_id.unwrap()[0]
         != params.clone().pinned_content_directory_id.unwrap()[0]
@@ -92,8 +94,7 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
         // We only fill the first one.
         let mut container: MediaContainerWrapper<MediaContainer> =
             MediaContainerWrapper::default();
-        container.content_type =
-            get_content_type_from_headers(req.headers_mut());
+        container.content_type = content_type.clone();
         container.media_container.size = Some(0);
         container.media_container.allow_sync = Some(true);
         container.media_container.identifier =
@@ -132,8 +133,15 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     }
 
     let upstream_res = plex_client.request(req).await.unwrap();
-    let mut container: MediaContainerWrapper<MediaContainer> =
-        from_reqwest_response(upstream_res).await.unwrap();
+    let mut container: MediaContainerWrapper<MediaContainer> = match from_reqwest_response(upstream_res).await {
+        Ok(r) => r,
+        Err(error) => {
+            tracing::error!(error = ?error, uri = ?req.uri(), "Failed to get plex response");
+            res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
+            return;
+        }
+    };
+    container.content_type = content_type;
 
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubStyleTransform)
@@ -151,6 +159,7 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
 pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
     let params: PlexParams = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
+    let content_type = get_content_type_from_headers(req.headers_mut());
 
     // Hack, as the list could be smaller when removing watched items. So we request more.
     if let Some(original_count) = params.clone().count {
@@ -170,8 +179,16 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
     );
 
     let upstream_res = plex_client.request(req).await.unwrap();
-    let mut container: MediaContainerWrapper<MediaContainer> =
-        from_reqwest_response(upstream_res).await.unwrap();
+    let mut container: MediaContainerWrapper<MediaContainer> = match from_reqwest_response(upstream_res).await {
+        Ok(r) => r,
+        Err(error) => {
+            tracing::error!(error = ?error, uri = ?req.uri(), "Failed to get plex response");
+            res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
+            return;
+        }
+    };
+    container.content_type = content_type;
+
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubSectionDirectoryTransform)
         .with_transform(HubSectionKeyTransform)
@@ -200,6 +217,7 @@ pub async fn get_collections_children(
         .map(|v| v.parse().unwrap())
         .collect();
     let plex_client = PlexClient::from_request(req, params.clone());
+    let content_type = get_content_type_from_headers(req.headers_mut());
 
     // We dont listen to pagination. We have a hard max of 250 per collection
     let limit = Some(250); // plex its max
@@ -208,7 +226,7 @@ pub async fn get_collections_children(
     // create a stub
     let mut container: MediaContainerWrapper<MediaContainer> =
         MediaContainerWrapper::default();
-    container.content_type = get_content_type_from_headers(req.headers_mut());
+    container.content_type = content_type;
     let size = container.media_container.children().len();
     container.media_container.size = Some(size.try_into().unwrap());
     container.media_container.offset = offset;

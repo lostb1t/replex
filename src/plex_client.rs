@@ -16,6 +16,7 @@ use moka::future::ConcurrentCacheExt;
 use once_cell::sync::Lazy;
 use once_cell::sync::OnceCell;
 use reqwest::header;
+use reqwest::header::ACCEPT;
 use reqwest::header::HeaderValue;
 use reqwest::Client;
 use salvo::http::ReqBody;
@@ -86,10 +87,8 @@ impl PlexClient {
             self.host,
             &req.uri_mut().path_and_query().unwrap()
         );
-        // let l = &req.uri_mut().path_and_query();
-        // dbg!(&self.host);
-        // dbg!(&req.));
-        let headers = req.headers_mut().to_owned();
+        let mut headers = req.headers_mut().to_owned();
+        headers.remove(ACCEPT); // remove accept as we always do json request
         let res = self
             .http_client
             .get(uri)
