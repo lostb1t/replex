@@ -126,7 +126,7 @@ Paths are subject to change.
 
 ## Docker
 
-2 docker images are provided. 
-The regular image `replex` and and image including nginx `replex-nginx`. That routes non replex request directly to plex. Or route it yourself like explained ankve.
+2 base docker images are provided. 
+The regular image `replex` and and image including nginx `replex:nginx`. That routes non replex request directly to plex. Or route it yourself like explained ankve.
 
 Some users report high CPU usage with the regular image. If you encounter this you can try the nginx image.
