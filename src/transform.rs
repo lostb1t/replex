@@ -233,6 +233,7 @@ impl TransformBuilder {
 
         for t in self.transforms.clone() {
             // dbg!(&t);
+    
             t.transform_mediacontainer(
                 &mut container.media_container,
                 self.plex_client.clone(),
@@ -242,6 +243,11 @@ impl TransformBuilder {
         }
 
         for item in container.media_container.children_mut() {
+            if item.is_hub() && !item.is_collection_hub() {
+                // We dont handle builtin hubs
+                continue
+            }
+
             for t in self.transforms.clone() {
                 t.transform_metadata(
                     item,
@@ -439,14 +445,14 @@ impl Transform for HubMixTransform {
         let mut new_hubs: Vec<MetaData> = vec![];
         // let mut library_section_id: Vec<Option<u32>> = vec![]; //librarySectionID
         for mut hub in item.children_mut() {
-            if !config.include_watched {
-                hub.children_mut().retain(|x| !x.is_watched());
-            }
-
             // we only process collection hubs
             if !hub.is_collection_hub() {
                 new_hubs.push(hub.to_owned());
                 continue;
+            }
+
+            if !config.include_watched {
+                hub.children_mut().retain(|x| !x.is_watched());
             }
 
             let p = new_hubs.iter().position(|v| v.title == hub.title);

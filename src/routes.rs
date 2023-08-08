@@ -77,7 +77,6 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     let params: PlexParams = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let content_type = get_content_type_from_headers(req.headers_mut());
-
     // not sure anymore why i have this lol
     // let content_directory_id_size =
     //     params.clone().content_directory_id.unwrap().len();
@@ -160,7 +159,6 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
     let params: PlexParams = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let content_type = get_content_type_from_headers(req.headers_mut());
-
     // Hack, as the list could be smaller when removing watched items. So we request more.
     if let Some(original_count) = params.clone().count {
         // let count_number: i32 = original_count.parse().unwrap();
@@ -214,6 +212,7 @@ pub async fn get_collections_children(
     let collection_ids = req.param::<String>("ids").unwrap();
     let collection_ids: Vec<u32> = collection_ids
         .split(',')
+        .filter(|&v| !v.parse::<u32>().is_err())
         .map(|v| v.parse().unwrap())
         .collect();
     let plex_client = PlexClient::from_request(req, params.clone());
