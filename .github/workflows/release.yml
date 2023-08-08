@@ -75,6 +75,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.PERSONAL_TOKEN }}
+      -
+        name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - id: docker-tag
         uses: yuya-takeyama/docker-tag-from-github-ref-action@v1
       - name: Install semantic-release-cargo
@@ -98,6 +104,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm
           push: true 
           tags: | 
+            sarendsen/replex:latest
             ghcr.io/sarendsen/replex:latest
       - name: Build nginx images
         uses: docker/build-push-action@v4
@@ -107,7 +114,8 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm
           push: true 
           tags: | 
-            ghcr.io/sarendsen/replex-nginx:latest
+            sarendsen/replex:nginx-latest
+            ghcr.io/sarendsen/replex:nginx-latest
       - name: Invoke semantic-release
         if: ${{ !inputs.images_only }}
         env:
