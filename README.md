@@ -10,7 +10,7 @@ Remix your plex recommendations.
 - Remove watched items from recommendations.
 - Choose between styles, shelf (default) or hero.
 - Auto load tmdb artwork for hero styles.
-- Disable user state: remove unwatched labels from artwork.
+- Disable user state: remove unwatched markers from artwork.
 - Disable leaf count: remove episode count from artwork.
 - Works on every client/app not only plex web!
 - Plays nice with PMM (and without).
@@ -73,7 +73,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_HOST              |        	| Plex target host to proxy                                             	  |
 | REPLEX_INCLUDE_WATCHED   | false    | If set to false, hide watched items.                                      |
 | REPLEX_CACHE_TTL         | 300    	| Time to live for caches in seconds. Set to 0 to disable            	      |
-| REPLEX_DISABLE_USER_STATE| false    | Unwatched and episode count banners will be removec from artwork. *does currently not work on IOS/AppleTV |
+| REPLEX_DISABLE_USER_STATE| false    | remove unwatched markers from artwork. *does currently not work on IOS/AppleTV |
 | REPLEX_DISABLE_LEAF_COUNT| false    | remove episode count label from show artwork                              |
 | REPLEX_TMDB_API_KEY      |     	    | Enables tmdb artwork for hero hubs instead of plex background artwork     |
 | REPLEX_SSL_ENABLE        | false    | Enable automatic SSL generation. http will be disabled                    |
