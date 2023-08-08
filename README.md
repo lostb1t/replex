@@ -10,7 +10,7 @@ Remix your plex recommendations.
 - Remove watched items from recommendations.
 - Choose between styles, shelf (default) or hero.
 - Auto load tmdb artwork for hero styles.
-- Disable user state: unwatched and episode labels are removed from the artwork.
+- Disable user state: unwatched and episode count banners are removed from the artwork.
 - Works on every client/app not only plex web!
 - Plays nice with PMM (and without).
 
