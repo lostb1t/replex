@@ -78,6 +78,7 @@ jobs:
       - id: docker-tag
         uses: yuya-takeyama/docker-tag-from-github-ref-action@v1
       - name: Install semantic-release-cargo
+        if: ${{ !inputs.images_only }}
         uses: taiki-e/install-action@v2
         with:
           tool: semantic-release-cargo@2
