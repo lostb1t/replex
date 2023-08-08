@@ -7,7 +7,7 @@ on:
         description: 'Only create new images'
         type: boolean
         required: true
-        default: true
+        default: false
 
   pull_request_target:
     types:
