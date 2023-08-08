@@ -679,6 +679,31 @@ impl Transform for HubSectionKeyTransform {
     }
 }
 
+#[derive(Default, Debug)]
+pub struct UserStateTransform;
+
+#[async_trait]
+impl Transform for UserStateTransform {
+    async fn transform_metadata(
+        &self,
+        item: &mut MetaData,
+        plex_client: PlexClient,
+        options: PlexParams,
+    ) {
+        let config: Config = Config::figment().extract().unwrap();
+        if !config.disable_user_state {
+            return
+        }
+        if item.is_hub() {
+            for child in item.children_mut() {
+                child.user_state = Some(false);
+            }
+        } else {
+            item.user_state = Some(false);
+        }
+    }
+}
+
 // #[derive(Default)]
 // pub struct WatchedFilter;
 

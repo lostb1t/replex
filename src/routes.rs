@@ -149,6 +149,7 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
             limit: params.clone().count.unwrap(),
         })
         .with_transform(TMDBArtTransform)
+        .with_transform(UserStateTransform)
         .apply_to(&mut container)
         .await;
     res.render(container);
@@ -195,6 +196,7 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
             limit: params.clone().count.unwrap(),
         })
         .with_transform(TMDBArtTransform)
+        .with_transform(UserStateTransform)
         // .with_filter(CollectionHubPermissionFilter)
         .with_filter(WatchedFilter)
         .apply_to(&mut container)
@@ -238,6 +240,7 @@ pub async fn get_collections_children(
             limit,
         })
         .with_transform(TMDBArtTransform)
+        .with_transform(UserStateTransform)
         .apply_to(&mut container)
         .await;
     res.render(container); // TODO: FIx XML

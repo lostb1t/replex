@@ -352,6 +352,10 @@ pub struct MetaData {
     #[serde(rename = "Guid", default, skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Guid", default, child)]
     pub guids: Vec<Guid>,
+    // #[yaserde(attribute)]
+    // #[yaserde(rename = "userState")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_state: Option<bool>,
 }
 
 pub(crate) fn deserialize_option_string_from_number<'de, D>(
