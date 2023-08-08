@@ -580,25 +580,23 @@ impl Transform for TMDBArtTransform {
     ) {
         let config: Config = Config::figment().extract().unwrap();
 
-        // let bla = async move |item| {
-        //     let banner = item.get_tmdb_banner().await;
-        //     if banner.is_some() {
-        //         item.art = banner;
-        //     }
-        //     item.to_owned()
-        // }
-
         if config.tmdb_api_key.is_some() {
             if item.is_hub() && item.style.clone().unwrap() == "hero" {
                 // let mut children: Vec<MetaData> = vec![];
     
                 let mut futures = FuturesOrdered::new();
+               
                 for child in item.children() {
+                    let style = item.style.clone().unwrap();
                     futures.push_back(async move {
                         let mut c = child.clone();
                         let banner = child.get_tmdb_banner().await;
                         if banner.is_some() {
-                            c.art = banner;
+                            c.art = banner.clone();
+                        }
+                        // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
+                        if style == "hero" {
+                            c.thumb = c.art.clone();
                         }
                         return c
                     });
