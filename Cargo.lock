@@ -2208,8 +2208,18 @@ version = "0.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5f4b8347cc26099d3aeee044065ecc3ae11469796b4d65d065a23a584ed92a6f"
 dependencies = [
- "opentelemetry_api",
- "opentelemetry_sdk",
+ "opentelemetry_api 0.19.0",
+ "opentelemetry_sdk 0.19.0",
+]
+
+[[package]]
+name = "opentelemetry"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9591d937bc0e6d2feb6f71a559540ab300ea49955229c347a517a28d27784c54"
+dependencies = [
+ "opentelemetry_api 0.20.0",
+ "opentelemetry_sdk 0.20.0",
 ]
 
 [[package]]
@@ -2221,8 +2231,20 @@ dependencies = [
  "async-trait",
  "bytes",
  "http",
- "opentelemetry_api",
+ "opentelemetry_api 0.19.0",
  "reqwest",
+]
+
+[[package]]
+name = "opentelemetry-http"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c7594ec0e11d8e33faf03530a4c49af7064ebba81c1480e01be67d90b356508b"
+dependencies = [
+ "async-trait",
+ "bytes",
+ "http",
+ "opentelemetry_api 0.20.0",
 ]
 
 [[package]]
@@ -2235,8 +2257,8 @@ dependencies = [
  "futures",
  "futures-util",
  "http",
- "opentelemetry",
- "opentelemetry-http",
+ "opentelemetry 0.19.0",
+ "opentelemetry-http 0.8.0",
  "opentelemetry-proto",
  "prost",
  "reqwest",
@@ -2247,11 +2269,13 @@ dependencies = [
 
 [[package]]
 name = "opentelemetry-prometheus"
-version = "0.12.0"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a9f186f6293ebb693caddd0595e66b74a6068fa51048e26e0bf9c95478c639c"
+checksum = "c7d81bc254e2d572120363a2b16cdb0d715d301b5789be0cfc26ad87e4e10e53"
 dependencies = [
- "opentelemetry",
+ "once_cell",
+ "opentelemetry_api 0.20.0",
+ "opentelemetry_sdk 0.20.0",
  "prometheus",
  "protobuf",
 ]
@@ -2264,18 +2288,18 @@ checksum = "045f8eea8c0fa19f7d48e7bc3128a39c2e5c533d5c61298c548dfefc1064474c"
 dependencies = [
  "futures",
  "futures-util",
- "opentelemetry",
+ "opentelemetry 0.19.0",
  "prost",
  "tonic 0.8.3",
 ]
 
 [[package]]
 name = "opentelemetry-semantic-conventions"
-version = "0.11.0"
+version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24e33428e6bf08c6f7fcea4ddb8e358fab0fe48ab877a87c70c6ebe20f673ce5"
+checksum = "73c9f9340ad135068800e7f1b24e9e09ed9e7143f5bf8518ded3d3ec69789269"
 dependencies = [
- "opentelemetry",
+ "opentelemetry 0.20.0",
 ]
 
 [[package]]
@@ -2288,6 +2312,22 @@ dependencies = [
  "futures-channel",
  "futures-util",
  "indexmap 1.9.3",
+ "once_cell",
+ "pin-project-lite",
+ "thiserror",
+ "urlencoding",
+]
+
+[[package]]
+name = "opentelemetry_api"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8a81f725323db1b1206ca3da8bb19874bbd3f57c3bcd59471bfb04525b265b9b"
+dependencies = [
+ "futures-channel",
+ "futures-util",
+ "indexmap 1.9.3",
+ "js-sys",
  "once_cell",
  "pin-project-lite",
  "thiserror",
@@ -2308,12 +2348,41 @@ dependencies = [
  "futures-executor",
  "futures-util",
  "once_cell",
- "opentelemetry_api",
+ "opentelemetry_api 0.19.0",
  "percent-encoding",
  "rand 0.8.5",
  "thiserror",
  "tokio",
  "tokio-stream",
+]
+
+[[package]]
+name = "opentelemetry_sdk"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fa8e705a0612d48139799fcbaba0d4a90f06277153e43dd2bdc16c6f0edd8026"
+dependencies = [
+ "async-trait",
+ "crossbeam-channel",
+ "futures-channel",
+ "futures-executor",
+ "futures-util",
+ "once_cell",
+ "opentelemetry_api 0.20.0",
+ "ordered-float",
+ "percent-encoding",
+ "rand 0.8.5",
+ "regex",
+ "thiserror",
+]
+
+[[package]]
+name = "ordered-float"
+version = "3.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2fc2dbde8f8a79f2102cc474ceb0ad68e3b80b85289ea62389b60e66777e4213"
+dependencies = [
+ "num-traits",
 ]
 
 [[package]]
@@ -2825,7 +2894,7 @@ dependencies = [
  "mime_guess",
  "moka",
  "once_cell",
- "opentelemetry",
+ "opentelemetry 0.19.0",
  "opentelemetry-otlp",
  "pathetic",
  "pretty_assertions",
@@ -3061,9 +3130,9 @@ checksum = "1ad4cc8da4ef723ed60bced201181d83791ad433213d8c24efffda1eec85d741"
 
 [[package]]
 name = "salvo"
-version = "0.49.1"
+version = "0.50.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58461bb9a4af0cc0916fec5ff1b465c4cafb933c49c038e7ea9862b5f9645d55"
+checksum = "445c8ac2e33a39fcd19e28a2cd1bf80e760b3e33d9e6fc3a20591805821d39de"
 dependencies = [
  "salvo-cache",
  "salvo-compression",
@@ -3076,9 +3145,9 @@ dependencies = [
 
 [[package]]
 name = "salvo-cache"
-version = "0.49.1"
+version = "0.50.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "558cbfe2fae9c8c8c1204b2e904d231af5fd5abcaac504cd81856cd31d7a1b43"
+checksum = "627e4998a17709b22687b771ad312732b8dc5841d07d794ec10495a934cfdc85"
 dependencies = [
  "bytes",
  "moka",
@@ -3088,9 +3157,9 @@ dependencies = [
 
 [[package]]
 name = "salvo-compression"
-version = "0.49.1"
+version = "0.50.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f993b820ed1f68047e0db3a7a1b4bcb9ca3acd84d86a88be7eee8a627695fe70"
+checksum = "e868b4772678ed1dd8ec4be2ffe49bd42ec7bdf81f8d0f06ca868f5db56eb148"
 dependencies = [
  "brotli",
  "bytes",
@@ -3107,9 +3176,9 @@ dependencies = [
 
 [[package]]
 name = "salvo-cors"
-version = "0.49.1"
+version = "0.50.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b573f71d5bea58dbc08e83a1d636ca6ac16d3fc96abbf5fb914fd310a9934ab1"
+checksum = "cc0dcc2f5c8d5c05853b10fff0042a0ffb536a489b4628a8907099dffbf79182"
 dependencies = [
  "bytes",
  "salvo_core",
@@ -3118,12 +3187,12 @@ dependencies = [
 
 [[package]]
 name = "salvo-otel"
-version = "0.49.1"
+version = "0.50.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d99f3843d421dc6488bd8326d872a5e72b08496b38d68a5a9a51cf28664b132"
+checksum = "27cb94db155b00995bd8d27441414a32fb692192b9b89cc557095f1cc02474fb"
 dependencies = [
- "opentelemetry",
- "opentelemetry-http",
+ "opentelemetry 0.20.0",
+ "opentelemetry-http 0.9.0",
  "opentelemetry-prometheus",
  "opentelemetry-semantic-conventions",
  "salvo_core",
@@ -3131,9 +3200,9 @@ dependencies = [
 
 [[package]]
 name = "salvo-proxy"
-version = "0.49.1"
+version = "0.50.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58db7db6478384fd92706ca671639855cda9108ccdce534d0c07aea371df09be"
+checksum = "0bcb298489451d8ecbb15682f23e61a2f5b18ab6d53587c57da14accb4590f07"
 dependencies = [
  "fastrand 2.0.0",
  "futures-util",
@@ -3160,9 +3229,9 @@ dependencies = [
 
 [[package]]
 name = "salvo_core"
-version = "0.49.1"
+version = "0.50.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "03e5205a8e9c720d97c2b038e1d993683367f59def18ce2d998da68767e8fbd9"
+checksum = "ae62390001e8103c7c29170abfcd52ebbe7d506b946af8925b3937a0e6694396"
 dependencies = [
  "async-trait",
  "base64 0.21.2",
@@ -3205,6 +3274,7 @@ dependencies = [
  "tokio",
  "tokio-rustls 0.24.1",
  "tokio-stream",
+ "tokio-util",
  "tracing",
  "url",
  "x509-parser",
@@ -3213,9 +3283,9 @@ dependencies = [
 
 [[package]]
 name = "salvo_extra"
-version = "0.49.1"
+version = "0.50.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "195c843f4aa87579721cc5100b53c68a56e73cc155b3862525d15c34925fe2ec"
+checksum = "d50e1339735dfaa9360e92c5a25feec7058838777c1b333f0f2f9bcbdbe78c95"
 dependencies = [
  "base64 0.21.2",
  "etag",
@@ -3232,9 +3302,9 @@ dependencies = [
 
 [[package]]
 name = "salvo_macros"
-version = "0.49.1"
+version = "0.50.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "098f8bca7db09df9a4bab7bed6a63cfd0ed1f57e93b179305c1019a2ead81296"
+checksum = "aa32bcec4032be0e6672a442f2df130ef0ef88a951fe196a23c8c4be52412387"
 dependencies = [
  "cruet",
  "proc-macro-crate",
@@ -4077,7 +4147,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "00a39dcf9bfc1742fa4d6215253b33a6e474be78275884c216fc2a06267b3600"
 dependencies = [
  "once_cell",
- "opentelemetry",
+ "opentelemetry 0.19.0",
  "tracing",
  "tracing-core",
  "tracing-log",

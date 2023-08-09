@@ -16,7 +16,7 @@ use salvo::proxy::Proxy as SalvoProxy;
 use std::time::Duration;
 use salvo::http::{Mime, Request, Response, StatusCode};
 use salvo::http::header::CONTENT_TYPE;
-use salvo::routing::filter::PathFilter;
+use salvo::routing::PathFilter;
 
 
 pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {

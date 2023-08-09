@@ -116,6 +116,15 @@ jobs:
           tags: | 
             sarendsen/replex:nginx-latest
             ghcr.io/sarendsen/replex:nginx-latest
+      - name: Build nonginx images
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: docker/Dockerfile.github
+          platforms: linux/amd64,linux/arm64,linux/arm
+          push: true 
+          tags: | 
+            ghcr.io/sarendsen/replex:nonginx-latest
       - name: Invoke semantic-release
         if: ${{ !inputs.images_only }}
         env:

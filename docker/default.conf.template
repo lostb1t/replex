@@ -9,11 +9,11 @@ upstream replex {
 }
 
 map $request_method $upstream_location {
-  PUT     ${REPLEX_HOST};
-  POST    ${REPLEX_HOST};
-  PATCH   ${REPLEX_HOST};
-  OPTIONS   ${REPLEX_HOST};
-  default http://127.0.0.1:${REPLEX_PORT};
+  PUT     ${PLEX_PROTOCOL}://plex;
+  POST    ${PLEX_PROTOCOL}://plex;
+  PATCH   ${PLEX_PROTOCOL}://plex;
+  OPTIONS   ${PLEX_PROTOCOL}://plex;
+  default http://replex;
 }
 
 ## If there is no Upgrade header, then $connection_upgrade is close, otherwise it is upgrade
@@ -31,7 +31,7 @@ server {
     proxy_pass_request_headers on;
     # proxy_redirect default;
     # TODO: Only allow same server and app.plex.tv
-    add_header "Access-Control-Allow-Methods" "GET, POST, PUT, PATCH, OPTIONS, HEAD";
+    # add_header "Access-Control-Allow-Methods" "GET, POST, PUT, PATCH, OPTIONS, HEAD";
 
     set $redirect_streams ${REPLEX_REDIRECT_STREAMS};
 
@@ -53,8 +53,8 @@ server {
       proxy_pass $upstream_location;
     }
 
-    location /hubs/sections {
-      proxy_pass $upstream_location;
+    location /hubs/sections/ {
+        proxy_pass $upstream_location;      
     }
 
     location /replex/ {
