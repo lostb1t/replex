@@ -38,7 +38,7 @@ server {
     #add_header "Access-Control-Allow-Methods" "GET, POST, PUT, PATCH, OPTIONS, HEAD";
     #add_header 'Access-Control-Allow-Origin' "$http_origin" always;
     #add_header "Access-Control-Allow-Origin" $http_origin;
-    add_header Access-Control-Allow-Origin *;
+    #add_header Access-Control-Allow-Origin *;
 
     location / {
       proxy_pass ${PLEX_PROTOCOL}://plex;
