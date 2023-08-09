@@ -32,12 +32,12 @@ server {
     proxy_pass_request_headers on;
     proxy_redirect off;
     # TODO: Only allow same server and app.plex.tv
-    #add_header "Access-Control-Allow-Methods" "GET, POST, PUT, PATCH, OPTIONS, HEAD";
+    add_header "Access-Control-Allow-Methods" "GET, POST, PUT, PATCH, OPTIONS, HEAD";
     # proxy_set_header Origin '$http_origin';
     #add header "Access-Control-Expose-Headers" "Location, Date";
     #add_header "Access-Control-Allow-Methods" "GET, POST, PUT, PATCH, OPTIONS, HEAD";
     #add_header 'Access-Control-Allow-Origin' "$http_origin" always;
-    #add_header "Access-Control-Allow-Origin" $http_origin;
+    add_header "Access-Control-Allow-Origin" $http_origin;
 
     location / {
       proxy_pass ${PLEX_PROTOCOL}://plex;
