@@ -7,7 +7,9 @@ COPY Cargo.toml Cargo.lock ./replex/
 WORKDIR /app/src/replex
 RUN cargo build --release
 
-COPY ./ ./
+# COPY ./ ./
+COPY Cargo.toml Cargo.lock ./
+COPY ./src ./src
 RUN cargo build --release
 
 FROM nginx:bookworm as nginx

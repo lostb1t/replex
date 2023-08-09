@@ -1,16 +1,17 @@
 #!/bin/bash
-# http="http://"
-# https="https://"
-# PLEX=$(echo $REPLEX_HOST)
-# PLEX=${PLEX#"$https"}
-# PLEX=${PLEX#"$http"}
 PLEX_PROTOCOL="$(echo $REPLEX_HOST | grep :// | sed -e's,^\(.*://\).*,\1,g')"
 PLEX="$(echo ${REPLEX_HOST/$PLEX_PROTOCOL/})"
 PLEX_PROTOCOL="${PLEX_PROTOCOL//:\/\//}"
 REPLEX_PORT=300
+: "${REPLEX_REDIRECT_STREAMS:=0}"
+REPLEX_REDIRECT_STREAMS="${REPLEX_REDIRECT_STREAMS/true/1}"
+REPLEX_REDIRECT_STREAMS="${REPLEX_REDIRECT_STREAMS/false/0}"
+
 export PLEX
 export PLEX_PROTOCOL
 export REPLEX_PORT
+export REPLEX_REDIRECT_STREAMS
+export REPLEX_HOST
 
 /app/replex &
 

@@ -28,20 +28,18 @@ server {
     #listen 0.0.0.0:443 ssl;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    #proxy_set_header X-NginX-Proxy true;
     proxy_pass_request_headers on;
-    proxy_redirect off;
+    # proxy_redirect default;
     # TODO: Only allow same server and app.plex.tv
     add_header "Access-Control-Allow-Methods" "GET, POST, PUT, PATCH, OPTIONS, HEAD";
-    # proxy_set_header Origin '$http_origin';
-    #add header "Access-Control-Expose-Headers" "Location, Date";
-    #add_header "Access-Control-Allow-Methods" "GET, POST, PUT, PATCH, OPTIONS, HEAD";
-    #add_header 'Access-Control-Allow-Origin' "$http_origin" always;
-    #add_header "Access-Control-Allow-Origin" $http_origin;
-    #add_header Access-Control-Allow-Origin *;
+
+    set $redirect_streams ${REPLEX_REDIRECT_STREAMS};
 
     location / {
-      proxy_pass ${PLEX_PROTOCOL}://plex;
+        proxy_pass ${PLEX_PROTOCOL}://plex;
+        if ($redirect_streams) {
+            proxy_pass http://replex;
+        }
     }
 
     location /:/websockets {

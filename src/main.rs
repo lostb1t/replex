@@ -74,6 +74,7 @@ async fn main() {
     // });
     let version = env!("CARGO_PKG_VERSION");
     tracing::info!("Replex version {}", version);
+    // dbg!(&config);
 
     let router = route();
     if config.ssl_enable && config.ssl_domain.is_some() {

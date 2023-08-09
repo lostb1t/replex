@@ -14,7 +14,7 @@ docker-build:
 # 	docker run --rm -it -p 3001:80 -e REPLEX_HOST="http://46.4.30.217:42405" ghcr.io/sarendsen/replex:test
 
 docker-run:
-	docker run --rm -it -p 80:80 -e RUST_LOG="info,replex=info" -e REPLEX_TMDB_API_KEY=0d73e0cb91f39e670b0efa6913afbd58 -e REPLEX_HOST="https://46-4-30-217.01b0839de64b49138531cab1bf32f7c2.plex.direct:42405" ghcr.io/sarendsen/replex:nginx-latest
+	docker run --rm -it -p 80:80 -e RUST_LOG="info,replex=info" -e REPLEX_TMDB_API_KEY=0d73e0cb91f39e670b0efa6913afbd58 -e REPLEX_HOST="https://46-4-30-217.01b0839de64b49138531cab1bf32f7c2.plex.direct:42405" ghcr.io/sarendsen/replex:nginx-test
 
 # push-docker:
 # 	docker push ghcr.io/sarendsen/replex:latest
@@ -29,7 +29,7 @@ docker-run:
 
 
 run:
-	REPLEX_redirect_streams=1 REPLEX_DISABLE_LEAF_COUNT=0 REPLEX_DISABLE_USER_STATE=1 REPLEX_TMDB_API_KEY=0d73e0cb91f39e670b0efa6913afbd58 REPLEX_ENABLE_CONSOLE=0 REPLEX_CACHE_TTL=0 REPLEX_HOST=https://46-4-30-217.01b0839de64b49138531cab1bf32f7c2.plex.direct:42405 RUST_LOG="info,replex=info" cargo watch -x run
+	REPLEX_REDIRECT_STREAMS=1 REPLEX_DISABLE_LEAF_COUNT=0 REPLEX_DISABLE_USER_STATE=1 REPLEX_TMDB_API_KEY=0d73e0cb91f39e670b0efa6913afbd58 REPLEX_ENABLE_CONSOLE=0 REPLEX_CACHE_TTL=0 REPLEX_HOST=https://46-4-30-217.01b0839de64b49138531cab1bf32f7c2.plex.direct:42405 RUST_LOG="info,replex=info" cargo watch -x run
 
 # run:
 # 	REPLEX_ENABLE_CONSOLE=0 REPLEX_CACHE_TTL=0 REPLEX_HOST=https://46-4-30-217.01b0839de64b49138531cab1bf32f7c2.plex.direct:42405 RUST_LOG="info" cargo run

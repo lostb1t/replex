@@ -106,11 +106,12 @@ You have 2 options to provide remote access.
 
 1. By ip http://[replexip]:[replexport]
 
-   This option has 2 downsides. One it has no SSL so your connections will be insecure. Second app.plex.tv will not work. As browsers do not allow unsecure connections from a securew website. Gf you want to to use the web ui you can access it by ip. All other clients should work with unsecured connections
+   This option has 2 downsides. One it has no SSL so your connections will be insecure. Second app.plex.tv will not work. As browsers do not allow unsecure connections from a securew website. Gf you want to to use the web ui you can access it by ip. All other clients should work with unsecured connections. NOTE: If remote access was enabled before, then plex witll still try to use https for it. Even if disabled.
 
 2. Custom domain (reverse proxy)
 
    You can setup a reverse proxy with a custom domain. This solves both the issues from option 1.
+   This is the prefered way.
 
 For both options set your domain or ip (http://[replexip]:[replexport]) in the 'Custom server access URLs' field under network and make sure to disable remote access under remote access.
 
@@ -125,5 +126,5 @@ Paths are subject to change.
 
 ## Redirect streams
 
-If you have for example an appbox it might not be ideal to stream media trhough replex. As that will take a lot of netowkr resources.
-You can redirect streams by enabling `REPLEX_REDIRECT_STREAMS` and optionally set `REPLEX_REDIRECT_STREAMS_URL``
+If you have for example an appbox it might not be ideal to stream media through replex. As that will take a lot of network resources.
+You can redirect streams by enabling `REPLEX_REDIRECT_STREAMS` and optionally set `REPLEX_REDIRECT_STREAMS_URL` to point directlt to your appbox.

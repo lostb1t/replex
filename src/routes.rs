@@ -7,6 +7,7 @@ use itertools::Itertools;
 use crate::transform::*;
 use crate::url::*;
 use crate::utils::*;
+use crate::proxy::PlexProxy;
 use salvo::cache::{Cache, MemoryStore};
 use salvo::compression::Compression;
 use salvo::cors::Cors;
@@ -15,6 +16,7 @@ use salvo::proxy::Proxy as SalvoProxy;
 use std::time::Duration;
 use salvo::http::{Mime, Request, Response, StatusCode};
 use salvo::http::header::CONTENT_TYPE;
+use salvo::routing::filter::PathFilter;
 
 
 pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
@@ -29,6 +31,11 @@ pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
 
 pub fn route() -> Router {
     let config: Config = Config::figment().extract().unwrap();
+
+    // cant use colon in paths. So we do it with an regex
+    let guid = regex::Regex::new(":").unwrap();
+    PathFilter::register_wisp_regex("colon", guid);
+
     let mut router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
         .hoop(Timeout::new(Duration::from_secs(60)))
@@ -46,7 +53,7 @@ pub fn route() -> Router {
                 .hoop(default_cache())
                 .get(get_hubs_sections),
         )
-        // .push(Router::new().path("/test").get(test))
+        // .push(Router::new().path("/ping").get(PlexProxy::new(config.host.clone().unwrap())))
         .push(Router::new().path("/hello").get(hello))
         .push(
             Router::new()
@@ -57,15 +64,15 @@ pub fn route() -> Router {
 
         if config.redirect_streams {
             router = router.push(
-                Router::with_path("/video/<uch>/transcode/<**rest>")
+                Router::with_path("/video/<colon:colon>/transcode/<**rest>")
                     .handle(redirect_stream),
             )
             .push(
-                Router::with_path("/photo/<uch>/transcode<**rest>")
+                Router::with_path("/photo/<colon:colon>/transcode")
                     .handle(redirect_stream),
             )
             .push(
-                Router::with_path("/<uch>/timeline<**rest>")
+                Router::with_path("/<colon:colon>/timeline<**rest>")
                     .handle(redirect_stream),
             )
             .push(
