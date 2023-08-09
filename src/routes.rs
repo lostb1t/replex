@@ -64,7 +64,6 @@ pub fn route() -> Router {
         // )
 }
 
-
 #[handler]
 async fn redirect(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
     let config: Config = Config::figment().extract().unwrap();
