@@ -13,6 +13,8 @@ use salvo::cors::Cors;
 use salvo::prelude::*;
 use salvo::proxy::Proxy as SalvoProxy;
 use std::time::Duration;
+use salvo::http::{Mime, Request, Response, StatusCode};
+use salvo::http::header::CONTENT_TYPE;
 
 
 pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
@@ -56,6 +58,22 @@ pub fn route() -> Router {
             Router::with_path("<**rest>")
                 .handle(SalvoProxy::new(config.host.unwrap())),
         )
+        // .push(
+        //     Router::with_path("<**rest>")
+        //         .handle(redirect),
+        // )
+}
+
+
+#[handler]
+async fn redirect(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+    let config: Config = Config::figment().extract().unwrap();
+    let redirect_url = format!("{}{}", config.host.unwrap(), req.uri_mut().path_and_query().unwrap());
+    let mime = mime_guess::from_path(req.uri().path()).first_or_octet_stream();
+    dbg!(&mime);
+    res.headers_mut().insert(CONTENT_TYPE, mime.as_ref().parse().unwrap());
+    res.render("would redirect");
+    // res.render(Redirect::temporary(redirect_url));
 }
 
 #[handler]
