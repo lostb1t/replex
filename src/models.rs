@@ -139,8 +139,8 @@ pub struct Guid {
 pub struct Image {
     #[yaserde(attribute)]
     pub alt: String,
-    #[serde(rename="type")]
-    #[yaserde(attribute, rename="type")]
+    #[serde(rename = "type")]
+    #[yaserde(attribute, rename = "type")]
     pub r#type: String,
     #[yaserde(attribute)]
     pub url: String,
@@ -397,104 +397,54 @@ where
     Ok(Some(deserialize_string_from_number(deserializer)?))
 }
 
+
+
 impl MetaData {
-    pub async fn get_tmdb_banner(&self) -> Option<String> {
-        if self.guids.is_empty() {
+    // TODO: handle errors
+    // We should be able to reuse the client
+    pub async fn get_hero_art(
+        &self,
+        plex_client: PlexClient,
+    ) -> Option<String> {
+        if self.guid.is_none() {
             return None;
         }
 
-        let mut tmdb_id: Option<u64> = None;
-        for guid in self.guids.clone() {
-            if guid.id.starts_with("tmdb") {
-                let mut _tmdb_id = guid.id;
-                _tmdb_id = _tmdb_id.replace("tmdb://", "");
-                tmdb_id = Some(_tmdb_id.parse().unwrap());
+        let cache_key = format!("{}:cover_art", self.guid.clone().unwrap());
+
+        let mut cached_result: Option<Option<String>> =
+                    GLOBAL_CACHE.get(cache_key.as_str()).await;
+
+        if cached_result.is_some() {   
+            return cached_result.unwrap()
+        }
+    
+        let guid = self
+            .guid
+            .clone()
+            .unwrap()
+            .replace("plex://show/", "")
+            .replace("plex://movie/", "");
+        let mut container = plex_client.get_provider_data(guid).await.unwrap();
+
+        let metadata = container.media_container.children_mut().get(0).unwrap();
+        let mut image: Option<String> = None;
+        for i in &metadata.images {
+            if i.r#type == "coverArt" {
+                image = Some(i.url.clone());
                 break;
             }
         }
-        tmdb_id?;
 
-        // TODO: Dry....
-        // TODO: Foreign media often dont have "english" banners. Support native language banners
-        match self.r#type.as_str() {
-            "movie" => {
-                let cache_key = format!("tmdb:movie:{:?}:banner", tmdb_id);
-                let cached_result: Option<Option<String>> =
-                    GLOBAL_CACHE.get(cache_key.as_str()).await;
+        let _ = GLOBAL_CACHE
+        .insert(
+            cache_key,
+            image.clone(),
+            crate::cache::Expiration::Never,
+        )
+        .await;
+        return image;
 
-                if let Some(i) = cached_result {
-                    return i;
-                }
-
-                let cmd = MovieImages::new(tmdb_id.unwrap())
-                    .with_language(Some("en".to_string()));
-                let banner: Option<String> =
-                    match cmd.execute(&TMDB_CLIENT).await {
-                        Ok(res) => {
-                            if !res.backdrops.is_empty() {
-                                Some(format!(
-                                    "https://image.tmdb.org/t/p/original{}",
-                                    res.backdrops[0].file_path
-                                ))
-                            } else {
-                                None
-                            }
-                        }
-                        Err(_res) => {
-                            // tracing::warn!("Could not find {:?}", res);
-                            None
-                        }
-                    };
-
-                let _ = GLOBAL_CACHE
-                    .insert(
-                        cache_key,
-                        banner.clone(),
-                        crate::cache::Expiration::Never,
-                    )
-                    .await;
-                banner
-            }
-            "show" => {
-                let cache_key = format!("tmdb:tv:{:?}:banner", tmdb_id);
-                let cached_result: Option<Option<String>> =
-                    GLOBAL_CACHE.get(cache_key.as_str()).await;
-
-                if let Some(i) = cached_result {
-                    return i;
-                }
-
-                let cmd = TVShowImages::new(tmdb_id.unwrap())
-                    .with_language(Some("en".to_string()));
-                let banner: Option<String> =
-                    match cmd.execute(&TMDB_CLIENT).await {
-                        Ok(res) => {
-                            if !res.backdrops.is_empty() {
-                                Some(format!(
-                                    "https://image.tmdb.org/t/p/original{}",
-                                    res.backdrops[0].file_path
-                                ))
-                            } else {
-                                None
-                            }
-                        }
-                        Err(_res) => {
-                            // tracing::warn!("Could not find {:?}", res);
-                            None
-                        }
-                    };
-
-                let _ = GLOBAL_CACHE
-                    .insert(
-                        cache_key,
-                        banner.clone(),
-                        crate::cache::Expiration::Never,
-                    )
-                    .await;
-                banner
-            }
-            _ => None,
-        }
     }
 
     pub fn children_mut(&mut self) -> &mut Vec<MetaData> {
@@ -642,8 +592,8 @@ pub struct DisplayField {
     #[yaserde(rename = "type")]
     pub r#type: Option<String>,
     // #[yaserde(attribute)]
-    #[yaserde(attribute, rename="imageType")]
-    #[serde(skip_serializing_if = "Option::is_none", rename="imageType")]
+    #[yaserde(attribute, rename = "imageType")]
+    #[serde(skip_serializing_if = "Option::is_none", rename = "imageType")]
     pub image_type: Option<String>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub fields: Vec<String>,

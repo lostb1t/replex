@@ -16,8 +16,8 @@ use moka::future::ConcurrentCacheExt;
 use once_cell::sync::Lazy;
 use once_cell::sync::OnceCell;
 use reqwest::header;
-use reqwest::header::ACCEPT;
 use reqwest::header::HeaderValue;
+use reqwest::header::ACCEPT;
 use reqwest::Client;
 use salvo::http::ReqBody;
 use salvo::Error;
@@ -163,10 +163,7 @@ impl PlexClient {
         &self,
         id: i32,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
-        let resp = self
-            .get("/hubs".to_string())
-            .await
-            .unwrap();
+        let resp = self.get("/hubs".to_string()).await.unwrap();
         let container: MediaContainerWrapper<MediaContainer> =
             from_reqwest_response(resp).await.unwrap();
         Ok(container)
@@ -196,6 +193,25 @@ impl PlexClient {
         let r = f.await.unwrap();
         self.insert_cache(cache_key, r.clone()).await;
         Ok(r)
+    }
+
+    pub async fn get_provider_data(
+        self,
+        guid: String,
+    ) -> Result<MediaContainerWrapper<MediaContainer>> {
+        let uri = format!(
+            "https://metadata.provider.plex.tv/library/metadata/{}",
+            guid
+        );
+        let res = self
+            .http_client
+            .get(uri)
+            .send()
+            .await
+            .map_err(Error::other)?;
+        let container: MediaContainerWrapper<MediaContainer> =
+            from_reqwest_response(res).await.unwrap();
+        Ok(container)
     }
 
     async fn get_cache(
@@ -235,8 +251,7 @@ impl PlexClient {
         if let Some(i) = client_identifier.clone() {
             headers.insert(
                 "X-Plex-Client-Identifier",
-                header::HeaderValue::from_str(i.as_str())
-                    .unwrap(),
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
             );
         }
         headers.insert(
@@ -300,7 +315,6 @@ impl PlexClient {
             cache: CACHE.clone(),
         }
     }
-
 }
 
 // #[cfg(test)]

@@ -3,7 +3,8 @@ use async_recursion::async_recursion;
 use async_trait::async_trait;
 use futures_util::{
     future::{self, join_all, LocalBoxFuture},
-    stream::{FuturesUnordered, FuturesOrdered}, StreamExt,
+    stream::{FuturesOrdered, FuturesUnordered},
+    StreamExt,
 };
 use itertools::Itertools;
 use lazy_static::__Deref;
@@ -234,7 +235,7 @@ impl TransformBuilder {
 
         for t in self.transforms.clone() {
             // dbg!(&t);
-    
+
             t.transform_mediacontainer(
                 &mut container.media_container,
                 self.plex_client.clone(),
@@ -246,7 +247,7 @@ impl TransformBuilder {
         for item in container.media_container.children_mut() {
             if item.is_hub() && !item.is_collection_hub() {
                 // We dont handle builtin hubs
-                continue
+                continue;
             }
 
             for t in self.transforms.clone() {
@@ -404,7 +405,6 @@ impl Transform for HubStyleTransform {
                 .unwrap()
                 .has_label("REPLEXHERO".to_string())
             {
-                
                 item.style = Some("hero".to_string());
                 // item.meta = Some(Meta {
                 //     r#type: None,
@@ -556,16 +556,24 @@ impl Transform for HubChildrenLimitTransform {
 pub struct TMDBArtTransform;
 
 impl TMDBArtTransform {
-    pub async fn transform(&self, item: &mut MetaData) {
-        let banner = item.get_tmdb_banner().await;
-        if banner.is_some() {
-            item.art = banner;
+    pub async fn transform(
+        &self,
+        item: &mut MetaData,
+        plex_client: PlexClient,
+    ) {
+        let art = item.get_hero_art(plex_client).await;
+        if art.is_some() {
+            item.art = art;
         }
     }
-    pub async fn apply_tmdb_banner(&self, item: &mut MetaData) -> MetaData {
-        let banner = item.get_tmdb_banner().await;
-        if banner.is_some() {
-            item.art = banner;
+    pub async fn apply_tmdb_banner(
+        &self,
+        item: &mut MetaData,
+        plex_client: PlexClient,
+    ) -> MetaData {
+        let art = item.get_hero_art(plex_client).await;
+        if art.is_some() {
+            item.art = art;
         }
         item.to_owned()
     }
@@ -580,35 +588,36 @@ impl Transform for TMDBArtTransform {
         options: PlexParams,
     ) {
         let config: Config = Config::figment().extract().unwrap();
-    
+
         if config.tmdb_api_key.is_some() {
             let style = item.style.clone().unwrap_or("".to_string()).to_owned();
             if item.is_hub() && ["clip", "hero"].contains(&style.as_str()) {
                 // let mut children: Vec<MetaData> = vec![];
-    
+
                 let mut futures = FuturesOrdered::new();
-               
+
                 for child in item.children() {
                     // let style = item.style.clone().unwrap();
+                    let client = plex_client.clone();
                     futures.push_back(async move {
                         let mut c = child.clone();
-                        let banner = child.get_tmdb_banner().await;
-                        if banner.is_some() {
-                            c.art = banner.clone();
+                        
+                        let art = child.get_hero_art(client).await;
+                        if art.is_some() {
+                            c.art = art.clone();
                         }
                         // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
                         c.thumb = c.art.clone();
-                        return c
+                        return c;
                     });
                 }
                 // let now = Instant::now();
 
-                let children: Vec<MetaData>  = futures.collect().await;
+                let children: Vec<MetaData> = futures.collect().await;
                 item.set_children(children);
-
             } else {
                 // keep this blocking for now. AS its loaded in the background
-                self.transform(item).await;
+                self.transform(item, plex_client.clone()).await;
             }
         }
     }
@@ -670,9 +679,9 @@ impl Transform for HubKeyTransform {
         plex_client: PlexClient,
         options: PlexParams,
     ) {
-       
         if item.is_hub() {
-            if !item.key.contains("replex") { // might already been set by the mixings
+            if !item.key.contains("replex") {
+                // might already been set by the mixings
                 item.key = format!("/replex{}", item.key);
             }
         }
@@ -692,7 +701,7 @@ impl Transform for UserStateTransform {
     ) {
         let config: Config = Config::figment().extract().unwrap();
         if !config.disable_user_state && !config.disable_leaf_count {
-            return
+            return;
         }
         if item.is_hub() {
             for child in item.children_mut() {

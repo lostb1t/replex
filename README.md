@@ -75,7 +75,6 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_CACHE_TTL          | 300    	 | Time to live for caches in seconds. Set to 0 to disable (not recommended).          	      |
 | REPLEX_DISABLE_USER_STATE[^1] | false    | Remove unwatched markers from artwork.|
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
-| REPLEX_TMDB_API_KEY      |     	    | Enables tmdb artwork for hero hubs instead of plex background artwork.     |
 | REPLEX_REDIRECT_STREAMS  | false    | Redirect streams to another endpoint.                                      |
 | REPLEX_REDIRECT_STREAMS_URL  | REPLEX_HOST    | Alternative streams endpoint                                         |
 
@@ -92,11 +91,8 @@ You can recreate the builtin rows with smart collections if you wish to have tha
 ## Hub style
 
 You can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection. 
-Plex uses an the background artwork for hero elements. 
-Often these dont have any text or are not suitable for hero artwork in general.
-You can use tmdb to automaticly load hero artwork by providing the env `REPLEX_TMDB_API_KEY`. This way you can keep your backgrounds and hero artwork seperated. 
 
-see https://developer.themoviedb.org/docs/getting-started on how to get an api key. 
+Note: hero style elements uses coverart from plex. Banner or background is not used.
 
 ## Remote access (force clients to use the proxy)
 
