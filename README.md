@@ -70,16 +70,16 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 
 | Setting        	          | Default 	| Description                                                            	  |
 |---------------------------|----------|---------------------------------------------------------------------------|
-| REPLEX_HOST               |        	| Plex target host to proxy                                             	  |
+| REPLEX_HOST               |        	| Plex target host to proxy.                                             	  |
 | REPLEX_INCLUDE_WATCHED    | false    | If set to false, hide watched items.                                      |
-| REPLEX_CACHE_TTL          | 300    	| Time to live for caches in seconds. Set to 0 to disable            	      |
-| REPLEX_DISABLE_USER_STATE[^1] | false    | remove unwatched markers from artwork.|
-| REPLEX_DISABLE_LEAF_COUNT| false    | remove episode count label from show artwork                              |
-| REPLEX_TMDB_API_KEY      |     	    | Enables tmdb artwork for hero hubs instead of plex background artwork     |
+| REPLEX_CACHE_TTL          | 300    	| Time to live for caches in seconds. Set to 0 to disable (not recommended).          	      |
+| REPLEX_DISABLE_USER_STATE[^1] | false    | Remove unwatched markers from artwork.|
+| REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
+| REPLEX_TMDB_API_KEY      |     	    | Enables tmdb artwork for hero hubs instead of plex background artwork.     |
 
 [^1]: Only works in the web app.
 
-## Mixing rows
+## Mixed rows
 
 Custom collections with the same name from different libraries will be merged into one on the home screen,
 So an collection named "Trending" in the Movie library will be merged with an collection named "Trending" from a shows library on home.
