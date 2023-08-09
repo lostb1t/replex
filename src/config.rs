@@ -40,6 +40,12 @@ pub struct Config {
         deserialize_with = "figment::util::bool_from_str_or_int"
     )]
     pub disable_leaf_count: bool,
+    #[serde(
+        default = "default_as_false",
+        deserialize_with = "figment::util::bool_from_str_or_int"
+    )]
+    pub redirect_streams: bool,
+    pub redirect_streams_url: Option<String>,
 }
 
 fn default_cache_ttl() -> u64 {

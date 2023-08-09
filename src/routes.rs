@@ -13,6 +13,8 @@ use salvo::cors::Cors;
 use salvo::prelude::*;
 use salvo::proxy::Proxy as SalvoProxy;
 use std::time::Duration;
+use salvo::http::{Mime, Request, Response, StatusCode};
+use salvo::http::header::CONTENT_TYPE;
 
 
 pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
@@ -27,7 +29,7 @@ pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
 
 pub fn route() -> Router {
     let config: Config = Config::figment().extract().unwrap();
-    Router::with_hoop(Cors::permissive().into_handler())
+    let mut router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
         .hoop(Timeout::new(Duration::from_secs(60)))
         .hoop(Compression::new().enable_gzip(CompressionLevel::Fastest))
@@ -51,11 +53,49 @@ pub fn route() -> Router {
                 .path("/replex/library/collections/<ids>/children")
                 .hoop(default_cache())
                 .get(get_collections_children),
-        )
-        .push(
+        );
+
+        if config.redirect_streams {
+            router = router.push(
+                Router::with_path("/video/<uch>/transcode/<**rest>")
+                    .handle(redirect_stream),
+            )
+            .push(
+                Router::with_path("/photo/<uch>/transcode<**rest>")
+                    .handle(redirect_stream),
+            )
+            .push(
+                Router::with_path("/<uch>/timeline<**rest>")
+                    .handle(redirect_stream),
+            )
+            .push(
+                Router::with_path("/statistics/bandwidth<**rest>")
+                    .handle(redirect_stream),
+            );
+        }
+
+        // catchall
+        router = router.push(
             Router::with_path("<**rest>")
                 .handle(SalvoProxy::new(config.host.unwrap())),
-        )
+        );
+
+        router
+
+}
+
+
+#[handler]
+async fn redirect_stream(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+    let config: Config = Config::figment().extract().unwrap();
+    let redirect_url = if config.redirect_streams_url.clone().is_some() {
+        format!("{}{}", config.redirect_streams_url.clone().unwrap(), req.uri_mut().path_and_query().unwrap())
+    } else {
+        format!("{}{}", config.host.unwrap(), req.uri_mut().path_and_query().unwrap())
+    };
+    let mime = mime_guess::from_path(req.uri().path()).first_or_octet_stream();
+    res.headers_mut().insert(CONTENT_TYPE, mime.as_ref().parse().unwrap());
+    res.render(Redirect::temporary(redirect_url));
 }
 
 #[handler]

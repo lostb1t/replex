@@ -70,12 +70,14 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 
 | Setting        	          | Default 	| Description                                                            	  |
 |---------------------------|----------|---------------------------------------------------------------------------|
-| REPLEX_HOST               |        	| Plex target host to proxy.                                             	  |
+| REPLEX_HOST               |        	 | Plex target host to proxy.                                             	  |
 | REPLEX_INCLUDE_WATCHED    | false    | If set to false, hide watched items.                                      |
-| REPLEX_CACHE_TTL          | 300    	| Time to live for caches in seconds. Set to 0 to disable (not recommended).          	      |
+| REPLEX_CACHE_TTL          | 300    	 | Time to live for caches in seconds. Set to 0 to disable (not recommended).          	      |
 | REPLEX_DISABLE_USER_STATE[^1] | false    | Remove unwatched markers from artwork.|
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
 | REPLEX_TMDB_API_KEY      |     	    | Enables tmdb artwork for hero hubs instead of plex background artwork.     |
+| REPLEX_REDIRECT_STREAMS  | false    | Redirect streams to another endpoint.                                      |
+| REPLEX_REDIRECT_STREAMS_URL  | REPLEX_HOST    | Alternative streams endpoint                                         |
 
 [^1]: Only works in the web app.
 
@@ -120,3 +122,8 @@ If you have a reverse proxy running and only want to route the necessary paths, 
 - /replex
 
 Paths are subject to change.
+
+## Redirect streams
+
+If you have for example an appbox it might not be ideal to stream media trhough replex. As that will take a lot of netowkr resources.
+You can redirect streams by enabling `REPLEX_REDIRECT_STREAMS` and optionally set `REPLEX_REDIRECT_STREAMS_URL``
