@@ -404,6 +404,7 @@ impl Transform for HubStyleTransform {
                 .unwrap()
                 .has_label("REPLEXHERO".to_string())
             {
+                
                 item.style = Some("hero".to_string());
                 // item.meta = Some(Meta {
                 //     r#type: None,
