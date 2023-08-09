@@ -68,19 +68,16 @@ services:
 
 Settings are set via [environment variables](https://kinsta.com/knowledgebase/what-is-an-environment-variable/) 
 
-| Setting        	         | Default 	| Description                                                            	  |
-|--------------------------|----------|---------------------------------------------------------------------------|
-| REPLEX_HOST              |        	| Plex target host to proxy                                             	  |
-| REPLEX_INCLUDE_WATCHED   | false    | If set to false, hide watched items.                                      |
-| REPLEX_CACHE_TTL         | 300    	| Time to live for caches in seconds. Set to 0 to disable            	      |
-| REPLEX_DISABLE_USER_STATE| false    | remove unwatched markers from artwork. *does currently not work on IOS/AppleTV |
+| Setting        	          | Default 	| Description                                                            	  |
+|---------------------------|----------|---------------------------------------------------------------------------|
+| REPLEX_HOST               |        	| Plex target host to proxy                                             	  |
+| REPLEX_INCLUDE_WATCHED    | false    | If set to false, hide watched items.                                      |
+| REPLEX_CACHE_TTL          | 300    	| Time to live for caches in seconds. Set to 0 to disable            	      |
+| REPLEX_DISABLE_USER_STATE[^1] | false    | remove unwatched markers from artwork.|
 | REPLEX_DISABLE_LEAF_COUNT| false    | remove episode count label from show artwork                              |
 | REPLEX_TMDB_API_KEY      |     	    | Enables tmdb artwork for hero hubs instead of plex background artwork     |
-| REPLEX_SSL_ENABLE        | false    | Enable automatic SSL generation. http will be disabled                    |
-|                          |          | (stored in /data/acme/letsencrypt so make sure to mount a volume)         |
-| REPLEX_SSL_DOMAIN        |          | Domain to request SSL certificate for when REPLEX_SSL_ENABLE is enabled   |
 
-SSL only works with the regular docker image. And is kinda untested at this point.
+[^1]: Only works in the web app.
 
 ## Mixing rows
 
