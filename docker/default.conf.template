@@ -4,7 +4,7 @@ upstream plex {
 }
 
 upstream replex {
-    server 127.0.0.1:80;
+    server 127.0.0.1:${REPLEX_PORT};
     keepalive 8;
 }
 
@@ -13,7 +13,7 @@ map $request_method $upstream_location {
   POST    ${REPLEX_HOST};
   PATCH   ${REPLEX_HOST};
   OPTIONS   ${REPLEX_HOST};
-  default http://127.0.0.1:80;
+  default http://127.0.0.1:${REPLEX_PORT};
 }
 
 ## If there is no Upgrade header, then $connection_upgrade is close, otherwise it is upgrade
