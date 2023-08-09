@@ -55,7 +55,7 @@ pub fn route() -> Router {
                 .get(get_collections_children),
         )
         .push(
-            Router::with_path("/<identifier>/<**rest>")
+            Router::with_path("/video/<uch>/transcode/<**rest>")
                 .handle(redirect),
         )
         .push(
@@ -85,8 +85,9 @@ async fn redirect(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
     let mime = mime_guess::from_path(req.uri().path()).first_or_octet_stream();
     dbg!(&mime);
     res.headers_mut().insert(CONTENT_TYPE, mime.as_ref().parse().unwrap());
-    res.render("would redirect");
-    // res.render(Redirect::temporary(redirect_url));
+    //res.render("would redirect");
+    dbg!(&redirect_url);
+    res.render(Redirect::temporary(redirect_url));
 }
 
 #[handler]
