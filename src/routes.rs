@@ -33,6 +33,7 @@ pub fn route() -> Router {
         .hoop(Logger::new())
         .hoop(Timeout::new(Duration::from_secs(60)))
         .hoop(Compression::new().enable_gzip(CompressionLevel::Fastest))
+        .get(SalvoProxy::new(config.host.unwrap()))
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
@@ -54,14 +55,19 @@ pub fn route() -> Router {
                 .hoop(default_cache())
                 .get(get_collections_children),
         )
+        // .push(
+        //     Router::new()
+        //         // .path("/desktop/<**rest>")
+        //         // .path("/")
+        //         .path("/web/<**rest>")
+        //         // .path("/web/index.html")
+        //         // .handle(redirect),
+        //         .handle(SalvoProxy::new(config.host.unwrap())),
+        // )
         .push(
             Router::with_path("<**rest>")
-                .handle(SalvoProxy::new(config.host.unwrap())),
+                .handle(redirect),
         )
-        // .push(
-        //     Router::with_path("<**rest>")
-        //         .handle(redirect),
-        // )
 }
 
 #[handler]
