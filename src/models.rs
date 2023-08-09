@@ -136,6 +136,29 @@ pub struct Guid {
     PartialOrd,
 )]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
+pub struct Image {
+    #[yaserde(attribute)]
+    pub alt: String,
+    #[serde(rename="type")]
+    #[yaserde(attribute, rename="type")]
+    pub r#type: String,
+    #[yaserde(attribute)]
+    pub url: String,
+}
+
+#[derive(
+    Debug,
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    YaDeserialize,
+    YaSerialize,
+    Default,
+    PartialOrd,
+)]
+#[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
 pub struct Label {
     #[yaserde(attribute)]
@@ -356,6 +379,13 @@ pub struct MetaData {
     // #[yaserde(rename = "userState")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user_state: Option<bool>,
+    #[serde(rename = "Image", default, skip_serializing_if = "Vec::is_empty")]
+    #[yaserde(rename = "Image", default, child)]
+    pub images: Vec<Image>,
+    #[yaserde(attribute)]
+    #[yaserde(rename = "extraType")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub extra_type: Option<i32>, // actually a bool but plex does 0 and 1
 }
 
 pub(crate) fn deserialize_option_string_from_number<'de, D>(
@@ -612,6 +642,10 @@ pub struct DisplayField {
     #[yaserde(rename = "type")]
     pub r#type: Option<String>,
     // #[yaserde(attribute)]
+    #[yaserde(attribute, rename="imageType")]
+    #[serde(skip_serializing_if = "Option::is_none", rename="imageType")]
+    pub image_type: Option<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub fields: Vec<String>,
 }
 

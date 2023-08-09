@@ -6,6 +6,7 @@ use futures_util::{
     stream::{FuturesUnordered, FuturesOrdered}, StreamExt,
 };
 use itertools::Itertools;
+use lazy_static::__Deref;
 use std::sync::Arc;
 use tokio::task::JoinSet;
 use tokio::time::Instant;
@@ -404,24 +405,23 @@ impl Transform for HubStyleTransform {
                 .has_label("REPLEXHERO".to_string())
             {
                 item.style = Some("hero".to_string());
-
-                // for android, as it doesnt listen to hero style on home..... so we make it a clip
+                // item.meta = Some(Meta {
+                //     r#type: None,
+                //     display_fields: vec![
+                //         DisplayField {
+                //             r#type: Some("movie".to_string()),
+                //             image_type: Some("coverArt".to_string()),
+                //             fields: vec![],
+                //         },
+                //         // DisplayField {
+                //         //     r#type: Some("show".to_string()),
+                //         //     fields: vec!["title".to_string(), "year".to_string()],
+                //         // },
+                //     ],
+                // });
+                // for android, as it doesnt listen to hero style on home..... clip works
                 if let Some(platform) = &options.platform {
                     if platform.to_lowercase() == "android" {
-                        // dbg!("We got android");
-                        // self.meta = Some(Meta {
-                        //     r#type: None,
-                        //     display_fields: vec![
-                        //         DisplayField {
-                        //             r#type: Some("movie".to_string()),
-                        //             fields: vec!["title".to_string(), "year".to_string()],
-                        //         },
-                        //         DisplayField {
-                        //             r#type: Some("show".to_string()),
-                        //             fields: vec!["title".to_string(), "year".to_string()],
-                        //         },
-                        //     ],
-                        // });
                         item.r#type = "clip".to_string();
                     }
                 }
@@ -579,15 +579,16 @@ impl Transform for TMDBArtTransform {
         options: PlexParams,
     ) {
         let config: Config = Config::figment().extract().unwrap();
-
+    
         if config.tmdb_api_key.is_some() {
-            if item.is_hub() && item.style.clone().unwrap() == "hero" {
+            let style = item.style.clone().unwrap_or("".to_string()).to_owned();
+            if item.is_hub() && ["clip", "hero"].contains(&style.as_str()) {
                 // let mut children: Vec<MetaData> = vec![];
     
                 let mut futures = FuturesOrdered::new();
                
                 for child in item.children() {
-                    let style = item.style.clone().unwrap();
+                    // let style = item.style.clone().unwrap();
                     futures.push_back(async move {
                         let mut c = child.clone();
                         let banner = child.get_tmdb_banner().await;
@@ -595,9 +596,7 @@ impl Transform for TMDBArtTransform {
                             c.art = banner.clone();
                         }
                         // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
-                        if style == "hero" {
-                            c.thumb = c.art.clone();
-                        }
+                        c.thumb = c.art.clone();
                         return c
                     });
                 }
@@ -659,11 +658,11 @@ impl Transform for HubSectionDirectoryTransform {
 }
 
 #[derive(Default, Debug)]
-pub struct HubSectionKeyTransform;
+pub struct HubKeyTransform;
 
 /// We point to replex so we can do some transform on the children calls
 #[async_trait]
-impl Transform for HubSectionKeyTransform {
+impl Transform for HubKeyTransform {
     async fn transform_metadata(
         &self,
         item: &mut MetaData,
@@ -672,7 +671,9 @@ impl Transform for HubSectionKeyTransform {
     ) {
        
         if item.is_hub() {
-            item.key = format!("/replex{}", item.key);
+            if !item.key.contains("replex") { // might already been set by the mixings
+                item.key = format!("/replex{}", item.key);
+            }
         }
     }
 }

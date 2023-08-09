@@ -150,6 +150,7 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
         })
         .with_transform(TMDBArtTransform)
         .with_transform(UserStateTransform)
+        .with_transform(HubKeyTransform)
         .apply_to(&mut container)
         .await;
     res.render(container);
@@ -190,13 +191,12 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
 
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubSectionDirectoryTransform)
-        .with_transform(HubSectionKeyTransform)
-        .with_transform(HubStyleTransform)
         .with_transform(HubChildrenLimitTransform {
             limit: params.clone().count.unwrap(),
         })
         .with_transform(TMDBArtTransform)
         .with_transform(UserStateTransform)
+        .with_transform(HubKeyTransform)
         // .with_filter(CollectionHubPermissionFilter)
         .with_filter(WatchedFilter)
         .apply_to(&mut container)
