@@ -5,7 +5,7 @@ build:
 	cargo build --release
 
 docker-build:
-	docker build -t ghcr.io/sarendsen/replex-nginx:test --target nginx . -f docker/Dockerfile
+	docker build -t ghcr.io/sarendsen/replex:nginx-test --target nginx . -f docker/Dockerfile
 
 # docker-build:
 # 	docker buildx build -t ghcr.io/sarendsen/replexnonginx:latest --platform linux/amd64 --target replex . -f docker/Dockerfile
@@ -14,7 +14,7 @@ docker-build:
 # 	docker run --rm -it -p 3001:80 -e REPLEX_HOST="http://46.4.30.217:42405" ghcr.io/sarendsen/replex:test
 
 docker-run:
-	docker run --rm -it -p 3001:80 -e RUST_LOG="info,replex=info" -e REPLEX_TMDB_API_KEY=0d73e0cb91f39e670b0efa6913afbd58 -e REPLEX_HOST="http://46.4.30.217:42405" ghcr.io/sarendsen/replex-nginx:test
+	docker run --rm -it -p 80:80 -e RUST_LOG="info,replex=info" -e REPLEX_TMDB_API_KEY=0d73e0cb91f39e670b0efa6913afbd58 -e REPLEX_HOST="https://46-4-30-217.01b0839de64b49138531cab1bf32f7c2.plex.direct:42405" ghcr.io/sarendsen/replex:nginx-latest
 
 # push-docker:
 # 	docker push ghcr.io/sarendsen/replex:latest
