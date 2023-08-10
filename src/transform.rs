@@ -629,40 +629,37 @@ impl Transform for TMDBArtTransform {
         options: PlexParams,
     ) {
         let config: Config = Config::figment().extract().unwrap();
+        let style = item.style.clone().unwrap_or("".to_string()).to_owned();
+        if item.is_hub() && ["clip", "hero"].contains(&style.as_str()) {
+            // let mut children: Vec<MetaData> = vec![];
 
-        if config.tmdb_api_key.is_some() {
-            let style = item.style.clone().unwrap_or("".to_string()).to_owned();
-            if item.is_hub() && ["clip", "hero"].contains(&style.as_str()) {
-                // let mut children: Vec<MetaData> = vec![];
+            let mut futures = FuturesOrdered::new();
+            // let now = Instant::now();
 
-                let mut futures = FuturesOrdered::new();
-                // let now = Instant::now();
+            for child in item.children() {
+                // let style = item.style.clone().unwrap();
+                let client = plex_client.clone();
+                futures.push_back(async move {
+                    let mut c = child.clone();
 
-                for child in item.children() {
-                    // let style = item.style.clone().unwrap();
-                    let client = plex_client.clone();
-                    futures.push_back(async move {
-                        let mut c = child.clone();
-
-                        let art = child.get_hero_art(client).await;
-                        if art.is_some() {
-                            c.art = art.clone();
-                        }
-                        // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
-                        c.thumb = c.art.clone();
-                        c
-                    });
-                }
-                // let elapsed = now.elapsed();
-                // println!("Elapsed: {:.2?}", elapsed);
-                // let now = Instant::now();
-
-                let children: Vec<MetaData> = futures.collect().await;
-                item.set_children(children);
-            } else {
-                // keep this blocking for now. AS its loaded in the background
-                self.transform(item, plex_client.clone()).await;
+                    let art = child.get_hero_art(client).await;
+                    if art.is_some() {
+                        c.art = art.clone();
+                    }
+                    // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
+                    c.thumb = c.art.clone();
+                    c
+                });
             }
+            // let elapsed = now.elapsed();
+            // println!("Elapsed: {:.2?}", elapsed);
+            // let now = Instant::now();
+
+            let children: Vec<MetaData> = futures.collect().await;
+            item.set_children(children);
+        } else {
+            // keep this blocking for now. AS its loaded in the background
+            self.transform(item, plex_client.clone()).await;
         }
     }
 }
