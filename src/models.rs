@@ -403,13 +403,11 @@ impl MetaData {
         &self,
         plex_client: PlexClient,
     ) -> Option<String> {
-        if self.guid.is_none() {
-            return None;
-        }
+        self.guid.as_ref()?;
 
         let cache_key = format!("{}:cover_art", self.guid.clone().unwrap());
 
-        let mut cached_result: Option<Option<String>> =
+        let cached_result: Option<Option<String>> =
             GLOBAL_CACHE.get(cache_key.as_str()).await;
 
         if cached_result.is_some() {
@@ -447,9 +445,9 @@ impl MetaData {
         }
 
         let _ = GLOBAL_CACHE
-            .insert(cache_key, image.clone(), crate::cache::Expiration::Never)
+            .insert(cache_key, image.clone(), crate::cache::Expiration::Month)
             .await;
-        return image;
+        image
     }
 
     pub fn children_mut(&mut self) -> &mut Vec<MetaData> {
