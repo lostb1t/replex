@@ -38,7 +38,7 @@ pub fn route() -> Router {
     let proxy = SalvoProxy::with_client(
         config.host.unwrap(),
         reqwest::Client::builder()
-            .timeout(Duration::from_secs(20))
+            .timeout(Duration::from_secs(30))
             .build()
             .unwrap(),
     );
