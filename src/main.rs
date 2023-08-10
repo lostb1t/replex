@@ -84,11 +84,17 @@ async fn main() {
             .add_domain(config.ssl_domain.unwrap())
             .bind()
             .await;
-        Server::new(acceptor).serve(router).await;
+        Server::new(acceptor)
+            .idle_timeout(Duration::from_secs(60))
+            .serve(router)
+            .await;
     } else {
         let acceptor = TcpListener::new(format!("0.0.0.0:{}", config.port))
             .bind()
             .await;
-        Server::new(acceptor).serve(router).await;
+        Server::new(acceptor)
+            .idle_timeout(Duration::from_secs(60))
+            .serve(router)
+            .await;
     }
 }
