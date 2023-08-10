@@ -47,6 +47,7 @@ pub fn route() -> Router {
         .hoop(Logger::new())
         .hoop(Timeout::new(Duration::from_secs(60)))
         .hoop(Compression::new().enable_gzip(CompressionLevel::Fastest))
+        .hoop(max_concurrency(500))
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
@@ -73,7 +74,6 @@ pub fn route() -> Router {
         router = router
             .push(
                 Router::with_path("/video/<colon:colon>/transcode/<**rest>")
-                    .hoop(max_concurrency(50))
                     .handle(redirect_stream),
             )
             .push(
