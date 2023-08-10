@@ -3,21 +3,21 @@ use crate::config::Config;
 use crate::logging::*;
 use crate::models::*;
 use crate::plex_client::*;
-use itertools::Itertools;
+use crate::proxy::PlexProxy;
 use crate::transform::*;
 use crate::url::*;
 use crate::utils::*;
-use crate::proxy::PlexProxy;
+use itertools::Itertools;
 use salvo::cache::{Cache, MemoryStore};
 use salvo::compression::Compression;
 use salvo::cors::Cors;
+use salvo::http::header::CONTENT_TYPE;
+use salvo::http::{Mime, Request, Response, StatusCode};
 use salvo::prelude::*;
 use salvo::proxy::Proxy as SalvoProxy;
-use std::time::Duration;
-use salvo::http::{Mime, Request, Response, StatusCode};
-use salvo::http::header::CONTENT_TYPE;
 use salvo::routing::PathFilter;
-
+// use std::time::Duration;
+use tokio::time::{sleep, Duration};
 
 pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
     let config: Config = Config::figment().extract().unwrap();
@@ -35,6 +35,13 @@ pub fn route() -> Router {
     // cant use colon in paths. So we do it with an regex
     let guid = regex::Regex::new(":").unwrap();
     PathFilter::register_wisp_regex("colon", guid);
+    let proxy = SalvoProxy::with_client(
+        config.host.unwrap(),
+        reqwest::Client::builder()
+            .timeout(Duration::from_secs(30))
+            .build()
+            .unwrap(),
+    );
 
     let mut router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
@@ -45,7 +52,7 @@ pub fn route() -> Router {
                 .path(PLEX_HUBS_PROMOTED)
                 .hoop(default_cache())
                 .get(get_hubs_promoted),
-                // .get(test),
+            // .get(test),
         )
         .push(
             Router::new()
@@ -62,9 +69,11 @@ pub fn route() -> Router {
                 .get(get_collections_children),
         );
 
-        if config.redirect_streams {
-            router = router.push(
+    if config.redirect_streams {
+        router = router
+            .push(
                 Router::with_path("/video/<colon:colon>/transcode/<**rest>")
+                    .hoop(max_concurrency(50))
                     .handle(redirect_stream),
             )
             .push(
@@ -79,29 +88,40 @@ pub fn route() -> Router {
                 Router::with_path("/statistics/bandwidth<**rest>")
                     .handle(redirect_stream),
             );
-        }
+    }
 
-        // catchall
-        router = router.push(
-            Router::with_path("<**rest>")
-                .handle(SalvoProxy::new(config.host.unwrap())),
-        );
+    // catchall
+    router = router.push(
+        Router::with_path("<**rest>")
+            .handle(proxy),
+    );
 
-        router
-
+    router
 }
 
-
 #[handler]
-async fn redirect_stream(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+async fn redirect_stream(
+    req: &mut Request,
+    _depot: &mut Depot,
+    res: &mut Response,
+) {
     let config: Config = Config::figment().extract().unwrap();
     let redirect_url = if config.redirect_streams_url.clone().is_some() {
-        format!("{}{}", config.redirect_streams_url.clone().unwrap(), req.uri_mut().path_and_query().unwrap())
+        format!(
+            "{}{}",
+            config.redirect_streams_url.clone().unwrap(),
+            req.uri_mut().path_and_query().unwrap()
+        )
     } else {
-        format!("{}{}", config.host.unwrap(), req.uri_mut().path_and_query().unwrap())
+        format!(
+            "{}{}",
+            config.host.unwrap(),
+            req.uri_mut().path_and_query().unwrap()
+        )
     };
     let mime = mime_guess::from_path(req.uri().path()).first_or_octet_stream();
-    res.headers_mut().insert(CONTENT_TYPE, mime.as_ref().parse().unwrap());
+    res.headers_mut()
+        .insert(CONTENT_TYPE, mime.as_ref().parse().unwrap());
     res.render(Redirect::temporary(redirect_url));
 }
 
@@ -116,6 +136,8 @@ async fn test(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
 
 #[handler]
 async fn hello(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+    sleep(Duration::from_secs(2)).await;
+    println!("2 have elapsed");
     return res.render("Hello world!");
 }
 
@@ -163,11 +185,7 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     );
 
     // we want guids for banners
-    add_query_param_salvo(
-        req,
-        "includeGuids".to_string(),
-        "1".to_string(),
-    );
+    add_query_param_salvo(req, "includeGuids".to_string(), "1".to_string());
 
     // Hack, as the list could be smaller when removing watched items. So we request more.
     if let Some(original_count) = params.clone().count {
@@ -179,14 +197,15 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     }
 
     let upstream_res = plex_client.request(req).await.unwrap();
-    let mut container: MediaContainerWrapper<MediaContainer> = match from_reqwest_response(upstream_res).await {
-        Ok(r) => r,
-        Err(error) => {
-            tracing::error!(error = ?error, uri = ?req.uri(), "Failed to get plex response");
-            res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
-            return;
-        }
-    };
+    let mut container: MediaContainerWrapper<MediaContainer> =
+        match from_reqwest_response(upstream_res).await {
+            Ok(r) => r,
+            Err(error) => {
+                tracing::error!(error = ?error, uri = ?req.uri(), "Failed to get plex response");
+                res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
+                return;
+            }
+        };
     container.content_type = content_type;
 
     TransformBuilder::new(plex_client, params.clone())
@@ -219,21 +238,18 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
     }
 
     // we want guids for banners
-    add_query_param_salvo(
-        req,
-        "includeGuids".to_string(),
-        "1".to_string(),
-    );
+    add_query_param_salvo(req, "includeGuids".to_string(), "1".to_string());
 
     let upstream_res = plex_client.request(req).await.unwrap();
-    let mut container: MediaContainerWrapper<MediaContainer> = match from_reqwest_response(upstream_res).await {
-        Ok(r) => r,
-        Err(error) => {
-            tracing::error!(error = ?error, uri = ?req.uri(), "Failed to get plex response");
-            res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
-            return;
-        }
-    };
+    let mut container: MediaContainerWrapper<MediaContainer> =
+        match from_reqwest_response(upstream_res).await {
+            Ok(r) => r,
+            Err(error) => {
+                tracing::error!(error = ?error, uri = ?req.uri(), "Failed to get plex response");
+                res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
+                return;
+            }
+        };
     container.content_type = content_type;
 
     TransformBuilder::new(plex_client, params.clone())
