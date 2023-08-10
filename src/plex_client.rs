@@ -209,8 +209,9 @@ impl PlexClient {
             .send()
             .await
             .map_err(Error::other)?;
+        
         let container: MediaContainerWrapper<MediaContainer> =
-            from_reqwest_response(res).await.unwrap();
+            from_reqwest_response(res).await?;
         Ok(container)
     }
 

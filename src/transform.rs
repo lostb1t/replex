@@ -234,8 +234,29 @@ impl TransformBuilder {
         // }
 
         for t in self.transforms.clone() {
-            // dbg!(&t);
+            // let mut set = JoinSet::new();
+            // for item in container.media_container.children_mut() {
+            //     set.spawn(t.transform_metadata(
+            //         item,
+            //         self.plex_client.clone(),
+            //         self.options.clone(),
+            //     ));
+            // };
+  
+            let futures =
+                container.media_container.children_mut().iter_mut().map(
+                    |x: &mut MetaData| {
+                        t.transform_metadata(
+                            x,
+                            self.plex_client.clone(),
+                            self.options.clone(),
+                        )
+                    },
+                );
 
+            future::join_all(futures).await;
+
+            // dont use join as it needs ti be executed in order
             t.transform_mediacontainer(
                 &mut container.media_container,
                 self.plex_client.clone(),
@@ -244,21 +265,32 @@ impl TransformBuilder {
             .await
         }
 
-        for item in container.media_container.children_mut() {
-            if item.is_hub() && !item.is_collection_hub() {
-                // We dont handle builtin hubs
-                continue;
-            }
+        // for t in self.transforms.clone() {
+        //     // dbg!(&t);
 
-            for t in self.transforms.clone() {
-                t.transform_metadata(
-                    item,
-                    self.plex_client.clone(),
-                    self.options.clone(),
-                )
-                .await;
-            }
-        }
+        //     t.transform_mediacontainer(
+        //         &mut container.media_container,
+        //         self.plex_client.clone(),
+        //         self.options.clone(),
+        //     )
+        //     .await
+        // }
+
+        // for item in container.media_container.children_mut() {
+        //     if item.is_hub() && !item.is_collection_hub() {
+        //         // We dont handle builtin hubs
+        //         continue;
+        //     }
+
+        //     for t in self.transforms.clone() {
+        //         t.transform_metadata(
+        //             item,
+        //             self.plex_client.clone(),
+        //             self.options.clone(),
+        //         )
+        //         .await;
+        //     }
+        // }
 
         // future::join_all(futures).await;
 
@@ -581,6 +613,15 @@ impl TMDBArtTransform {
 
 #[async_trait]
 impl Transform for TMDBArtTransform {
+    // async fn transform_metacontainer(
+    //     &self,
+    //     item: &mut MetaData,
+    //     plex_client: PlexClient,
+    //     options: PlexParams,
+    // ) {
+
+    // }
+
     async fn transform_metadata(
         &self,
         item: &mut MetaData,
@@ -595,22 +636,25 @@ impl Transform for TMDBArtTransform {
                 // let mut children: Vec<MetaData> = vec![];
 
                 let mut futures = FuturesOrdered::new();
+                // let now = Instant::now();
 
                 for child in item.children() {
                     // let style = item.style.clone().unwrap();
                     let client = plex_client.clone();
                     futures.push_back(async move {
                         let mut c = child.clone();
-                        
+
                         let art = child.get_hero_art(client).await;
                         if art.is_some() {
                             c.art = art.clone();
                         }
                         // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
                         c.thumb = c.art.clone();
-                        return c;
+                        c
                     });
                 }
+                // let elapsed = now.elapsed();
+                // println!("Elapsed: {:.2?}", elapsed);
                 // let now = Instant::now();
 
                 let children: Vec<MetaData> = futures.collect().await;

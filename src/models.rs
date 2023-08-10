@@ -397,11 +397,8 @@ where
     Ok(Some(deserialize_string_from_number(deserializer)?))
 }
 
-
-
 impl MetaData {
-    // TODO: handle errors
-    // We should be able to reuse the client
+    // TODO: move to plexclient
     pub async fn get_hero_art(
         &self,
         plex_client: PlexClient,
@@ -413,38 +410,46 @@ impl MetaData {
         let cache_key = format!("{}:cover_art", self.guid.clone().unwrap());
 
         let mut cached_result: Option<Option<String>> =
-                    GLOBAL_CACHE.get(cache_key.as_str()).await;
+            GLOBAL_CACHE.get(cache_key.as_str()).await;
 
-        if cached_result.is_some() {   
-            return cached_result.unwrap()
+        if cached_result.is_some() {
+            return cached_result.unwrap();
         }
-    
+
         let guid = self
             .guid
             .clone()
             .unwrap()
             .replace("plex://show/", "")
             .replace("plex://movie/", "");
-        let mut container = plex_client.get_provider_data(guid).await.unwrap();
 
-        let metadata = container.media_container.children_mut().get(0).unwrap();
+        let mut container: MediaContainerWrapper<MediaContainer> =
+            match plex_client.get_provider_data(guid).await {
+                Ok(r) => r,
+                Err(r) => {
+                    tracing::warn!(
+                        "Error loading prodiver metadata for: {}",
+                        self.guid.clone().unwrap()
+                    );
+                    MediaContainerWrapper::default()
+                }
+            };
+        // let mut container = plex_client.get_provider_data(guid).await.unwrap();
+        let metadata = container.media_container.children_mut().get(0);
         let mut image: Option<String> = None;
-        for i in &metadata.images {
-            if i.r#type == "coverArt" {
-                image = Some(i.url.clone());
-                break;
+        if metadata.is_some() {
+            for i in &metadata.unwrap().images {
+                if i.r#type == "coverArt" {
+                    image = Some(i.url.clone());
+                    break;
+                }
             }
         }
 
         let _ = GLOBAL_CACHE
-        .insert(
-            cache_key,
-            image.clone(),
-            crate::cache::Expiration::Never,
-        )
-        .await;
+            .insert(cache_key, image.clone(), crate::cache::Expiration::Never)
+            .await;
         return image;
-
     }
 
     pub fn children_mut(&mut self) -> &mut Vec<MetaData> {
