@@ -597,17 +597,8 @@ impl TMDBArtTransform {
         if art.is_some() {
             item.art = art;
         }
-    }
-    pub async fn apply_tmdb_banner(
-        &self,
-        item: &mut MetaData,
-        plex_client: PlexClient,
-    ) -> MetaData {
-        let art = item.get_hero_art(plex_client).await;
-        if art.is_some() {
-            item.art = art;
-        }
-        item.to_owned()
+        // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
+        item.thumb = item.art.clone();
     }
 }
 
