@@ -73,19 +73,17 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_HOST               |        	 | Plex target host to proxy.                                             	  |
 | REPLEX_INCLUDE_WATCHED    | false    | If set to false, hide watched items.                                      |
 | REPLEX_CACHE_TTL          | 300    	 | Time to live for caches in seconds. Set to 0 to disable (not recommended).          	      |
-| REPLEX_DISABLE_USER_STATE[^1] | false    | Remove unwatched markers from artwork.|
+| REPLEX_DISABLE_USER_STATE | false    | Remove unwatched markers from artwork.|
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
 | REPLEX_REDIRECT_STREAMS  | false    | Redirect streams to another endpoint.                                      |
 | REPLEX_REDIRECT_STREAMS_URL  | REPLEX_HOST    | Alternative streams endpoint                                         |
-
-[^1]: Only works in the web app.
 
 ## Mixed rows
 
 Custom collections with the same name from different libraries will be merged into one on the home screen,
 So an collection named "Trending" in the Movie library will be merged with an collection named "Trending" from a shows library on home.
 
-Note, this does not work on builtin recommandations. As i personally dont see then need of mixing those. 
+Note, this does not work on builtin recommendations. As i personally dont see then need of mixing those. 
 You can recreate the builtin rows with smart collections if you wish to have that functionality, or with PMM ofcourse.
 
 ## Hub style
@@ -123,4 +121,4 @@ Paths are subject to change.
 ## Redirect streams
 
 If you have for example an appbox it might not be ideal to stream media through replex. As that will take a lot of network resources.
-You can redirect streams by enabling `REPLEX_REDIRECT_STREAMS` and optionally set `REPLEX_REDIRECT_STREAMS_URL` to point directlt to your appbox.
+You can redirect streams by enabling `REPLEX_REDIRECT_STREAMS` and optionally set `REPLEX_REDIRECT_STREAMS_URL` if it needs to be different from REPLEX_HOST
