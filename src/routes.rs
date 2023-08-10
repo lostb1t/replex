@@ -53,7 +53,6 @@ pub fn route() -> Router {
                 .path(PLEX_HUBS_PROMOTED)
                 .hoop(default_cache())
                 .get(get_hubs_promoted),
-            // .get(test),
         )
         .push(
             Router::new()
