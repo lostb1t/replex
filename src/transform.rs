@@ -598,7 +598,7 @@ impl TMDBArtTransform {
             item.art = art;
         }
         // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
-        item.thumb = item.art.clone();
+        //item.thumb = item.art.clone();
     }
 }
 
