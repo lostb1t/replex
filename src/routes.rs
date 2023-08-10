@@ -38,14 +38,14 @@ pub fn route() -> Router {
     let proxy = SalvoProxy::with_client(
         config.host.unwrap(),
         reqwest::Client::builder()
-            .timeout(Duration::from_secs(30))
+            .timeout(Duration::from_secs(20))
             .build()
             .unwrap(),
     );
 
     let mut router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
-        .hoop(Timeout::new(Duration::from_secs(60)))
+        .hoop(Timeout::new(Duration::from_secs(30)))
         .hoop(Compression::new().enable_gzip(CompressionLevel::Fastest))
         .hoop(max_concurrency(500))
         .push(
