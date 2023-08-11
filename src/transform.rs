@@ -583,34 +583,11 @@ impl Transform for HubChildrenLimitTransform {
 }
 
 #[derive(Default, Debug)]
-pub struct TMDBArtTransform;
+pub struct HubArtTransform;
 
-impl TMDBArtTransform {
-    pub async fn transform(
-        &self,
-        item: &mut MetaData,
-        plex_client: PlexClient,
-    ) {
-        let art = item.get_hero_art(plex_client).await;
-        if art.is_some() {
-            item.art = art;
-        }
-        // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
-        //item.thumb = item.art.clone();
-    }
-}
 
 #[async_trait]
-impl Transform for TMDBArtTransform {
-    // async fn transform_metacontainer(
-    //     &self,
-    //     item: &mut MetaData,
-    //     plex_client: PlexClient,
-    //     options: PlexParams,
-    // ) {
-
-    // }
-
+impl Transform for HubArtTransform {
     async fn transform_metadata(
         &self,
         item: &mut MetaData,
@@ -646,9 +623,52 @@ impl Transform for TMDBArtTransform {
 
             let children: Vec<MetaData> = futures.collect().await;
             item.set_children(children);
-        } else {
-            // keep this blocking for now. AS its loaded in the background
-            self.transform(item, plex_client.clone()).await;
+        }
+    }
+}
+
+
+/// Collections can be called from hubs as a refresh. But also standalone. 
+/// We need to know if if its hub called and if the hub is hero styled for media.
+#[derive(Default, Debug)]
+pub struct CollecionArtTransform {
+    pub collection_ids: Vec<u32>,
+    pub hub: bool, // if collections is meant for hubs
+}
+
+#[async_trait]
+impl Transform for CollecionArtTransform {
+
+    async fn transform_metadata(
+        &self,
+        item: &mut MetaData,
+        plex_client: PlexClient,
+        options: PlexParams,
+    ) {
+        if self.hub { 
+            let mut collection_details = plex_client
+                .clone()
+                .get_cached(
+                    plex_client
+                        .get_collection(self.collection_ids[0] as i32),
+                    format!("collection:{}", item.key.clone()).to_string(),
+                )
+                .await;
+            
+            if collection_details.is_ok() && collection_details.unwrap()
+                    .media_container
+                    .children()
+                    .get(0)
+                    .unwrap()
+                    .has_label("REPLEXHERO".to_string()) {
+
+                let art = item.get_hero_art(plex_client).await;
+                if art.is_some() {
+                    item.art = art;
+                }
+                // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
+                item.thumb = item.art.clone();
+            }
         }
     }
 }

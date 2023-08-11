@@ -4,6 +4,7 @@ use tmdb_api::movie::images::MovieImages;
 use tmdb_api::prelude::Command;
 use tmdb_api::tvshow::search::TVShowSearch;
 use tmdb_api::Client;
+use figment::{providers::Env, Figment};
 
 extern crate mime;
 use crate::cache::GLOBAL_CACHE;
@@ -70,8 +71,34 @@ pub struct PlexParams {
     pub container_size: Option<i32>,
     #[salvo(extract(rename = "X-Plex-Container-Start"))]
     pub container_start: Option<i32>,
-    // #[salvo(extract(rename = "Accept"))]
-    // pub accept: ContentType,
+    #[serde(
+        default = "default_as_false",
+        deserialize_with = "bool_from_int"
+    )]
+    #[salvo(extract(rename = "includeCollections"))]
+    pub include_collections: bool,
+    #[serde(
+        default = "default_as_false",
+        deserialize_with = "bool_from_int"
+    )]
+    #[salvo(extract(rename = "includeAdvanced"))]
+    pub include_advanced: bool,
+}
+
+
+fn bool_from_int<'de, D>(deserializer: D) -> Result<bool, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    match u8::deserialize(deserializer)? {
+        0 => Ok(false),
+        1 => Ok(true),
+        other => {
+            Err(serde::de::Error::invalid_value(
+            serde::de::Unexpected::Unsigned(other as u64),
+            &"zero or one",
+        ))},
+    }
 }
 
 pub fn deserialize_comma_seperated_number<'de, D>(

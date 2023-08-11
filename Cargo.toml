@@ -32,8 +32,8 @@ serde-aux = "^4.2.0"
 serde_with = { version = "3.0", features = ["json"] }
 futures = "0.3.28"
 figment = { version = "0.10.10", features = ["env"] }
-#salvo = { version = "0.50.2", features = ["websocket", "proxy", "cors", "acme", "cache", "timeout", "otel", "compression", "concurrency-limiter"] }
-salvo = { git = "https://github.com/salvo-rs/salvo", features = ["websocket", "proxy", "cors", "acme", "cache", "timeout", "otel", "compression", "concurrency-limiter"] }
+#salvo = { version = "0.50.2", features = ["websocket", "proxy", "cors", "acme", "cache", "otel", "compression", "affix"] }
+salvo = { git = "https://github.com/salvo-rs/salvo", branch = "proxy", features = ["websocket", "proxy", "cors", "acme", "cache", "otel", "compression", "concurrency-limiter", "affix"] }
 reqwest = { version = "0.11", features = ["gzip", "json"] }
 http-body-util = "0.1.0-rc.3"
 once_cell = "1.18.0"
@@ -45,7 +45,6 @@ tmdb-api = "0.5.0"
 bincode = "1.3.3"
 mime_guess = "2.0.4"
 regex = "1.9.3"
-#tower = { version = "0.4.13", features = ["limit"] }
 
 [dev-dependencies]
 async-std = { version = "^1.12", features = ["attributes"] }
@@ -60,7 +59,7 @@ rstest = "0.18.1"
 #test = []
 
 #[replace]
-#"salvo-proxy:0.49.0" = { path = "../salvo/crates/proxy" }
+#"salvo-proxy:0.50.2" = { path = "../salvo/crates/proxy" }
 
 [profile.release]
 debug = true

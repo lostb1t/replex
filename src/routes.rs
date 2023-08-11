@@ -1,9 +1,12 @@
+use std::sync::Arc;
+
 use crate::cache::*;
 use crate::config::Config;
 use crate::logging::*;
 use crate::models::*;
 use crate::plex_client::*;
-use crate::proxy::PlexProxy;
+use crate::proxy::Proxy;
+use crate::timeout::*;
 use crate::transform::*;
 use crate::url::*;
 use crate::utils::*;
@@ -14,7 +17,7 @@ use salvo::cors::Cors;
 use salvo::http::header::CONTENT_TYPE;
 use salvo::http::{Mime, Request, Response, StatusCode};
 use salvo::prelude::*;
-use salvo::proxy::Proxy as SalvoProxy;
+// use salvo::proxy::Proxy as SalvoProxy;
 use salvo::routing::PathFilter;
 // use std::time::Duration;
 use tokio::time::{sleep, Duration};
@@ -35,8 +38,9 @@ pub fn route() -> Router {
     // cant use colon in paths. So we do it with an regex
     let guid = regex::Regex::new(":").unwrap();
     PathFilter::register_wisp_regex("colon", guid);
-    let proxy = SalvoProxy::with_client(
-        config.host.unwrap(),
+
+    let proxy = Proxy::with_client(
+        config.host.clone().unwrap(),
         reqwest::Client::builder()
             .timeout(Duration::from_secs(30))
             .build()
@@ -47,7 +51,8 @@ pub fn route() -> Router {
         .hoop(Logger::new())
         .hoop(Timeout::new(Duration::from_secs(30)))
         .hoop(Compression::new().enable_gzip(CompressionLevel::Fastest))
-        .hoop(max_concurrency(500))
+        // .hoop(max_concurrency(500))
+        .hoop(affix::insert("proxy", Arc::new(proxy.clone())))
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
@@ -89,11 +94,30 @@ pub fn route() -> Router {
             );
     }
 
+    // TODO: We could just make a gobal middleware that checks every request for the includeRelated.
+    // Not sure of the performance impact tho
+    if config.disable_related {
+        router = router
+            .push(
+                Router::new()
+                    .path("/library/metadata/<id>/related")
+                    .hoop(Timeout::new(Duration::from_secs(5)))
+                    .handle(proxy.clone()),
+            )
+            .push(
+                Router::with_path("/library/metadata/<id>")
+                    .hoop(disable_related_query)
+                    .handle(proxy.clone()),
+            )
+            .push(
+                Router::with_path("/playQueues")
+                    .hoop(disable_related_query)
+                    .handle(proxy.clone()),
+            );
+    }
+
     // catchall
-    router = router.push(
-        Router::with_path("<**rest>")
-            .handle(proxy),
-    );
+    router = router.push(Router::with_path("<**rest>").handle(proxy.clone()));
 
     router
 }
@@ -141,19 +165,20 @@ async fn hello(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
 }
 
 #[handler]
+async fn disable_related_query(
+    req: &mut Request,
+    depot: &mut Depot,
+    res: &mut Response,
+    ctrl: &mut FlowCtrl,
+) {
+    add_query_param_salvo(req, "includeRelated".to_string(), "0".to_string());
+}
+
+#[handler]
 pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     let params: PlexParams = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let content_type = get_content_type_from_headers(req.headers_mut());
-    // not sure anymore why i have this lol
-    // let content_directory_id_size =
-    //     params.clone().content_directory_id.unwrap().len();
-    // if content_directory_id_size > usize::try_from(1).unwrap() {
-    //     let upstream_res = plex_client.request(req).await.unwrap();
-    //     let mut container = from_reqwest_response(upstream_res).await.unwrap();
-    //     container.content_type = content_type.clone();
-    //     res.render(container);
-    // }
 
     if params.clone().content_directory_id.unwrap()[0]
         != params.clone().pinned_content_directory_id.unwrap()[0]
@@ -213,7 +238,7 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
         .with_transform(HubChildrenLimitTransform {
             limit: params.clone().count.unwrap(),
         })
-        .with_transform(TMDBArtTransform)
+        .with_transform(HubArtTransform)
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
         .apply_to(&mut container)
@@ -257,7 +282,7 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
         .with_transform(HubChildrenLimitTransform {
             limit: params.clone().count.unwrap(),
         })
-        .with_transform(TMDBArtTransform)
+        .with_transform(HubArtTransform)
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
         // .with_filter(CollectionHubPermissionFilter)
@@ -298,11 +323,16 @@ pub async fn get_collections_children(
     // filtering of watched happens in the transform
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(LibraryMixTransform {
-            collection_ids,
+            collection_ids: collection_ids.clone(),
             offset,
             limit,
         })
-        .with_transform(TMDBArtTransform)
+        .with_transform(CollecionArtTransform {
+            collection_ids: collection_ids.clone(),
+            hub: params.content_directory_id.is_some() // its a guessing game
+                && !params.include_collections
+                && !params.include_advanced,
+        })
         .with_transform(UserStateTransform)
         .apply_to(&mut container)
         .await;

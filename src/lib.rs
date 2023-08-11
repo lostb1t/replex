@@ -15,6 +15,7 @@ pub mod cache;
 pub mod routes;
 pub mod tmdb;
 pub mod proxy;
+pub mod timeout;
 
 #[cfg(test)]
 mod test_helpers;

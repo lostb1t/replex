@@ -3131,7 +3131,7 @@ checksum = "1ad4cc8da4ef723ed60bced201181d83791ad433213d8c24efffda1eec85d741"
 [[package]]
 name = "salvo"
 version = "0.50.2"
-source = "git+https://github.com/salvo-rs/salvo#9def4b27413446d4afda5439293a59fce6273616"
+source = "git+https://github.com/salvo-rs/salvo?branch=proxy#7bac3e2ec29ea93de4ee7837945ed07c5b07c7d6"
 dependencies = [
  "salvo-cache",
  "salvo-compression",
@@ -3145,7 +3145,7 @@ dependencies = [
 [[package]]
 name = "salvo-cache"
 version = "0.50.2"
-source = "git+https://github.com/salvo-rs/salvo#9def4b27413446d4afda5439293a59fce6273616"
+source = "git+https://github.com/salvo-rs/salvo?branch=proxy#7bac3e2ec29ea93de4ee7837945ed07c5b07c7d6"
 dependencies = [
  "bytes",
  "moka",
@@ -3156,7 +3156,7 @@ dependencies = [
 [[package]]
 name = "salvo-compression"
 version = "0.50.2"
-source = "git+https://github.com/salvo-rs/salvo#9def4b27413446d4afda5439293a59fce6273616"
+source = "git+https://github.com/salvo-rs/salvo?branch=proxy#7bac3e2ec29ea93de4ee7837945ed07c5b07c7d6"
 dependencies = [
  "brotli",
  "bytes",
@@ -3174,7 +3174,7 @@ dependencies = [
 [[package]]
 name = "salvo-cors"
 version = "0.50.2"
-source = "git+https://github.com/salvo-rs/salvo#9def4b27413446d4afda5439293a59fce6273616"
+source = "git+https://github.com/salvo-rs/salvo?branch=proxy#7bac3e2ec29ea93de4ee7837945ed07c5b07c7d6"
 dependencies = [
  "bytes",
  "salvo_core",
@@ -3184,7 +3184,7 @@ dependencies = [
 [[package]]
 name = "salvo-otel"
 version = "0.50.2"
-source = "git+https://github.com/salvo-rs/salvo#9def4b27413446d4afda5439293a59fce6273616"
+source = "git+https://github.com/salvo-rs/salvo?branch=proxy#7bac3e2ec29ea93de4ee7837945ed07c5b07c7d6"
 dependencies = [
  "opentelemetry 0.20.0",
  "opentelemetry-http 0.9.0",
@@ -3196,7 +3196,7 @@ dependencies = [
 [[package]]
 name = "salvo-proxy"
 version = "0.50.2"
-source = "git+https://github.com/salvo-rs/salvo#9def4b27413446d4afda5439293a59fce6273616"
+source = "git+https://github.com/salvo-rs/salvo?branch=proxy#7bac3e2ec29ea93de4ee7837945ed07c5b07c7d6"
 dependencies = [
  "fastrand 2.0.0",
  "futures-util",
@@ -3224,7 +3224,7 @@ dependencies = [
 [[package]]
 name = "salvo_core"
 version = "0.50.2"
-source = "git+https://github.com/salvo-rs/salvo#9def4b27413446d4afda5439293a59fce6273616"
+source = "git+https://github.com/salvo-rs/salvo?branch=proxy#7bac3e2ec29ea93de4ee7837945ed07c5b07c7d6"
 dependencies = [
  "async-trait",
  "base64 0.21.2",
@@ -3277,7 +3277,7 @@ dependencies = [
 [[package]]
 name = "salvo_extra"
 version = "0.50.2"
-source = "git+https://github.com/salvo-rs/salvo#9def4b27413446d4afda5439293a59fce6273616"
+source = "git+https://github.com/salvo-rs/salvo?branch=proxy#7bac3e2ec29ea93de4ee7837945ed07c5b07c7d6"
 dependencies = [
  "base64 0.21.2",
  "etag",
@@ -3295,7 +3295,7 @@ dependencies = [
 [[package]]
 name = "salvo_macros"
 version = "0.50.2"
-source = "git+https://github.com/salvo-rs/salvo#9def4b27413446d4afda5439293a59fce6273616"
+source = "git+https://github.com/salvo-rs/salvo?branch=proxy#7bac3e2ec29ea93de4ee7837945ed07c5b07c7d6"
 dependencies = [
  "cruet",
  "proc-macro-crate",
