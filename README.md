@@ -107,8 +107,8 @@ You have 2 options to provide remote access.
    You can setup a reverse proxy with a custom domain. This solves both the issues from option 1.
    This is the prefered way.
 
-For both options set your domain or ip (http(s)://[replexip]:[replexport]) in the 'Custom server access URLs' field under network and make sure to disable remote access under remote access. 
-use https instead of http if you use a custom domain, otherwise app.plex.tv wont work
+For both options set your domain or ip(with port) in the 'Custom server access URLs' field under network and make sure to disable remote access under remote access. 
+Use https instead of http if you using a custom domain, otherwise app.plex.tv wont work.
 
 ## Reverse proxy
 
