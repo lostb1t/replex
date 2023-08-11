@@ -47,7 +47,6 @@ pub fn route() -> Router {
             .unwrap(),
     );
 
-
     let mut router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
         .hoop(Timeout::new(Duration::from_secs(30)))
@@ -100,7 +99,8 @@ pub fn route() -> Router {
     if config.disable_related {
         router = router
             .push(
-                Router::new().path("/library/metadata/<id>/related")
+                Router::new()
+                    .path("/library/metadata/<id>/related")
                     .hoop(Timeout::new(Duration::from_secs(5)))
                     .handle(proxy.clone()),
             )
@@ -117,9 +117,7 @@ pub fn route() -> Router {
     }
 
     // catchall
-    router = router.push(Router::with_path("<**rest>")
-        .handle(proxy.clone())
-    );
+    router = router.push(Router::with_path("<**rest>").handle(proxy.clone()));
 
     router
 }
@@ -240,7 +238,7 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
         .with_transform(HubChildrenLimitTransform {
             limit: params.clone().count.unwrap(),
         })
-        .with_transform(TMDBArtTransform)
+        .with_transform(HubArtTransform)
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
         .apply_to(&mut container)
@@ -284,7 +282,7 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
         .with_transform(HubChildrenLimitTransform {
             limit: params.clone().count.unwrap(),
         })
-        .with_transform(TMDBArtTransform)
+        .with_transform(HubArtTransform)
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
         // .with_filter(CollectionHubPermissionFilter)
@@ -325,11 +323,16 @@ pub async fn get_collections_children(
     // filtering of watched happens in the transform
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(LibraryMixTransform {
-            collection_ids,
+            collection_ids: collection_ids.clone(),
             offset,
             limit,
         })
-        .with_transform(TMDBArtTransform)
+        .with_transform(CollecionArtTransform {
+            collection_ids: collection_ids.clone(),
+            hub: params.content_directory_id.is_some() // its a guessing game
+                && !params.include_collections
+                && !params.include_advanced,
+        })
         .with_transform(UserStateTransform)
         .apply_to(&mut container)
         .await;
