@@ -77,6 +77,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
 | REPLEX_REDIRECT_STREAMS  | false    | Redirect streams to another endpoint.                                      |
 | REPLEX_REDIRECT_STREAMS_URL  | REPLEX_HOST    | Alternative streams endpoint                                         |
+| REPLEX_DISABLE_RELATED.  | false | See: https://github.com/sarendsen/replex/issues/26.        |
 
 ## Mixed rows
 
