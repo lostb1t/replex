@@ -9,7 +9,6 @@ use salvo::Error;
 // use salvo::extract;
 use http::uri::{Scheme, Uri};
 use http::Extensions;
-use indexmap::IndexMap;
 use salvo::http::header::HeaderValue;
 
 // use reqwest::Client;

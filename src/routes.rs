@@ -52,30 +52,7 @@ pub fn route() -> Router {
         .hoop(Timeout::new(Duration::from_secs(30)))
         .hoop(Compression::new().enable_gzip(CompressionLevel::Fastest))
         // .hoop(max_concurrency(500))
-        .hoop(affix::insert("proxy", Arc::new(proxy.clone())))
-        .push(
-            Router::new()
-                .path(PLEX_HUBS_PROMOTED)
-                .hoop(default_cache())
-                .get(get_hubs_promoted),
-        )
-        .push(
-            Router::new()
-                .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
-                .hoop(default_cache())
-                .get(get_hubs_sections),
-        )
-        // .push(Router::new().path("/ping").get(PlexProxy::new(config.host.clone().unwrap())))
-        .push(Router::new().path("/hello").get(hello))
-        .push(
-            Router::new()
-                .path("/replex/library/collections/<ids>/children")
-                .hoop(default_cache())
-                .get(get_collections_children),
-        ).push(
-            Router::with_path("/photo/<colon:colon>/transcode/<**rest>")
-                .hoop(fix_photo_transcode_request)
-        );
+        .hoop(affix::insert("proxy", Arc::new(proxy.clone())));
 
     if config.redirect_streams {
         router = router
@@ -120,8 +97,33 @@ pub fn route() -> Router {
             );
     }
 
-    // catchall
-    router = router.push(Router::with_path("<**rest>").handle(proxy.clone()));
+    router = router
+        .push(
+            Router::new()
+                .path(PLEX_HUBS_PROMOTED)
+                .hoop(default_cache())
+                .get(get_hubs_promoted),
+        )
+        .push(
+            Router::new()
+                .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
+                .hoop(default_cache())
+                .get(get_hubs_sections),
+        )
+        // .push(Router::new().path("/ping").get(PlexProxy::new(config.host.clone().unwrap())))
+        .push(Router::new().path("/hello").get(hello))
+        .push(
+            Router::new()
+                .path("/replex/library/collections/<ids>/children")
+                .hoop(default_cache())
+                .get(get_collections_children),
+        )
+        .push(
+            Router::with_path("/photo/<colon:colon>/transcode")
+                .hoop(fix_photo_transcode_request)
+                .handle(proxy.clone()),
+        )
+        .push(Router::with_path("<**rest>").handle(proxy.clone()));
 
     router
 }
@@ -170,30 +172,23 @@ async fn hello(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
 
 // Google tv requests some weird thumbnail for hero elements. Let fix that
 #[handler]
-async fn fix_photo_transcode_request(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+async fn fix_photo_transcode_request(
+    req: &mut Request,
+    _depot: &mut Depot,
+    res: &mut Response,
+) {
     let params: PlexParams = req.extract().await.unwrap();
-    dbg!(&params);
-    if params.size.is_some() && params.size.unwrap().starts_with("medium-") && params.platform.is_some() && params.platform.unwrap() == "android" {
-        // we gonna assume this is is a background request
-        dbg!("gonna fix");
-        add_query_param_salvo(
-            req,
-            "height".to_string(),
-            "1000".to_string(),
-        );
-        add_query_param_salvo(
-            req,
-            "width".to_string(),
-            "1000".to_string(),
-        );
-        add_query_param_salvo(
-            req,
-            "quality".to_string(),
-            "80".to_string(),
-        );
+    if params.size.is_some()
+        && params.size.unwrap().starts_with("medium-")
+        && params.platform.is_some()
+        && params.platform.unwrap().to_lowercase() == "android"
+    {
+        // we gonna assume this is is a background request so go big
+        add_query_param_salvo(req, "height".to_string(), "1000".to_string());
+        add_query_param_salvo(req, "width".to_string(), "1000".to_string());
+        add_query_param_salvo(req, "quality".to_string(), "80".to_string());
     }
 }
-
 
 #[handler]
 async fn disable_related_query(
