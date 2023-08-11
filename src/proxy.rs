@@ -5,18 +5,22 @@ use salvo::http::ReqBody;
 use salvo::http::ResBody;
 use salvo::BoxedError;
 use salvo::Error;
+use once_cell::sync::OnceCell;
 // use salvo::extract;
 use salvo::http::header::HeaderValue;
+use http::uri::{Scheme, Uri};
+use http::{Extensions};
+use indexmap::IndexMap;
 
 // use reqwest::Client;
 use salvo::http::header::CONNECTION;
 use salvo::http::header::UPGRADE;
-use salvo::prelude::*;
-use salvo::proxy::Proxy as SalvoProxy;
-use salvo::proxy::Upstreams;
+// use salvo::proxy::Proxy as SalvoProxy;
+use crate::salvo_proxy::Proxy as SalvoProxy;
+use crate::salvo_proxy::Upstreams;
 use salvo::rt::TokioIo;
 use salvo::test::ResponseExt;
-use std::net::SocketAddr;
+// use std::net::SocketAddr;
 use tokio::io::copy_bidirectional;
 use tracing::debug;
 use url::Url;
@@ -27,9 +31,10 @@ use hyper::client::conn::http1::Builder;
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
 use hyper::upgrade::Upgraded;
-use hyper::{Method, Request, Response};
-
+use hyper::{Method};
 use tokio::net::{TcpListener, TcpStream};
+use salvo::{async_trait, Depot, FlowCtrl, Request, Handler, Response, http::Version, conn::SocketAddr};
+use salvo::test::RequestBuilder;
 
 type HyperRequest = hyper::Request<ReqBody>;
 type HyperResponse = hyper::Response<ResBody>;
@@ -91,7 +96,9 @@ where
         depot: &mut Depot,
         res: &mut salvo::Response,
         ctrl: &mut FlowCtrl,
-    ) {
+    ) { 
+        // dbg!(&req.uri_mut());
+        // let mut reqq = RequestBuilder::new(req.uri_mut().to_string(), req.method_mut().clone()).build();
         self.inner.handle(req, depot, res, ctrl).await;
     }
 }

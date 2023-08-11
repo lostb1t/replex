@@ -6,10 +6,10 @@ use crate::logging::*;
 use crate::models::*;
 use crate::plex_client::*;
 use crate::proxy::Proxy;
+use crate::timeout::*;
 use crate::transform::*;
 use crate::url::*;
 use crate::utils::*;
-use crate::timeout::*;
 use itertools::Itertools;
 use salvo::cache::{Cache, MemoryStore};
 use salvo::compression::Compression;
@@ -47,11 +47,12 @@ pub fn route() -> Router {
             .unwrap(),
     );
 
+
     let mut router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
         .hoop(Timeout::new(Duration::from_secs(30)))
         .hoop(Compression::new().enable_gzip(CompressionLevel::Fastest))
-        .hoop(max_concurrency(500))
+        // .hoop(max_concurrency(500))
         .hoop(affix::insert("proxy", Arc::new(proxy.clone())))
         .push(
             Router::new()
@@ -94,21 +95,31 @@ pub fn route() -> Router {
             );
     }
 
+    // TODO: We could just make a gobal middleware that checks every request for the includeRelated.
+    // Not sure of the performance impact tho
     if config.disable_related {
         router = router
             .push(
-                Router::with_path("/library/metadata/<id>/related<**rest>")
+                Router::new().path("/library/metadata/<id>/related")
                     .hoop(Timeout::new(Duration::from_secs(5)))
                     .handle(proxy.clone()),
             )
             .push(
-                Router::with_path("/library/metadata/<id>/<**rest>")
-                    .handle(disable_related_query),
+                Router::with_path("/library/metadata/<id>")
+                    .hoop(disable_related_query)
+                    .handle(proxy.clone()),
+            )
+            .push(
+                Router::with_path("/playQueues")
+                    .hoop(disable_related_query)
+                    .handle(proxy.clone()),
             );
     }
 
     // catchall
-    router = router.push(Router::with_path("<**rest>").handle(proxy));
+    router = router.push(Router::with_path("<**rest>")
+        .handle(proxy.clone())
+    );
 
     router
 }
@@ -162,23 +173,7 @@ async fn disable_related_query(
     res: &mut Response,
     ctrl: &mut FlowCtrl,
 ) {
-    // let proxy = depot.get::<Proxy<String>>("proxy").unwrap();
-    let config: Config = Config::figment().extract().unwrap();
-    let proxy = Proxy::with_client(
-        config.host.clone().unwrap(),
-        reqwest::Client::builder()
-            .timeout(Duration::from_secs(30))
-            .build()
-            .unwrap(),
-    );
-    add_query_param_salvo(
-        req,
-        "includeRelated".to_string(),
-        "0".to_string(),
-    );
-
-    let depot = &mut Depot::default();
-    proxy.handle(req, depot, res, ctrl).await
+    add_query_param_salvo(req, "includeRelated".to_string(), "0".to_string());
 }
 
 #[handler]
