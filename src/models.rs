@@ -83,6 +83,12 @@ pub struct PlexParams {
     )]
     #[salvo(extract(rename = "includeAdvanced"))]
     pub include_advanced: bool,
+    // photo transcode
+    pub size: Option<String>,
+    pub width: Option<i32>,
+    pub height: Option<i32>,
+    pub quality: Option<i32>,
+    pub url: Option<String>,
 }
 
 

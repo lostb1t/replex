@@ -72,6 +72,9 @@ pub fn route() -> Router {
                 .path("/replex/library/collections/<ids>/children")
                 .hoop(default_cache())
                 .get(get_collections_children),
+        ).push(
+            Router::with_path("/photo/<colon:colon>/transcode/<**rest>")
+                .hoop(fix_photo_transcode_request)
         );
 
     if config.redirect_streams {
@@ -82,6 +85,7 @@ pub fn route() -> Router {
             )
             .push(
                 Router::with_path("/photo/<colon:colon>/transcode")
+                    .hoop(fix_photo_transcode_request)
                     .handle(redirect_stream),
             )
             .push(
@@ -163,6 +167,33 @@ async fn hello(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
     println!("2 have elapsed");
     return res.render("Hello world!");
 }
+
+// Google tv requests some weird thumbnail for hero elements. Let fix that
+#[handler]
+async fn fix_photo_transcode_request(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+    let params: PlexParams = req.extract().await.unwrap();
+    dbg!(&params);
+    if params.size.is_some() && params.size.unwrap().starts_with("medium-") && params.platform.is_some() && params.platform.unwrap() == "android" {
+        // we gonna assume this is is a background request
+        dbg!("gonna fix");
+        add_query_param_salvo(
+            req,
+            "height".to_string(),
+            "1000".to_string(),
+        );
+        add_query_param_salvo(
+            req,
+            "width".to_string(),
+            "1000".to_string(),
+        );
+        add_query_param_salvo(
+            req,
+            "quality".to_string(),
+            "80".to_string(),
+        );
+    }
+}
+
 
 #[handler]
 async fn disable_related_query(
