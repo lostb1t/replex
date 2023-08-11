@@ -83,6 +83,12 @@ pub struct PlexParams {
     )]
     #[salvo(extract(rename = "includeAdvanced"))]
     pub include_advanced: bool,
+    #[serde(
+        default = "default_as_false",
+        deserialize_with = "bool_from_int"
+    )]
+    #[salvo(extract(rename = "excludeAllLeaves"))]
+    pub exclude_all_leaves: bool,
     // photo transcode
     pub size: Option<String>,
     pub width: Option<i32>,

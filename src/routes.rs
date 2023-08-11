@@ -357,7 +357,8 @@ pub async fn get_collections_children(
             collection_ids: collection_ids.clone(),
             hub: params.content_directory_id.is_some() // its a guessing game
                 && !params.include_collections
-                && !params.include_advanced,
+                && !params.include_advanced
+                && !params.exclude_all_leaves
         })
         .with_transform(UserStateTransform)
         .apply_to(&mut container)
