@@ -1,23 +1,23 @@
 use hyper::http;
 use hyper::HeaderMap;
 // use hyper::header::CONNECTION;
+use once_cell::sync::OnceCell;
 use salvo::http::ReqBody;
 use salvo::http::ResBody;
 use salvo::BoxedError;
 use salvo::Error;
-use once_cell::sync::OnceCell;
 // use salvo::extract;
-use salvo::http::header::HeaderValue;
 use http::uri::{Scheme, Uri};
-use http::{Extensions};
+use http::Extensions;
 use indexmap::IndexMap;
+use salvo::http::header::HeaderValue;
 
 // use reqwest::Client;
 use salvo::http::header::CONNECTION;
 use salvo::http::header::UPGRADE;
 // use salvo::proxy::Proxy as SalvoProxy;
-use crate::salvo_proxy::Proxy as SalvoProxy;
-use crate::salvo_proxy::Upstreams;
+use salvo::proxy::Proxy as SalvoProxy;
+use salvo::proxy::Upstreams;
 use salvo::rt::TokioIo;
 use salvo::test::ResponseExt;
 // use std::net::SocketAddr;
@@ -31,10 +31,13 @@ use hyper::client::conn::http1::Builder;
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
 use hyper::upgrade::Upgraded;
-use hyper::{Method};
-use tokio::net::{TcpListener, TcpStream};
-use salvo::{async_trait, Depot, FlowCtrl, Request, Handler, Response, http::Version, conn::SocketAddr};
+use hyper::Method;
 use salvo::test::RequestBuilder;
+use salvo::{
+    async_trait, conn::SocketAddr, http::Version, Depot, FlowCtrl, Handler,
+    Request, Response,
+};
+use tokio::net::{TcpListener, TcpStream};
 
 type HyperRequest = hyper::Request<ReqBody>;
 type HyperResponse = hyper::Response<ResBody>;
@@ -51,13 +54,15 @@ where
     /// Create new `Proxy` with upstreams list.
     pub fn new(upstreams: U) -> Self {
         Proxy {
-            inner: SalvoProxy::new(upstreams),
+            inner: SalvoProxy::new(upstreams)
+                .url_rest_getter(default_url_rest_getter),
         }
     }
     /// Create new `Proxy` with upstreams list and [`Client`].
     pub fn with_client(upstreams: U, client: reqwest::Client) -> Self {
         Proxy {
-            inner: SalvoProxy::with_client(upstreams, client),
+            inner: SalvoProxy::with_client(upstreams, client)
+                .url_rest_getter(default_url_rest_getter),
         }
     }
 }
@@ -73,9 +78,8 @@ where
             inner: SalvoProxy::with_client(
                 upstreams,
                 self.inner.client.clone(),
-            )
+            ).url_rest_getter(default_url_rest_getter),
         }
-
     }
 
     // fn clone_from(&mut self, source: &Self) {
@@ -96,9 +100,13 @@ where
         depot: &mut Depot,
         res: &mut salvo::Response,
         ctrl: &mut FlowCtrl,
-    ) { 
+    ) {
         // dbg!(&req.uri_mut());
         // let mut reqq = RequestBuilder::new(req.uri_mut().to_string(), req.method_mut().clone()).build();
         self.inner.handle(req, depot, res, ctrl).await;
     }
+}
+
+pub fn default_url_rest_getter(req: &Request, _depot: &Depot) -> String {
+    req.uri().path_and_query().unwrap().to_string()
 }

@@ -15,7 +15,6 @@ pub mod cache;
 pub mod routes;
 pub mod tmdb;
 pub mod proxy;
-pub mod salvo_proxy;
 pub mod timeout;
 
 #[cfg(test)]
