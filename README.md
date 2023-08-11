@@ -78,6 +78,10 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_REDIRECT_STREAMS  | false    | Redirect streams to another endpoint.                                      |
 | REPLEX_REDIRECT_STREAMS_URL  | REPLEX_HOST    | Alternative streams endpoint                                         |
 | REPLEX_DISABLE_RELATED.  | false | See: https://github.com/sarendsen/replex/issues/26.        |
+| REPLEX_SSL_ENABLE        | false    	| Enable automatic SSL generation. http will be disabled                     |
+|                          |           | (stored in /data/acme/letsencrypt so make sure to mount a volume)          |
+| REPLEX_SSL_DOMAIN        |           | Domain to request SSL certificate for when REPLEX_SSL_ENABLE is enabled   |
+
 
 ## Mixed rows
 
