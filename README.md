@@ -82,6 +82,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 |                          |           | (stored in /data/acme/letsencrypt so make sure to mount a volume)          |
 | REPLEX_SSL_DOMAIN        |           | Domain to request SSL certificate for when REPLEX_SSL_ENABLE is enabled   |
 
+Note: Automatic SSl is untested
 
 ## Mixed rows
 
