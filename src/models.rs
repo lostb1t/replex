@@ -424,9 +424,9 @@ impl MetaData {
         let mut container: MediaContainerWrapper<MediaContainer> =
             match plex_client.get_provider_data(guid).await {
                 Ok(r) => r,
-                Err(r) => {
+                Err(e) => {
                     tracing::warn!(
-                        "Error loading prodiver metadata for: {}",
+                        "Problem loading prodiver metadata for: {}.",
                         self.guid.clone().unwrap()
                     );
                     MediaContainerWrapper::default()

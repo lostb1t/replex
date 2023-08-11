@@ -150,12 +150,16 @@ impl PlexClient {
         &self,
         id: i32,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
-        let resp = self
+        let res = self
             .get(format!("/library/collections/{}", id))
-            .await
-            .unwrap();
+            .await?;
+
+        if res.status() == 404 {
+            return Err(salvo::http::StatusError::not_found().into());
+        }
+
         let container: MediaContainerWrapper<MediaContainer> =
-            from_reqwest_response(resp).await.unwrap();
+            from_reqwest_response(res).await.unwrap();
         Ok(container)
     }
 
@@ -185,12 +189,12 @@ impl PlexClient {
         name: String,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
         let cache_key = self.generate_cache_key(name.clone());
-        let cached = self.get_cache(&cache_key).await.unwrap();
+        let cached = self.get_cache(&cache_key).await?;
 
         if cached.is_some() {
             return Ok(cached.unwrap());
         }
-        let r = f.await.unwrap();
+        let r = f.await?;
         self.insert_cache(cache_key, r.clone()).await;
         Ok(r)
     }
@@ -209,7 +213,7 @@ impl PlexClient {
             .send()
             .await
             .map_err(Error::other)?;
-        
+
         let container: MediaContainerWrapper<MediaContainer> =
             from_reqwest_response(res).await?;
         Ok(container)

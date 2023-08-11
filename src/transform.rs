@@ -427,16 +427,14 @@ impl Transform for HubStyleTransform {
                         .get_collection(get_collection_id_from_hub(item)),
                     format!("collection:{}", item.key.clone()).to_string(),
                 )
-                .await
-                .unwrap();
-
-            if collection_details
-                .media_container
-                .children()
-                .get(0)
-                .unwrap()
-                .has_label("REPLEXHERO".to_string())
-            {
+                .await;
+            
+            if collection_details.is_ok() && collection_details.unwrap()
+                    .media_container
+                    .children()
+                    .get(0)
+                    .unwrap()
+                    .has_label("REPLEXHERO".to_string()) {
                 item.style = Some("hero".to_string());
                 // item.meta = Some(Meta {
                 //     r#type: None,
