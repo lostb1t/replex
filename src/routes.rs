@@ -179,13 +179,21 @@ async fn fix_photo_transcode_request(
 ) {
     let params: PlexParams = req.extract().await.unwrap();
     if params.size.is_some()
-        && params.size.unwrap().starts_with("medium-")
-        && params.platform.is_some()
-        && params.platform.unwrap().to_lowercase() == "android"
+        && params.clone().size.unwrap().contains('-') // (catched things like (medlium-240, large-500),i dont think size paramater orks at all, but who knows
+        // && params.platform.is_some()
+        // && params.clone().platform.unwrap().to_lowercase() == "android"
     {
-        // we gonna assume this is is a background request so go big
-        add_query_param_salvo(req, "height".to_string(), "1000".to_string());
-        add_query_param_salvo(req, "width".to_string(), "1000".to_string());
+        let size: String = params
+            .clone()
+            .size
+            .unwrap()
+            .split('-')
+            .last()
+            .unwrap()
+            .parse()
+            .unwrap();
+        add_query_param_salvo(req, "height".to_string(), size.clone());
+        add_query_param_salvo(req, "width".to_string(), size.clone());
         add_query_param_salvo(req, "quality".to_string(), "80".to_string());
     }
 }
@@ -358,7 +366,7 @@ pub async fn get_collections_children(
             hub: params.content_directory_id.is_some() // its a guessing game
                 && !params.include_collections
                 && !params.include_advanced
-                && !params.exclude_all_leaves
+                && !params.exclude_all_leaves,
         })
         .with_transform(UserStateTransform)
         .apply_to(&mut container)
