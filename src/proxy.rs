@@ -106,6 +106,6 @@ where
     }
 }
 
-pub fn default_url_rest_getter(req: &Request, _depot: &Depot) -> String {
-    req.uri().path_and_query().unwrap().to_string()
+pub fn default_url_rest_getter(req: &Request, _depot: &Depot) -> Option<String> {
+    Some(req.uri().path_and_query().unwrap().to_string())
 }
