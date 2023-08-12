@@ -443,7 +443,7 @@ impl MetaData {
         plex_client: PlexClient,
     ) -> Option<String> {
         self.guid.as_ref()?;
-
+        
         let cache_key = format!("{}:cover_art", self.guid.clone().unwrap());
 
         let cached_result: Option<Option<String>> =
@@ -452,7 +452,6 @@ impl MetaData {
         if cached_result.is_some() {
             return cached_result.unwrap();
         }
-
         let guid = self
             .guid
             .clone()

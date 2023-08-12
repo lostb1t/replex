@@ -133,116 +133,7 @@ impl TransformBuilder {
         self,
         container: &mut MediaContainerWrapper<MediaContainer>,
     ) {
-        // let mut filtered_childs: Vec<MetaData> = vec![];
-        // 'outer: for item in container.media_container.test() {
-        //     for filter in self.filters.clone() {
-        //         if !filter
-        //             .filter_metadata(
-        //                 item.to_owned(),
-        //                 self.plex_client.clone(),
-        //                 self.options.clone(),
-        //             )
-        //             .await
-        //         {
-        //             break 'outer;
-        //         }
-        //     }
-
-        //     if !item.test().is_empty() {
-        //         for child in item.test() {
-
-        //         }
-        //     }
-
-        //     filtered_childs.push(item.to_owned());
-        // }
-
-        // let children = self.apply_to_metadata(container.media_container.test());
-        // container.media_container.set_children(filtered_childs);
-
-        // if self.mix {
-        //     for id in reversed {
-        //         let mut c = plex_client
-        //             .get_collection_children(id, offset.clone(), limit.clone())
-        //             .await
-        //             .unwrap();
-        //         total_size += c.media_container.total_size.unwrap();
-        //         match children.is_empty() {
-        //             false => {
-        //                 children = children
-        //                     .into_iter()
-        //                     .interleave(c.media_container.children())
-        //                     .collect::<Vec<MetaData>>();
-        //             }
-        //             true => children.append(&mut c.media_container.children()),
-        //         }
-        //     }
-        // }
-
-        // for t in self.filters.clone() {
-        // for item in container.media_container.test() {
-        //     let futures = for filter in self.filters.clone().iter().map(
-        //         |x: Filter| {
-        //             x.filter(
-        //                 item,
-        //                 self.plex_client.clone(),
-        //                 self.options.clone(),
-        //             )
-        //         }
-        //     );
-        //     let results = future::join_all(futures).await;
-        // }
-
-        // for t in self.transforms.clone() {
-        //     let futures = container.media_container.test().iter_mut().map(
-        //         |x: &mut MetaData| {
-        //             t.transform_metadata(
-        //                 x,
-        //                 self.plex_client.clone(),
-        //                 self.options.clone(),
-        //             )
-        //         },
-        //     );
-        //     future::join_all(futures).await;
-
-        //     t.transform_mediacontainer(
-        //         &mut container.media_container,
-        //         self.plex_client.clone(),
-        //         self.options.clone(),
-        //     ).await
-        // }
-        // for t in self.transforms.clone() {
-        //     let futures =
-        //         container.media_container.children_mut().iter_mut().map(
-        //             |x: &mut MetaData| {
-        //                 t.transform_metadata(
-        //                     x,
-        //                     self.plex_client.clone(),
-        //                     self.options.clone(),
-        //                 )
-        //             },
-        //         );
-        //     future::join_all(futures).await;
-
-        //     // dont use join as it needs ti be executed in order
-        //     t.transform_mediacontainer(
-        //         &mut container.media_container,
-        //         self.plex_client.clone(),
-        //         self.options.clone(),
-        //     )
-        //     .await
-        // }
-
         for t in self.transforms.clone() {
-            // let mut set = JoinSet::new();
-            // for item in container.media_container.children_mut() {
-            //     set.spawn(t.transform_metadata(
-            //         item,
-            //         self.plex_client.clone(),
-            //         self.options.clone(),
-            //     ));
-            // };
-  
             let futures =
                 container.media_container.children_mut().iter_mut().map(
                     |x: &mut MetaData| {
@@ -264,72 +155,6 @@ impl TransformBuilder {
             )
             .await
         }
-
-        // for t in self.transforms.clone() {
-        //     // dbg!(&t);
-
-        //     t.transform_mediacontainer(
-        //         &mut container.media_container,
-        //         self.plex_client.clone(),
-        //         self.options.clone(),
-        //     )
-        //     .await
-        // }
-
-        // for item in container.media_container.children_mut() {
-        //     if item.is_hub() && !item.is_collection_hub() {
-        //         // We dont handle builtin hubs
-        //         continue;
-        //     }
-
-        //     for t in self.transforms.clone() {
-        //         t.transform_metadata(
-        //             item,
-        //             self.plex_client.clone(),
-        //             self.options.clone(),
-        //         )
-        //         .await;
-        //     }
-        // }
-
-        // future::join_all(futures).await;
-
-        // dont use join as it needs ti be executed in order
-
-        // }
-
-        // let mut set = tokio::task::JoinSet::new();
-        // for t in self.transforms.clone() {
-        //     for item in container.media_container.children_mut() {
-        //             set.spawn(t.transform_metadata(
-        //                 item,
-        //                 self.plex_client.clone(),
-        //                 self.options.clone(),
-        //             )
-        //         );
-        //     };
-        //     // let futures =
-        //     //     container.media_container.children_mut().iter_mut().map(
-        //     //         |x: &mut MetaData| {
-        //     //             t.transform_metadata(
-        //     //                 x,
-        //     //                 self.plex_client.clone(),
-        //     //                 self.options.clone(),
-        //     //             )
-        //     //         },
-        //     //     );
-
-        //     //future::join_all(futures).await;
-        //     // future::try_join_all(futures).await;
-
-        //     // dont use join as it needs ti be executed in order
-        //     t.transform_mediacontainer(
-        //         &mut container.media_container,
-        //         self.plex_client.clone(),
-        //         self.options.clone(),
-        //     )
-        //     .await
-        // }
 
         // filter behind transform as transform can load in additional data
         let children = container.media_container.children_mut();
@@ -639,38 +464,57 @@ pub struct CollecionArtTransform {
 #[async_trait]
 impl Transform for CollecionArtTransform {
 
-    async fn transform_metadata(
+    async fn transform_mediacontainer(
         &self,
-        item: &mut MetaData,
+        item: &mut MediaContainer,
         plex_client: PlexClient,
         options: PlexParams,
     ) {
-        //if self.hub { 
-            let mut collection_details = plex_client
-                .clone()
-                .get_cached(
-                    plex_client
-                        .get_collection(self.collection_ids[0] as i32),
-                    format!("collection:{}", item.key.clone()).to_string(),
-                )
-                .await;
-            
-            if collection_details.is_ok() && collection_details.unwrap()
-                    .media_container
-                    .children()
-                    .get(0)
-                    .unwrap()
-                    .has_label("REPLEXHERO".to_string()) {
+        let mut collection_details = plex_client
+        .clone()
+        .get_cached(
+            plex_client
+                .get_collection(
+                    self.collection_ids[0] as i32),
+                    format!("collection:{}", self.collection_ids[0].to_string()
+                ),
+        )
+        .await;
 
-                let art = item.get_hero_art(plex_client).await;
-                if art.is_some() {
-                    item.art = art;
-                }
-                // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
-                // item.thumb = item.art.clone();
+
+        if collection_details.is_ok() && collection_details.unwrap()
+            .media_container
+            .children()
+            .get(0)
+            .unwrap()
+            .has_label("REPLEXHERO".to_string()) {
+       
+            let mut futures = FuturesOrdered::new();
+            // let now = Instant::now();
+
+            for child in item.children() {
+                // let style = item.style.clone().unwrap();
+                let client = plex_client.clone();
+                futures.push_back(async move {
+                    let mut c = child.clone();
+
+                    let art = child.get_hero_art(client).await;
+                    if art.is_some() {
+                        c.art = art.clone();
+                    }
+                    // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
+                    // c.thumb = c.art.clone();
+                    c
+                });
             }
-        //}
-    }
+
+            let children: Vec<MetaData> = futures.collect().await;
+            item.set_children(children);
+
+        }
+
+        }
+
 }
 
 #[derive(Default)]

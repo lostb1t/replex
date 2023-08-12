@@ -115,7 +115,7 @@ pub fn route() -> Router {
         .push(
             Router::new()
                 .path("/replex/library/collections/<ids>/children")
-                .hoop(default_cache())
+                // .hoop(default_cache())
                 .get(get_collections_children),
         )
         .push(
