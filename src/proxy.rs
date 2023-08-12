@@ -54,14 +54,14 @@ where
     pub fn new(upstreams: U) -> Self {
         Proxy {
             inner: SalvoProxy::new(upstreams)
-                .url_rest_getter(default_url_rest_getter),
+                .url_path_getter(default_url_rest_getter),
         }
     }
     /// Create new `Proxy` with upstreams list and [`Client`].
     pub fn with_client(upstreams: U, client: reqwest::Client) -> Self {
         Proxy {
             inner: SalvoProxy::with_client(upstreams, client)
-                .url_rest_getter(default_url_rest_getter),
+                .url_path_getter(default_url_rest_getter),
         }
     }
 }
@@ -77,7 +77,7 @@ where
             inner: SalvoProxy::with_client(
                 upstreams,
                 self.inner.client.clone(),
-            ).url_rest_getter(default_url_rest_getter),
+            ).url_path_getter(default_url_rest_getter),
         }
     }
 
