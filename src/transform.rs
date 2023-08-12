@@ -645,7 +645,7 @@ impl Transform for CollecionArtTransform {
         plex_client: PlexClient,
         options: PlexParams,
     ) {
-        if self.hub { 
+        //if self.hub { 
             let mut collection_details = plex_client
                 .clone()
                 .get_cached(
@@ -669,7 +669,7 @@ impl Transform for CollecionArtTransform {
                 // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
                 // item.thumb = item.art.clone();
             }
-        }
+        //}
     }
 }
 
