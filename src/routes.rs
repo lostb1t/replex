@@ -276,7 +276,6 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
         .with_transform(HubChildrenLimitTransform {
             limit: params.clone().count.unwrap(),
         })
-        .with_transform(HubArtTransform)
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
         .apply_to(&mut container)
@@ -320,7 +319,6 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
         .with_transform(HubChildrenLimitTransform {
             limit: params.clone().count.unwrap(),
         })
-        .with_transform(HubArtTransform)
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
         // .with_filter(CollectionHubPermissionFilter)

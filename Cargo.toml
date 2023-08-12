@@ -58,8 +58,11 @@ rstest = "0.18.1"
 #[features]
 #test = []
 
-#[replace]
-#"salvo-proxy:0.50.2" = { path = "../salvo/crates/proxy" }
+[patch.crates-io]
+#salvo = {path = "../salvo"}
+salvo-proxy = { path = "../salvo/crates/proxy" }
+#salvo-websocket = { path = "../salvo/crates/websocket" }
+salvo_core = { path = "../salvo/crates/core" }
 
 [profile.release]
 debug = true

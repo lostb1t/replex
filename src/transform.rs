@@ -233,58 +233,58 @@ impl Filter for CollectionHubPermissionFilter {
     }
 }
 
-#[derive(Default, Debug)]
-pub struct HubStyleTransform;
+// #[derive(Default, Debug)]
+// pub struct HubStyleTransform;
 
-#[async_trait]
-impl Transform for HubStyleTransform {
-    async fn transform_metadata(
-        &self,
-        item: &mut MetaData,
-        plex_client: PlexClient,
-        options: PlexParams,
-    ) {
-        if item.is_collection_hub() {
-            let mut collection_details = plex_client
-                .clone()
-                .get_cached(
-                    plex_client
-                        .get_collection(get_collection_id_from_hub(item)),
-                    format!("collection:{}", item.key.clone()).to_string(),
-                )
-                .await;
-            
-            if collection_details.is_ok() && collection_details.unwrap()
-                    .media_container
-                    .children()
-                    .get(0)
-                    .unwrap()
-                    .has_label("REPLEXHERO".to_string()) {
-                item.style = Some("hero".to_string());
-                // item.meta = Some(Meta {
-                //     r#type: None,
-                //     display_fields: vec![
-                //         DisplayField {
-                //             r#type: Some("movie".to_string()),
-                //             image_type: Some("coverArt".to_string()),
-                //             fields: vec![],
-                //         },
-                //         // DisplayField {
-                //         //     r#type: Some("show".to_string()),
-                //         //     fields: vec!["title".to_string(), "year".to_string()],
-                //         // },
-                //     ],
-                // });
-                // for android, as it doesnt listen to hero style on home..... clip works
-                if let Some(platform) = &options.platform {
-                    if platform.to_lowercase() == "android" {
-                        item.r#type = "clip".to_string();
-                    }
-                }
-            }
-        }
-    }
-}
+// #[async_trait]
+// impl Transform for HubStyleTransform {
+//     async fn transform_metadata(
+//         &self,
+//         item: &mut MetaData,
+//         plex_client: PlexClient,
+//         options: PlexParams,
+//     ) {
+//         if item.is_collection_hub() {
+//             let mut collection_details = plex_client
+//                 .clone()
+//                 .get_cached(
+//                     plex_client
+//                         .get_collection(get_collection_id_from_hub(item)),
+//                     format!("collection:{}", item.key.clone()).to_string(),
+//                 )
+//                 .await;
+
+//             if collection_details.is_ok() && collection_details.unwrap()
+//                     .media_container
+//                     .children()
+//                     .get(0)
+//                     .unwrap()
+//                     .has_label("REPLEXHERO".to_string()) {
+//                 item.style = Some("hero".to_string());
+//                 // item.meta = Some(Meta {
+//                 //     r#type: None,
+//                 //     display_fields: vec![
+//                 //         DisplayField {
+//                 //             r#type: Some("movie".to_string()),
+//                 //             image_type: Some("coverArt".to_string()),
+//                 //             fields: vec![],
+//                 //         },
+//                 //         // DisplayField {
+//                 //         //     r#type: Some("show".to_string()),
+//                 //         //     fields: vec!["title".to_string(), "year".to_string()],
+//                 //         // },
+//                 //     ],
+//                 // });
+//                 // for android, as it doesnt listen to hero style on home..... clip works
+//                 if let Some(platform) = &options.platform {
+//                     if platform.to_lowercase() == "android" {
+//                         item.r#type = "clip".to_string();
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }
 
 #[derive(Default, Debug)]
 pub struct HubMixTransform;
@@ -408,11 +408,10 @@ impl Transform for HubChildrenLimitTransform {
 }
 
 #[derive(Default, Debug)]
-pub struct HubArtTransform;
-
+pub struct HubStyleTransform;
 
 #[async_trait]
-impl Transform for HubArtTransform {
+impl Transform for HubStyleTransform {
     async fn transform_metadata(
         &self,
         item: &mut MetaData,
@@ -421,39 +420,47 @@ impl Transform for HubArtTransform {
     ) {
         let config: Config = Config::figment().extract().unwrap();
         let style = item.style.clone().unwrap_or("".to_string()).to_owned();
-        if item.is_hub() && ["clip", "hero"].contains(&style.as_str()) {
-            // let mut children: Vec<MetaData> = vec![];
 
-            let mut futures = FuturesOrdered::new();
-            // let now = Instant::now();
-
-            for child in item.children() {
-                // let style = item.style.clone().unwrap();
-                let client = plex_client.clone();
-                futures.push_back(async move {
-                    let mut c = child.clone();
-
-                    let art = child.get_hero_art(client).await;
-                    if art.is_some() {
-                        c.art = art.clone();
+        if item.is_collection_hub() {
+            let is_hero = item.is_hero(plex_client.clone()).await.unwrap();
+            if is_hero {
+                item.style = Some("hero".to_string());
+                if let Some(platform) = &options.platform {
+                    if platform.to_lowercase() == "android" {
+                        item.r#type = "clip".to_string();
                     }
-                    // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
-                    c.thumb = c.art.clone();
-                    c
-                });
-            }
-            // let elapsed = now.elapsed();
-            // println!("Elapsed: {:.2?}", elapsed);
-            // let now = Instant::now();
+                }
 
-            let children: Vec<MetaData> = futures.collect().await;
-            item.set_children(children);
+                let mut futures = FuturesOrdered::new();
+                // let now = Instant::now();
+
+                for child in item.children() {
+                    // let style = item.style.clone().unwrap();
+                    let client = plex_client.clone();
+                    futures.push_back(async move {
+                        let mut c = child.clone();
+
+                        let art = child.get_hero_art(client).await;
+                        if art.is_some() {
+                            c.art = art.clone();
+                        }
+                        // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
+                        c.thumb = c.art.clone();
+                        c
+                    });
+                }
+                // let elapsed = now.elapsed();
+                // println!("Elapsed: {:.2?}", elapsed);
+                // let now = Instant::now();
+
+                let children: Vec<MetaData> = futures.collect().await;
+                item.set_children(children);
+            }
         }
     }
 }
 
-
-/// Collections can be called from hubs as a refresh. But also standalone. 
+/// Collections can be called from hubs as a refresh. But also standalone.
 /// We need to know if if its hub called and if the hub is hero styled for media.
 #[derive(Default, Debug)]
 pub struct CollecionArtTransform {
@@ -463,7 +470,6 @@ pub struct CollecionArtTransform {
 
 #[async_trait]
 impl Transform for CollecionArtTransform {
-
     async fn transform_mediacontainer(
         &self,
         item: &mut MediaContainer,
@@ -471,24 +477,22 @@ impl Transform for CollecionArtTransform {
         options: PlexParams,
     ) {
         let mut collection_details = plex_client
-        .clone()
-        .get_cached(
-            plex_client
-                .get_collection(
-                    self.collection_ids[0] as i32),
-                    format!("collection:{}", self.collection_ids[0].to_string()
-                ),
-        )
-        .await;
+            .clone()
+            .get_cached(
+                plex_client.get_collection(self.collection_ids[0] as i32),
+                format!("collection:{}", self.collection_ids[0].to_string()),
+            )
+            .await;
 
-
-        if collection_details.is_ok() && collection_details.unwrap()
-            .media_container
-            .children()
-            .get(0)
-            .unwrap()
-            .has_label("REPLEXHERO".to_string()) {
-       
+        if collection_details.is_ok()
+            && collection_details
+                .unwrap()
+                .media_container
+                .children()
+                .get(0)
+                .unwrap()
+                .has_label("REPLEXHERO".to_string())
+        {
             let mut futures = FuturesOrdered::new();
             // let now = Instant::now();
 
@@ -510,11 +514,8 @@ impl Transform for CollecionArtTransform {
 
             let children: Vec<MetaData> = futures.collect().await;
             item.set_children(children);
-
         }
-
-        }
-
+    }
 }
 
 #[derive(Default)]

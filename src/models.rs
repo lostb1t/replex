@@ -1,10 +1,10 @@
+use figment::{providers::Env, Figment};
 use salvo::prelude::*;
 use std::str::FromStr;
 use tmdb_api::movie::images::MovieImages;
 use tmdb_api::prelude::Command;
 use tmdb_api::tvshow::search::TVShowSearch;
 use tmdb_api::Client;
-use figment::{providers::Env, Figment};
 
 extern crate mime;
 use crate::cache::GLOBAL_CACHE;
@@ -71,22 +71,13 @@ pub struct PlexParams {
     pub container_size: Option<i32>,
     #[salvo(extract(rename = "X-Plex-Container-Start"))]
     pub container_start: Option<i32>,
-    #[serde(
-        default = "default_as_false",
-        deserialize_with = "bool_from_int"
-    )]
+    #[serde(default = "default_as_false", deserialize_with = "bool_from_int")]
     #[salvo(extract(rename = "includeCollections"))]
     pub include_collections: bool,
-    #[serde(
-        default = "default_as_false",
-        deserialize_with = "bool_from_int"
-    )]
+    #[serde(default = "default_as_false", deserialize_with = "bool_from_int")]
     #[salvo(extract(rename = "includeAdvanced"))]
     pub include_advanced: bool,
-    #[serde(
-        default = "default_as_false",
-        deserialize_with = "bool_from_int"
-    )]
+    #[serde(default = "default_as_false", deserialize_with = "bool_from_int")]
     #[salvo(extract(rename = "excludeAllLeaves"))]
     pub exclude_all_leaves: bool,
     // photo transcode
@@ -97,7 +88,6 @@ pub struct PlexParams {
     pub url: Option<String>,
 }
 
-
 fn bool_from_int<'de, D>(deserializer: D) -> Result<bool, D::Error>
 where
     D: Deserializer<'de>,
@@ -105,11 +95,10 @@ where
     match u8::deserialize(deserializer)? {
         0 => Ok(false),
         1 => Ok(true),
-        other => {
-            Err(serde::de::Error::invalid_value(
+        other => Err(serde::de::Error::invalid_value(
             serde::de::Unexpected::Unsigned(other as u64),
             &"zero or one",
-        ))},
+        )),
     }
 }
 
@@ -443,7 +432,7 @@ impl MetaData {
         plex_client: PlexClient,
     ) -> Option<String> {
         self.guid.as_ref()?;
-        
+
         let cache_key = format!("{}:cover_art", self.guid.clone().unwrap());
 
         let cached_result: Option<Option<String>> =
@@ -524,6 +513,29 @@ impl MetaData {
             }
         }
         false
+    }
+
+    /// if this hub should be hero style
+    pub async fn is_hero(&self, plex_client: PlexClient) -> Result<bool> {
+        if !self.is_hub() {
+            return Ok(false);
+        }
+        let collection_id = get_collection_id_from_hub(self);
+        let mut collection_details = plex_client
+        .clone()
+        .get_cached(
+            plex_client.get_collection(collection_id),
+            format!(
+                "collection:{}",
+                collection_id
+            ),
+        )
+        .await?;
+
+        Ok(collection_details.media_container.children()
+            .get(0)
+            .unwrap()
+            .has_label("REPLEXHERO".to_string()))
     }
 
     pub fn is_watched(&self) -> bool {

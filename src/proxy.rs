@@ -17,6 +17,7 @@ use salvo::http::header::UPGRADE;
 // use salvo::proxy::Proxy as SalvoProxy;
 use salvo::proxy::Proxy as SalvoProxy;
 use salvo::proxy::Upstreams;
+// salvo_core::handler::Handler;
 use salvo::rt::TokioIo;
 use salvo::test::ResponseExt;
 // use std::net::SocketAddr;
@@ -54,14 +55,16 @@ where
     pub fn new(upstreams: U) -> Self {
         Proxy {
             inner: SalvoProxy::new(upstreams)
-                .url_path_getter(default_url_rest_getter),
+                .url_path_getter(default_url_path_getter)
+                .url_query_getter(default_url_query_getter),
         }
     }
     /// Create new `Proxy` with upstreams list and [`Client`].
     pub fn with_client(upstreams: U, client: reqwest::Client) -> Self {
         Proxy {
             inner: SalvoProxy::with_client(upstreams, client)
-                .url_path_getter(default_url_rest_getter),
+                .url_path_getter(default_url_path_getter)
+                .url_query_getter(default_url_query_getter),
         }
     }
 }
@@ -77,7 +80,9 @@ where
             inner: SalvoProxy::with_client(
                 upstreams,
                 self.inner.client.clone(),
-            ).url_path_getter(default_url_rest_getter),
+            )
+            .url_path_getter(default_url_path_getter)
+            .url_query_getter(default_url_query_getter),
         }
     }
 
@@ -106,6 +111,19 @@ where
     }
 }
 
-pub fn default_url_rest_getter(req: &Request, _depot: &Depot) -> Option<String> {
-    Some(req.uri().path_and_query().unwrap().to_string())
+pub fn default_url_path_getter(
+    req: &Request,
+    _depot: &Depot,
+) -> Option<String> {
+    Some(req.uri().path().to_string())
+}
+
+pub fn default_url_query_getter(
+    req: &Request,
+    _depot: &Depot,
+) -> Option<String> {
+    match req.uri().query() {
+        Some(i) => Some(i.to_string()),
+        _ => None
+    }
 }
