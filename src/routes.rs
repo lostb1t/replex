@@ -70,7 +70,7 @@ pub fn route() -> Router {
                     .handle(redirect_stream),
             )
             .push(
-                Router::with_path("/statistics/bandwidth<**rest>")
+                Router::with_path("/statistics/<**rest>")
                     .handle(redirect_stream),
             ).push(
                 Router::with_path("/library/parts/<itemid>/<partid>/file.<extension>")
