@@ -346,7 +346,11 @@ pub async fn get_collections_children(
 
     // We dont listen to pagination. We have a hard max of 250 per collection
     let limit = Some(250); // plex its max
-    let offset = Some(0);
+
+    let mut offset = Some(0);
+    if params.container_start.is_some() {
+        offset = params.container_start;
+    }
 
     // create a stub
     let mut container: MediaContainerWrapper<MediaContainer> =
