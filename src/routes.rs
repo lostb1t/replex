@@ -72,6 +72,9 @@ pub fn route() -> Router {
             .push(
                 Router::with_path("/statistics/bandwidth<**rest>")
                     .handle(redirect_stream),
+            ).push(
+                Router::with_path("/library/parts/<itemid>/<partid>/file.<extension>")
+                    .handle(redirect_stream),
             );
     }
 
