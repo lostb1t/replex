@@ -1,4 +1,9 @@
-use crate::{config::Config, models::*, plex_client::PlexClient, utils::*};
+use crate::{
+    config::Config,
+    models::*,
+    plex_client::{self, PlexClient},
+    utils::*,
+};
 use async_recursion::async_recursion;
 use async_trait::async_trait;
 use futures_util::{
@@ -335,13 +340,57 @@ impl Transform for HubMixTransform {
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct LibraryMixTransform {
     pub collection_ids: Vec<u32>,
-    pub offset: Option<i32>,
-    pub limit: Option<i32>,
+    pub offset: i32,
+    pub limit: i32,
     // pub remove_watched: bool,
 }
+
+// #[async_recursion]
+// pub async fn load_collection_children(
+//     id: u32,
+//     offset: i32,
+//     limit: i32,
+//     original_limit: i32,
+//     client: PlexClient,
+// ) -> anyhow::Result<MediaContainerWrapper<MediaContainer>> {
+//     let config: Config = Config::figment().extract().unwrap();
+//     let mut c = client
+//         .get_collection_children(id, Some(offset), Some(limit))
+//         .await?;
+
+//     if !config.include_watched {
+//         c.media_container.children_mut().retain(|x| !x.is_watched());
+
+//         let children_lenght = c.media_container.children_mut().len() as i32;
+//         // dbg!(children_lenght);
+//         // dbg!(limit);
+//         // dbg!(c.media_container.total_size.unwrap());
+//         // dbg!(offset);
+//         // dbg!(limit);
+//         // dbg!(children_lenght);
+//         // dbg!(c.media_container.total_size);
+//         // dbg!("-------");
+//         let total_size = c.media_container.total_size.unwrap();
+//         if children_lenght < original_limit
+//             && total_size > offset + limit && offset < total_size
+//         {
+//             //dbg!("recursive");
+//             // self.clone().load_collection_children();
+//             // load more
+//             return load_collection_children(
+//                 id,
+//                 offset,
+//                 limit + 10,
+//                 original_limit,
+//                 client.clone(),
+//             ).await;
+//         }
+//     }
+//     Ok(c)
+// }
 
 #[async_trait]
 impl Transform for LibraryMixTransform {
@@ -353,21 +402,30 @@ impl Transform for LibraryMixTransform {
     ) {
         let config: Config = Config::figment().extract().unwrap();
         let mut children: Vec<MetaData> = vec![];
+        let mut total_size: i32 = 0;
+        let collection_ids_len = self.collection_ids.clone().len() as i32;
+        let collection_offset =
+            (self.offset as f32 / collection_ids_len as f32).ceil() as i32;
+        let collection_limit =
+            (self.limit as f32 / collection_ids_len as f32).ceil() as i32;
+        let mut total_size_children_unfiltered: i32 = 0;
 
         for id in self.collection_ids.clone() {
-            let mut c = plex_client
-                .get_collection_children(
+            let mut c = plex_client.clone().get_cached(
+                plex_client.load_collection_children_recursive(
                     id,
-                    self.offset.clone(),
-                    self.limit.clone(),
-                )
-                .await
-                .unwrap();
-            if !config.include_watched {
-                c.media_container.children_mut().retain(|x| !x.is_watched());
-            }
+                    self.offset,
+                    collection_limit,
+                    collection_limit,
+                ),
+                format!(
+                    "collection:{}:{}:{}",
+                    id, self.offset, collection_limit
+                ),
+            ).await.unwrap();
 
-            // total_size += c.media_container.total_size.unwrap();
+            total_size += c.media_container.total_size.unwrap();
+
             match children.is_empty() {
                 false => {
                     children = children
@@ -378,10 +436,28 @@ impl Transform for LibraryMixTransform {
                 true => children.append(&mut c.media_container.children()),
             }
         }
+        //dbg!(total_size);
+        let children_count = children.len() as i32;
 
+        // we dont know the total size because we filter stuff. We might already be at the end of the line
+        if children_count < self.limit {
+            // dbg!("yup");
+            // dbg!(children_count);
+            // dbg!(total_size);
+            // dbg!("------");
+            // total_size = self.limit + children_count;
+            total_size = self.offset + children_count;
+            //total_size = self.offset + children_count;
+            //dbg!(total_size);
+        }
+        // dbg!(self.limit);
+
+        //item.children_mut().truncate(self.limit as usize);
+        item.total_size = Some(total_size);
         // always metadata library
-        item.total_size = Some(children.len() as i32);
+        children.truncate(self.limit as usize);
         item.metadata = children;
+        item.size = Some(self.limit);
     }
 }
 
@@ -617,34 +693,3 @@ impl Transform for UserStateTransform {
         }
     }
 }
-
-// #[derive(Default)]
-// pub struct WatchedFilter;
-
-// #[async_trait]
-// impl Filter for WatchedFilter {
-//     async fn filter_metadata(
-//         &self,
-//         item: MetaData,
-//         plex_client: PlexClient,
-//         options: PlexParams,
-//     ) -> bool {
-//         tracing::debug!("filter watched");
-//         let mut children: Vec<MetaData> = vec![];
-//         if item.is_hub() {
-//             for mut child in self.media_container.children() {
-//                 child.remove_watched();
-//                 children.push(child);
-//             }
-//         } else {
-//             children = self
-//                 .media_container
-//                 .children()
-//                 .into_iter()
-//                 .filter(|c| !c.is_watched())
-//                 .collect::<Vec<MetaData>>();
-//         }
-//         self.media_container.set_children(children);
-//         self
-//     }
-// }

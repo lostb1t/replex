@@ -6,6 +6,7 @@ use crate::models::*;
 use crate::utils::*;
 use anyhow::Result;
 
+use async_recursion::async_recursion;
 use futures_util::Future;
 use futures_util::TryStreamExt;
 // use hyper::client::HttpConnector;
@@ -36,6 +37,7 @@ static CACHE: Lazy<Cache<String, MediaContainerWrapper<MediaContainer>>> =
             .build()
     });
 
+/// TODO: Implement clone
 #[derive(Debug, Clone)]
 pub struct PlexClient {
     pub http_client: Client,
@@ -145,6 +147,40 @@ impl PlexClient {
             from_reqwest_response(resp).await.unwrap();
         Ok(container)
     }
+
+    #[async_recursion]
+    pub async fn load_collection_children_recursive(
+        &self,
+        id: u32,
+        offset: i32,
+        limit: i32,
+        original_limit: i32
+    ) -> anyhow::Result<MediaContainerWrapper<MediaContainer>> {
+        let config: Config = Config::figment().extract().unwrap();
+        let mut c = self
+            .get_collection_children(id, Some(offset), Some(limit))
+            .await?;
+
+        if !config.include_watched {
+            c.media_container.children_mut().retain(|x| !x.is_watched());
+        
+            let children_lenght = c.media_container.children_mut().len() as i32;
+            let total_size = c.media_container.total_size.unwrap();
+            if children_lenght < original_limit
+                && total_size > offset + limit && offset < total_size
+            {
+                // load more
+                return self.load_collection_children_recursive(
+                    id,
+                    offset,
+                    limit + 10,
+                    original_limit
+                ).await;
+            }
+        }
+        Ok(c)
+    }
+
 
     pub async fn get_collection(
         &self,

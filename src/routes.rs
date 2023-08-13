@@ -74,8 +74,10 @@ pub fn route() -> Router {
             //        .handle(redirect_stream),
             //)
             .push(
-                Router::with_path("/library/parts/<itemid>/<partid>/file.<extension>")
-                    .handle(redirect_stream),
+                Router::with_path(
+                    "/library/parts/<itemid>/<partid>/file.<extension>",
+                )
+                .handle(redirect_stream),
             );
     }
 
@@ -158,22 +160,6 @@ async fn redirect_stream(
     res.render(Redirect::temporary(redirect_url));
 }
 
-#[handler]
-async fn test(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
-    let mut container: MediaContainerWrapper<MediaContainer> =
-        MediaContainerWrapper::default();
-    container.content_type = get_content_type_from_headers(req.headers_mut());
-
-    res.render(container);
-}
-
-#[handler]
-async fn hello(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
-    sleep(Duration::from_secs(2)).await;
-    println!("2 have elapsed");
-    return res.render("Hello world!");
-}
-
 // Google tv requests some weird thumbnail for hero elements. Let fix that
 #[handler]
 async fn fix_photo_transcode_request(
@@ -182,10 +168,10 @@ async fn fix_photo_transcode_request(
     res: &mut Response,
 ) {
     let params: PlexParams = req.extract().await.unwrap();
-    if params.size.is_some()
-        && params.clone().size.unwrap().contains('-') // (catched things like (medlium-240, large-500),i dont think size paramater orks at all, but who knows
-        // && params.platform.is_some()
-        // && params.clone().platform.unwrap().to_lowercase() == "android"
+    if params.size.is_some() && params.clone().size.unwrap().contains('-')
+    // (catched things like (medlium-240, large-500),i dont think size paramater orks at all, but who knows
+    // && params.platform.is_some()
+    // && params.clone().platform.unwrap().to_lowercase() == "android"
     {
         let size: String = params
             .clone()
@@ -213,7 +199,11 @@ async fn disable_related_query(
 }
 
 #[handler]
-pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
+pub async fn get_hubs_promoted(
+    req: &mut Request,
+    res: &mut Response,
+) -> Result<(), anyhow::Error> {
+    let config: Config = Config::figment().extract().unwrap();
     let params: PlexParams = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let content_type = get_content_type_from_headers(req.headers_mut());
@@ -229,7 +219,8 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
         container.media_container.allow_sync = Some(true);
         container.media_container.identifier =
             Some("com.plexapp.plugins.library".to_string());
-        return res.render(container);
+        res.render(container);
+        return Ok(());
     }
 
     // first directory, load everything here because we wanna reemiiiixxx
@@ -250,52 +241,76 @@ pub async fn get_hubs_promoted(req: &mut Request, res: &mut Response) {
     add_query_param_salvo(req, "includeGuids".to_string(), "1".to_string());
 
     // Hack, as the list could be smaller when removing watched items. So we request more.
-    if let Some(original_count) = params.clone().count {
-        add_query_param_salvo(
-            req,
-            "count".to_string(),
-            (original_count * 2).to_string(),
-        );
+    if !config.include_watched {
+        if let Some(original_count) = params.clone().count {
+            add_query_param_salvo(
+                req,
+                "count".to_string(),
+                (original_count * 2).to_string(),
+            );
+        }
     }
 
-    let upstream_res = plex_client.request(req).await.unwrap();
+    
+    let upstream_res = plex_client.request(req).await?;
+    match upstream_res.status() {
+        reqwest::StatusCode::OK => (),
+        status => {
+            tracing::error!(status = ?status, uri = ?req.uri(), "Failed to get plex response");
+            dbg!("this is error");
+            // res.render("");
+            return Err(salvo::http::StatusError::internal_server_error().into());
+            //res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
+            //return Ok()
+        }
+    };
+
     let mut container: MediaContainerWrapper<MediaContainer> =
-        match from_reqwest_response(upstream_res).await {
-            Ok(r) => r,
-            Err(error) => {
-                tracing::error!(error = ?error, uri = ?req.uri(), "Failed to get plex response");
-                res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
-                return;
-            }
-        };
+        from_reqwest_response(upstream_res).await?;
+    // match from_reqwest_response(upstream_res).await
+    // if upstream_res.status() == 500
+    // let mut container: MediaContainerWrapper<MediaContainer> =
+    //     match from_reqwest_response(upstream_res).await {
+    //         Ok(r) => r,
+    //         Err(error) => {
+    //             tracing::error!(error = ?error, uri = ?req.uri(), "Failed to get plex response");
+    //             res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
+    //             return Ok(())
+    //         }
+    //     };
     container.content_type = content_type;
 
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubStyleTransform)
         .with_transform(HubMixTransform)
-        .with_transform(HubChildrenLimitTransform {
-            limit: params.clone().count.unwrap(),
-        })
+        // .with_transform(HubChildrenLimitTransform {
+        //     limit: params.clone().count.unwrap(),
+        // })
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
         .apply_to(&mut container)
         .await;
     res.render(container);
+    Ok(())
 }
 
 #[handler]
 pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
+    let config: Config = Config::figment().extract().unwrap();
     let params: PlexParams = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let content_type = get_content_type_from_headers(req.headers_mut());
+
     // Hack, as the list could be smaller when removing watched items. So we request more.
-    if let Some(original_count) = params.clone().count {
-        // let count_number: i32 = original_count.parse().unwrap();
-        add_query_param_salvo(
-            req,
-            "count".to_string(),
-            (original_count * 2).to_string(),
-        );
+    if !config.include_watched {
+        if let Some(original_count) = params.clone().count {
+            // let count_number: i32 = original_count.parse().unwrap();
+            add_query_param_salvo(
+                req,
+                "count".to_string(),
+                (original_count * 2).to_string(),
+            );
+        }
     }
 
     // we want guids for banners
@@ -316,9 +331,9 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubSectionDirectoryTransform)
         .with_transform(HubStyleTransform)
-        .with_transform(HubChildrenLimitTransform {
-            limit: params.clone().count.unwrap(),
-        })
+        // .with_transform(HubChildrenLimitTransform {
+        //     limit: params.clone().count.unwrap(),
+        // })
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
         // .with_filter(CollectionHubPermissionFilter)
@@ -345,12 +360,11 @@ pub async fn get_collections_children(
     let content_type = get_content_type_from_headers(req.headers_mut());
 
     // We dont listen to pagination. We have a hard max of 250 per collection
-    let limit = Some(250); // plex its max
-
-    let mut offset = Some(0);
-    if params.container_start.is_some() {
-        offset = params.container_start;
-    }
+    let mut limit: i32 = params.container_size.unwrap_or(50);
+    let mut offset: i32 = params.container_start.unwrap_or(0);
+    // if params.container_start.is_some() {
+    //     offset = params.container_start;
+    // }
 
     // create a stub
     let mut container: MediaContainerWrapper<MediaContainer> =
@@ -358,7 +372,7 @@ pub async fn get_collections_children(
     container.content_type = content_type;
     let size = container.media_container.children().len();
     container.media_container.size = Some(size.try_into().unwrap());
-    container.media_container.offset = offset;
+    container.media_container.offset = Some(offset);
 
     // filtering of watched happens in the transform
     TransformBuilder::new(plex_client, params.clone())
@@ -378,6 +392,22 @@ pub async fn get_collections_children(
         .apply_to(&mut container)
         .await;
     res.render(container); // TODO: FIx XML
+}
+
+#[handler]
+async fn test(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+    let mut container: MediaContainerWrapper<MediaContainer> =
+        MediaContainerWrapper::default();
+    container.content_type = get_content_type_from_headers(req.headers_mut());
+
+    res.render(container);
+}
+
+#[handler]
+async fn hello(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+    sleep(Duration::from_secs(2)).await;
+    println!("2 have elapsed");
+    return res.render("Hello world!");
 }
 
 #[cfg(test)]

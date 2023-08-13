@@ -3233,6 +3233,7 @@ version = "0.50.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9e7570dc31d317238a725c0bd1a9722f1a44664252eb112bb3c453d6de1db750"
 dependencies = [
+ "anyhow",
  "async-trait",
  "base64 0.21.2",
  "brotli",
