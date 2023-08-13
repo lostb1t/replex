@@ -383,11 +383,6 @@ pub async fn get_collections_children(
         .with_transform(UserStateTransform)
         .apply_to(&mut container)
         .await;
-    
-    // harcodded limit
-    if container.media_container.total_size.unwrap() > limit {
-        container.media_container.total_size = Some(250);
-    }
 
     res.render(container); // TODO: FIx XML
     Ok(())

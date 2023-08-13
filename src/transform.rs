@@ -403,87 +403,8 @@ impl Transform for LibraryMixTransform {
     ) {
         let config: Config = Config::figment().extract().unwrap();
         let mut children: Vec<MetaData> = vec![];
-        let collection_ids_len = self.collection_ids.clone().len() as i32;
-        let mut total_size = 0;
-        let mut collections_total_sizes: HashMap<u32, i32> =
-            HashMap::with_capacity(collection_ids_len as usize);
-        //let collection_offset =
-        //    (self.offset as f32 / collection_ids_len as f32).ceil() as i32;
-        //let collection_limit =
-        //    (self.limit as f32 / collection_ids_len as f32).ceil() as i32;
 
         for id in self.collection_ids.clone() {
-            // We need this for the total count. In theory it shouldnt have mattered.
-            // But IOS doesnt listen to changes in total size. Picks it from the first request.
-            // Which results in a loop
-            if !config.include_watched {
-                let mut collection = plex_client
-                    .clone()
-                    .get_cached(
-                        plex_client.get_collection(id as i32),
-                        format!("get_collection:{}", id),
-                    )
-                    .await
-                    .unwrap();
-
-                let collection_metadata =
-                    collection.media_container.children_mut()[0].clone();
-                let library_items = plex_client
-                    .clone()
-                    .get_cached(
-                        plex_client.get_collection_total_size_unwatched(
-                            collection
-                                .media_container
-                                .library_section_id
-                                .unwrap() as i32,
-                            collection_metadata.index.unwrap() as i32,
-                            collection_metadata.subtype.unwrap(),
-                        ),
-                        format!(
-                            "get_collection_total_size_unwatched:{}:{}",
-                            collection
-                                .media_container
-                                .library_section_id
-                                .unwrap() as i32,
-                            id
-                        ),
-                    )
-                    .await
-                    .unwrap();
-                collections_total_sizes.insert(
-                    id,
-                    library_items.media_container.total_size.unwrap(),
-                );
-                total_size += library_items.media_container.total_size.unwrap();
-            } else {
-                let c = plex_client
-                    .clone()
-                    .get_cached(
-                        plex_client.get_collection_children(
-                            id,
-                            Some(0),
-                            Some(0),
-                        ),
-                        format!("get_collection_children:{}:{}:{}", id, 0, 0),
-                    )
-                    .await
-                    .unwrap();
-                collections_total_sizes
-                    .insert(id, c.media_container.total_size.unwrap());
-                total_size += c.media_container.total_size.unwrap();
-            }
-        }
-
-        for id in self.collection_ids.clone() {
-            // let mut c = plex_client
-            //     .get_collection_children(
-            //         id,
-            //         Some(self.offset.clone()),
-            //         Some(self.limit.clone()),
-            //     )
-            //     .await
-            //     .unwrap();
-
             let mut c = plex_client
                 .clone()
                 .get_cached(
@@ -515,13 +436,7 @@ impl Transform for LibraryMixTransform {
                 true => children.append(&mut c.media_container.children()),
             }
         }
-        // children.truncate(self.limit as usize);
-
-        // dbg!("DONE");
-        // dbg!("------");
-        item.total_size = Some(total_size);
-        // always metadata library
-        // item.size = Some(children.len() as i32);
+        item.total_size = Some(children.len() as i32);
         item.metadata = children;
     }
 }
