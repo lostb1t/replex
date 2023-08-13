@@ -489,8 +489,8 @@ impl Transform for LibraryMixTransform {
                 .get_cached(
                     plex_client.get_collection_children(
                         id,
-                        Some(self.offset.clone()),
-                        Some(self.limit.clone()),
+                        Some(self.offset),
+                        Some(self.limit),
                     ),
                     format!(
                         "get_collection_children:{}:{}:{}",
