@@ -407,10 +407,10 @@ impl Transform for LibraryMixTransform {
         let mut total_size = 0;
         let mut collections_total_sizes: HashMap<u32, i32> =
             HashMap::with_capacity(collection_ids_len as usize);
-        let collection_offset =
-            (self.offset as f32 / collection_ids_len as f32).ceil() as i32;
-        let collection_limit =
-            (self.limit as f32 / collection_ids_len as f32).ceil() as i32;
+        //let collection_offset =
+        //    (self.offset as f32 / collection_ids_len as f32).ceil() as i32;
+        //let collection_limit =
+        //    (self.limit as f32 / collection_ids_len as f32).ceil() as i32;
 
         for id in self.collection_ids.clone() {
             // We need this for the total count. In theory it shouldnt have mattered.
