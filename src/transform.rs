@@ -695,7 +695,7 @@ impl Transform for HubSectionDirectoryTransform {
         plex_client: PlexClient,
         options: PlexParams,
     ) {
-        if item.is_hub() && !item.directory.is_empty() {
+        if item.is_collection_hub() && !item.directory.is_empty() {
             let childs = item.children();
             item.directory = vec![];
             item.video = childs;
