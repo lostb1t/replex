@@ -251,6 +251,9 @@ pub struct MetaData {
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub index: Option<u32>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subtype: Option<String>,
     #[yaserde(attribute, rename = "parentYear")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_year: Option<i32>,

@@ -251,7 +251,6 @@ pub async fn get_hubs_promoted(
         }
     }
 
-    
     let upstream_res = plex_client.request(req).await?;
     match upstream_res.status() {
         reqwest::StatusCode::OK => (),
@@ -267,17 +266,6 @@ pub async fn get_hubs_promoted(
 
     let mut container: MediaContainerWrapper<MediaContainer> =
         from_reqwest_response(upstream_res).await?;
-    // match from_reqwest_response(upstream_res).await
-    // if upstream_res.status() == 500
-    // let mut container: MediaContainerWrapper<MediaContainer> =
-    //     match from_reqwest_response(upstream_res).await {
-    //         Ok(r) => r,
-    //         Err(error) => {
-    //             tracing::error!(error = ?error, uri = ?req.uri(), "Failed to get plex response");
-    //             res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
-    //             return Ok(())
-    //         }
-    //     };
     container.content_type = content_type;
 
     TransformBuilder::new(plex_client, params.clone())
@@ -290,6 +278,7 @@ pub async fn get_hubs_promoted(
         .with_transform(HubKeyTransform)
         .apply_to(&mut container)
         .await;
+
     res.render(container);
     Ok(())
 }
@@ -348,7 +337,7 @@ pub async fn get_collections_children(
     req: &mut Request,
     _depot: &mut Depot,
     res: &mut Response,
-) {
+) -> Result<(), anyhow::Error> {
     let params: PlexParams = req.extract().await.unwrap();
     let collection_ids = req.param::<String>("ids").unwrap();
     let collection_ids: Vec<u32> = collection_ids
@@ -391,7 +380,9 @@ pub async fn get_collections_children(
         .with_transform(UserStateTransform)
         .apply_to(&mut container)
         .await;
+
     res.render(container); // TODO: FIx XML
+    Ok(())
 }
 
 #[handler]

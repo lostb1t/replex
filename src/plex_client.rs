@@ -141,6 +141,7 @@ impl PlexClient {
 
         // we want guids for banners
         path = format!("{}&includeGuids=1", path);
+        // dbg!(&path);
 
         let resp = self.get(path).await.unwrap();
         let container: MediaContainerWrapper<MediaContainer> =
@@ -154,41 +155,80 @@ impl PlexClient {
         id: u32,
         offset: i32,
         limit: i32,
-        original_limit: i32
+        original_limit: i32,
     ) -> anyhow::Result<MediaContainerWrapper<MediaContainer>> {
         let config: Config = Config::figment().extract().unwrap();
         let mut c = self
             .get_collection_children(id, Some(offset), Some(limit))
             .await?;
-
+        // dbg!(limit);
+        // dbg!(c.media_container.children_mut())
         if !config.include_watched {
+            // dbg!(c.media_container.children_mut().len());
             c.media_container.children_mut().retain(|x| !x.is_watched());
-        
+            // dbg!(c.media_container.children_mut().len());
+            // dbg!("-----");
+
             let children_lenght = c.media_container.children_mut().len() as i32;
             let total_size = c.media_container.total_size.unwrap();
             if children_lenght < original_limit
-                && total_size > offset + limit && offset < total_size
+                && total_size > offset + limit
+                && offset < total_size
             {
                 // load more
-                return self.load_collection_children_recursive(
-                    id,
-                    offset,
-                    limit + 10,
-                    original_limit
-                ).await;
+                return self
+                    .load_collection_children_recursive(
+                        id,
+                        offset,
+                        limit + 10,
+                        original_limit,
+                    )
+                    .await;
             }
         }
         Ok(c)
     }
 
-
     pub async fn get_collection(
         &self,
         id: i32,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
-        let res = self
-            .get(format!("/library/collections/{}", id))
-            .await?;
+        let res = self.get(format!("/library/collections/{}", id)).await?;
+
+        if res.status() == 404 {
+            return Err(salvo::http::StatusError::not_found().into());
+        }
+
+        let container: MediaContainerWrapper<MediaContainer> =
+            from_reqwest_response(res).await.unwrap();
+        Ok(container)
+    }
+
+    // theres actually a global endpoint https://plex.sjoerdarendsen.dev/library/all?show.collection=2042780&collection=2042780&X-Plex-Container-Start=0&X-Plex-Container-Size=72
+    pub async fn get_collection_total_size_unwatched(
+        &self,
+        section_id: i32,
+        collection_index: i32,
+        r#type: String,
+    ) -> Result<MediaContainerWrapper<MediaContainer>> {
+        let mut path = format!("/library/sections/{}/all?X-Plex-Container-Start=0&X-Plex-Container-Size=0", section_id);
+        // dbg!(&path);
+
+        if r#type == "show" {
+            path = format!(
+                "{}&show.unwatchedLeaves=1&show.collection={}",
+                path, collection_index
+            );
+        }
+
+        if r#type == "movie" {
+            path = format!(
+                "{}&movie.unwatched=1&movie.collection={}",
+                path, collection_index
+            );
+        }
+        // dbg!(&path);
+        let res = self.get(path).await?;
 
         if res.status() == 404 {
             return Err(salvo::http::StatusError::not_found().into());

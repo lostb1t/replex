@@ -11,6 +11,7 @@ use futures_util::{
     stream::{FuturesOrdered, FuturesUnordered},
     StreamExt,
 };
+use std::collections::HashMap;
 use itertools::Itertools;
 use lazy_static::__Deref;
 use std::sync::Arc;
@@ -402,29 +403,143 @@ impl Transform for LibraryMixTransform {
     ) {
         let config: Config = Config::figment().extract().unwrap();
         let mut children: Vec<MetaData> = vec![];
-        let mut total_size: i32 = 0;
         let collection_ids_len = self.collection_ids.clone().len() as i32;
-        let collection_offset =
-            (self.offset as f32 / collection_ids_len as f32).ceil() as i32;
-        let collection_limit =
-            (self.limit as f32 / collection_ids_len as f32).ceil() as i32;
-        let mut total_size_children_unfiltered: i32 = 0;
+        let mut total_size = 0;
+        let mut collections_total_sizes: HashMap<u32, i32> = HashMap::with_capacity(collection_ids_len as usize);
 
         for id in self.collection_ids.clone() {
-            let mut c = plex_client.clone().get_cached(
-                plex_client.load_collection_children_recursive(
-                    id,
-                    self.offset,
-                    collection_limit,
-                    collection_limit,
-                ),
-                format!(
-                    "collection:{}:{}:{}",
-                    id, self.offset, collection_limit
-                ),
-            ).await.unwrap();
+            // We need this for the total count. In theory it shouldnt have mattered.
+            // But IOS doesnt listen to changes in total size. Picks it from the first request.
+            // Which results in a loop
+            if !config.include_watched {
+                let mut collection = plex_client
+                .clone()
+                .get_cached(
+                    plex_client.get_collection(id as i32),
+                    format!("get_collection:{}", id),
+                )
+                .await
+                .unwrap();
 
-            total_size += c.media_container.total_size.unwrap();
+                let collection_metadata =
+                    collection.media_container.children_mut()[0].clone();
+                let library_items = plex_client
+                    .clone()
+                    .get_cached(
+                        plex_client.get_collection_total_size_unwatched(
+                            collection
+                                .media_container
+                                .library_section_id
+                                .unwrap() as i32,
+                            collection_metadata.index.unwrap() as i32,
+                            collection_metadata.subtype.unwrap(),
+                        ),
+                        format!(
+                            "get_collection_total_size_unwatched:{}:{}",
+                            collection
+                                .media_container
+                                .library_section_id
+                                .unwrap() as i32,
+                            id
+                        ),
+                    )
+                    .await
+                    .unwrap();
+                collections_total_sizes.insert(id, library_items.media_container.total_size.unwrap());
+                total_size += library_items.media_container.total_size.unwrap();
+            } else {
+                let c = plex_client
+                    .clone()
+                    .get_cached(
+                        plex_client.get_collection_children(
+                            id,
+                            Some(0),
+                            Some(0),
+                        ),
+                        format!(
+                            "get_collection_children:{}:{}:{}",
+                            id, 0, 0
+                        ),
+                    )
+                    .await
+                    .unwrap();
+                collections_total_sizes.insert(id, c.media_container.total_size.unwrap());
+                total_size += c.media_container.total_size.unwrap();
+            }
+        }
+
+        for id in self.collection_ids.clone() {
+            let percentage = {
+                let mut b = 0;
+                for s in collections_total_sizes.clone().into_iter() {
+                    b += s.1;
+                }
+                let size = collections_total_sizes.get(&id);
+                // b / size
+                // dbg!(&b);
+                // dbg!(&size);
+                let x = ((size.unwrap() * 100 / b * 100) / 100) as f32;
+                x / 100.00 
+            };
+            // dbg!(percentage);
+            let mut c = plex_client
+                .clone()
+                .get_cached(
+                    plex_client.load_collection_children_recursive(
+                        id,
+                        (self.offset as f32 * percentage).ceil() as i32,
+                        (self.limit as f32 * percentage).ceil() as i32,
+                        (self.limit as f32 * percentage).ceil() as i32,
+                    ),
+                    format!(
+                        "load_collection_children_recursive:{}:{}:{}",
+                        id, self.offset, self.limit
+                    ),
+                )
+                .await
+                .unwrap();
+
+            // if !config.include_watched {
+            //     // We need this for the total count. In theory it shouldnt have mattered.
+            //     // But IOS doesnt listen to changes in total size. Picks it from the first request.
+            //     // Which results in a loop
+            //     let mut collection = plex_client
+            //         .clone()
+            //         .get_cached(
+            //             plex_client.get_collection(id as i32),
+            //             format!("collection:{}", id),
+            //         )
+            //         .await
+            //         .unwrap();
+
+            //     let collection_metadata =
+            //         collection.media_container.children_mut()[0].clone();
+            //     let library_items = plex_client
+            //         .clone()
+            //         .get_cached(
+            //             plex_client.get_collection_total_size(
+            //                 collection
+            //                     .media_container
+            //                     .library_section_id
+            //                     .unwrap() as i32,
+            //                 collection_metadata.index.unwrap() as i32,
+            //                 collection_metadata.subtype.unwrap(),
+            //             ),
+            //             format!(
+            //                 "library_items:{}:{}",
+            //                 collection
+            //                     .media_container
+            //                     .library_section_id
+            //                     .unwrap() as i32,
+            //                 id
+            //             ),
+            //         )
+            //         .await
+            //         .unwrap();
+            //     total_size += library_items.media_container.total_size.unwrap();
+            // } else {
+            //     total_size += c.media_container.total_size.unwrap();
+            // }
 
             match children.is_empty() {
                 false => {
@@ -436,28 +551,10 @@ impl Transform for LibraryMixTransform {
                 true => children.append(&mut c.media_container.children()),
             }
         }
-        //dbg!(total_size);
-        let children_count = children.len() as i32;
 
-        // we dont know the total size because we filter stuff. We might already be at the end of the line
-        if children_count < self.limit {
-            // dbg!("yup");
-            // dbg!(children_count);
-            // dbg!(total_size);
-            // dbg!("------");
-            // total_size = self.limit + children_count;
-            total_size = self.offset + children_count;
-            //total_size = self.offset + children_count;
-            //dbg!(total_size);
-        }
-        // dbg!(self.limit);
-
-        //item.children_mut().truncate(self.limit as usize);
         item.total_size = Some(total_size);
         // always metadata library
-        children.truncate(self.limit as usize);
         item.metadata = children;
-        item.size = Some(self.limit);
     }
 }
 
