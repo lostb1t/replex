@@ -406,6 +406,10 @@ impl Transform for LibraryMixTransform {
         let collection_ids_len = self.collection_ids.clone().len() as i32;
         let mut total_size = 0;
         let mut collections_total_sizes: HashMap<u32, i32> = HashMap::with_capacity(collection_ids_len as usize);
+        let collection_offset =
+            (self.offset as f32 / collection_ids_len as f32).ceil() as i32;
+        let collection_limit =
+            (self.limit as f32 / collection_ids_len as f32).ceil() as i32;
 
         for id in self.collection_ids.clone() {
             // We need this for the total count. In theory it shouldnt have mattered.
@@ -469,27 +473,31 @@ impl Transform for LibraryMixTransform {
         }
 
         for id in self.collection_ids.clone() {
-            let percentage = {
-                let mut b = 0;
-                for s in collections_total_sizes.clone().into_iter() {
-                    b += s.1;
-                }
-                let size = collections_total_sizes.get(&id);
-                // b / size
-                // dbg!(&b);
-                // dbg!(&size);
-                let x = ((size.unwrap() * 100 / b * 100) / 100) as f32;
-                x / 100.00 
-            };
-            // dbg!(percentage);
+            // let percentage = {
+            //     let mut b = 0;
+            //     for s in collections_total_sizes.clone().into_iter() {
+            //         b += s.1;
+            //     }
+            //     let size = collections_total_sizes.get(&id);
+            //     // b / size
+            //     // dbg!(&b);
+            //     // dbg!(&size);
+            //     let x = ((size.unwrap() * 100 / b * 100) / 100) as f32;
+            //     // let x = (100 -((size.unwrap() * 100 / b * 100) / 100) as f32;
+            //     x / 100.00 
+            // };
+
             let mut c = plex_client
                 .clone()
                 .get_cached(
                     plex_client.load_collection_children_recursive(
                         id,
-                        (self.offset as f32 * percentage).ceil() as i32,
-                        (self.limit as f32 * percentage).ceil() as i32,
-                        (self.limit as f32 * percentage).ceil() as i32,
+                        collection_offset,
+                        collection_limit,
+                        collection_limit,
+                        // (self.offset as f32 * percentage).ceil() as i32,
+                        // (self.limit as f32 * percentage).ceil() as i32,
+                        // (self.limit as f32 * percentage).ceil() as i32,
                     ),
                     format!(
                         "load_collection_children_recursive:{}:{}:{}",
@@ -498,7 +506,8 @@ impl Transform for LibraryMixTransform {
                 )
                 .await
                 .unwrap();
-
+            // dbg!(c.media_container.children())
+            // dbg!(c)
             // if !config.include_watched {
             //     // We need this for the total count. In theory it shouldnt have mattered.
             //     // But IOS doesnt listen to changes in total size. Picks it from the first request.
@@ -540,7 +549,8 @@ impl Transform for LibraryMixTransform {
             // } else {
             //     total_size += c.media_container.total_size.unwrap();
             // }
-
+            // let local_c = c.media_container.children().truncate();
+            // children.truncate(self.limit as usize);
             match children.is_empty() {
                 false => {
                     children = children
@@ -551,7 +561,10 @@ impl Transform for LibraryMixTransform {
                 true => children.append(&mut c.media_container.children()),
             }
         }
-
+        // children.truncate(self.limit as usize);
+        
+        // dbg!("DONE");
+        // dbg!("------");
         item.total_size = Some(total_size);
         // always metadata library
         item.metadata = children;

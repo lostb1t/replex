@@ -161,31 +161,69 @@ impl PlexClient {
         let mut c = self
             .get_collection_children(id, Some(offset), Some(limit))
             .await?;
-        // dbg!(limit);
-        // dbg!(c.media_container.children_mut())
-        if !config.include_watched {
-            // dbg!(c.media_container.children_mut().len());
-            c.media_container.children_mut().retain(|x| !x.is_watched());
-            // dbg!(c.media_container.children_mut().len());
-            // dbg!("-----");
 
+        if !config.include_watched {
+            let original_size = c.media_container.size.unwrap();
+            //let children = 
+            c.media_container.children_mut().retain(|x| !x.is_watched());
             let children_lenght = c.media_container.children_mut().len() as i32;
             let total_size = c.media_container.total_size.unwrap();
-            if children_lenght < original_limit
+
+            // dbg!("checking", original_size, children_lenght, offset, total_size, limit, original_limit);
+            // if original_size != children_lenght {
+            //     dbg!("checking", original_size, children_lenght, offset, total_size, limit, original_limit);
+            // }
+            // take into account watched, reload if we are under the requested limit
+            if (children_lenght < original_limit
                 && total_size > offset + limit
-                && offset < total_size
+                && offset < total_size)
+                || (children_lenght < original_limit
+                    && total_size > offset + original_size)
             {
-                // load more
-                return self
+                let mut children = c.media_container.children();
+                // dbg!("recursive");
+                // dbg!("checking", original_size, children_lenght, offset, total_size, limit);
+                let new_limit = match limit {
+                    x if x < 25 => 25 + x,
+                    x if x > 25 => x * 2,
+                    _ => 25 + limit,
+                };
+                let mut r = self
                     .load_collection_children_recursive(
                         id,
-                        offset,
-                        limit + 10,
+                        offset + children_lenght,
+                        new_limit,
+                        // limit + 10,
                         original_limit,
                     )
-                    .await;
+                    .await.unwrap();
+                children.append(r.media_container.children_mut());
+                c.media_container.set_children(children);
+                // return self
+                //     .load_collection_children_recursive(
+                //         id,
+                //         offset,
+                //         new_limit,
+                //         // limit + 10,
+                //         original_limit,
+                //     )
+                //     .await;
             }
         }
+        // dbg!(c.media_container.children_mut().len());
+        // dbg!(limit);
+        c.media_container
+            .children_mut()
+            .truncate(original_limit as usize);
+
+        // for (pos, child) in c.media_container.children().iter().enumerate() {
+        //     if child.title == "Plane" {
+        //         dbg!(pos);
+        //     }
+        // }
+        // dbg!(c.media_container.children_mut().len());
+        // dbg!("-----");
+        // dbg!("checking", offset, c.media_container.total_size.unwrap(), limit, original_limit, c.media_container.children_mut().len());
         Ok(c)
     }
 
