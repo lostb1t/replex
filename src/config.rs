@@ -18,6 +18,11 @@ pub struct Config {
     #[serde(default = "default_cache_ttl")]
     pub cache_ttl: u64,
     #[serde(
+        default = "default_as_true",
+        deserialize_with = "figment::util::bool_from_str_or_int"
+    )]
+    pub cache_refresh: bool,
+    #[serde(
         default = "default_as_false",
         deserialize_with = "figment::util::bool_from_str_or_int"
     )]
@@ -59,6 +64,10 @@ fn default_cache_ttl() -> u64 {
 
 fn default_port() -> u64 {
     80
+}
+
+fn default_as_true() -> bool {
+    true
 }
 
 impl Config {
