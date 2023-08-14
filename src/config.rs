@@ -58,7 +58,7 @@ pub struct Config {
 }
 
 fn default_cache_ttl() -> u64 {
-    5 * 60
+    15 * 60 // 15 minutes
 }
 
 // fn default_port() -> u64 {

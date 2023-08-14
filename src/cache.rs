@@ -143,8 +143,9 @@ impl CacheManager {
 }
 
 pub struct RequestIssuer {
-    use_scheme: bool,
+    // use_scheme: bool,
     use_authority: bool,
+    use_local_addr: bool,
     use_path: bool,
     use_query: bool,
     use_method: bool,
@@ -161,8 +162,9 @@ impl RequestIssuer {
     /// Create a new `RequestIssuer`.
     pub fn new() -> Self {
         Self {
-            use_scheme: true,
-            use_authority: true,
+            // use_scheme: true,
+            use_authority: false,
+            use_local_addr: true,
             use_path: true,
             use_query: true,
             use_method: true,
@@ -172,13 +174,17 @@ impl RequestIssuer {
         }
     }
     /// Whether to use request's uri scheme when generate the key.
-    pub fn use_scheme(mut self, value: bool) -> Self {
-        self.use_scheme = value;
-        self
-    }
+    // pub fn use_scheme(mut self, value: bool) -> Self {
+    //     self.use_scheme = value;
+    //     self
+    // }
     /// Whether to use request's uri authority when generate the key.
     pub fn use_authority(mut self, value: bool) -> Self {
         self.use_authority = value;
+        self
+    }
+    pub fn use_local_addr(mut self, value: bool) -> Self {
+        self.use_local_addr = value;
         self
     }
     /// Whether to use request's uri path when generate the key.
@@ -215,17 +221,22 @@ impl CacheIssuer for RequestIssuer {
         _depot: &Depot,
     ) -> Option<Self::Key> {
         let mut key = String::new();
-        key.push_str("uri::");
-        if self.use_scheme {
-            if let Some(scheme) = req.uri().scheme_str() {
-                key.push_str(scheme);
-                key.push_str("://");
-            }
-        }
+        key.push_str("uri::http://"); // always http as we use local addr
+        // if self.use_scheme {
+        //     if let Some(scheme) = req.uri().scheme_str() {
+        //         key.push_str(scheme);
+        //         key.push_str("://");
+        //     }
+        // }
         if self.use_authority {
             if let Some(authority) = req.uri().authority() {
                 key.push_str(authority.as_str());
             }
+        }
+        if self.use_local_addr {
+            // key.push_str(format!("{}", req.local_addr().into()));
+            // dbg!(format!("{}", req.local_addr()));
+            key.push_str(req.local_addr().to_string().replace("socket://", "").as_str());
         }
         if self.use_path {
             key.push_str(req.uri().path());
@@ -255,6 +266,7 @@ impl CacheIssuer for RequestIssuer {
             key.push_str("|X-Plex-Language::");
             key.push_str(req.header("X-Plex-Language").unwrap());
         }
+        dbg!(&key);
         Some(key)
     }
 }
