@@ -426,7 +426,8 @@ pub fn auto_refresh_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
             );
         };
 
-        tracing::debug!(req = ?req, "Refreshing cached entry");
+        tracing::debug!("Refreshing cached entry");
+        tracing::trace!(req = ?req, "Refreshing cached entry");
 
         std::thread::spawn(move || {
             match req.send() {
