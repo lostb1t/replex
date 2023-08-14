@@ -422,8 +422,15 @@ pub fn auto_refresh_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
             );
         };
 
-        tracing::debug!("Refreshing cached entry");
-        //tracing::trace!(req = ?req, "Refreshing cached entry");
+        if values_list.contains_key("mime") {
+            req = req.header(
+                "Accept",
+                values_list.get("mime").unwrap().to_string(),
+            );
+        };
+
+        //tracing::debug!("Refreshing cached entry");
+        tracing::trace!(req = ?req, "Refreshing cached entry");
 
         std::thread::spawn(move || {
             match req.send() {

@@ -241,7 +241,7 @@ impl CacheIssuer for RequestIssuer {
         if self.use_path {
             key.push_str(req.uri().path());
         }
-        // TODO: Clean up query. Not everything needs a cache change
+        // TODO: Clean up query. Not everything needs a cache change.
         if self.use_query {
             if let Some(query) = req.uri().query() {
                 key.push('?');
@@ -266,7 +266,7 @@ impl CacheIssuer for RequestIssuer {
             key.push_str("|X-Plex-Language::");
             key.push_str(req.header("X-Plex-Language").unwrap());
         }
-        dbg!(&key);
+        // dbg!(&key);
         Some(key)
     }
 }
@@ -309,12 +309,15 @@ where
         if config.cache_ttl == 0 {
             return None;
         }
+        // dbg!("loading cache", &key);
         self.inner.get(key)
     }
 
     async fn save_entry(&self, key: Self::Key, entry: CachedEntry) -> Result<(), Self::Error> {
         let config: Config = Config::figment().extract().unwrap();
         if config.cache_ttl != 0 {
+            //tracing::debug!(key = ?key.clone(), "Insert cache");
+            //dbg!("insert cache", &key);
             self.inner.insert(key, entry);
         }
         Ok(())
