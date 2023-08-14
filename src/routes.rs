@@ -14,6 +14,7 @@ use crate::url::*;
 use crate::utils::*;
 use itertools::Itertools;
 use moka::future::Cache as MokaCache;
+use moka::notification::RemovalCause;
 use moka::sync::Cache as MokaCacheSync;
 use moka::sync::CacheBuilder as MokaCacheBuilder;
 use salvo::cache::{Cache, CachedEntry};
@@ -396,7 +397,11 @@ pub fn auto_refresh_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
     }
 
     // TODO: Maybe stop after a month? we can add a timestamp header to the key when first cached.
-    let listener = move |k: Arc<String>, v: CachedEntry, cause| {
+    let listener = move |k: Arc<String>, v: CachedEntry, cause: RemovalCause| {
+        if cause != RemovalCause::Expired {
+            return
+        }
+
         let z = k.clone();
         let values_list = cache_key_to_values(&z);
         let uri = values_list.get("uri").unwrap().to_string();
