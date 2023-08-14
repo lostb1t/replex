@@ -255,7 +255,6 @@ impl CacheIssuer for RequestIssuer {
             key.push_str("|X-Plex-Language::");
             key.push_str(req.header("X-Plex-Language").unwrap());
         }
-        dbg!(&key);
         Some(key)
     }
 }
