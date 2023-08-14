@@ -56,10 +56,10 @@ pub fn route() -> Router {
                 Router::with_path("/video/<colon:colon>/transcode/<**rest>")
                     .handle(redirect_stream),
             )
-            .push(
-                Router::with_path("/<colon:colon>/timeline/<**rest>")
-                    .handle(redirect_stream),
-            )
+            //.push(
+            //    Router::with_path("/<colon:colon>/timeline/<**rest>")
+            //        .handle(redirect_stream),
+            //)
             .push(
                 Router::with_path(
                     "/library/parts/<itemid>/<partid>/file.<extension>",
