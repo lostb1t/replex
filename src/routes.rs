@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use crate::cache::*;
@@ -11,7 +13,10 @@ use crate::transform::*;
 use crate::url::*;
 use crate::utils::*;
 use itertools::Itertools;
-use salvo::cache::{Cache, MemoryStore};
+use moka::future::Cache as MokaCache;
+use moka::sync::Cache as MokaCacheSync;
+use moka::sync::CacheBuilder as MokaCacheBuilder;
+use salvo::cache::{Cache, CachedEntry};
 use salvo::compression::Compression;
 use salvo::cors::Cors;
 use salvo::http::header::CONTENT_TYPE;
@@ -20,17 +25,8 @@ use salvo::prelude::*;
 // use salvo::proxy::Proxy as SalvoProxy;
 use salvo::routing::PathFilter;
 // use std::time::Duration;
+use std::string;
 use tokio::time::{sleep, Duration};
-
-pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
-    let config: Config = Config::figment().extract().unwrap();
-    Cache::new(
-        MemoryStore::builder()
-            .time_to_live(Duration::from_secs(config.cache_ttl))
-            .build(),
-        RequestIssuer::default(),
-    )
-}
 
 pub fn route() -> Router {
     let config: Config = Config::figment().extract().unwrap();
@@ -60,15 +56,15 @@ pub fn route() -> Router {
                 Router::with_path("/video/<colon:colon>/transcode/<**rest>")
                     .handle(redirect_stream),
             )
-            .push(
-                Router::with_path("/photo/<colon:colon>/transcode")
-                    .hoop(fix_photo_transcode_request)
-                    .handle(redirect_stream),
-            )
-            .push(
-                Router::with_path("/<colon:colon>/timeline<**rest>")
-                    .handle(redirect_stream),
-            )
+            // .push(
+            //     Router::with_path("/photo/<colon:colon>/transcode")
+            //         .hoop(fix_photo_transcode_request)
+            //         .handle(redirect_stream),
+            // )
+            // .push(
+            //     Router::with_path("/<colon:colon>/timeline<**rest>")
+            //         .handle(redirect_stream),
+            // )
             //.push(
             //    Router::with_path("/statistics/<**rest>")
             //        .handle(redirect_stream),
@@ -107,13 +103,13 @@ pub fn route() -> Router {
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
-                .hoop(default_cache())
+                .hoop(auto_refresh_cache())
                 .get(get_hubs_promoted),
         )
         .push(
             Router::new()
                 .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
-                .hoop(default_cache())
+                .hoop(auto_refresh_cache())
                 .get(get_hubs_sections),
         )
         // .push(Router::new().path("/ping").get(PlexProxy::new(config.host.clone().unwrap())))
@@ -258,7 +254,9 @@ pub async fn get_hubs_promoted(
             tracing::error!(status = ?status, uri = ?req.uri(), "Failed to get plex response");
             dbg!("this is error");
             // res.render("");
-            return Err(salvo::http::StatusError::internal_server_error().into());
+            return Err(
+                salvo::http::StatusError::internal_server_error().into()
+            );
             //res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
             //return Ok()
         }
@@ -386,6 +384,84 @@ pub async fn get_collections_children(
 
     res.render(container); // TODO: FIx XML
     Ok(())
+}
+
+#[handler]
+async fn empty_handler() {}
+
+fn cache_key_to_values(string: &str) -> HashMap<&str, &str> {
+    string
+        .split("|")
+        .map(|s| s.split("::").collect_tuple().unwrap())
+        .map(|(key, val)| (key, val))
+        .collect()
+}
+
+pub fn auto_refresh_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
+    let config: Config = Config::figment().extract().unwrap();
+
+    if config.cache_ttl == 0 || !config.cache_refresh {
+        return default_cache();
+    }
+
+    
+    let listener = move |k: Arc<String>, v: CachedEntry, cause| {
+        let z = k.clone();
+        let values_list = cache_key_to_values(&z);
+        let uri = values_list.get("uri").unwrap().to_string();
+        let client = reqwest::blocking::Client::new();
+
+        let mut req = client.get(uri);
+        if values_list.contains_key("X-Plex-Token") {
+            req = req.header(
+                "X-Plex-Token",
+                values_list.get("X-Plex-Token").unwrap().to_string(),
+            );
+        };
+
+        if values_list.contains_key("X-Plex-Language") {
+            req = req.header(
+                "X-Plex-Language",
+                values_list.get("X-Plex-Language").unwrap().to_string(),
+            );
+        };
+
+        tracing::debug!(req = ?req, "Refreshing cached entry");
+
+        std::thread::spawn(move || {
+            match req.send() {
+                Ok(res) => {
+                    // dbg!(res);
+                    tracing::debug!("Succesfully refreshing cached entry");
+                }
+                Err(err) => {
+                    tracing::error!(err = ?err, "Failed to refresh cached entry");
+                }
+            }
+        });
+    };
+
+    Cache::new(
+        MemoryStore::with_moka_cache(
+            MokaCacheSync::builder()
+                .time_to_live(Duration::from_secs(config.cache_ttl))
+                .eviction_listener(listener)
+                .build(),
+        ),
+        RequestIssuer::default(),
+    )
+}
+
+pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
+    let config: Config = Config::figment().extract().unwrap();
+    Cache::new(
+        MemoryStore::with_moka_cache(
+            MokaCacheSync::builder()
+                .time_to_live(Duration::from_secs(config.cache_ttl))
+                .build(),
+        ),
+        RequestIssuer::default(),
+    )
 }
 
 #[handler]

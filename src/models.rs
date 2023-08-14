@@ -406,8 +406,7 @@ pub struct MetaData {
     #[serde(rename = "Guid", default, skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Guid", default, child)]
     pub guids: Vec<Guid>,
-    // #[yaserde(attribute)]
-    // #[yaserde(rename = "userState")]
+    #[yaserde(attribute, rename = "userState")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user_state: Option<bool>,
     #[serde(rename = "Image", default, skip_serializing_if = "Vec::is_empty")]

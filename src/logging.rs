@@ -22,7 +22,7 @@ impl Handler for Logger {
     async fn handle(&self, req: &mut Request, depot: &mut Depot, res: &mut Response, ctrl: &mut FlowCtrl) {
         let headers = req.headers_mut().clone();
         let span = tracing::span!(
-            Level::DEBUG,
+            Level::TRACE,
             "Request",
             remote_addr = %req.remote_addr().to_string(),
             version = ?req.version(),

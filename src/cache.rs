@@ -1,14 +1,20 @@
 use async_trait::async_trait;
-use moka::{future::Cache, future::ConcurrentCacheExt, Expiry};
+use moka::{future::ConcurrentCacheExt, Expiry};
 use once_cell::sync::Lazy;
+use salvo::cache::{CacheStore, CachedEntry};
 use salvo::{cache::CacheIssuer, Depot, Request};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Deserializer, Serialize};
+use std::borrow::Borrow;
+use std::convert::Infallible;
 use std::hash::Hash;
 use std::{
     sync::Arc,
     time::{Duration, Instant},
 };
+use moka::future::Cache as MokaCache;
+use moka::sync::Cache as MokaCacheSync;
+use moka::sync::CacheBuilder as MokaCacheBuilder;
 use std::error::Error;
 
 use crate::config::Config;
@@ -18,14 +24,14 @@ use crate::config::Config;
 pub type CacheKey = String;
 pub type CacheValue = (Expiration, Arc<Vec<u8>>);
 // pub type CacheValue = Arc<Vec<u8>>;
-pub type GlobalCacheType = Cache<CacheKey, CacheValue>;
+pub type GlobalCacheType = MokaCache<CacheKey, CacheValue>;
 
 pub(crate) static GLOBAL_CACHE: Lazy<CacheManager> = Lazy::new(|| {
     let expiry = CacheExpiry;
 
     // let store: GlobalCacheType =
     CacheManager::new(
-        Cache::builder()
+        MokaCache::builder()
             .max_capacity(100000)
             .expire_after(expiry)
             .build(),
@@ -142,7 +148,9 @@ pub struct RequestIssuer {
     use_path: bool,
     use_query: bool,
     use_method: bool,
-    use_token: bool,
+    use_plex_token: bool,
+    use_plex_language: bool,
+    use_mime: bool,
 }
 impl Default for RequestIssuer {
     fn default() -> Self {
@@ -158,7 +166,9 @@ impl RequestIssuer {
             use_path: true,
             use_query: true,
             use_method: true,
-            use_token: true,
+            use_plex_token: true,
+            use_plex_language: true,
+            use_mime: true,
         }
     }
     /// Whether to use request's uri scheme when generate the key.
@@ -186,8 +196,12 @@ impl RequestIssuer {
         self.use_method = value;
         self
     }
-    pub fn use_token(mut self, value: bool) -> Self {
-        self.use_token = value;
+    pub fn use_plex_token(mut self, value: bool) -> Self {
+        self.use_plex_token = value;
+        self
+    }
+    pub fn use_plex_language(mut self, value: bool) -> Self {
+        self.use_plex_language = value;
         self
     }
 }
@@ -201,6 +215,7 @@ impl CacheIssuer for RequestIssuer {
         _depot: &Depot,
     ) -> Option<Self::Key> {
         let mut key = String::new();
+        key.push_str("uri::");
         if self.use_scheme {
             if let Some(scheme) = req.uri().scheme_str() {
                 key.push_str(scheme);
@@ -215,6 +230,7 @@ impl CacheIssuer for RequestIssuer {
         if self.use_path {
             key.push_str(req.uri().path());
         }
+        // TODO: Clean up query. Not everything needs a cache change
         if self.use_query {
             if let Some(query) = req.uri().query() {
                 key.push('?');
@@ -222,18 +238,74 @@ impl CacheIssuer for RequestIssuer {
             }
         }
         if self.use_method {
-            key.push('|');
+            key.push_str("|method::");
             key.push_str(req.method().as_str());
         }
-        if self.use_token {
-            // TODO: Implement
-            key.push('|');
-            key.push_str(req.header("X-Plex-Token").unwrap_or_default());
+        if self.use_mime {
             if let Some(i) = req.first_accept() {
-                key.push('|');
+                key.push_str("|mime::");
                 key.push_str(i.to_string().as_str());
             }
         }
+        if self.use_plex_token && req.headers().contains_key("X-Plex-Token") {
+            key.push_str("|X-Plex-Token::");
+            key.push_str(req.header("X-Plex-Token").unwrap());
+        }
+        if self.use_plex_language && req.headers().contains_key("X-Plex-Languagen") {
+            key.push_str("|X-Plex-Language::");
+            key.push_str(req.header("X-Plex-Language").unwrap());
+        }
+        dbg!(&key);
         Some(key)
+    }
+}
+
+pub struct MemoryStore<K> {
+    inner: MokaCacheSync<K, CachedEntry>,
+}
+impl<K> MemoryStore<K>
+where
+    K: Hash + Eq + Send + Sync + Clone + 'static,
+{
+    /// Create a new `MemoryStore`.
+    pub fn new(max_capacity: u64) -> Self {
+        Self {
+            inner: MokaCacheSync::new(max_capacity),
+        }
+    }
+
+    pub fn with_moka_cache(cache: MokaCacheSync<K, CachedEntry>) -> Self {
+        Self {
+            inner: cache,
+        }
+    }
+}
+
+#[async_trait]
+impl<K> CacheStore for MemoryStore<K>
+where
+    K: Hash + Eq + Send + Sync + Clone + 'static,
+{
+    type Error = Infallible;
+    type Key = K;
+
+    async fn load_entry<Q>(&self, key: &Q) -> Option<CachedEntry>
+    where
+        Self::Key: Borrow<Q>,
+        Q: Hash + Eq + Sync,
+    {   
+        let config: Config = Config::figment().extract().unwrap();
+        if config.cache_ttl == 0 {
+            return None;
+        }
+        self.inner.get(key)
+    }
+
+    async fn save_entry(&self, key: Self::Key, entry: CachedEntry) -> Result<(), Self::Error> {
+        let config: Config = Config::figment().extract().unwrap();
+        if config.cache_ttl != 0 {
+            self.inner.insert(key, entry);
+        }
+        Ok(())
     }
 }

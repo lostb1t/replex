@@ -8,8 +8,7 @@ fn default_as_false() -> bool {
 #[derive(Debug, PartialEq, Deserialize)]
 pub struct Config {
     pub host: Option<String>,
-    #[serde(default = "default_port")]
-    pub port: u64,
+    pub port: Option<u64>,
     #[serde(
         default = "default_as_false",
         deserialize_with = "figment::util::bool_from_str_or_int"
@@ -17,6 +16,11 @@ pub struct Config {
     pub include_watched: bool,
     #[serde(default = "default_cache_ttl")]
     pub cache_ttl: u64,
+    #[serde(
+        default = "default_as_true",
+        deserialize_with = "figment::util::bool_from_str_or_int"
+    )]
+    pub cache_refresh: bool,
     #[serde(
         default = "default_as_false",
         deserialize_with = "figment::util::bool_from_str_or_int"
@@ -57,8 +61,12 @@ fn default_cache_ttl() -> u64 {
     5 * 60
 }
 
-fn default_port() -> u64 {
-    80
+// fn default_port() -> u64 {
+//     80
+// }
+
+fn default_as_true() -> bool {
+    true
 }
 
 impl Config {
