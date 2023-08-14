@@ -56,15 +56,15 @@ pub fn route() -> Router {
                 Router::with_path("/video/<colon:colon>/transcode/<**rest>")
                     .handle(redirect_stream),
             )
-            .push(
-                Router::with_path("/photo/<colon:colon>/transcode")
-                    .hoop(fix_photo_transcode_request)
-                    .handle(redirect_stream),
-            )
-            .push(
-                Router::with_path("/<colon:colon>/timeline<**rest>")
-                    .handle(redirect_stream),
-            )
+            // .push(
+            //     Router::with_path("/photo/<colon:colon>/transcode")
+            //         .hoop(fix_photo_transcode_request)
+            //         .handle(redirect_stream),
+            // )
+            // .push(
+            //     Router::with_path("/<colon:colon>/timeline<**rest>")
+            //         .handle(redirect_stream),
+            // )
             //.push(
             //    Router::with_path("/statistics/<**rest>")
             //        .handle(redirect_stream),
@@ -404,15 +404,32 @@ pub fn auto_refresh_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
         return default_cache();
     }
 
+    
     let listener = move |k: Arc<String>, v: CachedEntry, cause| {
         let z = k.clone();
         let values_list = cache_key_to_values(&z);
         let uri = values_list.get("uri").unwrap().to_string();
+        let client = reqwest::blocking::Client::new();
 
-        tracing::debug!(uri = ?uri, "Refreshing cached entry");
+        let mut req = client.get(uri);
+        if values_list.contains_key("X-Plex-Token") {
+            req = req.header(
+                "X-Plex-Token",
+                values_list.get("X-Plex-Token").unwrap().to_string(),
+            );
+        };
+
+        if values_list.contains_key("X-Plex-Language") {
+            req = req.header(
+                "X-Plex-Language",
+                values_list.get("X-Plex-Language").unwrap().to_string(),
+            );
+        };
+
+        tracing::debug!(req = ?req, "Refreshing cached entry");
 
         std::thread::spawn(move || {
-            match reqwest::blocking::get(uri) {
+            match req.send() {
                 Ok(res) => {
                     // dbg!(res);
                     tracing::debug!("Succesfully refreshing cached entry");

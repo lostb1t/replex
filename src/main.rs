@@ -78,20 +78,22 @@ async fn main() {
 
     let router = route();
     if config.ssl_enable && config.ssl_domain.is_some() {
-        let acceptor = TcpListener::new("0.0.0.0:443")
-            .acme()
-            .cache_path("/data/acme/letsencrypt")
-            .add_domain(config.ssl_domain.unwrap())
-            .bind()
-            .await;
+        let acceptor =
+            TcpListener::new(format!("0.0.0.0:{}", config.port.unwrap_or(443)))
+                .acme()
+                .cache_path("/data/acme/letsencrypt")
+                .add_domain(config.ssl_domain.unwrap())
+                .bind()
+                .await;
         Server::new(acceptor)
             .idle_timeout(Duration::from_secs(60))
             .serve(router)
             .await;
     } else {
-        let acceptor = TcpListener::new(format!("0.0.0.0:{}", config.port))
-            .bind()
-            .await;
+        let acceptor =
+            TcpListener::new(format!("0.0.0.0:{}", config.port.unwrap_or(80)))
+                .bind()
+                .await;
         Server::new(acceptor)
             .idle_timeout(Duration::from_secs(60))
             .serve(router)

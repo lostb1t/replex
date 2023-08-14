@@ -585,7 +585,6 @@ impl Filter for WatchedFilter {
         plex_client: PlexClient,
         options: PlexParams,
     ) -> bool {
-        tracing::debug!("filter watched");
         let config: Config = Config::figment().extract().unwrap();
         if config.include_watched {
             return true;

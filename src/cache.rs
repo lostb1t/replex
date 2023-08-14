@@ -230,6 +230,7 @@ impl CacheIssuer for RequestIssuer {
         if self.use_path {
             key.push_str(req.uri().path());
         }
+        // TODO: Clean up query. Not everything needs a cache change
         if self.use_query {
             if let Some(query) = req.uri().query() {
                 key.push('?');
@@ -254,6 +255,7 @@ impl CacheIssuer for RequestIssuer {
             key.push_str("|X-Plex-Language::");
             key.push_str(req.header("X-Plex-Language").unwrap());
         }
+        dbg!(&key);
         Some(key)
     }
 }
