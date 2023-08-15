@@ -125,3 +125,8 @@ Paths are subject to change.
 
 If you have for example an appbox it might not be ideal to stream media through replex. As that will take a lot of network resources.
 You can redirect streams by enabling `REPLEX_REDIRECT_STREAMS` and optionally set `REPLEX_REDIRECT_STREAMS_URL` if it needs to be different from REPLEX_HOST
+
+## Known limitations/issues
+
+- hero rows on Android devices dont load more content. so hero rows have a maximum of 100 items.
+- when include_watched is false a maxium limit oer library is opposed of 250 items. So if you have a mixed row of 2 librsries the max results of that row will be 500 items.
