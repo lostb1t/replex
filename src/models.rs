@@ -200,8 +200,8 @@ impl YaSerializeTrait for SpecialBool {
         S: serde::Serializer,
     {
         // If you implement `Deref`, then you don't need to add `.0`
-        let s = format!("{}", self.inner);
-        serializer.serialize_str(&s)
+        let s = self.inner;
+        serializer.serialize_bool(s)
     }
 }
 
@@ -477,6 +477,9 @@ pub struct MetaData {
     pub promoted: Option<SpecialBool>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub placeholder: Option<bool>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub context: Option<String>,
     #[yaserde(attribute)]
     #[yaserde(rename = "hubKey")]
@@ -498,7 +501,7 @@ pub struct MetaData {
     #[yaserde(attribute)]
     pub style: Option<String>,
     #[yaserde(skip)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none", rename="Meta")]
     pub meta: Option<Meta>,
     #[serde(rename = "Metadata", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -823,9 +826,29 @@ pub struct DisplayField {
 )]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
+pub struct DisplayImage {
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "type")]
+    pub r#type: Option<String>,
+    // #[yaserde(attribute)]
+    #[yaserde(attribute, rename = "imageType")]
+    #[serde(skip_serializing_if = "Option::is_none", rename = "imageType")]
+    pub image_type: Option<String>,
+}
+
+#[derive(
+    Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default,
+)]
+#[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
+#[serde(rename_all = "camelCase")]
 pub struct Meta {
-    #[serde(rename = "DisplayFields")]
+    #[serde(rename = "DisplayFields", default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub display_fields: Vec<DisplayField>,
+    #[serde(rename = "DisplayImage", default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub display_images: Vec<DisplayImage>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[yaserde(rename = "type")]

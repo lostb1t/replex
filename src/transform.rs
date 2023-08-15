@@ -305,6 +305,7 @@ impl Transform for HubMixTransform {
     ) {
         let config: Config = Config::figment().extract().unwrap();
         let mut new_hubs: Vec<MetaData> = vec![];
+        //item.identifier = Some("tv.plex.provider.discover".to_string());
         // let mut library_section_id: Vec<Option<u32>> = vec![]; //librarySectionID
         for mut hub in item.children_mut() {
             // we only process collection hubs
@@ -316,11 +317,16 @@ impl Transform for HubMixTransform {
             if !config.include_watched {
                 hub.children_mut().retain(|x| !x.is_watched());
             }
+            //hub.context = Some("hub.home.watchlist_available".to_string());
+            //hub.r#type = "clip".to_string();
+            // hub.placeholder = Some(SpecialBool::new(true));
+            //hub.placeholder = Some(true);
+
 
             let p = new_hubs.iter().position(|v| v.title == hub.title);
-            if hub.r#type != "clip" {
-                hub.r#type = "mixed".to_string();
-            }
+            // if hub.r#type != "clip" {
+            //     hub.r#type = "mixed".to_string();
+            // }
             match p {
                 Some(v) => {
                     new_hubs[v].key = merge_children_keys(
@@ -488,19 +494,35 @@ impl Transform for HubStyleTransform {
         if item.is_collection_hub() {
             let is_hero = item.is_hero(plex_client.clone()).await.unwrap();
             if is_hero {
-                item.style = Some("hero".to_string());
+                //item.style = Some("hero".to_string());
 
-                /// fix for android mobile (nont TV)
-                if options.platform.unwrap_or_default().to_lowercase() == "android"
-                    && self.is_home && options.product.unwrap_or_default().to_lowercase() == "plex for android (mobile)"
-                {
-                    item.r#type = "clip".to_string();
-                }
-
+    
+                // if options.platform.unwrap_or_default().to_lowercase() == "android"
+                //     && self.is_home && options.product.unwrap_or_default().to_lowercase() == "plex for android (mobile)"
+                // {
+                //     item.r#type = "clip".to_string();
+                // }
+                item.r#type = "clip".to_string();
+                item.meta = Some(Meta {
+                    r#type: None,
+                    display_fields: vec![],
+                    display_images: vec![
+                        DisplayImage {
+                            r#type: Some("clip".to_string()),
+                            image_type: Some("coverArt".to_string()),
+                        },
+                    ],
+                });
                 let mut futures = FuturesOrdered::new();
                 // let now = Instant::now();
 
-                for child in item.children() {
+                for mut child in item.children() {
+                    child.r#type = "clip".to_string();
+                    // child.images = vec![Image {
+                    //     r#type: "coverArt".to_string(),
+                    //     url: "https://image.tmdb.org/t/p/original/3aQb80osBLrUISe6TJ7Y4A0VZJV.jpg".to_string(),
+                    //     alt: "Test".to_string()
+                    // }];
                     // let style = item.style.clone().unwrap();
                     let client = plex_client.clone();
                     futures.push_back(async move {
@@ -508,10 +530,15 @@ impl Transform for HubStyleTransform {
 
                         let art = child.get_hero_art(client).await;
                         if art.is_some() {
-                            c.art = art.clone();
+                            // c.art = art.clone();
+                            c.images = vec![Image {
+                                r#type: "coverArt".to_string(),
+                                url: art.clone().unwrap(),
+                                alt: "Test".to_string()
+                            }];
                         }
                         // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
-                        c.thumb = c.art.clone();
+                        // c.thumb = c.art.clone();
                         c
                     });
                 }
