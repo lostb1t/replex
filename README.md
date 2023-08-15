@@ -129,4 +129,4 @@ You can redirect streams by enabling `REPLEX_REDIRECT_STREAMS` and optionally se
 ## Known limitations/issues
 
 - hero rows on Android devices dont load more content. so hero rows have a maximum of 100 items on Android.
-- when include_watched is false a maximum item limit per library is opposed of 250 items. So if you have a mixed row of 2 librsries the max results of that row will be 500 items.
+- when include_watched is false a maximum item limit per library is opposed of 250 items. So if you have a mixed row of 2 libraries the max results of that row will be 500 items.
