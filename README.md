@@ -88,7 +88,7 @@ So an collection named "Trending" in the Movie library will be merged with an co
 Note, this does not work on builtin recommendations. As i personally dont see then need of mixing those. 
 You can recreate the builtin rows with smart collections if you wish to have that functionality, or with PMM ofcourse.
 
-## Hub style
+## Row style
 
 You can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection. 
 
