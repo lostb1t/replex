@@ -494,7 +494,7 @@ impl Transform for HubStyleTransform {
         if item.is_collection_hub() {
             let is_hero = item.is_hero(plex_client.clone()).await.unwrap();
             if is_hero {
-                //item.style = Some("hero".to_string());
+                item.style = Some("hero".to_string());
 
                 // if options.platform.unwrap_or_default().to_lowercase() == "android"
                 //     && self.is_home && options.product.unwrap_or_default().to_lowercase() == "plex for android (mobile)"
@@ -505,7 +505,7 @@ impl Transform for HubStyleTransform {
                 item.meta = Some(Meta {
                     r#type: None,
                     display_fields: vec![DisplayField {
-                        r#type: Some("clip".to_string()),
+                        r#type: Some("mixed".to_string()),
                         fields: vec![
                             "title".to_string(),
                             "parentTitle".to_string(),
