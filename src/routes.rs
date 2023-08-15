@@ -334,6 +334,7 @@ pub async fn get_collections_children(
     _depot: &mut Depot,
     res: &mut Response,
 ) -> Result<(), anyhow::Error> {
+    let config: Config = Config::figment().extract().unwrap();
     let params: PlexParams = req.extract().await.unwrap();
     let collection_ids = req.param::<String>("ids").unwrap();
     let collection_ids: Vec<u32> = collection_ids
@@ -348,12 +349,12 @@ pub async fn get_collections_children(
     let mut limit: i32 = 250;
     let mut offset: i32 = 0;
 
-    // let mut limit: i32 = params.container_size.unwrap_or(50);
-    // let mut offset: i32 = params.container_start.unwrap_or(0);
-    // if params.container_start.is_some() {
-    //     offset = params.container_start;
-    // }
-    // dbg!(&req);
+    // in we dont remove watched then we dont need to limit
+    if config.include_watched {
+        limit = params.container_size.unwrap_or(50);
+        offset = params.container_start.unwrap_or(0);
+    }
+
     // create a stub
     let mut container: MediaContainerWrapper<MediaContainer> =
         MediaContainerWrapper::default();

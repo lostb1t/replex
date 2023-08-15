@@ -403,7 +403,8 @@ impl Transform for LibraryMixTransform {
     ) {
         let config: Config = Config::figment().extract().unwrap();
         let mut children: Vec<MetaData> = vec![];
-        // dbg!(&self.collection_ids);
+        let mut total_size_including_watched = 0;
+
         for id in self.collection_ids.clone() {
             let mut c = plex_client
                 .clone()
@@ -420,12 +421,12 @@ impl Transform for LibraryMixTransform {
                 )
                 .await
                 .unwrap();
-
+            
+            total_size_including_watched += c.media_container.total_size.unwrap();
             if !config.include_watched {
                 c.media_container.children_mut().retain(|x| !x.is_watched());
             }
 
-            // total_size += c.media_container.total_size.unwrap();
             match children.is_empty() {
                 false => {
                     children = children
@@ -436,7 +437,11 @@ impl Transform for LibraryMixTransform {
                 true => children.append(&mut c.media_container.children()),
             }
         }
-        item.total_size = Some(children.len() as i32);
+        if !config.include_watched {
+            item.total_size = Some(children.len() as i32);
+        } else {
+            item.total_size = Some(total_size_including_watched);
+        };
         // always metadata
         item.metadata = children;
     }
