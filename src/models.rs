@@ -500,7 +500,8 @@ pub struct MetaData {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[yaserde(attribute)]
     pub style: Option<String>,
-    #[yaserde(skip)]
+    // #[yaserde(skip)]
+    #[yaserde(attribute, rename="Meta")]
     #[serde(skip_serializing_if = "Option::is_none", rename="Meta")]
     pub meta: Option<Meta>,
     #[serde(rename = "Metadata", default)]
@@ -813,10 +814,6 @@ pub struct DisplayField {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[yaserde(rename = "type")]
     pub r#type: Option<String>,
-    // #[yaserde(attribute)]
-    #[yaserde(attribute, rename = "imageType")]
-    #[serde(skip_serializing_if = "Option::is_none", rename = "imageType")]
-    pub image_type: Option<String>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub fields: Vec<String>,
 }

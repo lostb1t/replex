@@ -322,7 +322,6 @@ impl Transform for HubMixTransform {
             // hub.placeholder = Some(SpecialBool::new(true));
             //hub.placeholder = Some(true);
 
-
             let p = new_hubs.iter().position(|v| v.title == hub.title);
             // if hub.r#type != "clip" {
             //     hub.r#type = "mixed".to_string();
@@ -427,8 +426,9 @@ impl Transform for LibraryMixTransform {
                 )
                 .await
                 .unwrap();
-            
-            total_size_including_watched += c.media_container.total_size.unwrap();
+
+            total_size_including_watched +=
+                c.media_container.total_size.unwrap();
             if !config.include_watched {
                 c.media_container.children_mut().retain(|x| !x.is_watched());
             }
@@ -496,28 +496,32 @@ impl Transform for HubStyleTransform {
             if is_hero {
                 //item.style = Some("hero".to_string());
 
-    
                 // if options.platform.unwrap_or_default().to_lowercase() == "android"
                 //     && self.is_home && options.product.unwrap_or_default().to_lowercase() == "plex for android (mobile)"
                 // {
                 //     item.r#type = "clip".to_string();
                 // }
-                item.r#type = "clip".to_string();
+                item.r#type = "mixed".to_string();
                 item.meta = Some(Meta {
                     r#type: None,
-                    display_fields: vec![],
-                    display_images: vec![
-                        DisplayImage {
-                            r#type: Some("clip".to_string()),
-                            image_type: Some("coverArt".to_string()),
-                        },
-                    ],
+                    display_fields: vec![DisplayField {
+                        r#type: Some("clip".to_string()),
+                        fields: vec![
+                            "title".to_string(),
+                            "parentTitle".to_string(),
+                            "originallyAvailableAt".to_string(),
+                        ],
+                    }],
+                    display_images: vec![DisplayImage {
+                        r#type: Some("mixed".to_string()),
+                        image_type: Some("coverArt".to_string()),
+                    }],
                 });
                 let mut futures = FuturesOrdered::new();
                 // let now = Instant::now();
 
                 for mut child in item.children() {
-                    child.r#type = "clip".to_string();
+                    // child.r#type = "clip".to_string();
                     // child.images = vec![Image {
                     //     r#type: "coverArt".to_string(),
                     //     url: "https://image.tmdb.org/t/p/original/3aQb80osBLrUISe6TJ7Y4A0VZJV.jpg".to_string(),
@@ -534,7 +538,7 @@ impl Transform for HubStyleTransform {
                             c.images = vec![Image {
                                 r#type: "coverArt".to_string(),
                                 url: art.clone().unwrap(),
-                                alt: "Test".to_string()
+                                alt: "Test".to_string(),
                             }];
                         }
                         // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
