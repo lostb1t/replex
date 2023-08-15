@@ -403,7 +403,7 @@ impl Transform for LibraryMixTransform {
     ) {
         let config: Config = Config::figment().extract().unwrap();
         let mut children: Vec<MetaData> = vec![];
-
+        // dbg!(&self.collection_ids);
         for id in self.collection_ids.clone() {
             let mut c = plex_client
                 .clone()
@@ -437,6 +437,7 @@ impl Transform for LibraryMixTransform {
             }
         }
         item.total_size = Some(children.len() as i32);
+        // always metadata
         item.metadata = children;
     }
 }
@@ -464,7 +465,9 @@ impl Transform for HubChildrenLimitTransform {
 }
 
 #[derive(Default, Debug)]
-pub struct HubStyleTransform;
+pub struct HubStyleTransform {
+    pub is_home: bool, // use clip instead of hero for android
+}
 
 #[async_trait]
 impl Transform for HubStyleTransform {
@@ -481,11 +484,16 @@ impl Transform for HubStyleTransform {
             let is_hero = item.is_hero(plex_client.clone()).await.unwrap();
             if is_hero {
                 item.style = Some("hero".to_string());
-                if let Some(platform) = &options.platform {
-                    if platform.to_lowercase() == "android" {
-                        item.r#type = "clip".to_string();
-                    }
+                dbg!(&options);
+                /// fix for android mobile (nont TV)
+                
+                if options.platform.unwrap_or_default().to_lowercase() == "android"
+                    && self.is_home && options.product.unwrap_or_default().to_lowercase() == "plex for android (mobile)"
+                {
+                    dbg!("going clip");
+                    item.r#type = "clip".to_string();
                 }
+                
 
                 let mut futures = FuturesOrdered::new();
                 // let now = Instant::now();
@@ -614,6 +622,12 @@ impl Transform for HubSectionDirectoryTransform {
             item.directory = vec![];
             item.video = childs;
         }
+
+        // if item.is_collection_hub() {
+        //     let childs = item.children();
+        //     item.metadata = vec![];
+        //     item.video = childs;
+        // }
     }
 }
 
@@ -656,7 +670,7 @@ impl Transform for UserStateTransform {
         if item.is_hub() {
             for child in item.children_mut() {
                 if config.disable_user_state {
-                    child.user_state = Some(false);
+                    child.user_state = Some(SpecialBool::new(false));
                 }
                 if config.disable_leaf_count {
                     child.leaf_count = None;
@@ -664,10 +678,29 @@ impl Transform for UserStateTransform {
             }
         } else {
             if config.disable_user_state {
-                item.user_state = Some(false);
+                item.user_state = Some(SpecialBool::new(false));
             }
             if config.disable_leaf_count {
                 item.leaf_count = None;
+            }
+        }
+    }
+}
+
+#[derive(Default, Debug)]
+pub struct TestTransform;
+
+#[async_trait]
+impl Transform for TestTransform {
+    async fn transform_mediacontainer(
+        &self,
+        item: &mut MediaContainer,
+        plex_client: PlexClient,
+        options: PlexParams,
+    ) {
+        for i in item.children_mut() {
+            for x in i.children_mut() {
+                x.guids = vec![];
             }
         }
     }

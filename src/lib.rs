@@ -1,4 +1,5 @@
 #[macro_use]
+extern crate yaserde;
 extern crate yaserde_derive;
 extern crate derive_more;
 extern crate tracing;

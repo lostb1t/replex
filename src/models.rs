@@ -1,5 +1,6 @@
 use figment::{providers::Env, Figment};
 use salvo::prelude::*;
+use std::fmt;
 use std::str::FromStr;
 use tmdb_api::movie::images::MovieImages;
 use tmdb_api::prelude::Command;
@@ -24,6 +25,11 @@ use salvo::http::ResBody;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_with::serde_as;
 use tracing::debug;
+use yaserde::YaSerialize as YaSerializeTrait;
+use yaserde_derive::YaDeserialize;
+use yaserde_derive::YaSerialize;
+use std::io::{Read, Write};
+use xml::writer::XmlEvent;
 
 use salvo::macros::Extractible;
 // use replex::settings::*;
@@ -62,6 +68,8 @@ pub struct PlexParams {
     pub pinned_content_directory_id: Option<Vec<String>>,
     #[salvo(extract(rename = "X-Plex-Platform"))]
     pub platform: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Product"))]
+    pub product: Option<String>,
     pub count: Option<i32>,
     #[salvo(extract(rename = "X-Plex-Client-Identifier"))]
     pub client_identifier: Option<String>,
@@ -133,6 +141,95 @@ where
     }
 }
 
+
+/// For some fucking reason. Android for mobile (and only that) chokes on boolean in xml. It wants 0/1
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Default,
+    PartialOrd,
+    YaDeserialize,
+)]
+pub struct SpecialBool {
+    inner: bool
+}
+
+impl SpecialBool {
+    pub fn new(inner: bool) -> Self {
+        Self {
+            inner
+        }
+    }
+}
+
+impl fmt::Display for SpecialBool {
+    // This trait requires `fmt` with this exact signature.
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.inner)
+    }
+}
+
+impl YaSerializeTrait for SpecialBool {
+    fn serialize<W: Write>(&self, writer: &mut yaserde::ser::Serializer<W>) -> Result<(), String> {
+        let content = format!("{}", self.inner as i32);
+        let event = XmlEvent::characters(&content);
+        let _ret = writer.write(event);
+        Ok(())
+    }
+
+    fn serialize_attributes(
+      &self,
+      attributes: Vec<xml::attribute::OwnedAttribute>,
+      namespace: xml::namespace::Namespace,
+    ) -> Result<
+      (
+        Vec<xml::attribute::OwnedAttribute>,
+        xml::namespace::Namespace,
+      ),
+      String,
+    > {
+      Ok((attributes, namespace))
+    }
+  }
+
+  impl Serialize for SpecialBool {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        // If you implement `Deref`, then you don't need to add `.0`
+        let s = format!("{}", self.inner);
+        serializer.serialize_str(&s)
+    }
+}
+
+impl<'de> Deserialize<'de> for SpecialBool {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = bool::deserialize(deserializer)?;
+        Ok(SpecialBool::new(s))
+    }
+}
+
+
+// pub fn deserialize_special_bool<'de, D>(
+//     deserializer: D,
+// ) -> Result<Option<SpecialBool>, D::Error>
+// where
+//     D: Deserializer<'de>,
+// {
+//     match Deserialize::deserialize(deserializer)? {
+//         Some::<bool>(s) => {
+//             Ok(Some(SpecialBool::new(s)))
+//         }
+//         None => Ok(None),
+//     }
+// }
+
 #[derive(
     Debug,
     Serialize,
@@ -149,6 +246,27 @@ where
 pub struct Guid {
     #[yaserde(attribute)]
     id: String,
+}
+
+#[derive(
+    Debug,
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    YaDeserialize,
+    YaSerialize,
+    Default,
+    PartialOrd,
+)]
+#[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
+pub struct Media {
+    #[yaserde(attribute)]
+    id: i32,
+    #[yaserde(attribute, rename="partCount")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    part_count: Option<String>,
 }
 
 #[derive(
@@ -254,6 +372,30 @@ pub struct MetaData {
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub subtype: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub studio: Option<String>,
+    #[yaserde(attribute, rename = "contentRating")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content_rating: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rating: Option<f32>,
+    #[yaserde(attribute, rename = "audianceRating")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub audiance_rating: Option<f32>,
+    #[yaserde(attribute, rename = "primaryExtraKey")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub primary_extra_key: Option<String>,
+    #[yaserde(attribute, rename = "chapterSource")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub chapter_source: Option<String>,
+    #[yaserde(attribute, rename = "ratingImage")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rating_image: Option<String>,
+    #[yaserde(attribute, rename = "audienceRatingImage")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub audiance_rating_image: Option<String>,
     #[yaserde(attribute, rename = "parentYear")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_year: Option<i32>,
@@ -332,7 +474,7 @@ pub struct MetaData {
     pub year: Option<i32>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub promoted: Option<bool>,
+    pub promoted: Option<SpecialBool>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub context: Option<String>,
@@ -349,8 +491,9 @@ pub struct MetaData {
     //#[serde(deserialize_with = "str_or_i32")]
     pub size: Option<i32>,
     #[yaserde(attribute)]
+    // #[serde(skip_serializing_if = "Option::is_none", deserialize_with="deserialize_special_bool")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub more: Option<bool>,
+    pub more: Option<SpecialBool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[yaserde(attribute)]
     pub style: Option<String>,
@@ -400,15 +543,18 @@ pub struct MetaData {
     #[yaserde(rename = "Label", default)]
     #[yaserde(child)]
     pub labels: Vec<Label>,
-    #[yaserde(attribute)]
+    #[yaserde(attribute, rename="originallyAvailableAt")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub originally_available_at: Option<String>,
     #[serde(rename = "Guid", default, skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Guid", default, child)]
     pub guids: Vec<Guid>,
+    #[serde(rename = "Media", default, skip_serializing_if = "Vec::is_empty")]
+    #[yaserde(rename = "Media", default, child)]
+    pub media: Vec<Media>,
     #[yaserde(attribute, rename = "userState")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub user_state: Option<bool>,
+    pub user_state: Option<SpecialBool>,
     #[serde(rename = "Image", default, skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Image", default, child)]
     pub images: Vec<Image>,
@@ -425,6 +571,24 @@ where
     D: Deserializer<'de>,
 {
     Ok(Some(deserialize_string_from_number(deserializer)?))
+}
+
+pub fn deserialize_test<'de, D>(
+    deserializer: D,
+) -> Result<Option<i32>, D::Error>
+where
+    D: Deserializer<'de>,
+{   
+    dbg!("YO");
+    return Ok(Some(1));
+    // match Deserialize::deserialize(deserializer)? {
+    //     Some::<String>(s) => {
+    //         let r: Vec<i32> =
+    //             s.split(',').map(|s| s.parse().unwrap()).collect();
+    //         Ok(Some(r))
+    //     }
+    //     None => Ok(None),
+    // }
 }
 
 impl MetaData {
@@ -599,7 +763,7 @@ pub struct MediaContainer {
     #[yaserde(attribute)]
     #[yaserde(rename = "allowSync")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub allow_sync: Option<bool>,
+    pub allow_sync: Option<SpecialBool>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub identifier: Option<String>,

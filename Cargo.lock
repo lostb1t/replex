@@ -2916,6 +2916,7 @@ dependencies = [
  "tracing-opentelemetry",
  "tracing-subscriber",
  "url",
+ "xml-rs",
  "yaserde",
  "yaserde_derive",
 ]

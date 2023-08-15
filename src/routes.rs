@@ -9,6 +9,7 @@ use crate::logging::*;
 use crate::models::*;
 use crate::plex_client::*;
 use crate::proxy::Proxy;
+use crate::response::Xml;
 use crate::timeout::*;
 use crate::transform::*;
 use crate::url::*;
@@ -26,6 +27,7 @@ use salvo::http::{Mime, Request, Response, StatusCode};
 use salvo::prelude::*;
 // use salvo::proxy::Proxy as SalvoProxy;
 use salvo::routing::PathFilter;
+use tokio::fs;
 // use std::time::Duration;
 use std::string;
 use tokio::time::{sleep, Duration};
@@ -206,7 +208,7 @@ pub async fn get_hubs_promoted(
             MediaContainerWrapper::default();
         container.content_type = content_type.clone();
         container.media_container.size = Some(0);
-        container.media_container.allow_sync = Some(true);
+        container.media_container.allow_sync = Some(SpecialBool::new(true));
         container.media_container.identifier =
             Some("com.plexapp.plugins.library".to_string());
         res.render(container);
@@ -261,7 +263,9 @@ pub async fn get_hubs_promoted(
     container.content_type = content_type;
 
     TransformBuilder::new(plex_client, params.clone())
-        .with_transform(HubStyleTransform)
+        .with_transform(HubStyleTransform {
+            is_home: true
+        })
         .with_transform(HubMixTransform)
         // .with_transform(HubChildrenLimitTransform {
         //     limit: params.clone().count.unwrap(),
@@ -311,7 +315,10 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
 
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubSectionDirectoryTransform)
-        .with_transform(HubStyleTransform)
+        .with_transform(HubStyleTransform {
+            is_home: false
+        })
+        .with_transform(TestTransform)
         // .with_transform(HubChildrenLimitTransform {
         //     limit: params.clone().count.unwrap(),
         // })
@@ -321,7 +328,8 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
         .with_filter(WatchedFilter)
         .apply_to(&mut container)
         .await;
-    res.render(container); // TODO: FIx XML
+
+    res.render(container);
 }
 
 #[handler]
@@ -349,7 +357,7 @@ pub async fn get_collections_children(
     // if params.container_start.is_some() {
     //     offset = params.container_start;
     // }
-
+    dbg!(&req);
     // create a stub
     let mut container: MediaContainerWrapper<MediaContainer> =
         MediaContainerWrapper::default();
@@ -378,17 +386,6 @@ pub async fn get_collections_children(
 
     res.render(container); // TODO: FIx XML
     Ok(())
-}
-
-#[handler]
-async fn empty_handler() {}
-
-fn cache_key_to_values(string: &str) -> HashMap<&str, &str> {
-    string
-        .split("|")
-        .map(|s| s.split("::").collect_tuple().unwrap())
-        .map(|(key, val)| (key, val))
-        .collect()
 }
 
 pub fn auto_refresh_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
