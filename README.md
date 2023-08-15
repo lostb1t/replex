@@ -9,7 +9,7 @@ Remix your plex recommendations.
 - Merge recommendations on home into one from different libraries. Aka have movies and shows in a single row.
 - Remove watched items from recommendations.
 - Choose between styles, shelf (default) or hero.
-- Auto load tmdb artwork for hero styles.
+- Auto load artwork for hero styles.
 - Disable user state: remove unwatched markers from artwork.
 - Disable leaf count: remove episode count from artwork.
 - Works on every client/app not only plex web!
