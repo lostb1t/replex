@@ -234,14 +234,14 @@ pub async fn get_hubs_promoted(
 
     let mut count = params.clone().count.unwrap_or(25);
 
-    // some androids have trouble loading more for hero style. SO load more at once
+    // some androids have trouble loading more for hero style. So load more at once
     if params.platform.clone().unwrap_or_default().to_lowercase() == "android" && count < 50 {
         count = 50;
     } 
 
     // Hack, as the list could be smaller when removing watched items. So we request more.
-    if !config.include_watched {
-        count =  (count * 2);
+    if !config.include_watched && count < 50 {
+        count =  50;
     }
 
     add_query_param_salvo(
@@ -297,8 +297,8 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
     } 
 
     // Hack, as the list could be smaller when removing watched items. So we request more.
-    if !config.include_watched {
-        count =  (count * 2);
+    if !config.include_watched && count < 50 {
+        count =  50;
     }
 
     add_query_param_salvo(
@@ -424,16 +424,17 @@ pub fn auto_refresh_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
         );
 
         let mut req = client.get(url).headers(v.req_headers);
-        tracing::trace!(req = ?req, "Refreshing cached entry");
+        tracing::trace!(req = ?req, "Refreshing cached route entry");
+        // tracing::trace!("Refreshing cached route entry");
 
         std::thread::spawn(move || {
             match req.send() {
                 Ok(res) => {
                     // dbg!(res);
-                    tracing::debug!("Succesfully refreshing cached entry");
+                    tracing::debug!("Succesfully refreshed cached route entry");
                 }
                 Err(err) => {
-                    tracing::error!(err = ?err, "Failed to refresh cached entry");
+                    tracing::error!(err = ?err, "Failed to refresh cached route entry");
                 }
             }
         });
