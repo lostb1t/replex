@@ -314,7 +314,6 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
         .with_transform(HubStyleTransform {
             is_home: false
         })
-        .with_transform(TestTransform)
         // .with_transform(HubChildrenLimitTransform {
         //     limit: params.clone().count.unwrap(),
         // })
