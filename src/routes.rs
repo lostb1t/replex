@@ -232,16 +232,23 @@ pub async fn get_hubs_promoted(
     // we want guids for banners
     add_query_param_salvo(req, "includeGuids".to_string(), "1".to_string());
 
+    let mut count = params.clone().count.unwrap_or(25);
+
+    // some androids have trouble loading more for hero style. SO load more at once
+    if params.platform.clone().unwrap_or_default().to_lowercase() == "android" && count < 50 {
+        count = 50;
+    } 
+
     // Hack, as the list could be smaller when removing watched items. So we request more.
     if !config.include_watched {
-        if let Some(original_count) = params.clone().count {
-            add_query_param_salvo(
-                req,
-                "count".to_string(),
-                (original_count * 2).to_string(),
-            );
-        }
+        count =  (count * 2);
     }
+
+    add_query_param_salvo(
+        req,
+        "count".to_string(),
+        count.to_string(),
+    );
 
     let upstream_res = plex_client.request(req).await?;
     match upstream_res.status() {
@@ -282,17 +289,23 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
     let plex_client = PlexClient::from_request(req, params.clone());
     let content_type = get_content_type_from_headers(req.headers_mut());
 
+    let mut count = params.clone().count.unwrap_or(25);
+
+    // some androids have trouble loading more for hero style. SO load more at once
+    if params.platform.clone().unwrap_or_default().to_lowercase() == "android" && count < 50 {
+        count = 50;
+    } 
+
     // Hack, as the list could be smaller when removing watched items. So we request more.
     if !config.include_watched {
-        if let Some(original_count) = params.clone().count {
-            // let count_number: i32 = original_count.parse().unwrap();
-            add_query_param_salvo(
-                req,
-                "count".to_string(),
-                (original_count * 2).to_string(),
-            );
-        }
+        count =  (count * 2);
     }
+
+    add_query_param_salvo(
+        req,
+        "count".to_string(),
+        count.to_string(),
+    );
 
     // we want guids for banners
     add_query_param_salvo(req, "includeGuids".to_string(), "1".to_string());
