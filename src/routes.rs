@@ -4,6 +4,7 @@ use std::sync::Arc;
 
 use crate::cache::*;
 use crate::config::Config;
+use crate::headers;
 use crate::logging::*;
 use crate::models::*;
 use crate::plex_client::*;
@@ -17,7 +18,7 @@ use moka::future::Cache as MokaCache;
 use moka::notification::RemovalCause;
 use moka::sync::Cache as MokaCacheSync;
 use moka::sync::CacheBuilder as MokaCacheBuilder;
-use salvo::cache::{Cache, CachedEntry};
+// use salvo::cache::{Cache, CachedEntry};
 use salvo::compression::Compression;
 use salvo::cors::Cors;
 use salvo::http::header::CONTENT_TYPE;
@@ -105,6 +106,7 @@ pub fn route() -> Router {
                 .get(get_hubs_sections),
         )
         // .push(Router::new().path("/ping").get(PlexProxy::new(config.host.clone().unwrap())))
+        .push(Router::new().path("/test").get(test))
         .push(Router::new().path("/hello").get(hello))
         .push(
             Router::new()
@@ -397,39 +399,25 @@ pub fn auto_refresh_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
     }
 
     // TODO: Maybe stop after a month? we can add a timestamp header to the key when first cached.
-    let listener = move |k: Arc<String>, v: CachedEntry, cause: RemovalCause| {
+    let listener = move |k: Arc<String>,
+                         v: CachedEntry,
+                         cause: RemovalCause| {
         if cause != RemovalCause::Expired {
-            return
+            return;
         }
 
-        let z = k.clone();
-        let values_list = cache_key_to_values(&z);
-        let uri = values_list.get("uri").unwrap().to_string();
         let client = reqwest::blocking::Client::new();
 
-        let mut req = client.get(uri);
-        if values_list.contains_key("X-Plex-Token") {
-            req = req.header(
-                "X-Plex-Token",
-                values_list.get("X-Plex-Token").unwrap().to_string(),
-            );
-        };
+        let url = format!(
+            "http://{}{}",
+            v.req_local_addr
+                    .to_string()
+                    .replace("socket://", "")
+                    .as_str(),
+            v.req_uri.path_and_query().unwrap()
+        );
 
-        if values_list.contains_key("X-Plex-Language") {
-            req = req.header(
-                "X-Plex-Language",
-                values_list.get("X-Plex-Language").unwrap().to_string(),
-            );
-        };
-
-        if values_list.contains_key("mime") {
-            req = req.header(
-                "Accept",
-                values_list.get("mime").unwrap().to_string(),
-            );
-        };
-
-        //tracing::debug!("Refreshing cached entry");
+        let mut req = client.get(url).headers(v.req_headers);
         tracing::trace!(req = ?req, "Refreshing cached entry");
 
         std::thread::spawn(move || {
@@ -452,7 +440,7 @@ pub fn auto_refresh_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
                 .eviction_listener(listener)
                 .build(),
         ),
-        RequestIssuer::default(),
+        RequestIssuer::with_plex_defaults(),
     )
 }
 
@@ -464,17 +452,13 @@ pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
                 .time_to_live(Duration::from_secs(config.cache_ttl))
                 .build(),
         ),
-        RequestIssuer::default(),
+        RequestIssuer::with_plex_defaults(),
     )
 }
 
+
 #[handler]
 async fn test(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
-    let mut container: MediaContainerWrapper<MediaContainer> =
-        MediaContainerWrapper::default();
-    container.content_type = get_content_type_from_headers(req.headers_mut());
-
-    res.render(container);
 }
 
 #[handler]

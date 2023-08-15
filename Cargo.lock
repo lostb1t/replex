@@ -2884,6 +2884,7 @@ dependencies = [
  "figment",
  "futures",
  "futures-util",
+ "http",
  "http-body-util",
  "httpmock",
  "hyper 1.0.0-rc.4",

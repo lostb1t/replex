@@ -483,7 +483,7 @@ impl Transform for HubStyleTransform {
                 item.style = Some("hero".to_string());
                 if let Some(platform) = &options.platform {
                     if platform.to_lowercase() == "android" {
-                        // item.r#type = "clip".to_string();
+                        item.r#type = "clip".to_string();
                     }
                 }
 
