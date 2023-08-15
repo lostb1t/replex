@@ -484,16 +484,13 @@ impl Transform for HubStyleTransform {
             let is_hero = item.is_hero(plex_client.clone()).await.unwrap();
             if is_hero {
                 item.style = Some("hero".to_string());
-                dbg!(&options);
+
                 /// fix for android mobile (nont TV)
-                
                 if options.platform.unwrap_or_default().to_lowercase() == "android"
                     && self.is_home && options.product.unwrap_or_default().to_lowercase() == "plex for android (mobile)"
                 {
-                    dbg!("going clip");
                     item.r#type = "clip".to_string();
                 }
-                
 
                 let mut futures = FuturesOrdered::new();
                 // let now = Instant::now();

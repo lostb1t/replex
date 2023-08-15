@@ -248,13 +248,9 @@ pub async fn get_hubs_promoted(
         reqwest::StatusCode::OK => (),
         status => {
             tracing::error!(status = ?status, uri = ?req.uri(), "Failed to get plex response");
-            dbg!("this is error");
-            // res.render("");
             return Err(
                 salvo::http::StatusError::internal_server_error().into()
             );
-            //res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
-            //return Ok()
         }
     };
 
@@ -357,7 +353,7 @@ pub async fn get_collections_children(
     // if params.container_start.is_some() {
     //     offset = params.container_start;
     // }
-    dbg!(&req);
+    // dbg!(&req);
     // create a stub
     let mut container: MediaContainerWrapper<MediaContainer> =
         MediaContainerWrapper::default();
