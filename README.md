@@ -72,13 +72,13 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 |---------------------------|----------|---------------------------------------------------------------------------|
 | REPLEX_HOST               |        	 | Plex target host to proxy.                                             	  |
 | REPLEX_INCLUDE_WATCHED    | false    | If set to false, hide watched items.                                      |
-| REPLEX_CACHE_TTL          | 900    	 | Time to live for caches in seconds. Set to 0 to disable (not recommended).  |
-| REPLEX_CACHE_REFRESH      | true     | The cache for recommended rows are auto refreshed for each user.              	      |
 | REPLEX_DISABLE_USER_STATE | false    | Remove unwatched markers from artwork.|
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
+| REPLEX_DISABLE_RELATED  | false | See: https://github.com/sarendsen/replex/issues/26.        |
 | REPLEX_REDIRECT_STREAMS  | false    | Redirect streams to another endpoint.                                      |
 | REPLEX_REDIRECT_STREAMS_URL  | REPLEX_HOST    | Alternative streams endpoint                                         |
-| REPLEX_DISABLE_RELATED  | false | See: https://github.com/sarendsen/replex/issues/26.        |
+| REPLEX_CACHE_TTL          | 900    	 | Time to live for caches in seconds. Set to 0 to disable (not recommended).  |
+| REPLEX_CACHE_REFRESH      | true     | The cache for recommended rows are auto refreshed for each user.              	      |
 
 ## Mixed rows
 
