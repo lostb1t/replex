@@ -155,10 +155,9 @@ pub struct RequestIssuer {
     use_authority: bool,
     use_local_addr: bool,
     use_path: bool,
+    // TODO: Also make this like headers. So that we can dump unneeded query variables like X-Plex-Client-Identifier and have cross device caching
     use_query: bool,
     use_method: bool,
-    use_plex_token: bool,
-    use_plex_language: bool,
     use_mime: bool,
     use_headers: Vec<http::HeaderName>,
 }
@@ -177,8 +176,6 @@ impl RequestIssuer {
             use_path: true,
             use_query: true,
             use_method: true,
-            use_plex_token: true,
-            use_plex_language: true,
             use_mime: false,
             use_headers: vec![],
         }
@@ -192,8 +189,6 @@ impl RequestIssuer {
             use_path: true,
             use_query: true,
             use_method: true,
-            use_plex_token: true,
-            use_plex_language: true,
             use_mime: false,
             use_headers: vec![
                 http::header::ACCEPT,
