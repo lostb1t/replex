@@ -564,7 +564,8 @@ impl Transform for HubStyleTransform {
         let style = item.style.clone().unwrap_or("".to_string()).to_owned();
 
         if item.is_collection_hub() {
-            let is_hero = item.is_hero(plex_client.clone()).await.unwrap();
+            // TODO: Check why tries to load non existing collectiin? my guess is no access
+            let is_hero = item.is_hero(plex_client.clone()).await.unwrap_or(false);
             if is_hero {
                 let mut style = PlatformHeroStyle::by_platform(
                     options.platform,
@@ -812,6 +813,7 @@ impl Transform for HubSectionDirectoryTransform {
         // }
     }
 }
+
 
 #[derive(Default, Debug)]
 pub struct HubKeyTransform;

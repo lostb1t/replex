@@ -58,15 +58,18 @@ fn default_as_false() -> bool {
 
 
 #[derive(
-    Debug, Clone, PartialEq, Eq, EnumString, EnumDisplay, Serialize, Deserialize,
+    Debug, Clone, PartialEq, Eq, EnumString, EnumDisplay, Serialize, Deserialize
 )]
 pub enum Platform {
-    Unknown,
+    // #[serde(default)]
     Android,
     #[serde(rename = "iOS")]
     #[strum(serialize = "iOS")]
     Ios,
     Safari,
+    Chrome,
+    #[serde(other)]
+    Unknown,
 }
 
 impl Default for Platform {
@@ -776,7 +779,7 @@ impl MetaData {
             ),
         )
         .await?;
-
+        // dbg!(collection_details.media_container.library_section_id);
         Ok(collection_details.media_container.children()
             .get(0)
             .unwrap()
