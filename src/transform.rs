@@ -305,6 +305,7 @@ impl Transform for HubMixTransform {
     ) {
         let config: Config = Config::figment().extract().unwrap();
         let mut new_hubs: Vec<MetaData> = vec![];
+        //item.identifier = Some("tv.plex.provider.discover".to_string());
         // let mut library_section_id: Vec<Option<u32>> = vec![]; //librarySectionID
         for mut hub in item.children_mut() {
             // we only process collection hubs
@@ -316,11 +317,15 @@ impl Transform for HubMixTransform {
             if !config.include_watched {
                 hub.children_mut().retain(|x| !x.is_watched());
             }
+            //hub.context = Some("hub.home.watchlist_available".to_string());
+            //hub.r#type = "clip".to_string();
+            // hub.placeholder = Some(SpecialBool::new(true));
+            //hub.placeholder = Some(true);
 
             let p = new_hubs.iter().position(|v| v.title == hub.title);
-            if hub.r#type != "clip" {
-                hub.r#type = "mixed".to_string();
-            }
+            // if hub.r#type != "clip" {
+            //     hub.r#type = "mixed".to_string();
+            // }
             match p {
                 Some(v) => {
                     new_hubs[v].key = merge_children_keys(
@@ -421,8 +426,9 @@ impl Transform for LibraryMixTransform {
                 )
                 .await
                 .unwrap();
-            
-            total_size_including_watched += c.media_container.total_size.unwrap();
+
+            total_size_including_watched +=
+                c.media_container.total_size.unwrap();
             if !config.include_watched {
                 c.media_container.children_mut().retain(|x| !x.is_watched());
             }
@@ -474,6 +480,78 @@ pub struct HubStyleTransform {
     pub is_home: bool, // use clip instead of hero for android
 }
 
+pub struct PlatformHeroStyle {
+    r#type: String,
+    style: Option<String>,
+    child_type: Option<String>,
+    cover_art_as_thumb: bool, // if we should return the coverart in the thumb field
+    cover_art_as_art: bool, // if we should return the coverart in the art field
+}
+
+impl Default for PlatformHeroStyle {
+    fn default() -> Self {
+        Self {
+            style: Some("hero".to_string()),
+            r#type: "clip".to_string(),
+            child_type: None,
+            cover_art_as_thumb: false,
+            cover_art_as_art: true
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum DeviceType {
+    Tv,
+    Mobile,
+}
+
+impl DeviceType {
+    pub fn from_product(product: String) -> DeviceType {
+        match product.to_lowercase() {
+            x if x.contains("(tv)") => DeviceType::Tv,
+            _ => DeviceType::Mobile
+        }
+    }
+}
+
+impl PlatformHeroStyle {
+    pub fn android(product: String) -> Self {
+        let device_type = DeviceType::from_product(product);
+ 
+        match device_type {
+            DeviceType::Tv => {
+                Self {
+                    style: Some("hero".to_string()),
+                    // clip wil make the item info dissapear on TV
+                    r#type: "mixed".to_string(), 
+                    // using clip makes it load thumbs instead of art as cover art. So we dont have to touch the background
+                    child_type: Some("clip".to_string()),
+                    cover_art_as_thumb: true,
+                    cover_art_as_art: false,
+                    ..PlatformHeroStyle::default()
+                }
+            },
+            _ => {
+                Self {
+                    style: None,
+                    r#type: "clip".to_string(),
+                    child_type: Some("clip".to_string()),
+                    ..PlatformHeroStyle::default()
+                }
+            }         
+        }
+
+    }
+
+    pub fn by_platform(platform: Platform, product: String) -> Self {
+        match platform {
+            Platform::Android => PlatformHeroStyle::android(product),
+            _ => PlatformHeroStyle::default(),
+        }
+    }
+}
+
 #[async_trait]
 impl Transform for HubStyleTransform {
     async fn transform_metadata(
@@ -488,30 +566,106 @@ impl Transform for HubStyleTransform {
         if item.is_collection_hub() {
             let is_hero = item.is_hero(plex_client.clone()).await.unwrap();
             if is_hero {
-                item.style = Some("hero".to_string());
+                let mut style = PlatformHeroStyle::by_platform(
+                    options.platform,
+                    options.product.unwrap_or_default(),
+                );
 
-                /// fix for android mobile (nont TV)
-                if options.platform.unwrap_or_default().to_lowercase() == "android"
-                    && self.is_home && options.product.unwrap_or_default().to_lowercase() == "plex for android (mobile)"
-                {
-                    item.r#type = "clip".to_string();
-                }
+                item.style = style.style;
 
+                item.r#type = style.r#type;
+                item.meta = Some(Meta {
+                    r#type: None,
+                    display_fields: vec![],
+                    // display_fields: vec![
+                    //     DisplayField {
+                    //         r#type: Some("movie".to_string()),
+                    //         fields: vec![
+                    //             // "title".to_string(),
+                    //             // "originallyAvailableAt".to_string(),
+                    //         ],
+                    //     },
+                    //     DisplayField {
+                    //         r#type: Some("show".to_string()),
+                    //         fields: vec![
+                    //             // "title".to_string(),
+                    //             // "originallyAvailableAt".to_string(),
+                    //         ],
+                    //     },
+                    //     DisplayField {
+                    //         r#type: Some("clip".to_string()),
+                    //         fields: vec![
+                    //             // "title".to_string(),
+                    //             // "originallyAvailableAt".to_string(),
+                    //         ],
+                    //     },
+                    //     DisplayField {
+                    //         r#type: Some("mixed".to_string()),
+                    //         fields: vec![
+                    //             // "title".to_string(),
+                    //             // "originallyAvailableAt".to_string(),
+                    //         ],
+                    //     },
+                    // ],
+                    display_images: vec![
+                        DisplayImage {
+                            r#type: Some("hero".to_string()),
+                            image_type: Some("coverArt".to_string()),
+                        },
+                        DisplayImage {
+                            r#type: Some("mixed".to_string()),
+                            image_type: Some("coverArt".to_string()),
+                        },
+                        DisplayImage {
+                            r#type: Some("clip".to_string()),
+                            image_type: Some("coverArt".to_string()),
+                        },
+                        DisplayImage {
+                            r#type: Some("movie".to_string()),
+                            image_type: Some("coverArt".to_string()),
+                        },
+                        DisplayImage {
+                            r#type: Some("show".to_string()),
+                            image_type: Some("coverArt".to_string()),
+                        },
+                    ],
+                });
                 let mut futures = FuturesOrdered::new();
                 // let now = Instant::now();
 
-                for child in item.children() {
-                    // let style = item.style.clone().unwrap();
+                for mut child in item.children() {
+                    if style.child_type.clone().is_some() {
+                        child.r#type = style.child_type.clone().unwrap();
+                    }
+
                     let client = plex_client.clone();
                     futures.push_back(async move {
                         let mut c = child.clone();
 
-                        let art = child.get_hero_art(client).await;
-                        if art.is_some() {
-                            c.art = art.clone();
+                        let cover_art = child.get_hero_art(client).await;
+                        if cover_art.is_some() {
+                            // c.art = art.clone();
+                            c.images = vec![
+                                Image {
+                                    r#type: "coverArt".to_string(),
+                                    url: cover_art.clone().unwrap(),
+                                    alt: Some(c.title.clone()),
+                                },
+                                Image {
+                                    r#type: "background".to_string(),
+                                    url: c.art.clone().unwrap(),
+                                    alt: Some(c.title.clone()),
+                                },
+                            ];
+                            // lots of clients dont listen to the above
+                            if style.cover_art_as_art {
+                                c.art = cover_art.clone();
+                            }
+
+                            if style.cover_art_as_thumb {
+                                c.thumb = cover_art.clone()
+                            }
                         }
-                        // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
-                        c.thumb = c.art.clone();
                         c
                     });
                 }
@@ -562,18 +716,44 @@ impl Transform for CollecionArtTransform {
             let mut futures = FuturesOrdered::new();
             // let now = Instant::now();
 
-            for child in item.children() {
+            let mut style = PlatformHeroStyle::by_platform(
+                options.platform,
+                options.product.unwrap_or_default(),
+            );
+
+            for mut child in item.children() {
+                if style.child_type.clone().is_some() {
+                    child.r#type = style.child_type.clone().unwrap();
+                }
+
+                //child.r#type = "clip".to_string();
                 // let style = item.style.clone().unwrap();
                 let client = plex_client.clone();
                 futures.push_back(async move {
                     let mut c = child.clone();
 
-                    let art = child.get_hero_art(client).await;
-                    if art.is_some() {
-                        c.art = art.clone();
+                    let cover_art = child.get_hero_art(client).await;
+                    if cover_art.is_some() {
+                        c.images = vec![
+                            Image {
+                                r#type: "coverArt".to_string(),
+                                url: cover_art.clone().unwrap(),
+                                alt: Some(c.title.clone()),
+                            },
+                            Image {
+                                r#type: "coverPoster".to_string(),
+                                url: cover_art.clone().unwrap(),
+                                alt: Some(c.title.clone()),
+                            },
+                        ];
+                        if style.cover_art_as_art {
+                            c.art = cover_art.clone();
+                        }
+
+                        if style.cover_art_as_thumb {
+                            c.thumb = cover_art.clone()
+                        }
                     }
-                    // big screen uses thumbs for artwork.... while mobile uses the artwork. yeah...
-                    // c.thumb = c.art.clone();
                     c
                 });
             }

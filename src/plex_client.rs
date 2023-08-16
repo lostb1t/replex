@@ -47,7 +47,7 @@ pub struct PlexClient {
     // /// `X-Plex-Platform` header value.
     // ///
     // /// Platform name, e.g. iOS, macOS, etc.
-    pub x_plex_platform: Option<String>,
+    pub x_plex_platform: Platform,
 
     // /// `X-Plex-Device-Name` header value.
     // ///
@@ -377,12 +377,10 @@ impl PlexClient {
             "Accept",
             header::HeaderValue::from_static("application/json"),
         );
-        if let Some(i) = platform.clone() {
-            headers.insert(
-                "X-Plex-Platform",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
+        headers.insert(
+            "X-Plex-Platform",
+            header::HeaderValue::from_str(platform.to_string().as_str()).unwrap(),
+        );
         Self {
             http_client: reqwest::Client::builder()
                 .default_headers(headers)
@@ -402,7 +400,7 @@ impl PlexClient {
         let config: Config = Config::figment().extract().unwrap();
         let token = "DUMMY".to_string();
         let client_identifier: Option<String> = None;
-        let platform: Option<String> = None;
+        let platform: Platform = Platform::Unknown;
 
         // Dont do the headers here. Do it in prepare function
         let mut headers = header::HeaderMap::new();
@@ -414,12 +412,10 @@ impl PlexClient {
             "Accept",
             header::HeaderValue::from_static("application/json"),
         );
-        if let Some(i) = platform.clone() {
-            headers.insert(
-                "X-Plex-Platform",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
+        headers.insert(
+            "X-Plex-Platform",
+            header::HeaderValue::from_str(platform.to_string().as_str()).unwrap(),
+        );
         Self {
             http_client: reqwest::Client::builder()
                 .default_headers(headers)
