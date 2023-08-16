@@ -327,7 +327,16 @@ impl PlexClient {
             .send()
             .await
             .map_err(Error::other)?;
-        // dbg!(&res.status());
+
+        // dbg!(res.status());
+        // if res.status() == 404 {
+        //     return Err(salvo::http::StatusError::not_found().into());
+        // }
+
+        // if res.status() == 500 {
+        //     return Err(salvo::http::StatusError::);
+        // }
+  
         let container: MediaContainerWrapper<MediaContainer> =
             from_reqwest_response(res).await?;
         Ok(container)

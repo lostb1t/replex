@@ -362,6 +362,17 @@ pub struct Context {
     pub images: Vec<Image>,
 }
 
+
+// #[derive(Debug)]
+// struct FailableOption<T: Default>(T);
+
+// impl<'de, T: Default + Deserialize<'de>> Deserialize<'de> for OrDefault<T> {
+//     fn or_default<'de, D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+//         T::deserialize(d).or_else(|_| Ok(T::default())).map(OrDefault)
+//     }
+// }
+
+
 #[derive(Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
@@ -409,10 +420,10 @@ pub struct MetaData {
     pub view_group: Option<String>,
     #[yaserde(attribute, rename = "addedAt")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub added_at: Option<u32>,
+    pub added_at: Option<i32>,
     #[yaserde(attribute, rename = "updatedAt")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub updated_at: Option<u32>,
+    pub updated_at: Option<i32>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub view_mode: Option<u32>,
@@ -686,8 +697,9 @@ impl MetaData {
                 Ok(r) => r,
                 Err(e) => {
                     tracing::warn!(
-                        "Problem loading prodiver metadata for: {}.",
-                        self.guid.clone().unwrap()
+                        "Problem loading prodiver metadata for: {} Error: {}",
+                        self.guid.clone().unwrap(),
+                        e
                     );
                     MediaContainerWrapper::default()
                 }
