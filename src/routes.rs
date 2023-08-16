@@ -235,10 +235,10 @@ pub async fn get_hubs_promoted(
     let mut count = params.clone().count.unwrap_or(25);
 
     // some androids have trouble loading more for hero style. So load more at once
-    if params.platform.clone().unwrap_or_default().to_lowercase() == "android" && count < 50 {
-        count = 50;
-    } 
-
+    match params.platform {
+        Platform::Android => count = 50,
+        _ => (),
+    }
     // Hack, as the list could be smaller when removing watched items. So we request more.
     if !config.include_watched && count < 50 {
         count =  50;
@@ -269,6 +269,7 @@ pub async fn get_hubs_promoted(
         .with_transform(HubStyleTransform {
             is_home: true
         })
+        // .with_transform(HubSectionDirectoryTransform)
         .with_transform(HubMixTransform)
         // .with_transform(HubChildrenLimitTransform {
         //     limit: params.clone().count.unwrap(),
@@ -291,10 +292,10 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
 
     let mut count = params.clone().count.unwrap_or(25);
 
-    // some androids have trouble loading more for hero style. SO load more at once
-    if params.platform.clone().unwrap_or_default().to_lowercase() == "android" && count < 50 {
-        count = 50;
-    } 
+    match params.platform {
+        Platform::Android => count = 50,
+        _ => (),
+    }
 
     // Hack, as the list could be smaller when removing watched items. So we request more.
     if !config.include_watched && count < 50 {

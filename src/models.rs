@@ -6,6 +6,7 @@ use tmdb_api::movie::images::MovieImages;
 use tmdb_api::prelude::Command;
 use tmdb_api::tvshow::search::TVShowSearch;
 use tmdb_api::Client;
+use std::string::ToString;
 
 extern crate mime;
 use crate::cache::GLOBAL_CACHE;
@@ -30,6 +31,8 @@ use yaserde_derive::YaDeserialize;
 use yaserde_derive::YaSerialize;
 use std::io::{Read, Write};
 use xml::writer::XmlEvent;
+use strum_macros::Display as EnumDisplay;
+use strum_macros::EnumString;
 
 use salvo::macros::Extractible;
 // use replex::settings::*;
@@ -53,6 +56,25 @@ fn default_as_false() -> bool {
     false
 }
 
+
+#[derive(
+    Debug, Clone, PartialEq, Eq, EnumString, EnumDisplay, Serialize, Deserialize,
+)]
+pub enum Platform {
+    Unknown,
+    Android,
+    #[serde(rename = "iOS")]
+    #[strum(serialize = "iOS")]
+    Ios,
+    Safari,
+}
+
+impl Default for Platform {
+    fn default() -> Self {
+        Platform::Unknown
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Extractible, Default, Clone)]
 #[salvo(extract(
     default_source(from = "query"),
@@ -66,8 +88,9 @@ pub struct PlexParams {
     #[serde(default, deserialize_with = "deserialize_comma_seperated_string")]
     #[salvo(extract(rename = "pinnedContentDirectoryID"))]
     pub pinned_content_directory_id: Option<Vec<String>>,
+    #[serde(default)]
     #[salvo(extract(rename = "X-Plex-Platform"))]
-    pub platform: Option<String>,
+    pub platform: Platform,
     #[salvo(extract(rename = "X-Plex-Product"))]
     pub product: Option<String>,
     pub count: Option<i32>,
@@ -267,6 +290,9 @@ pub struct Media {
     #[yaserde(attribute, rename="partCount")]
     #[serde(skip_serializing_if = "Option::is_none")]
     part_count: Option<String>,
+    #[yaserde(attribute, rename="channelArt")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    channel_art: Option<String>
 }
 
 #[derive(
@@ -284,7 +310,8 @@ pub struct Media {
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 pub struct Image {
     #[yaserde(attribute)]
-    pub alt: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub alt: Option<String>,
     #[serde(rename = "type")]
     #[yaserde(attribute, rename = "type")]
     pub r#type: String,
@@ -315,6 +342,26 @@ pub struct Label {
     filter: String,
 }
 
+#[derive(
+    Debug,
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
+    Eq,
+    YaDeserialize,
+    YaSerialize,
+    Default,
+    PartialOrd,
+)]
+#[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
+#[serde(rename_all = "camelCase")]
+pub struct Context {
+    #[serde(rename = "Image", default, skip_serializing_if = "Vec::is_empty")]
+    #[yaserde(rename = "Image", default, child)]
+    pub images: Vec<Image>,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
@@ -329,10 +376,16 @@ pub struct MetaData {
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub guid: Option<String>,
+    #[yaserde(attribute, rename = "primaryGuid")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub primary_guid: Option<String>,
     #[yaserde(attribute)]
     // #[yaserde(skip_serializing = true)]
     // #[serde(skip_serializing)]
     pub title: String,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub slug: Option<String>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tagline: Option<String>,
@@ -399,10 +452,6 @@ pub struct MetaData {
     #[yaserde(attribute, rename = "parentYear")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_year: Option<i32>,
-    #[yaserde(attribute)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[yaserde(rename = "parentThumb")]
-    pub parent_thumb: Option<String>,
     #[yaserde(attribute, rename = "parentIndex")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_index: Option<u32>,
@@ -424,6 +473,14 @@ pub struct MetaData {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[yaserde(rename = "parentTitle")]
     pub parent_title: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "parentArt")]
+    pub parent_art: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "parentThumb")]
+    pub parent_thumb: Option<String>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[yaserde(rename = "grandparentRatingKey")]
@@ -475,6 +532,9 @@ pub struct MetaData {
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub promoted: Option<SpecialBool>,
+    #[yaserde(attribute, rename="skipDetails")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub skip_details: Option<SpecialBool>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub placeholder: Option<bool>,
@@ -562,6 +622,9 @@ pub struct MetaData {
     #[serde(rename = "Image", default, skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Image", default, child)]
     pub images: Vec<Image>,
+    #[serde(rename = "Context", skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "Context", child)]
+    pub context_images: Option<Context>,
     #[yaserde(attribute)]
     #[yaserde(rename = "extraType")]
     #[serde(skip_serializing_if = "Option::is_none")]
