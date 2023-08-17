@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
-
+use rhai::{Engine, EvalAltResult};
 use crate::cache::*;
 use crate::config::Config;
 use crate::headers;
@@ -48,12 +48,15 @@ pub fn route() -> Router {
             .unwrap(),
     );
 
+    
+
     let mut router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
         .hoop(Timeout::new(Duration::from_secs(30)))
         .hoop(Compression::new().enable_gzip(CompressionLevel::Fastest))
         // .hoop(max_concurrency(500))
         .hoop(affix::insert("proxy", Arc::new(proxy.clone())));
+        // .hoop(affix::insert("script_engine", Arc::new(script_engine)));
 
     if config.redirect_streams {
         router = router
@@ -83,11 +86,11 @@ pub fn route() -> Router {
                     .hoop(Timeout::new(Duration::from_secs(5)))
                     .handle(proxy.clone()),
             )
-            .push(
-                Router::with_path("/library/metadata/<id>")
-                    .hoop(disable_related_query)
-                    .handle(proxy.clone()),
-            )
+            // .push(
+            //     Router::with_path("/library/metadata/<id>")
+            //         .hoop(disable_related_query)
+            //         .handle(proxy.clone()),
+            // )
             .push(
                 Router::with_path("/playQueues")
                     .hoop(disable_related_query)
@@ -117,12 +120,16 @@ pub fn route() -> Router {
                 .hoop(auto_refresh_cache())
                 .get(get_hubs_sections),
         )
-        // .push(Router::new().path("/ping").get(PlexProxy::new(config.host.clone().unwrap())))
+        .push(
+            Router::new()
+                .path(format!("{}/<id>", PLEX_LIBRARY_METADATA))
+                .get(get_library_metadata),
+        )
         .push(
             Router::new()
                 .path("/ping")
                 .hoop(force_maximum_quality)
-                .get(ping),
+                .get(ping)
         )
         .push(
             Router::new()
@@ -329,17 +336,16 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
 
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubSectionDirectoryTransform)
-        .with_transform(HubStyleTransform { is_home: false })
-        // .with_transform(HubChildrenLimitTransform {
-        //     limit: params.clone().count.unwrap(),
-        // })
+        .with_transform(HubStyleTransform {
+            is_home: false
+        })
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
         // .with_filter(CollectionHubPermissionFilter)
         .with_filter(WatchedFilter)
         .apply_to(&mut container)
         .await;
-
+    // dbg!(container.media_container.count);
     res.render(container);
 }
 
@@ -398,6 +404,39 @@ pub async fn get_collections_children(
 
     res.render(container); // TODO: FIx XML
     Ok(())
+}
+
+
+#[handler]
+pub async fn get_library_metadata(req: &mut Request, res: &mut Response) {
+    let config: Config = Config::figment().extract().unwrap();
+    let params: PlexParams = req.extract().await.unwrap();
+    let plex_client = PlexClient::from_request(req, params.clone());
+    let content_type = get_content_type_from_headers(req.headers_mut());
+    // dbg!("sup");
+
+    if config.disable_related {
+        add_query_param_salvo(req, "includeRelated".to_string(), "0".to_string());
+    }
+
+    let upstream_res = plex_client.request(req).await.unwrap();
+    let mut container: MediaContainerWrapper<MediaContainer> =
+        match from_reqwest_response(upstream_res).await {
+            Ok(r) => r,
+            Err(error) => {
+                tracing::error!(error = ?error, uri = ?req.uri(), "Failed to get plex response");
+                res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
+                return;
+            }
+        };
+    container.content_type = content_type;
+
+    TransformBuilder::new(plex_client, params.clone())
+        .with_transform(MediaContainerScriptingTransform)
+        .apply_to(&mut container)
+        .await;
+    // dbg!(container.media_container.count);
+    res.render(container);
 }
 
 pub fn auto_refresh_cache() -> Cache<MemoryStore<String>, RequestIssuer> {

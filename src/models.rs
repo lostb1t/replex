@@ -841,7 +841,7 @@ impl MetaData {
 }
 
 #[derive(
-    Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default,
+    Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default
 )]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
@@ -850,7 +850,7 @@ pub struct MediaContainer {
     #[yaserde(attribute)]
     //#[serde(deserialize_with = "str_or_i32")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub size: Option<i32>,
+    pub size: Option<i64>,
     #[yaserde(attribute)]
     #[yaserde(rename = "totalSize")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -957,7 +957,7 @@ impl MediaContainer {
         }
     }
     pub fn set_children(&mut self, value: Vec<MetaData>) {
-        let len: i32 = value.len().try_into().unwrap();
+        let len: i64 = value.len().try_into().unwrap();
         if !self.metadata.is_empty() {
             self.metadata = value;
         } else if !self.hub.is_empty() {
@@ -971,7 +971,7 @@ impl MediaContainer {
     }
 
     pub fn set_children_mut(&mut self, value: &mut Vec<MetaData>) {
-        let len: i32 = value.len().try_into().unwrap();
+        let len: i64 = value.len().try_into().unwrap();
         if !self.metadata.is_empty() {
             self.metadata = value.to_owned();
         } else if !self.hub.is_empty() {

@@ -13,6 +13,7 @@ use futures_util::{
 };
 use itertools::Itertools;
 use lazy_static::__Deref;
+use rhai::{Engine, EvalAltResult, Scope};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::task::JoinSet;
@@ -498,7 +499,7 @@ impl Default for PlatformHeroStyle {
             r#type: "clip".to_string(),
             child_type: None,
             cover_art_as_thumb: false,
-            cover_art_as_art: true
+            cover_art_as_art: true,
         }
     }
 }
@@ -513,7 +514,7 @@ impl DeviceType {
     pub fn from_product(product: String) -> DeviceType {
         match product.to_lowercase() {
             x if x.contains("(tv)") => DeviceType::Tv,
-            _ => DeviceType::Mobile
+            _ => DeviceType::Mobile,
         }
     }
 }
@@ -521,30 +522,27 @@ impl DeviceType {
 impl PlatformHeroStyle {
     pub fn android(product: String) -> Self {
         let device_type = DeviceType::from_product(product);
- 
+
         match device_type {
             DeviceType::Tv => {
                 Self {
                     style: Some("hero".to_string()),
                     // clip wil make the item info dissapear on TV
-                    r#type: "mixed".to_string(), 
+                    r#type: "mixed".to_string(),
                     // using clip makes it load thumbs instead of art as cover art. So we dont have to touch the background
                     child_type: Some("clip".to_string()),
                     cover_art_as_thumb: true,
                     cover_art_as_art: false,
                     ..PlatformHeroStyle::default()
                 }
+            }
+            _ => Self {
+                style: None,
+                r#type: "clip".to_string(),
+                child_type: Some("clip".to_string()),
+                ..PlatformHeroStyle::default()
             },
-            _ => {
-                Self {
-                    style: None,
-                    r#type: "clip".to_string(),
-                    child_type: Some("clip".to_string()),
-                    ..PlatformHeroStyle::default()
-                }
-            }         
         }
-
     }
 
     pub fn by_platform(platform: Platform, product: String) -> Self {
@@ -568,7 +566,8 @@ impl Transform for HubStyleTransform {
 
         if item.is_hub() {
             // TODO: Check why tries to load non existing collectiin? my guess is no access
-            let is_hero = item.is_hero(plex_client.clone()).await.unwrap_or(false);
+            let is_hero =
+                item.is_hero(plex_client.clone()).await.unwrap_or(false);
             if is_hero {
                 let mut style = PlatformHeroStyle::by_platform(
                     options.platform,
@@ -817,7 +816,6 @@ impl Transform for HubSectionDirectoryTransform {
     }
 }
 
-
 #[derive(Default, Debug)]
 pub struct HubKeyTransform;
 
@@ -881,7 +879,7 @@ pub struct TestTransform;
 impl Transform for TestTransform {
     async fn transform_mediacontainer(
         &self,
-        item: &mut MediaContainer,
+        mut item: &mut MediaContainer,
         plex_client: PlexClient,
         options: PlexParams,
     ) {
@@ -890,5 +888,58 @@ impl Transform for TestTransform {
                 x.guids = vec![];
             }
         }
+    }
+}
+
+pub struct ScriptingMediaContainer {}
+
+impl MediaContainer {
+    pub fn get_size(&mut self) -> i64 {
+        self.size.unwrap_or(0)
+    }
+    pub fn set_size(&mut self, value: i64) {
+        self.size = Some(value);
+    }
+}
+
+#[derive(Default, Debug)]
+pub struct MediaContainerScriptingTransform;
+
+#[async_trait]
+impl Transform for MediaContainerScriptingTransform {
+    async fn transform_mediacontainer(
+        &self,
+        item: &mut MediaContainer,
+        plex_client: PlexClient,
+        options: PlexParams,
+    ) {
+
+        // let mut itemm = item.clone();
+        let mut engine = Engine::new();
+        engine
+            .register_type_with_name::<MediaContainer>("MediaContainer")
+            .register_get_set(
+                "size",
+                MediaContainer::get_size,
+                MediaContainer::set_size,
+            );
+
+        let mut scope = Scope::new();
+        scope.push("media_container", item.clone());
+        scope.push("context", options);
+        // Your first Rhai Script
+        // let script = "media_container.size = 50;";
+
+        // Run the script - prints "42"
+        engine.run_file_with_scope(&mut scope, "hello_world.rhai".into()).unwrap();
+        // item = itemm;
+        let mut item = &mut scope.get_value::<MediaContainer>("media_container").unwrap();
+        //item = itemm;
+        dbg!(item.size);
+        // for i in item.children_mut() {
+        //     for x in i.children_mut() {
+        //         x.guids = vec![];
+        //     }
+        // }
     }
 }
