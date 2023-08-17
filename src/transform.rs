@@ -4,6 +4,7 @@ use crate::{
     plex_client::{self, PlexClient},
     utils::*,
 };
+// use rhai::serde::{from_dynamic, to_dynamic};
 use async_recursion::async_recursion;
 use async_trait::async_trait;
 use futures_util::{
@@ -13,7 +14,7 @@ use futures_util::{
 };
 use itertools::Itertools;
 use lazy_static::__Deref;
-use rhai::{Engine, EvalAltResult, Scope};
+use rhai::{Engine, EvalAltResult, Scope, Dynamic};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::task::JoinSet;
@@ -895,6 +896,8 @@ pub struct ScriptingMediaContainer {}
 
 impl MediaContainer {
     pub fn get_size(&mut self) -> i64 {
+        // rhai::Dynamic::from(self.size.unwrap_or(()))
+        // to_dynamic(self.size).unwrap()
         self.size.unwrap_or(0)
     }
     pub fn set_size(&mut self, value: i64) {
