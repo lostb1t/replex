@@ -654,7 +654,7 @@ impl Transform for HubStyleTransform {
                                 },
                                 Image {
                                     r#type: "background".to_string(),
-                                    url: c.art.clone().unwrap(),
+                                    url: cover_art.clone().unwrap(),
                                     alt: Some(c.title.clone()),
                                 },
                             ];
