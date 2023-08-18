@@ -60,7 +60,7 @@ jobs:
     strategy:
       matrix:
         platform:
-          - release_for: 64-bit Linux
+          - release_for: x86_64 Linux
             os: ubuntu-22.04
             docker: linux/amd64
             target: x86_64-unknown-linux-gnu
@@ -76,6 +76,21 @@ jobs:
             name: aarch64-unknown-linux-gnu.tar.gz
             command: build
 
+          # - release_for: x86_64 macOS
+          #   os: macOS-latest
+          #   docker: darwin/amd64
+          #   target: x86_64-apple-darwin
+          #   bin: replex
+          #   name: x86_64-apple-darwin.tar.gz
+          #   command: build
+
+          # - release_for: ARM64 macOS
+          #   os: ubuntu-22.04
+          #   docker: darwin/arm64
+          #   target: aarch64-apple-darwin
+          #   bin: replex
+          #   name: aarch64-apple-darwin.tar.gz
+          #   command: build
 
     runs-on: ${{ matrix.platform.os }}
     # runs-on: ubuntu-22.04
