@@ -362,7 +362,7 @@ impl PlexClient {
         format!("{}:{}", name, self.x_plex_token)
     }
 
-    pub fn from_request(req: &Request, params: PlexParams) -> Self {
+    pub fn from_request(req: &Request, params: PlexContext) -> Self {
         let config: Config = Config::figment().extract().unwrap();
         let token = params
             .clone()

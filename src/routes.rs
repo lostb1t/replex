@@ -180,7 +180,7 @@ async fn fix_photo_transcode_request(
     _depot: &mut Depot,
     res: &mut Response,
 ) {
-    let params: PlexParams = req.extract().await.unwrap();
+    let params: PlexContext = req.extract().await.unwrap();
     if params.size.is_some() && params.clone().size.unwrap().contains('-')
     // (catched things like (medlium-240, large-500),i dont think size paramater orks at all, but who knows
     // && params.platform.is_some()
@@ -217,7 +217,7 @@ pub async fn get_hubs_promoted(
     res: &mut Response,
 ) -> Result<(), anyhow::Error> {
     let config: Config = Config::figment().extract().unwrap();
-    let params: PlexParams = req.extract().await.unwrap();
+    let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let content_type = get_content_type_from_headers(req.headers_mut());
 
@@ -301,7 +301,7 @@ pub async fn get_hubs_promoted(
 #[handler]
 pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
     let config: Config = Config::figment().extract().unwrap();
-    let params: PlexParams = req.extract().await.unwrap();
+    let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let content_type = get_content_type_from_headers(req.headers_mut());
 
@@ -356,7 +356,7 @@ pub async fn get_collections_children(
     res: &mut Response,
 ) -> Result<(), anyhow::Error> {
     let config: Config = Config::figment().extract().unwrap();
-    let params: PlexParams = req.extract().await.unwrap();
+    let params: PlexContext = req.extract().await.unwrap();
     let collection_ids = req.param::<String>("ids").unwrap();
     let collection_ids: Vec<u32> = collection_ids
         .split(',')
@@ -410,7 +410,7 @@ pub async fn get_collections_children(
 #[handler]
 pub async fn get_library_metadata(req: &mut Request, res: &mut Response) {
     let config: Config = Config::figment().extract().unwrap();
-    let params: PlexParams = req.extract().await.unwrap();
+    let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let content_type = get_content_type_from_headers(req.headers_mut());
     // dbg!("sup");

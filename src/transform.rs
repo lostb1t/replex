@@ -4,7 +4,7 @@ use crate::{
     plex_client::{self, PlexClient},
     utils::*,
 };
-// use rhai::serde::{from_dynamic, to_dynamic};
+
 use async_recursion::async_recursion;
 use async_trait::async_trait;
 use futures_util::{
@@ -13,12 +13,13 @@ use futures_util::{
     StreamExt,
 };
 use itertools::Itertools;
-use lazy_static::__Deref;
-use rhai::{Engine, EvalAltResult, Scope, Dynamic};
-use std::collections::HashMap;
+use rhai::{serde::{from_dynamic, to_dynamic}};
+use rhai::{Dynamic, Engine, EvalAltResult, Scope};
+use std::{collections::HashMap, cell::Cell};
 use std::sync::Arc;
 use tokio::task::JoinSet;
 use tokio::time::Instant;
+use std::cell::RefCell;
 
 #[async_trait]
 pub trait Transform: Send + Sync + 'static {
@@ -26,15 +27,17 @@ pub trait Transform: Send + Sync + 'static {
         &self,
         item: &mut MetaData,
         plex_client: PlexClient,
-        options: PlexParams,
+        options: PlexContext,
     ) {
+
     }
     async fn transform_mediacontainer(
         &self,
-        item: &mut MediaContainer,
+        item: MediaContainer,
         plex_client: PlexClient,
-        options: PlexParams,
-    ) {
+        options: PlexContext,
+    ) -> MediaContainer {
+        item
     }
 }
 
@@ -44,7 +47,7 @@ pub trait Filter: Send + Sync + 'static {
         &self,
         item: &mut MetaData,
         plex_client: PlexClient,
-        options: PlexParams,
+        options: PlexContext,
     ) -> bool {
         true
     }
@@ -52,7 +55,7 @@ pub trait Filter: Send + Sync + 'static {
         &self,
         item: MediaContainer,
         plex_client: PlexClient,
-        options: PlexParams,
+        options: PlexContext,
     ) -> bool {
         true
     }
@@ -63,7 +66,7 @@ pub trait Filter: Send + Sync + 'static {
 #[derive(Clone)]
 pub struct TransformBuilder {
     pub plex_client: PlexClient,
-    pub options: PlexParams,
+    pub options: PlexContext,
     pub mix: bool,
     pub transforms: Vec<Arc<dyn Transform>>,
     pub filters: Vec<Arc<dyn Filter>>,
@@ -71,7 +74,7 @@ pub struct TransformBuilder {
 
 impl TransformBuilder {
     #[inline]
-    pub fn new(plex_client: PlexClient, options: PlexParams) -> Self {
+    pub fn new(plex_client: PlexClient, options: PlexContext) -> Self {
         Self {
             transforms: Vec::new(),
             filters: Vec::new(),
@@ -156,12 +159,14 @@ impl TransformBuilder {
             future::join_all(futures).await;
 
             // dont use join as it needs ti be executed in order
-            t.transform_mediacontainer(
-                &mut container.media_container,
+            // let l = std::cell::RefCell::new(&mut container.media_container);
+            container.media_container = t.transform_mediacontainer(
+                container.media_container.clone(),
                 self.plex_client.clone(),
                 self.options.clone(),
             )
-            .await
+            .await;
+            // dbg!(container.media_container.size);
         }
 
         // filter behind transform as transform can load in additional data
@@ -192,7 +197,7 @@ impl Filter for CollectionHubPermissionFilter {
         &self,
         item: &mut MetaData,
         plex_client: PlexClient,
-        options: PlexParams,
+        options: PlexContext,
     ) -> bool {
         tracing::debug!("filter collection permissions");
 
@@ -250,7 +255,7 @@ impl Filter for CollectionHubPermissionFilter {
 //         &self,
 //         item: &mut MetaData,
 //         plex_client: PlexClient,
-//         options: PlexParams,
+//         options: PlexContext,
 //     ) {
 //         if item.is_collection_hub() {
 //             let mut collection_details = plex_client
@@ -301,10 +306,10 @@ pub struct HubMixTransform;
 impl Transform for HubMixTransform {
     async fn transform_mediacontainer(
         &self,
-        item: &mut MediaContainer,
+        mut item: MediaContainer,
         plex_client: PlexClient,
-        options: PlexParams,
-    ) {
+        options: PlexContext,
+    ) -> MediaContainer {
         let config: Config = Config::figment().extract().unwrap();
         let mut new_hubs: Vec<MetaData> = vec![];
         //item.identifier = Some("tv.plex.provider.discover".to_string());
@@ -348,6 +353,7 @@ impl Transform for HubMixTransform {
             }
         }
         item.set_children_mut(&mut new_hubs);
+        item
     }
 }
 
@@ -407,10 +413,10 @@ pub struct LibraryMixTransform {
 impl Transform for LibraryMixTransform {
     async fn transform_mediacontainer(
         &self,
-        item: &mut MediaContainer,
+        mut item: MediaContainer,
         plex_client: PlexClient,
-        options: PlexParams,
-    ) {
+        options: PlexContext,
+    ) -> MediaContainer {
         let config: Config = Config::figment().extract().unwrap();
         let mut children: Vec<MetaData> = vec![];
         let mut total_size_including_watched = 0;
@@ -455,6 +461,7 @@ impl Transform for LibraryMixTransform {
         };
         // always metadata
         item.metadata = children;
+        item
     }
 }
 
@@ -469,7 +476,7 @@ impl Transform for HubChildrenLimitTransform {
         &self,
         item: &mut MetaData,
         plex_client: PlexClient,
-        options: PlexParams,
+        options: PlexContext,
     ) {
         let len = self.limit as usize;
         if item.is_collection_hub() {
@@ -560,7 +567,7 @@ impl Transform for HubStyleTransform {
         &self,
         item: &mut MetaData,
         plex_client: PlexClient,
-        options: PlexParams,
+        options: PlexContext,
     ) {
         let config: Config = Config::figment().extract().unwrap();
         let style = item.style.clone().unwrap_or("".to_string()).to_owned();
@@ -696,10 +703,10 @@ pub struct CollecionStyleTransform {
 impl Transform for CollecionStyleTransform {
     async fn transform_mediacontainer(
         &self,
-        item: &mut MediaContainer,
+        mut item: MediaContainer,
         plex_client: PlexClient,
-        options: PlexParams,
-    ) {
+        options: PlexContext,
+    ) -> MediaContainer {
         let mut collection_details = plex_client
             .clone()
             .get_cached(
@@ -765,6 +772,7 @@ impl Transform for CollecionStyleTransform {
             let children: Vec<MetaData> = futures.collect().await;
             item.set_children(children);
         }
+        item
     }
 }
 
@@ -777,7 +785,7 @@ impl Filter for WatchedFilter {
         &self,
         item: &mut MetaData,
         plex_client: PlexClient,
-        options: PlexParams,
+        options: PlexContext,
     ) -> bool {
         let config: Config = Config::figment().extract().unwrap();
         if config.include_watched {
@@ -801,7 +809,7 @@ impl Transform for HubSectionDirectoryTransform {
         &self,
         item: &mut MetaData,
         plex_client: PlexClient,
-        options: PlexParams,
+        options: PlexContext,
     ) {
         if item.is_collection_hub() && !item.directory.is_empty() {
             let childs = item.children();
@@ -827,7 +835,7 @@ impl Transform for HubKeyTransform {
         &self,
         item: &mut MetaData,
         plex_client: PlexClient,
-        options: PlexParams,
+        options: PlexContext,
     ) {
         if item.is_collection_hub() {
             if !item.key.contains("replex") {
@@ -847,7 +855,7 @@ impl Transform for UserStateTransform {
         &self,
         item: &mut MetaData,
         plex_client: PlexClient,
-        options: PlexParams,
+        options: PlexContext,
     ) {
         let config: Config = Config::figment().extract().unwrap();
         if !config.disable_user_state && !config.disable_leaf_count {
@@ -880,16 +888,22 @@ pub struct TestTransform;
 impl Transform for TestTransform {
     async fn transform_mediacontainer(
         &self,
-        mut item: &mut MediaContainer,
+        mut item: MediaContainer,
         plex_client: PlexClient,
-        options: PlexParams,
-    ) {
+        options: PlexContext,
+    ) -> MediaContainer {
         for i in item.children_mut() {
             for x in i.children_mut() {
                 x.guids = vec![];
             }
         }
+        item
     }
+}
+
+pub struct TestStruct {
+    pub value: i32,
+    pub valuee: String,
 }
 
 pub struct ScriptingMediaContainer {}
@@ -912,37 +926,29 @@ pub struct MediaContainerScriptingTransform;
 impl Transform for MediaContainerScriptingTransform {
     async fn transform_mediacontainer(
         &self,
-        item: &mut MediaContainer,
+        item: MediaContainer,
         plex_client: PlexClient,
-        options: PlexParams,
-    ) {
-
-        // let mut itemm = item.clone();
+        options: PlexContext,
+    ) -> MediaContainer {
+        let mut media_container: Dynamic = to_dynamic(item).unwrap();
+        let mut context: Dynamic = to_dynamic(options).unwrap();
         let mut engine = Engine::new();
+    
         engine
-            .register_type_with_name::<MediaContainer>("MediaContainer")
-            .register_get_set(
-                "size",
-                MediaContainer::get_size,
-                MediaContainer::set_size,
-            );
+            .register_type_with_name::<Dynamic>("MediaContainer")
+            .register_type_with_name::<Dynamic>("PlexContext");
 
         let mut scope = Scope::new();
-        scope.push("media_container", item.clone());
-        scope.push("context", options);
-        // Your first Rhai Script
-        // let script = "media_container.size = 50;";
+        scope.push("media_container", media_container);
+        scope.push("context", context);
 
-        // Run the script - prints "42"
-        engine.run_file_with_scope(&mut scope, "hello_world.rhai".into()).unwrap();
-        // item = itemm;
-        let mut item = &mut scope.get_value::<MediaContainer>("media_container").unwrap();
-        //item = itemm;
-        dbg!(item.size);
-        // for i in item.children_mut() {
-        //     for x in i.children_mut() {
-        //         x.guids = vec![];
-        //     }
-        // }
+        engine
+            .run_file_with_scope(&mut scope, "hello_world.rhai".into())
+            .unwrap();
+        let result = from_dynamic::<MediaContainer>(&scope
+            .get_value::<Dynamic>("media_container")
+            .unwrap()).unwrap();
+        result
+
     }
 }
