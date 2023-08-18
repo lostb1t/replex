@@ -14,7 +14,7 @@ jobs:
             target: aarch64-unknown-linux-gnu
             bin: precious
             name: aarch64-unknown-linux-gnu.tar.gz
-            command: both
+            command: build
 
             # more release targets here ...
 
