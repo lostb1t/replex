@@ -308,6 +308,9 @@ impl Transform for HubMixTransform {
         //item.identifier = Some("tv.plex.provider.discover".to_string());
         // let mut library_section_id: Vec<Option<u32>> = vec![]; //librarySectionID
         for mut hub in item.children_mut() {
+            if hub.size.unwrap() == 0 {
+                continue;
+            }
             // we only process collection hubs
             if !hub.is_collection_hub() {
                 new_hubs.push(hub.to_owned());
