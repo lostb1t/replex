@@ -94,7 +94,8 @@ You can recreate the builtin rows with smart collections if you wish to have tha
 
 For custom collections you can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection.
 
-for built in rows you can use the hubidentifier in the `REPLEX_HERO_ROWS` env like so `REPLEX_HERO_ROWS="movies.recent,movie.recentlyadded"`
+For built in rows you can use the hubidentifier in the `REPLEX_HERO_ROWS` env like so `REPLEX_HERO_ROWS="movies.recent,movie.recentlyadded"`
+This also works for collections.
 
 Note: hero style elements uses coverart from plex. Banner or background is not used.
 
