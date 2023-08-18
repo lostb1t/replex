@@ -1,0 +1,42 @@
+jobs:
+  release:
+    name: Release - ${{ matrix.platform.release_for }}
+    strategy:
+      matrix:
+        platform:
+          - release_for: FreeBSD-x86_64
+            os: ubuntu-20.04
+            target: x86_64-unknown-freebsd
+            bin: precious
+            name: precious-FreeBSD-x86_64.tar.gz
+            command: build
+
+          - release_for: Windows-x86_64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            bin: precious.exe
+            name: precious-Windows-x86_64.zip
+            command: both
+
+          - release_for: macOS-x86_64
+            os: macOS-latest
+            target: x86_64-apple-darwin
+            bin: precious
+            name: precious-Darwin-x86_64.tar.gz
+            command: both
+
+            # more release targets here ...
+
+    runs-on: ${{ matrix.platform.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build binary
+        uses: houseabsolute/actions-rust-cross@v0
+        with:
+          command: ${{ matrix.platform.command }}
+          target: ${{ matrix.platform.target }}
+          args: "--locked --release"
+          strip: true
+
+    # more packaging stuff goes here ...
