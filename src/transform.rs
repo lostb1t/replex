@@ -563,7 +563,7 @@ impl Transform for HubStyleTransform {
         let config: Config = Config::figment().extract().unwrap();
         let style = item.style.clone().unwrap_or("".to_string()).to_owned();
 
-        if item.is_collection_hub() {
+        if item.is_hub() {
             // TODO: Check why tries to load non existing collectiin? my guess is no access
             let is_hero = item.is_hero(plex_client.clone()).await.unwrap_or(false);
             if is_hero {
@@ -684,13 +684,13 @@ impl Transform for HubStyleTransform {
 /// Collections can be called from hubs as a refresh. But also standalone.
 /// We need to know if if its hub called and if the hub is hero styled for media.
 #[derive(Default, Debug)]
-pub struct CollecionArtTransform {
+pub struct CollecionStyleTransform {
     pub collection_ids: Vec<u32>,
     pub hub: bool, // if collections is meant for hubs
 }
 
 #[async_trait]
-impl Transform for CollecionArtTransform {
+impl Transform for CollecionStyleTransform {
     async fn transform_mediacontainer(
         &self,
         item: &mut MediaContainer,

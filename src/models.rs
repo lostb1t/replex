@@ -144,6 +144,9 @@ where
 {
     match Deserialize::deserialize(deserializer)? {
         Some::<String>(s) => {
+            if s.is_empty() {
+                return Ok(None);
+            }
             let r: Vec<i32> =
                 s.split(',').map(|s| s.parse().unwrap()).collect();
             Ok(Some(r))
@@ -768,6 +771,17 @@ impl MetaData {
         if !self.is_hub() {
             return Ok(false);
         }
+        let config: Config = Config::figment().extract().unwrap();
+        // dbg!(&config.hero_rows);
+        if config.hero_rows.is_some() && self.hub_identifier.is_some() {
+            let id = self.hub_identifier.clone().unwrap();
+            for row in config.hero_rows.unwrap() {
+                if !row.is_empty() && id.contains(&row) {
+                    return Ok(true);
+                }
+            }
+        }
+
         let collection_id = get_collection_id_from_hub(self);
         let mut collection_details = plex_client
         .clone()

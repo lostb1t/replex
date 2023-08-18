@@ -383,7 +383,7 @@ pub async fn get_collections_children(
             offset,
             limit,
         })
-        .with_transform(CollecionArtTransform {
+        .with_transform(CollecionStyleTransform {
             collection_ids: collection_ids.clone(),
             hub: params.content_directory_id.is_some() // its a guessing game
                 && !params.include_collections

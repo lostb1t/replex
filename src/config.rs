@@ -1,3 +1,4 @@
+use crate::models::deserialize_comma_seperated_string;
 use figment::{providers::Env, Figment};
 use serde::Deserialize;
 
@@ -21,6 +22,11 @@ pub struct Config {
         deserialize_with = "figment::util::bool_from_str_or_int"
     )]
     pub cache_refresh: bool,
+    #[serde(
+        default,
+        deserialize_with = "deserialize_comma_seperated_string"
+    )]
+    pub hero_rows: Option<Vec<String>>,
     #[serde(
         default = "default_as_false",
         deserialize_with = "figment::util::bool_from_str_or_int"
@@ -63,6 +69,14 @@ fn default_cache_ttl() -> u64 {
 
 // fn default_port() -> u64 {
 //     80
+// }
+
+// fn default_hero_rows() -> Option<Vec<String>> {
+//     Some(vec![
+//         "movies.recent".to_string(),
+//         "television.recent".to_string(),
+//         "movie.recentlyadded".to_string(),
+//     ])
 // }
 
 fn default_as_true() -> bool {

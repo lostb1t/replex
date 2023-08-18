@@ -72,6 +72,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | Setting        	          | Default 	| Description                                                            	  |
 |---------------------------|----------|---------------------------------------------------------------------------|
 | REPLEX_HOST               |        	 | Plex target host to proxy.                                             	  |
+| REPLEX_HERO_ROWS          |        	 | Comma seperated list of hubidentifiers to make hero stlye                  |
 | REPLEX_INCLUDE_WATCHED    | false    | If set to false, hide watched items.                                      |
 | REPLEX_DISABLE_USER_STATE | false    | Remove unwatched markers from artwork.|
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
@@ -91,7 +92,9 @@ You can recreate the builtin rows with smart collections if you wish to have tha
 
 ## Row style
 
-You can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection. 
+For custom collections you can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection.
+
+for built in rows you can use the hubidentifier in the `REPLEX_HERO_ROWS` env like so `REPLEX_HERO_ROWS="movies.recent,movie.recentlyadded"`
 
 Note: hero style elements uses coverart from plex. Banner or background is not used.
 
