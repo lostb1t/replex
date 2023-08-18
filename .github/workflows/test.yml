@@ -1,3 +1,8 @@
+name: test build
+
+on:
+  workflow_dispatch:
+
 jobs:
   release:
     name: Release - ${{ matrix.platform.release_for }}
