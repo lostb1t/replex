@@ -111,7 +111,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY_IMAGE }}
-      - uses: dtolnay/rust-toolchain@stable
+      #- uses: dtolnay/rust-toolchain@stable
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Log in to GitHub Container Registry
@@ -144,7 +144,6 @@ jobs:
           command: ${{ matrix.platform.command }}
           target: ${{ matrix.platform.target }}
           args: "--locked --release"
-          strip: true
       -
         name: Build image and push by digest
         id: build
