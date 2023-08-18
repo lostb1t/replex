@@ -2,7 +2,12 @@ name: test
 
 on:
   workflow_dispatch:
-
+    inputs:
+      test_build:
+        description: 'Create test builds'
+        type: boolean
+        required: true
+        default: false
 
   pull_request_target:
     types:
@@ -50,7 +55,7 @@ jobs:
   #       shell: bash
 
   build:
-    # if: needs.get-next-version.outputs.new-release-published == 'true' || inputs.images_only
+    if: needs.get-next-version.outputs.new-release-published == 'true' || inputs.test_build
     name: Build - ${{ matrix.platform.release_for }}
     strategy:
       matrix:
@@ -85,6 +90,12 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      -
+        name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY_IMAGE }}
       - uses: dtolnay/rust-toolchain@stable
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -103,12 +114,12 @@ jobs:
       - id: docker-tag
         uses: yuya-takeyama/docker-tag-from-github-ref-action@v1
       - name: Install semantic-release-cargo
-        if: ${{ !inputs.images_only }}
+        if: ${{ !inputs.test_build }}
         uses: taiki-e/install-action@v2
         with:
           tool: semantic-release-cargo@2
       - name: Prepare semantic-release for Rust
-        if: ${{ !inputs.images_only }}
+        if: ${{ !inputs.test_build }}
         run: semantic-release-cargo prepare ${{ needs.get-next-version.outputs.new-release-version }}
       - name: Build binary
         uses: houseabsolute/actions-rust-cross@v0
@@ -147,8 +158,13 @@ jobs:
           path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1
+      - name: Invoke semantic-release
+        if: ${{ !inputs.test_build }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        run: npx semantic-release
 
-  release:
+  build-images:
     runs-on: ubuntu-latest
     needs:
       - build
@@ -190,13 +206,3 @@ jobs:
         name: Inspect image
         run: |
           docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}
-      - name: Install semantic-release-cargo
-        if: ${{ !inputs.images_only }}
-        uses: taiki-e/install-action@v2
-        with:
-          tool: semantic-release-cargo@2
-      - name: Invoke semantic-release
-        if: ${{ !inputs.images_only }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
-        run: npx semantic-release
