@@ -6,15 +6,16 @@ RUN apt update \
     && apt clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 RUN mkdir -p app
+COPY bin/ bin/
 RUN if [ "${TARGETPLATFORM}" = "linux/amd64" ]; then \
-    mv bins/x86_64-unknown-linux-gnu/replex app/replex && \
+    mv bin/x86_64-unknown-linux-gnu/replex app/replex && \
     chmod +x app/replex && \
     ls -la app/ . && \
     pwd \
     ; fi
     
 RUN if [ "${TARGETPLATFORM}" = "linux/arm64" ]; then \
-    mv bins/aarch64-unknown-linux-gnu/replex app/replex && \
+    mv bin/aarch64-unknown-linux-gnu/replex app/replex && \
     chmod +x app/replex && \
     ls -la app/ . && \
     pwd \
