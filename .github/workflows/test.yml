@@ -204,7 +204,7 @@ jobs:
       - uses: docker/setup-buildx-action@v2
       - uses: docker/build-push-action@v4
         with:
-          #push: true
+          push: true
           # push: ${{ github.event_name != 'pull_request' }}
           context: .
           platforms: linux/amd64,linux/arm64
