@@ -66,4 +66,4 @@ rstest = "0.18.1"
 #salvo-cache = { path = "../salvo/crates/cache" }
 
 [profile.release]
-debug = true
+debug = false
