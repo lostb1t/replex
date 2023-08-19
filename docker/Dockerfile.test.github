@@ -1,5 +1,5 @@
 # important that we build replex agains the same openssl version as the docker image
-FROM --platform=$BUILDPLATFORM" debian:bookworm-slim
+FROM --platform=$BUILDPLATFORM debian:bookworm-slim
 ARG TARGETPLATFORM
 RUN apt update \
     && apt install -y openssl ca-certificates \
