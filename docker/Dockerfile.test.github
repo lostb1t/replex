@@ -6,7 +6,6 @@ RUN apt update \
     && apt clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-WORKDIR /app
 RUN if [ "${TARGETPLATFORM}" = "linux/amd64" ]; then \
     mv bins/x86_64-unknown-linux-gnu/replex app/replex && \
     chmod +x app/replex && \
