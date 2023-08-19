@@ -108,6 +108,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Cache cargo & target directories
         uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.platform.target }}
       - name: Install semantic-release-cargo
         if: ${{ !inputs.test_build }}
         uses: taiki-e/install-action@v2
