@@ -183,7 +183,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: bins
-          path: /tmp/target
+          path: /bins
+      - name: check bin path
+        run: ls -al bins
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
