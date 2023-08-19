@@ -185,7 +185,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: bins
-          path: /bins
+          path: bins/
       - name: check bin path
         run: ls -al bins
       -
