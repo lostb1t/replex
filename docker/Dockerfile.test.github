@@ -8,25 +8,25 @@ RUN apt update \
 
 WORKDIR /app
 RUN if [ "${TARGETPLATFORM}" = "linux/amd64" ]; then \
-    mv bin/amd64-bin/dim app/replex && \
+    mv bin/x86_64-unknown-linux-gnu/release/replex app/replex && \
     chmod +x app/replex && \
     ls -la app/ . && \
     pwd \
     ; fi
     
 RUN if [ "${TARGETPLATFORM}" = "linux/arm64" ]; then \
-    mv bin/aarch64-bin/dim app/replex && \
+    mv bin/aarch64-unknown-linux-gnu/release/replex app/replex && \
     chmod +x app/replex && \
     ls -la app/ . && \
     pwd \
     ; fi
-    
-RUN if [ "${TARGETPLATFORM}" = "linux/arm/v7" ]; then \
-    mv bin/armhf-bin/dim app/replex && \
-    chmod +x app/replex && \
-    ls -la app/ . && \
-    pwd \
-    ; fi
+
+# RUN if [ "${TARGETPLATFORM}" = "linux/arm/v7" ]; then \
+#     mv bin/armhf-bin/dim app/replex && \
+#     chmod +x app/replex && \
+#     ls -la app/ . && \
+#     pwd \
+#     ; fi
 # COPY ./ci-target/release/replex ./
 
 EXPOSE 80

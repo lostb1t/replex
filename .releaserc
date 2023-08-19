@@ -6,3 +6,10 @@ plugins:
     "@semantic-release/release-notes-generator",
     "@semantic-release/github",
   ]
+publish:
+  - path: "@semantic-release/github"
+    assets:
+      - path: "bins/x86_64-unknown-linux-gnu/release/replex"
+        name: "x86_64-unknown-linux-gnu"
+      - path: "bins/aarch64-unknown-linux-gnu/release/replex"
+        name: "aarch64-unknown-linux-gnu"
