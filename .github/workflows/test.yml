@@ -128,7 +128,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p bins/${{ matrix.platform.target }}
-          mv target/${{ matrix.platform.target }}/release/replex bins/${{ matrix.platform.target }}
+          mv target/${{ matrix.platform.target }}/release/replex bins/${{ matrix.platform.target }}/replex
       -
         name: Upload artifacts
         uses: actions/upload-artifact@v3
