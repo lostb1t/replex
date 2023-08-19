@@ -150,6 +150,8 @@ jobs:
       - name: Move bin
         shell: bash
         run: |
+          mkdir -p bins
+          mkdir -p bins/${{ matrix.platform.target }}
           mv target/${{ matrix.platform.target }}/release/replex bins/${{ matrix.platform.target }}
       -
         name: Upload artifacts
