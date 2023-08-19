@@ -129,15 +129,15 @@ jobs:
       - name: Move bin
         shell: bash
         run: |
-          mkdir -p bins/${{ matrix.platform.target }}
-          mv target/${{ matrix.platform.target }}/release/replex bins/${{ matrix.platform.target }}/replex
+          mkdir -p bin/${{ matrix.platform.target }}
+          mv target/${{ matrix.platform.target }}/release/replex bin/${{ matrix.platform.target }}/replex
       -
         name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           # name: ${{ matrix.platform.target }}
-          name: bins
-          path: bins/*
+          name: bin
+          path: bin/*
           if-no-files-found: error
           retention-days: 1
       # -
@@ -188,10 +188,10 @@ jobs:
         name: Download digests
         uses: actions/download-artifact@v3
         with:
-          name: bins
-          path: bins/
+          name: bin
+          path: bin/
       - name: check bin path
-        run: ls -al bins
+        run: ls -al bin
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
