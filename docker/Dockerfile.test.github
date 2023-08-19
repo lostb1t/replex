@@ -8,14 +8,14 @@ RUN apt update \
 
 WORKDIR /app
 RUN if [ "${TARGETPLATFORM}" = "linux/amd64" ]; then \
-    mv bin/x86_64-unknown-linux-gnu/release/replex app/replex && \
+    mv bin/x86_64-unknown-linux-gnu/replex app/replex && \
     chmod +x app/replex && \
     ls -la app/ . && \
     pwd \
     ; fi
     
 RUN if [ "${TARGETPLATFORM}" = "linux/arm64" ]; then \
-    mv bin/aarch64-unknown-linux-gnu/release/replex app/replex && \
+    mv bin/aarch64-unknown-linux-gnu/replex app/replex && \
     chmod +x app/replex && \
     ls -la app/ . && \
     pwd \
