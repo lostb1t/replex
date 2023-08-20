@@ -1,4 +1,4 @@
-name: test
+name: Release
 
 on:
   workflow_dispatch:
