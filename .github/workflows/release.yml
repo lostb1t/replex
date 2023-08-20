@@ -253,6 +253,24 @@ jobs:
         with:
           name: bin
           path: bin/
+      - name: Package as archive
+        shell: bash
+        run: |
+          mkdir -p assets
+          cd bin
+          for dir in */; do
+              (
+                  cd $dir
+                  name=${dir%/}
+                  if [[ "$name" == *"windows"* ]]; then
+                      7z a ../../assets/$name.7z ./
+                  else
+                      chmod +x ./replex
+                      tar czvf ../../assets/$name.tar.gz ./
+                  fi
+              )
+          done
+          cd -
       - name: Invoke semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
