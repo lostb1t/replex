@@ -253,23 +253,20 @@ jobs:
       #   run: |
       #     docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}
 
-  # release:
-  #   runs-on: ${{ matrix.platform.os }}
-  #   # runs-on: ubuntu-22.04
-  #   needs: [
-  #     get-next-version,
-  #     #  test,
-  #   ]
-  #   env:
-  #     HUSKY: 0
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-  #       with:
-  #         fetch-depth: 0
-  #     - name: Invoke semantic-release
-  #       if: ${{ !inputs.test_build }}
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
-  #       run: npx semantic-release
+   release:
+     if: ${{ !inputs.test_build }}
+     runs-on: ubuntu-22.04
+     needs:
+      - build
+     env:
+       HUSKY: 0
+     steps:
+       - name: Checkout
+         uses: actions/checkout@v3
+         with:
+           fetch-depth: 0
+       - name: Invoke semantic-release
+         env:
+           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+         run: npx semantic-release
    
