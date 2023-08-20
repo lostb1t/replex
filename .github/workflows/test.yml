@@ -94,7 +94,7 @@ jobs:
           - release_for: x86_64 Windows
             os: windows-latest
             target: x86_64-pc-windows-msvc
-            bin: precious.exe
+            bin: replex.exe
             name: precious-Windows-x86_64.zip
             command: build
 
@@ -136,7 +136,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p bin/${{ matrix.platform.target }}
-          mv target/${{ matrix.platform.target }}/release/replex bin/${{ matrix.platform.target }}/replex
+          mv target/${{ matrix.platform.target }}/release/replex bin/${{ matrix.platform.target }}/${{ matrix.platform.bin }}
       -
         name: Upload artifacts
         uses: actions/upload-artifact@v3
