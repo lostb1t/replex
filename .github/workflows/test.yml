@@ -203,7 +203,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY_IMAGE }}
+          images: ${{ env.REGISTRY_IMAGE }}:latest
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
         with:
