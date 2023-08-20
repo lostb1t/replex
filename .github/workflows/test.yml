@@ -24,7 +24,7 @@ on:
   #     - '**.md'
 
 env:
-  REGISTRY_IMAGE: ghcr.io/sarendsen/replex-test
+  REGISTRY_IMAGE: ghcr.io/sarendsen/replex
 
 permissions:
   contents: write
