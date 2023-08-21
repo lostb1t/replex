@@ -401,7 +401,7 @@ pub async fn get_collections_children(
 pub fn auto_refresh_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
     let config: Config = Config::figment().extract().unwrap();
 
-    if config.cache_ttl == 0 || !config.cache_refresh {
+    if config.cache_ttl == 0 || !config.cache_rows || !config.cache_rows_refresh {
         return default_cache();
     }
 
@@ -454,10 +454,16 @@ pub fn auto_refresh_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
 
 pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
     let config: Config = Config::figment().extract().unwrap();
+    let ttl = if config.cache_rows {
+        config.cache_ttl
+    } else {
+        0
+    };
+
     Cache::new(
         MemoryStore::with_moka_cache(
             MokaCacheSync::builder()
-                .time_to_live(Duration::from_secs(config.cache_ttl))
+                .time_to_live(Duration::from_secs(ttl))
                 .build(),
         ),
         RequestIssuer::with_plex_defaults(),

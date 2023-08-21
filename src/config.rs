@@ -21,7 +21,12 @@ pub struct Config {
         default = "default_as_true",
         deserialize_with = "figment::util::bool_from_str_or_int"
     )]
-    pub cache_refresh: bool,
+    pub cache_rows: bool,
+    #[serde(
+        default = "default_as_true",
+        deserialize_with = "figment::util::bool_from_str_or_int"
+    )]
+    pub cache_rows_refresh: bool,
     #[serde(
         default,
         deserialize_with = "deserialize_comma_seperated_string"
@@ -64,7 +69,7 @@ pub struct Config {
 }
 
 fn default_cache_ttl() -> u64 {
-    15 * 60 // 15 minutes
+    30 * 60 // 30 minutes
 }
 
 // fn default_port() -> u64 {

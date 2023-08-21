@@ -79,8 +79,9 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_DISABLE_RELATED  | false | See: https://github.com/sarendsen/replex/issues/26.        |
 | REPLEX_REDIRECT_STREAMS  | false    | Redirect streams to another endpoint.                                      |
 | REPLEX_REDIRECT_STREAMS_URL  | REPLEX_HOST    | Alternative streams endpoint                                         |
-| REPLEX_CACHE_TTL          | 900    	 | Time to live for caches in seconds. Set to 0 to disable (not recommended).  |
-| REPLEX_CACHE_REFRESH      | true     | The cache for recommended rows are auto refreshed for each user.              	      |
+| REPLEX_CACHE_TTL          | 1800    	 | Time to live for caches in seconds. Set to 0 to disable (not recommended).  |
+| REPLEX_CACHE_ROWS         | true       | Cache rows            	                            |
+| REPLEX_CACHE_ROWS_REFRESH   true     | Auto refreshe cached rows           	                 |
 
 ## Mixed rows
 
@@ -135,4 +136,4 @@ You can redirect streams by enabling `REPLEX_REDIRECT_STREAMS` and optionally se
 
 - hero rows on Android devices dont load more content. so hero rows have a maximum of 100 items on Android.
 - when include_watched is false a maximum item limit per library is opposed of 250 items. So if you have a mixed row of 2 libraries the max results of that row will be 500 items.
-- disable_user_state: For movies this works in the webapp. Shows however work accross clients
+- disable_user_state: For movies this works in the webapp. Shows work accross clients
