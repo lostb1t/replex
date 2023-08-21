@@ -781,7 +781,9 @@ impl MetaData {
                 }
             }
         }
-
+        if !self.is_collection_hub() {
+            return Ok(false);
+        }
         let collection_id = get_collection_id_from_hub(self);
         let mut collection_details = plex_client
         .clone()
