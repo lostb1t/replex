@@ -12,7 +12,7 @@ Remix your plex recommendations.
 - Auto load artwork for hero styles.
 - Disable user state: remove unwatched markers from artwork.
 - Disable leaf count: remove episode count from artwork.
-- Hot cache: auto refreshed cache for home and librery recommended.
+- Hot cache: auto refreshed cache for home and library recommended.
 - Disable transcoding / force direct play 
 - Works on every client/app not only plex web!
 - Plays nice with PMM (and without).
