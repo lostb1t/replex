@@ -74,6 +74,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_HOST               |        	 | Plex target host to proxy.                                             	  |
 | REPLEX_HERO_ROWS          |        	 | Comma seperated list of hubidentifiers to make hero stlye                  |
 | REPLEX_INCLUDE_WATCHED    | false    | If set to false, hide watched items.                                      |
+| REPLEX_DISABLE_TRANSCODE    | false    | Force direct stream.                                      |
 | REPLEX_DISABLE_USER_STATE | false    | Remove unwatched markers from artwork.|
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
 | REPLEX_DISABLE_RELATED  | false | See: https://github.com/sarendsen/replex/issues/26.        |
@@ -99,6 +100,11 @@ For built in rows you can use the hubidentifier in the `REPLEX_HERO_ROWS` env li
 This also works for collections.
 
 Note: hero style elements uses coverart from plex. Banner or background is not used.
+
+## Disable transcoding
+
+Transcoding can be disabled by setting `REPLEX_DISABLE_TRANSCODE=true`. 
+This will force direct play/stream.
 
 ## Remote access (force clients to use the proxy)
 

@@ -23,6 +23,7 @@ use moka::sync::CacheBuilder as MokaCacheBuilder;
 use salvo::compression::Compression;
 use salvo::cors::Cors;
 use salvo::http::header::CONTENT_TYPE;
+use salvo::http::uri::Uri;
 use salvo::http::{Mime, Request, Response, StatusCode};
 use salvo::prelude::*;
 // use salvo::proxy::Proxy as SalvoProxy;
@@ -94,6 +95,15 @@ pub fn route() -> Router {
             );
     }
 
+    if config.disable_transcode {
+        router = router.push(
+            Router::new()
+                .path("/video/<colon:colon>/transcode/universal/decision")
+                .hoop(disable_transcode)
+                .handle(proxy.clone()),
+        )
+    }
+
     router = router
         .push(
             Router::new()
@@ -108,8 +118,7 @@ pub fn route() -> Router {
                 .get(get_hubs_sections),
         )
         // .push(Router::new().path("/ping").get(PlexProxy::new(config.host.clone().unwrap())))
-        .push(Router::new().path("/test").get(test))
-        .push(Router::new().path("/hello").get(hello))
+        .push(Router::new().path("/ping").hoop(disable_transcode).get(ping))
         .push(
             Router::new()
                 .path("/replex/library/collections/<ids>/children")
@@ -241,14 +250,10 @@ pub async fn get_hubs_promoted(
     }
     // Hack, as the list could be smaller when removing watched items. So we request more.
     if !config.include_watched && count < 50 {
-        count =  50;
+        count = 50;
     }
 
-    add_query_param_salvo(
-        req,
-        "count".to_string(),
-        count.to_string(),
-    );
+    add_query_param_salvo(req, "count".to_string(), count.to_string());
 
     let upstream_res = plex_client.request(req).await?;
     match upstream_res.status() {
@@ -266,9 +271,7 @@ pub async fn get_hubs_promoted(
     container.content_type = content_type;
 
     TransformBuilder::new(plex_client, params.clone())
-        .with_transform(HubStyleTransform {
-            is_home: true
-        })
+        .with_transform(HubStyleTransform { is_home: true })
         // .with_transform(HubSectionDirectoryTransform)
         .with_transform(HubMixTransform)
         // .with_transform(HubChildrenLimitTransform {
@@ -299,14 +302,10 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
 
     // Hack, as the list could be smaller when removing watched items. So we request more.
     if !config.include_watched && count < 50 {
-        count =  50;
+        count = 50;
     }
 
-    add_query_param_salvo(
-        req,
-        "count".to_string(),
-        count.to_string(),
-    );
+    add_query_param_salvo(req, "count".to_string(), count.to_string());
 
     // we want guids for banners
     add_query_param_salvo(req, "includeGuids".to_string(), "1".to_string());
@@ -325,9 +324,7 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
 
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubSectionDirectoryTransform)
-        .with_transform(HubStyleTransform {
-            is_home: false
-        })
+        .with_transform(HubStyleTransform { is_home: false })
         // .with_transform(HubChildrenLimitTransform {
         //     limit: params.clone().count.unwrap(),
         // })
@@ -401,7 +398,8 @@ pub async fn get_collections_children(
 pub fn auto_refresh_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
     let config: Config = Config::figment().extract().unwrap();
 
-    if config.cache_ttl == 0 || !config.cache_rows || !config.cache_rows_refresh {
+    if config.cache_ttl == 0 || !config.cache_rows || !config.cache_rows_refresh
+    {
         return default_cache();
     }
 
@@ -418,9 +416,9 @@ pub fn auto_refresh_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
         let url = format!(
             "http://{}{}",
             v.req_local_addr
-                    .to_string()
-                    .replace("socket://", "")
-                    .as_str(),
+                .to_string()
+                .replace("socket://", "")
+                .as_str(),
             v.req_uri.path_and_query().unwrap()
         );
 
@@ -470,16 +468,57 @@ pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
     )
 }
 
-
 #[handler]
-async fn test(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+async fn disable_transcode(
+    req: &mut Request,
+) {
+
+    let mut queries = req.queries().clone();
+    queries.remove("maxVideoBitrate");
+    queries.remove("videoBitrate");
+    queries.remove("directStream");
+    queries.insert("directStream".to_string(), "1".to_string());
+    queries.remove("directPlay");
+    queries.insert("directPlay".to_string(), "1".to_string());
+    queries.remove("videoQuality");
+    queries.insert("videoQuality".to_string(), "100".to_string());
+    if let Some(i) = req.queries().get("protocol") {
+        if i == "http" {
+            queries.remove("copyts");
+            queries.insert("copyts".to_string(), "0".to_string());
+            queries.remove("hasMDE");
+            queries.insert("hasMDE".to_string(), "0".to_string());
+        }
+    }
+
+    replace_query(queries, req);
+
+    if req
+        .headers_mut()
+        .contains_key(headers::PLEX_CLIENT_PROFILE_EXTRA)
+    {
+        let extra = req
+            .headers_mut()
+            .get(headers::PLEX_CLIENT_PROFILE_EXTRA)
+            .unwrap();
+        let filtered_extra = extra
+            .to_str()
+            .unwrap()
+            .split("+")
+            .filter(|s| !s.contains("add-limitation"))
+            .join("+");
+
+        req.headers_mut().insert(
+            headers::PLEX_CLIENT_PROFILE_EXTRA,
+            salvo::http::HeaderValue::from_str(&filtered_extra).unwrap(),
+        );
+    };
+
 }
 
 #[handler]
-async fn hello(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
-    sleep(Duration::from_secs(2)).await;
-    println!("2 have elapsed");
-    return res.render("Hello world!");
+async fn ping(req: &mut Request, _depot: &mut Depot, res: &mut Response) {
+    res.render("pong!")
 }
 
 #[cfg(test)]

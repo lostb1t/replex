@@ -2,8 +2,10 @@ extern crate tracing;
 use anyhow::Result;
 use bytes::Bytes;
 extern crate mime;
+use itertools::Itertools;
 // use futures_util::StreamExt;
 use mime::Mime;
+use multimap::MultiMap;
 use salvo::Error;
 use serde::{Deserialize, Serialize};
 use strum_macros::Display as EnumDisplay;
@@ -11,6 +13,7 @@ use strum_macros::EnumString;
 // use http_body::{Limited, Full};
 use http_body_util::BodyExt;
 use tracing::error;
+use url::Url;
 use yaserde::ser::to_string as to_xml_str;
 // use salvo_core::http::response::Response as SalvoResponse;
 use salvo::http::HeaderValue;
@@ -38,6 +41,13 @@ pub fn get_collection_id_from_hub(hub: &MetaData) -> i32 {
         .unwrap()
         .parse()
         .unwrap()
+}
+
+pub fn replace_query(query: MultiMap<String, String>, req: &mut SalvoRequest) {
+    let mut url = Url::parse(req.uri_mut().to_string().as_str()).unwrap();
+    url.query_pairs_mut().clear().extend_pairs(&query.iter().map(|(k, v)| (k, v)).collect_vec());
+    dbg!(&url.to_string());
+    *req.uri_mut() = hyper::Uri::try_from(url.as_str()).unwrap();
 }
 
 pub fn add_query_param_salvo(
@@ -166,7 +176,7 @@ pub async fn from_salvo_response(
 // pub fn from_bytes(
 //     bytes: bytes::Bytes,
 //     content_type: ContentType,
-// ) -> Result<MediaContainerWrapper<MediaContainer>, Error> {    
+// ) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
 //     let result: MediaContainerWrapper<MediaContainer> = match content_type {
 //         ContentType::Json => {
 //             let mut c: MediaContainerWrapper<MediaContainer> =
