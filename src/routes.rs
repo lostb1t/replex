@@ -118,7 +118,12 @@ pub fn route() -> Router {
                 .get(get_hubs_sections),
         )
         // .push(Router::new().path("/ping").get(PlexProxy::new(config.host.clone().unwrap())))
-        .push(Router::new().path("/ping").hoop(force_maximum_quality).get(ping))
+        .push(
+            Router::new()
+                .path("/ping")
+                .hoop(force_maximum_quality)
+                .get(ping),
+        )
         .push(
             Router::new()
                 .path("/replex/library/collections/<ids>/children")
@@ -469,10 +474,7 @@ pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
 }
 
 #[handler]
-async fn force_maximum_quality(
-    req: &mut Request,
-) {
-
+async fn force_maximum_quality(req: &mut Request) {
     let mut queries = req.queries().clone();
     queries.remove("maxVideoBitrate");
     queries.remove("videoBitrate");
@@ -505,7 +507,10 @@ async fn force_maximum_quality(
             .to_str()
             .unwrap()
             .split("+")
-            .filter(|s| !s.contains("add-limitation"))
+            .filter(|s| {
+                !s.contains("add-limitation")
+                    && !s.to_lowercase().contains("name=video.bitrate")
+            })
             .join("+");
 
         req.headers_mut().insert(
@@ -513,7 +518,6 @@ async fn force_maximum_quality(
             salvo::http::HeaderValue::from_str(&filtered_extra).unwrap(),
         );
     };
-
 }
 
 #[handler]

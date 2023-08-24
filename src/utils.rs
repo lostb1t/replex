@@ -46,7 +46,6 @@ pub fn get_collection_id_from_hub(hub: &MetaData) -> i32 {
 pub fn replace_query(query: MultiMap<String, String>, req: &mut SalvoRequest) {
     let mut url = Url::parse(req.uri_mut().to_string().as_str()).unwrap();
     url.query_pairs_mut().clear().extend_pairs(&query.iter().map(|(k, v)| (k, v)).collect_vec());
-    dbg!(&url.to_string());
     *req.uri_mut() = hyper::Uri::try_from(url.as_str()).unwrap();
 }
 
