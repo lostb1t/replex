@@ -71,6 +71,11 @@ pub struct Config {
         deserialize_with = "figment::util::bool_from_str_or_int"
     )]
     pub disable_transcode: bool,
+    #[serde(
+        default = "default_as_false",
+        deserialize_with = "figment::util::bool_from_str_or_int"
+    )]
+    pub force_maximum_quality: bool,
 }
 
 fn default_cache_ttl() -> u64 {
