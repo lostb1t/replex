@@ -95,11 +95,11 @@ pub fn route() -> Router {
             );
     }
 
-    if config.disable_transcode {
+    if config.force_maximum_quality {
         router = router.push(
             Router::new()
                 .path("/video/<colon:colon>/transcode/universal/decision")
-                .hoop(disable_transcode)
+                .hoop(force_maximum_quality)
                 .handle(proxy.clone()),
         )
     }
@@ -118,7 +118,7 @@ pub fn route() -> Router {
                 .get(get_hubs_sections),
         )
         // .push(Router::new().path("/ping").get(PlexProxy::new(config.host.clone().unwrap())))
-        .push(Router::new().path("/ping").hoop(disable_transcode).get(ping))
+        .push(Router::new().path("/ping").hoop(force_maximum_quality).get(ping))
         .push(
             Router::new()
                 .path("/replex/library/collections/<ids>/children")
@@ -469,7 +469,7 @@ pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
 }
 
 #[handler]
-async fn disable_transcode(
+async fn force_maximum_quality(
     req: &mut Request,
 ) {
 
@@ -478,8 +478,8 @@ async fn disable_transcode(
     queries.remove("videoBitrate");
     queries.remove("directStream");
     queries.insert("directStream".to_string(), "1".to_string());
-    queries.remove("directPlay");
-    queries.insert("directPlay".to_string(), "1".to_string());
+    //queries.remove("directPlay");
+    //queries.insert("directPlay".to_string(), "1".to_string());
     queries.remove("videoQuality");
     queries.insert("videoQuality".to_string(), "100".to_string());
     if let Some(i) = req.queries().get("protocol") {
