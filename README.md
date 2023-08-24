@@ -13,7 +13,7 @@ Remix your plex recommendations.
 - Disable user state: remove unwatched markers from artwork.
 - Disable leaf count: remove episode count from artwork.
 - Hot cache: auto refreshed cache for home and library recommended.
-- Force maximum quality.
+- Force original quality.
 - Works on every client/app not only plex web!
 - Plays nice with PMM (and without).
 
@@ -75,7 +75,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_HOST               |        	 | Plex target host to proxy.                                             	  |
 | REPLEX_HERO_ROWS          |        	 | Comma seperated list of hubidentifiers to make hero stlye                  |
 | REPLEX_INCLUDE_WATCHED    | false    | If set to false, hide watched items.                                      |
-| REPLEX_FORCE_MAXIMUM_QUALITY    | false    | Force maxium quality.                                      |
+| REPLEX_FORCE_ORIGINAL_QUALITY    | false    | Force original quality.                                      |
 | REPLEX_DISABLE_USER_STATE | false    | Remove unwatched markers from artwork.|
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
 | REPLEX_DISABLE_RELATED  | false | See: https://github.com/sarendsen/replex/issues/26.        |
@@ -102,9 +102,9 @@ This also works for collections.
 
 Note: hero style elements uses coverart from plex. Banner or background is not used.
 
-## Force maximum quality
+## Force original quality
 
-Force clients to maxium quality with the setting `REPLEX_FORCE_MAXIMUM_QUALITY=true`. 
+Force clients to the original/maximum quality with the setting `REPLEX_FORCE_ORIGINAL_QUALITY=true`. 
 This will force direct play/stream for all clients. Meaning that if a client requests anything other then the original quality this will be ignored and the original quality (direct play/stream) is used instead. 
 
 ## Remote access (force clients to use the proxy)
