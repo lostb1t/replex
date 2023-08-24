@@ -13,7 +13,7 @@ Remix your plex recommendations.
 - Disable user state: remove unwatched markers from artwork.
 - Disable leaf count: remove episode count from artwork.
 - Hot cache: auto refreshed cache for home and library recommended.
-- Disable transcoding / force direct play 
+- Force maximum quality.
 - Works on every client/app not only plex web!
 - Plays nice with PMM (and without).
 
@@ -75,7 +75,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_HOST               |        	 | Plex target host to proxy.                                             	  |
 | REPLEX_HERO_ROWS          |        	 | Comma seperated list of hubidentifiers to make hero stlye                  |
 | REPLEX_INCLUDE_WATCHED    | false    | If set to false, hide watched items.                                      |
-| REPLEX_DISABLE_TRANSCODE    | false    | Force direct stream.                                      |
+| REPLEX_FORCE_MAXIMUM_QUALITY    | false    | Force maxium quality.                                      |
 | REPLEX_DISABLE_USER_STATE | false    | Remove unwatched markers from artwork.|
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
 | REPLEX_DISABLE_RELATED  | false | See: https://github.com/sarendsen/replex/issues/26.        |
@@ -102,9 +102,10 @@ This also works for collections.
 
 Note: hero style elements uses coverart from plex. Banner or background is not used.
 
-## Disable transcoding
+## Force maximum quality
 
-Transcoding can be disabled by setting `REPLEX_DISABLE_TRANSCODE=true`. 
+Force clients to macouk
+quality by setting `REPLEX_FORCE_MAXIMUM_QUALITY=true`. 
 This will force direct play/stream for all clients. Meaning that if a client request a trancoded stream this will be ignored and a direct play/stream is used instead. 
 
 ## Remote access (force clients to use the proxy)
