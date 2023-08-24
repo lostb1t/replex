@@ -95,7 +95,7 @@ pub fn route() -> Router {
             );
     }
 
-    if config.force_maximum_quality {
+    if config.force_maximum_quality || config.disable_transcode {
         router = router.push(
             Router::new()
                 .path("/video/<colon:colon>/transcode/universal/decision")
