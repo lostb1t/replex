@@ -95,11 +95,11 @@ pub fn route() -> Router {
             );
     }
 
-    if config.force_original_quality || config.disable_transcode {
+    if config.force_maximum_quality || config.disable_transcode {
         router = router.push(
             Router::new()
                 .path("/video/<colon:colon>/transcode/universal/decision")
-                .hoop(force_original_quality)
+                .hoop(force_maximum_quality)
                 .handle(proxy.clone()),
         )
     }
@@ -121,7 +121,7 @@ pub fn route() -> Router {
         .push(
             Router::new()
                 .path("/ping")
-                .hoop(force_original_quality)
+                .hoop(force_maximum_quality)
                 .get(ping),
         )
         .push(
@@ -474,7 +474,7 @@ pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
 }
 
 #[handler]
-async fn force_original_quality(req: &mut Request) {
+async fn force_maximum_quality(req: &mut Request) {
     let mut queries = req.queries().clone();
     queries.remove("maxVideoBitrate");
     queries.remove("videoBitrate");
