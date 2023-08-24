@@ -105,7 +105,7 @@ Note: hero style elements uses coverart from plex. Banner or background is not u
 ## Disable transcoding
 
 Transcoding can be disabled by setting `REPLEX_DISABLE_TRANSCODE=true`. 
-This will force direct play/stream.
+This will force direct play/stream for all clients. Meaning that if a client request a trancoded stream this will be ignored and a direct play/stream is used instead. 
 
 ## Remote access (force clients to use the proxy)
 
