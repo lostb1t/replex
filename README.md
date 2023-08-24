@@ -131,6 +131,7 @@ If you have a reverse proxy running and only want to route the necessary paths, 
 
 - /hubs (excluding /hubs/search)
 - /replex
+- /video/:/transcode/universal/decision (if force maxiumum quality is enabled) 
 
 Paths are subject to change.
 
