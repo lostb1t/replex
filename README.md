@@ -133,7 +133,7 @@ If you have a reverse proxy running and only want to route the necessary paths, 
 - /replex
 - /video/:/transcode/universal/decision (if force maximum quality is enabled) 
 
-Paths are subject to change.
+Paths are subject to change. for an uptodate list see [routing](src/routes.rs)
 
 ## Redirect streams
 
