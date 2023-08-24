@@ -104,9 +104,8 @@ Note: hero style elements uses coverart from plex. Banner or background is not u
 
 ## Force maximum quality
 
-Force clients to maxium quality. 
-quality by setting `REPLEX_FORCE_MAXIMUM_QUALITY=true`. 
-This will force direct play/stream for all clients. Meaning that if a client requests a trancoded stream this will be ignored and a direct play/stream is used instead. 
+Force clients to maxium quality with the setting `REPLEX_FORCE_MAXIMUM_QUALITY=true`. 
+This will force direct play/stream for all clients. Meaning that if a client requests anything other then the original quality this will be ignored and the original quality (direct play/stream) is used instead. 
 
 ## Remote access (force clients to use the proxy)
 
