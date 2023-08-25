@@ -107,6 +107,9 @@ Note: hero style elements uses coverart from plex. Banner or background is not u
 Force clients to the maximum quality with the setting `REPLEX_FORCE_MAXIMUM_QUALITY=true`. 
 This will force client to the maxmum quality. Meaning that if a client requests anything other then the maximum quality this will be ignored and the maximum quality (direct play/stream when server allows for original) is used instead. 
 
+This doesn't prevent transcoding. It only sets the bitrate to original quality. 
+So if a client needs a different codec, container or audio it should still transcode.
+
 ## Remote access (force clients to use the proxy)
 
 Because this app sits before Plex the builtin remote access (and auto SSL) will not work and needs to be disabled.
