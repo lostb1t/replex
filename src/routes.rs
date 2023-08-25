@@ -493,14 +493,9 @@ async fn force_maximum_quality(req: &mut Request) {
         }
     }
 
-    replace_query(queries, req);
-
-    if req
-        .headers_mut()
-        .contains_key(headers::PLEX_CLIENT_PROFILE_EXTRA)
+    if queries.contains_key(headers::PLEX_CLIENT_PROFILE_EXTRA)
     {
-        let extra = req
-            .headers_mut()
+        let extra = queries
             .remove(headers::PLEX_CLIENT_PROFILE_EXTRA)
             .unwrap();
         let filtered_extra = extra
@@ -513,11 +508,13 @@ async fn force_maximum_quality(req: &mut Request) {
             })
             .join("+");
 
-        req.headers_mut().insert(
+        queries.insert(
             headers::PLEX_CLIENT_PROFILE_EXTRA,
             salvo::http::HeaderValue::from_str(&filtered_extra).unwrap(),
         );
     };
+    
+    replace_query(queries, req);
 }
 
 #[handler]
