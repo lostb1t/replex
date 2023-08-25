@@ -501,7 +501,7 @@ async fn force_maximum_quality(req: &mut Request) {
     {
         let extra = req
             .headers_mut()
-            .get(headers::PLEX_CLIENT_PROFILE_EXTRA)
+            .remove(headers::PLEX_CLIENT_PROFILE_EXTRA)
             .unwrap();
         let filtered_extra = extra
             .to_str()
