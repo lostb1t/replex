@@ -493,14 +493,15 @@ async fn force_maximum_quality(req: &mut Request) {
         }
     }
 
-    if queries.contains_key(headers::PLEX_CLIENT_PROFILE_EXTRA)
+    let query_key = "X-Plex-Client-Profile-Extra".to_string();
+    if queries.contains_key(&query_key)
     {
-        let extra = queries
-            .remove(headers::PLEX_CLIENT_PROFILE_EXTRA)
-            .unwrap();
+        
+        let extra = &queries
+            .remove(&query_key.clone())
+            .unwrap()[0];
+        
         let filtered_extra = extra
-            .to_str()
-            .unwrap()
             .split("+")
             .filter(|s| {
                 !s.contains("add-limitation")
@@ -509,12 +510,13 @@ async fn force_maximum_quality(req: &mut Request) {
             .join("+");
 
         queries.insert(
-            headers::PLEX_CLIENT_PROFILE_EXTRA,
-            salvo::http::HeaderValue::from_str(&filtered_extra).unwrap(),
+            query_key,
+            filtered_extra,
         );
     };
-    
+
     replace_query(queries, req);
+    
 }
 
 #[handler]
