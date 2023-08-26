@@ -369,9 +369,9 @@ pub struct Media {
     #[yaserde(attribute, rename = "container")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub container: Option<String>,
-    #[yaserde(rename = "Part", child)]
-    #[serde(skip_serializing_if = "Vec::is_empty", default, rename = "Part")]
-    pub parts: Vec<MediaPart>,
+    //#[yaserde(rename = "Part", child)]
+    //#[serde(skip_serializing_if = "Vec::is_empty", default, rename = "Part")]
+    //pub parts: Vec<MediaPart>,
 }
 
 #[derive(
