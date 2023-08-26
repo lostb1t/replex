@@ -120,11 +120,11 @@ pub fn route() -> Router {
                 .hoop(auto_refresh_cache())
                 .get(get_hubs_sections),
         )
-        .push(
-            Router::new()
-                .path(format!("{}/<id>", PLEX_LIBRARY_METADATA))
-                .get(get_library_item_metadata),
-        )
+        //.push(
+        //    Router::new()
+        //        .path(format!("{}/<id>", PLEX_LIBRARY_METADATA))
+        //        .get(get_library_item_metadata),
+        //)
         .push(
             Router::new()
                 .path("/ping")
