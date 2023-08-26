@@ -137,11 +137,11 @@ pub fn route() -> Router {
                 .hoop(default_cache())
                 .get(get_collections_children),
         )
-        .push(
-            Router::new()
-                .path(format!("/playQueues"))
-                .post(get_play_queues)
-        )
+        //.push(
+        //    Router::new()
+        //        .path(format!("/playQueues"))
+        //       .post(get_play_queues)
+        //)
         .push(
             Router::with_path("/photo/<colon:colon>/transcode")
                 .hoop(fix_photo_transcode_request)
