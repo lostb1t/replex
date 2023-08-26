@@ -84,7 +84,18 @@ impl Default for Platform {
     default_source(from = "header"),
     rename_all = "camelCase"
 ))]
-pub struct PlexParams {
+pub struct Resolution {
+    pub height: i64,
+    pub width: i64
+}
+
+#[derive(Serialize, Deserialize, Debug, Extractible, Default, Clone)]
+#[salvo(extract(
+    default_source(from = "query"),
+    default_source(from = "header"),
+    rename_all = "camelCase"
+))]
+pub struct PlexContext {
     #[serde(default, deserialize_with = "deserialize_comma_seperated_string")]
     #[salvo(extract(rename = "contentDirectoryID"))]
     pub content_directory_id: Option<Vec<String>>,
@@ -94,6 +105,9 @@ pub struct PlexParams {
     #[serde(default)]
     #[salvo(extract(rename = "X-Plex-Platform"))]
     pub platform: Platform,
+    #[serde(default, deserialize_with = "deserialize_screen_resolution")]
+    #[salvo(extract(rename = "X-Plex-Device-Screen-Resolution"))]
+    pub screen_resolution: Vec<Resolution>,
     #[salvo(extract(rename = "X-Plex-Product"))]
     pub product: Option<String>,
     pub count: Option<i32>,
@@ -167,6 +181,25 @@ where
             Ok(Some(r))
         }
         None => Ok(None),
+    }
+}
+
+pub fn deserialize_screen_resolution<'de, D>(
+    deserializer: D,
+) -> Result<Vec<Resolution>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    match Deserialize::deserialize(deserializer)? {
+        Some::<String>(s) => {
+            let r: Vec<Resolution> = s.split(',')
+                .map(|s| { 
+                    let k: Vec<i64> = s.split("x").map(|s| s.parse().unwrap()).collect();
+                    Resolution {width: k[0], height: k[1]}
+                }).collect();
+            Ok(r)
+        }
+        None => Ok(vec![]),
     }
 }
 
@@ -283,16 +316,41 @@ pub struct Guid {
     Deserialize,
     Clone,
     PartialEq,
-    Eq,
+    // Eq,
     YaDeserialize,
     YaSerialize,
     Default,
     PartialOrd,
 )]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
+#[serde(rename_all = "camelCase")]
 pub struct Media {
     #[yaserde(attribute)]
-    id: i32,
+    id: i64,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    duration: Option<i64>,
+    #[yaserde(attribute, rename="bitRate")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    bit_rate: Option<i64>,
+    #[yaserde(attribute, rename="aspectRation")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    aspect_ratio: Option<f64>,
+    #[yaserde(attribute, rename="audioCodec")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    audio_codec: Option<String>,
+    #[yaserde(attribute, rename="videoCodec")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    video_codec: Option<String>,
+    #[yaserde(attribute, rename="videoResolution")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    video_resolution: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    height: Option<i64>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    width: Option<i64>,
     #[yaserde(attribute, rename="partCount")]
     #[serde(skip_serializing_if = "Option::is_none")]
     part_count: Option<String>,
@@ -300,6 +358,8 @@ pub struct Media {
     #[serde(skip_serializing_if = "Option::is_none")]
     channel_art: Option<String>
 }
+
+
 
 #[derive(
     Debug,
@@ -450,10 +510,10 @@ pub struct MetaData {
     pub content_rating: Option<String>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub rating: Option<f32>,
+    pub rating: Option<f64>,
     #[yaserde(attribute, rename = "audianceRating")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub audiance_rating: Option<f32>,
+    pub audiance_rating: Option<f64>,
     #[yaserde(attribute, rename = "primaryExtraKey")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub primary_extra_key: Option<String>,
@@ -841,7 +901,7 @@ impl MetaData {
 }
 
 #[derive(
-    Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default,
+    Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default
 )]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
@@ -850,7 +910,7 @@ pub struct MediaContainer {
     #[yaserde(attribute)]
     //#[serde(deserialize_with = "str_or_i32")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub size: Option<i32>,
+    pub size: Option<i64>,
     #[yaserde(attribute)]
     #[yaserde(rename = "totalSize")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -957,7 +1017,7 @@ impl MediaContainer {
         }
     }
     pub fn set_children(&mut self, value: Vec<MetaData>) {
-        let len: i32 = value.len().try_into().unwrap();
+        let len: i64 = value.len().try_into().unwrap();
         if !self.metadata.is_empty() {
             self.metadata = value;
         } else if !self.hub.is_empty() {
@@ -971,7 +1031,7 @@ impl MediaContainer {
     }
 
     pub fn set_children_mut(&mut self, value: &mut Vec<MetaData>) {
-        let len: i32 = value.len().try_into().unwrap();
+        let len: i64 = value.len().try_into().unwrap();
         if !self.metadata.is_empty() {
             self.metadata = value.to_owned();
         } else if !self.hub.is_empty() {
