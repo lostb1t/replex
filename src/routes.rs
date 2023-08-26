@@ -91,11 +91,11 @@ pub fn route() -> Router {
             //         .hoop(disable_related_query)
             //         .handle(proxy.clone()),
             // )
-            // .push(
-            //     Router::with_path("/playQueues")
-            //         .hoop(disable_related_query)
-            //         .handle(proxy.clone()),
-            // );
+            .push(
+                 Router::with_path("/playQueues")
+                     .hoop(disable_related_query)
+                     .handle(proxy.clone()),
+            );
     }
 
     if config.force_maximum_quality || config.disable_transcode {
