@@ -23,7 +23,19 @@ fn reorder_media(media, context) {
 };
 
 if media_container.Metadata != () {
-    if media_container.Metadata[0].Media != () {
-        media_container.Metadata[0].Media = reorder_media(media_container.Metadata[0].Media, context);
+    for (item, index) in media_container.Metadata {
+        if media_container.Metadata[index].Media != () {
+            media_container.Metadata[index].Media = reorder_media(media_container.Metadata[index].Media, context);
+        }
+    }
+}
+
+if media_container.Hub != () {
+    for (hub, hub_index) in media_container.Hub {
+        for (item, index) in media_container.Hub[hub_index].Metadata {
+            if media_container.Hub[hub_index].Metadata[index].Media != () {
+                media_container.Hub[hub_index].Metadata[index].Media = reorder_media(media_container.Hub[hub_index].Metadata[index].Media, context);
+            }
+        }
     }
 }

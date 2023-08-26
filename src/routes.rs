@@ -137,11 +137,11 @@ pub fn route() -> Router {
                 .hoop(default_cache())
                 .get(get_collections_children),
         )
-        // .push(
-        //     Router::new()
-        //         .path(format!("/playQueues"))
-        //         .post(get_play_queues)
-        // )
+        .push(
+            Router::new()
+                .path(format!("/playQueues"))
+                .post(get_play_queues)
+        )
         .push(
             Router::with_path("/photo/<colon:colon>/transcode")
                 .hoop(fix_photo_transcode_request)
@@ -296,7 +296,7 @@ pub async fn get_hubs_promoted(
         // })
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
-        // .with_transform(MediaContainerScriptingTransform)
+        .with_transform(MediaContainerScriptingTransform)
         .apply_to(&mut container)
         .await;
 
@@ -347,7 +347,7 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
         })
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
-        // .with_transform(MediaContainerScriptingTransform)
+        .with_transform(MediaContainerScriptingTransform)
         // .with_filter(CollectionHubPermissionFilter)
         .with_filter(WatchedFilter)
         .apply_to(&mut container)
@@ -406,7 +406,7 @@ pub async fn get_collections_children(
                 && !params.exclude_all_leaves,
         })
         .with_transform(UserStateTransform)
-        // .with_transform(MediaContainerScriptingTransform)
+        .with_transform(MediaContainerScriptingTransform)
         .apply_to(&mut container)
         .await;
 
