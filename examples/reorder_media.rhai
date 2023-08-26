@@ -1,4 +1,8 @@
 
+//
+// Reorder media based on resolution, most closest to the client resolution on top.
+//
+
 fn sort_media(x, y, context) {
     let device_density = context.screen_resolution[0].height * context.screen_resolution[0].width;
     let current_density = x.height * x.width;
@@ -13,7 +17,6 @@ fn sort_media(x, y, context) {
     }
 }
 
-// reorder based on resolution, most suitable resolution on top
 fn reorder_media(media, context) {
     media.sort(|x, y| sort_media(x, y, context));
     return media;
