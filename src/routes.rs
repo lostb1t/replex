@@ -109,6 +109,12 @@ pub fn route() -> Router {
                 .hoop(force_maximum_quality)
                 .handle(proxy.clone()),
         )
+        .push(
+            Router::new()
+                .path("/video/<colon:colon>/transcode/universal/start<**rest>")
+                .hoop(force_maximum_quality)
+                .handle(proxy.clone()),
+        )
     }
 
     router = router
@@ -566,14 +572,15 @@ async fn force_maximum_quality(req: &mut Request) {
     //queries.insert("directPlay".to_string(), "1".to_string());
     queries.remove("videoQuality");
     queries.insert("videoQuality".to_string(), "100".to_string());
-    if let Some(i) = req.queries().get("protocol") {
-        if i == "http" {
-            queries.remove("copyts");
-            queries.insert("copyts".to_string(), "0".to_string());
-            queries.remove("hasMDE");
-            queries.insert("hasMDE".to_string(), "0".to_string());
-        }
-    }
+
+    // if let Some(i) = req.queries().get("protocol") {
+    //     if i == "http" {
+    //         queries.remove("copyts");
+    //         queries.insert("copyts".to_string(), "0".to_string());
+    //         queries.remove("hasMDE");
+    //         queries.insert("hasMDE".to_string(), "0".to_string());
+    //     }
+    // }
 
     let query_key = "X-Plex-Client-Profile-Extra".to_string();
     if queries.contains_key(&query_key)
