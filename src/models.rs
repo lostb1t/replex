@@ -2,11 +2,11 @@ use figment::{providers::Env, Figment};
 use salvo::prelude::*;
 use std::fmt;
 use std::str::FromStr;
+use std::string::ToString;
 use tmdb_api::movie::images::MovieImages;
 use tmdb_api::prelude::Command;
 use tmdb_api::tvshow::search::TVShowSearch;
 use tmdb_api::Client;
-use std::string::ToString;
 
 extern crate mime;
 use crate::cache::GLOBAL_CACHE;
@@ -25,14 +25,14 @@ use salvo::http::ReqBody;
 use salvo::http::ResBody;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_with::serde_as;
+use std::io::{Read, Write};
+use strum_macros::Display as EnumDisplay;
+use strum_macros::EnumString;
 use tracing::debug;
+use xml::writer::XmlEvent;
 use yaserde::YaSerialize as YaSerializeTrait;
 use yaserde_derive::YaDeserialize;
 use yaserde_derive::YaSerialize;
-use std::io::{Read, Write};
-use xml::writer::XmlEvent;
-use strum_macros::Display as EnumDisplay;
-use strum_macros::EnumString;
 
 use salvo::macros::Extractible;
 // use replex::settings::*;
@@ -56,9 +56,8 @@ fn default_as_false() -> bool {
     false
 }
 
-
 #[derive(
-    Debug, Clone, PartialEq, Eq, EnumString, EnumDisplay, Serialize, Deserialize
+    Debug, Clone, PartialEq, Eq, EnumString, EnumDisplay, Serialize, Deserialize,
 )]
 pub enum Platform {
     // #[serde(default)]
@@ -86,7 +85,7 @@ impl Default for Platform {
 ))]
 pub struct Resolution {
     pub height: i64,
-    pub width: i64
+    pub width: i64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Extractible, Default, Clone)]
@@ -192,37 +191,36 @@ where
 {
     match Deserialize::deserialize(deserializer)? {
         Some::<String>(s) => {
-            let r: Vec<Resolution> = s.split(',')
-                .map(|s| { 
-                    let k: Vec<i64> = s.split("x").map(|s| s.parse().unwrap()).collect();
-                    Resolution {width: k[0], height: k[1]}
-                }).collect();
+            let cleaned_string: String = s
+                .chars()
+                .filter(|c| c.is_numeric() || *c == 'x' || *c == ',')
+                .collect();
+            let r: Vec<Resolution> = cleaned_string
+                .split(',')
+                .map(|s| {
+                    let k: Vec<i64> =
+                        s.split("x").map(|s| s.parse().unwrap()).collect();
+                    Resolution {
+                        width: k[0],
+                        height: k[1],
+                    }
+                })
+                .collect();
             Ok(r)
         }
         None => Ok(vec![]),
     }
 }
 
-
 /// For some fucking reason. Android for mobile (and only that) chokes on boolean in xml. It wants 0/1
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Default,
-    PartialOrd,
-    YaDeserialize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Default, PartialOrd, YaDeserialize)]
 pub struct SpecialBool {
-    inner: bool
+    inner: bool,
 }
 
 impl SpecialBool {
     pub fn new(inner: bool) -> Self {
-        Self {
-            inner
-        }
+        Self { inner }
     }
 }
 
@@ -234,7 +232,10 @@ impl fmt::Display for SpecialBool {
 }
 
 impl YaSerializeTrait for SpecialBool {
-    fn serialize<W: Write>(&self, writer: &mut yaserde::ser::Serializer<W>) -> Result<(), String> {
+    fn serialize<W: Write>(
+        &self,
+        writer: &mut yaserde::ser::Serializer<W>,
+    ) -> Result<(), String> {
         let content = format!("{}", self.inner as i32);
         let event = XmlEvent::characters(&content);
         let _ret = writer.write(event);
@@ -242,21 +243,21 @@ impl YaSerializeTrait for SpecialBool {
     }
 
     fn serialize_attributes(
-      &self,
-      attributes: Vec<xml::attribute::OwnedAttribute>,
-      namespace: xml::namespace::Namespace,
+        &self,
+        attributes: Vec<xml::attribute::OwnedAttribute>,
+        namespace: xml::namespace::Namespace,
     ) -> Result<
-      (
-        Vec<xml::attribute::OwnedAttribute>,
-        xml::namespace::Namespace,
-      ),
-      String,
+        (
+            Vec<xml::attribute::OwnedAttribute>,
+            xml::namespace::Namespace,
+        ),
+        String,
     > {
-      Ok((attributes, namespace))
+        Ok((attributes, namespace))
     }
-  }
+}
 
-  impl Serialize for SpecialBool {
+impl Serialize for SpecialBool {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -276,7 +277,6 @@ impl<'de> Deserialize<'de> for SpecialBool {
         Ok(SpecialBool::new(s))
     }
 }
-
 
 // pub fn deserialize_special_bool<'de, D>(
 //     deserializer: D,
@@ -330,19 +330,19 @@ pub struct Media {
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     duration: Option<i64>,
-    #[yaserde(attribute, rename="bitRate")]
+    #[yaserde(attribute, rename = "bitRate")]
     #[serde(skip_serializing_if = "Option::is_none")]
     bit_rate: Option<i64>,
-    #[yaserde(attribute, rename="aspectRation")]
+    #[yaserde(attribute, rename = "aspectRation")]
     #[serde(skip_serializing_if = "Option::is_none")]
     aspect_ratio: Option<f64>,
-    #[yaserde(attribute, rename="audioCodec")]
+    #[yaserde(attribute, rename = "audioCodec")]
     #[serde(skip_serializing_if = "Option::is_none")]
     audio_codec: Option<String>,
-    #[yaserde(attribute, rename="videoCodec")]
+    #[yaserde(attribute, rename = "videoCodec")]
     #[serde(skip_serializing_if = "Option::is_none")]
     video_codec: Option<String>,
-    #[yaserde(attribute, rename="videoResolution")]
+    #[yaserde(attribute, rename = "videoResolution")]
     #[serde(skip_serializing_if = "Option::is_none")]
     video_resolution: Option<String>,
     #[yaserde(attribute)]
@@ -351,15 +351,13 @@ pub struct Media {
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     width: Option<i64>,
-    #[yaserde(attribute, rename="partCount")]
+    #[yaserde(attribute, rename = "partCount")]
     #[serde(skip_serializing_if = "Option::is_none")]
     part_count: Option<String>,
-    #[yaserde(attribute, rename="channelArt")]
+    #[yaserde(attribute, rename = "channelArt")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    channel_art: Option<String>
+    channel_art: Option<String>,
 }
-
-
 
 #[derive(
     Debug,
@@ -428,7 +426,6 @@ pub struct Context {
     pub images: Vec<Image>,
 }
 
-
 // #[derive(Debug)]
 // struct FailableOption<T: Default>(T);
 
@@ -437,7 +434,6 @@ pub struct Context {
 //         T::deserialize(d).or_else(|_| Ok(T::default())).map(OrDefault)
 //     }
 // }
-
 
 #[derive(Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize)]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
@@ -609,7 +605,7 @@ pub struct MetaData {
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub promoted: Option<SpecialBool>,
-    #[yaserde(attribute, rename="skipDetails")]
+    #[yaserde(attribute, rename = "skipDetails")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skip_details: Option<SpecialBool>,
     #[yaserde(attribute)]
@@ -638,8 +634,8 @@ pub struct MetaData {
     #[yaserde(attribute)]
     pub style: Option<String>,
     // #[yaserde(skip)]
-    #[yaserde(attribute, rename="Meta")]
-    #[serde(skip_serializing_if = "Option::is_none", rename="Meta")]
+    #[yaserde(attribute, rename = "Meta")]
+    #[serde(skip_serializing_if = "Option::is_none", rename = "Meta")]
     pub meta: Option<Meta>,
     #[serde(rename = "Metadata", default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -684,7 +680,7 @@ pub struct MetaData {
     #[yaserde(rename = "Label", default)]
     #[yaserde(child)]
     pub labels: Vec<Label>,
-    #[yaserde(attribute, rename="originallyAvailableAt")]
+    #[yaserde(attribute, rename = "originallyAvailableAt")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub originally_available_at: Option<String>,
     #[serde(rename = "Guid", default, skip_serializing_if = "Vec::is_empty")]
@@ -706,6 +702,13 @@ pub struct MetaData {
     #[yaserde(rename = "extraType")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub extra_type: Option<i32>, // actually a bool but plex does 0 and 1
+    #[yaserde(attribute)]
+    #[yaserde(rename = "playQueueItemID")]
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        rename = "playQueueItemID"
+    )]
+    pub play_queue_item_id: Option<i32>,
 }
 
 pub(crate) fn deserialize_option_string_from_number<'de, D>(
@@ -722,7 +725,7 @@ pub fn deserialize_test<'de, D>(
 ) -> Result<Option<i32>, D::Error>
 where
     D: Deserializer<'de>,
-{   
+{
     dbg!("YO");
     return Ok(Some(1));
     // match Deserialize::deserialize(deserializer)? {
@@ -846,17 +849,16 @@ impl MetaData {
         }
         let collection_id = get_collection_id_from_hub(self);
         let mut collection_details = plex_client
-        .clone()
-        .get_cached(
-            plex_client.get_collection(collection_id),
-            format!(
-                "collection:{}",
-                collection_id
-            ),
-        )
-        .await?;
+            .clone()
+            .get_cached(
+                plex_client.get_collection(collection_id),
+                format!("collection:{}", collection_id),
+            )
+            .await?;
         // dbg!(collection_details.media_container.library_section_id);
-        Ok(collection_details.media_container.children()
+        Ok(collection_details
+            .media_container
+            .children()
             .get(0)
             .unwrap()
             .has_label("REPLEXHERO".to_string()))
@@ -901,7 +903,7 @@ impl MetaData {
 }
 
 #[derive(
-    Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default
+    Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default,
 )]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
@@ -956,6 +958,59 @@ pub struct MediaContainer {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Directory")]
     pub directory: Vec<MetaData>,
+    #[yaserde(attribute)]
+    #[yaserde(rename = "playQueueID")]
+    #[serde(skip_serializing_if = "Option::is_none", rename = "playQueueID")]
+    pub play_queue_id: Option<i32>,
+    #[yaserde(attribute)]
+    #[yaserde(rename = "playQueueSelectedItemID")]
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        rename = "playQueueSelectedItemID"
+    )]
+    pub play_queue_selected_item_id: Option<i32>,
+    #[yaserde(attribute)]
+    #[yaserde(rename = "playQueueSelectedItemOffset")]
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        rename = "playQueueSelectedItemOffset"
+    )]
+    pub play_queue_selected_item_offset: Option<i32>,
+    #[yaserde(attribute)]
+    #[yaserde(rename = "playQueueSelectedMetadataItemID")]
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        rename = "playQueueSelectedMetadataItemID"
+    )]
+    pub play_queue_selected_metadata_item_id: Option<String>,
+    #[yaserde(attribute)]
+    #[yaserde(rename = "playQueueShuffled")]
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        rename = "playQueueShuffled"
+    )]
+    pub play_queue_shuffled: Option<bool>,
+    #[yaserde(attribute)]
+    #[yaserde(rename = "playQueueSourceURI")]
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        rename = "playQueueSourceURI"
+    )]
+    pub play_queue_source_uri: Option<String>,
+    #[yaserde(attribute)]
+    #[yaserde(rename = "playQueueTotalCount")]
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        rename = "playQueueTotalCount"
+    )]
+    pub play_queue_total_count: Option<i32>,
+    #[yaserde(attribute)]
+    #[yaserde(rename = "playQueueVersion")]
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        rename = "playQueueVersion"
+    )]
+    pub play_queue_version: Option<i32>,
 }
 
 #[derive(

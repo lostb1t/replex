@@ -91,11 +91,11 @@ pub fn route() -> Router {
             //         .hoop(disable_related_query)
             //         .handle(proxy.clone()),
             // )
-            .push(
-                Router::with_path("/playQueues")
-                    .hoop(disable_related_query)
-                    .handle(proxy.clone()),
-            );
+            // .push(
+            //     Router::with_path("/playQueues")
+            //         .hoop(disable_related_query)
+            //         .handle(proxy.clone()),
+            // );
     }
 
     if config.force_maximum_quality || config.disable_transcode {
@@ -123,7 +123,7 @@ pub fn route() -> Router {
         .push(
             Router::new()
                 .path(format!("{}/<id>", PLEX_LIBRARY_METADATA))
-                .get(get_library_metadata),
+                .get(get_library_item_metadata),
         )
         .push(
             Router::new()
@@ -137,6 +137,11 @@ pub fn route() -> Router {
                 .hoop(default_cache())
                 .get(get_collections_children),
         )
+        // .push(
+        //     Router::new()
+        //         .path(format!("/playQueues"))
+        //         .post(get_play_queues)
+        // )
         .push(
             Router::with_path("/photo/<colon:colon>/transcode")
                 .hoop(fix_photo_transcode_request)
@@ -291,6 +296,7 @@ pub async fn get_hubs_promoted(
         // })
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
+        // .with_transform(MediaContainerScriptingTransform)
         .apply_to(&mut container)
         .await;
 
@@ -341,6 +347,7 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
         })
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
+        // .with_transform(MediaContainerScriptingTransform)
         // .with_filter(CollectionHubPermissionFilter)
         .with_filter(WatchedFilter)
         .apply_to(&mut container)
@@ -399,6 +406,7 @@ pub async fn get_collections_children(
                 && !params.exclude_all_leaves,
         })
         .with_transform(UserStateTransform)
+        // .with_transform(MediaContainerScriptingTransform)
         .apply_to(&mut container)
         .await;
 
@@ -408,12 +416,11 @@ pub async fn get_collections_children(
 
 
 #[handler]
-pub async fn get_library_metadata(req: &mut Request, res: &mut Response) {
+pub async fn get_library_item_metadata(req: &mut Request, res: &mut Response) {
     let config: Config = Config::figment().extract().unwrap();
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
-    let content_type = get_content_type_from_headers(req.headers_mut());
-    // dbg!("sup");
+    let content_type = get_content_type_from_headers(req.headers_mut());;
 
     if config.disable_related {
         add_query_param_salvo(req, "includeRelated".to_string(), "0".to_string());
@@ -436,6 +443,38 @@ pub async fn get_library_metadata(req: &mut Request, res: &mut Response) {
         .apply_to(&mut container)
         .await;
     // dbg!(container.media_container.count);
+    res.render(container);
+}
+
+
+#[handler]
+pub async fn get_play_queues(req: &mut Request, res: &mut Response) {
+    let config: Config = Config::figment().extract().unwrap();
+    let params: PlexContext = req.extract().await.unwrap();
+    let plex_client = PlexClient::from_request(req, params.clone());
+    let content_type = get_content_type_from_headers(req.headers_mut());
+
+    if config.disable_related {
+        add_query_param_salvo(req, "includeRelated".to_string(), "0".to_string());
+    }
+
+    let upstream_res = plex_client.request(req).await.unwrap();
+    let mut container: MediaContainerWrapper<MediaContainer> =
+        match from_reqwest_response(upstream_res).await {
+            Ok(r) => r,
+            Err(error) => {
+                tracing::error!(error = ?error, uri = ?req.uri(), "Failed to get plex response");
+                res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
+                return;
+            }
+        };
+    container.content_type = content_type;
+
+    TransformBuilder::new(plex_client, params.clone())
+        .with_transform(MediaContainerScriptingTransform)
+        .apply_to(&mut container)
+        .await;
+
     res.render(container);
 }
 

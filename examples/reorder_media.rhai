@@ -22,4 +22,8 @@ fn reorder_media(media, context) {
     return media;
 };
 
-media_container.Metadata[0].Media = reorder_media(media_container.Metadata[0].Media, context);
+if media_container.Metadata != () {
+    if media_container.Metadata[0].Media != () {
+        media_container.Metadata[0].Media = reorder_media(media_container.Metadata[0].Media, context);
+    }
+}

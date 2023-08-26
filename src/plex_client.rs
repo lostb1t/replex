@@ -93,11 +93,18 @@ impl PlexClient {
         headers.remove(ACCEPT); // remove accept as we always do json request
         let res = self
             .http_client
-            .get(uri)
+            .request(req.method_mut().to_owned(), uri)
             .headers(headers)
             .send()
             .await
             .map_err(Error::other)?;
+        // let res = self
+        //     .http_client
+        //     .get(uri)
+        //     .headers(headers)
+        //     .send()
+        //     .await
+        //     .map_err(Error::other)?;
         Ok(res)
     }
 

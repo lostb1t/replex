@@ -154,6 +154,7 @@ pub async fn from_reqwest_response(
     res: reqwest::Response,
 ) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
     let bytes = res.bytes().await.unwrap();
+    // dbg!(&bytes);
     // serde_json::from_reader(&*bytes).map_err(Error::other)
     serde_json::from_reader(&*bytes).map_err(Error::other)
 }
