@@ -76,6 +76,7 @@ pub struct Config {
         deserialize_with = "figment::util::bool_from_str_or_int"
     )]
     pub force_maximum_quality: bool,
+    pub test_script: Option<String>,
 }
 
 fn default_cache_ttl() -> u64 {

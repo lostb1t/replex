@@ -930,6 +930,11 @@ impl Transform for MediaContainerScriptingTransform {
         plex_client: PlexClient,
         options: PlexContext,
     ) -> MediaContainer {
+        let config: Config = Config::figment().extract().unwrap();
+        if config.test_script.is_none() {
+            return item;
+        }
+
         let mut media_container: Dynamic = to_dynamic(item).unwrap();
         let mut context: Dynamic = to_dynamic(options).unwrap();
         let mut engine = Engine::new();
@@ -943,7 +948,7 @@ impl Transform for MediaContainerScriptingTransform {
         scope.push("context", context);
 
         engine
-            .run_file_with_scope(&mut scope, "hello_world.rhai".into())
+            .run_file_with_scope(&mut scope, config.test_script.unwrap().into())
             .unwrap();
         let result = from_dynamic::<MediaContainer>(&scope
             .get_value::<Dynamic>("media_container")
