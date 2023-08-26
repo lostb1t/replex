@@ -60,14 +60,18 @@ pub fn route() -> Router {
 
     if config.redirect_streams {
         router = router
-            .push(
-                Router::with_path("/video/<colon:colon>/transcode/<**rest>")
-                    .handle(redirect_stream),
-            )
+            // .push(
+            //     Router::with_path("/video/<colon:colon>/transcode/<**rest>")
+            //         .handle(redirect_stream),
+            // )
             //.push(
             //    Router::with_path("/<colon:colon>/timeline/<**rest>")
             //        .handle(redirect_stream),
             //)
+            .push(
+                Router::with_path("/video/<colon:colon>/transcode/universal/session/<**rest>")
+                    .handle(redirect_stream),
+            )
             .push(
                 Router::with_path(
                     "/library/parts/<itemid>/<partid>/file.<extension>",
