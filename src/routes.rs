@@ -566,6 +566,8 @@ async fn force_maximum_quality(req: &mut Request) {
     let mut queries = req.queries().clone();
     queries.remove("maxVideoBitrate");
     queries.remove("videoBitrate");
+    queries.remove("autoAdjustQuality");
+    queries.insert("autoAdjustQuality".to_string(), "0".to_string());
     queries.remove("directStream");
     queries.insert("directStream".to_string(), "1".to_string());
     //queries.remove("directPlay");
