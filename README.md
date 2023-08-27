@@ -85,7 +85,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_REDIRECT_STREAMS_URL  | REPLEX_HOST    | Alternative streams endpoint                                         |
 | REPLEX_CACHE_TTL          | 1800    	 | Time to live for caches in seconds. Set to 0 to disable (not recommended).  |
 | REPLEX_CACHE_ROWS         | true       | Cache rows            	                            |
-| REPLEX_CACHE_ROWS_REFRESH | true     | Auto refreshe cached rows           	                 |
+| REPLEX_CACHE_ROWS_REFRESH | true     | Auto refresh cached rows           	                 |
 
 ## Mixed rows
 
