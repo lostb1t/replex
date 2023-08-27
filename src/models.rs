@@ -356,7 +356,7 @@ pub struct Media {
     pub width: Option<i64>,
     #[yaserde(attribute, rename = "partCount")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub part_count: Option<String>,
+    pub part_count: Option<i32>,
     #[yaserde(attribute, rename = "channelArt")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub channel_art: Option<String>,
