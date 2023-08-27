@@ -14,7 +14,7 @@ Remix your plex recommendations.
 - Disable leaf count: remove episode count from artwork.
 - Hot cache: auto refreshed cache for home and library recommended.
 - Force maximum quality.
-- Auto select correct version based on resolution of the client.
+- Auto select version based on resolution of the client.
 - Works on every client/app not only plex web!
 - Plays nice with PMM (and without).
 
