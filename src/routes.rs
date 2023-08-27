@@ -613,7 +613,7 @@ async fn force_maximum_quality(req: &mut Request) {
     };
 
     replace_query(queries, req);
-    dbg!(&req);
+    // dbg!(&req);
 }
 
 #[handler]
