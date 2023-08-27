@@ -13,13 +13,13 @@ use futures_util::{
     StreamExt,
 };
 use itertools::Itertools;
-use rhai::{serde::{from_dynamic, to_dynamic}};
+use rhai::serde::{from_dynamic, to_dynamic};
 use rhai::{Dynamic, Engine, EvalAltResult, Scope};
-use std::{collections::HashMap, cell::Cell};
+use std::cell::RefCell;
 use std::sync::Arc;
+use std::{cell::Cell, collections::HashMap};
 use tokio::task::JoinSet;
 use tokio::time::Instant;
-use std::cell::RefCell;
 
 #[async_trait]
 pub trait Transform: Send + Sync + 'static {
@@ -29,7 +29,6 @@ pub trait Transform: Send + Sync + 'static {
         plex_client: PlexClient,
         options: PlexContext,
     ) {
-
     }
     async fn transform_mediacontainer(
         &self,
@@ -160,12 +159,13 @@ impl TransformBuilder {
 
             // dont use join as it needs ti be executed in order
             // let l = std::cell::RefCell::new(&mut container.media_container);
-            container.media_container = t.transform_mediacontainer(
-                container.media_container.clone(),
-                self.plex_client.clone(),
-                self.options.clone(),
-            )
-            .await;
+            container.media_container = t
+                .transform_mediacontainer(
+                    container.media_container.clone(),
+                    self.plex_client.clone(),
+                    self.options.clone(),
+                )
+                .await;
             // dbg!(container.media_container.size);
         }
 
@@ -553,10 +553,24 @@ impl PlatformHeroStyle {
         }
     }
 
-    pub fn by_platform(platform: Platform, product: String) -> Self {
+    pub fn htpc_style() -> Self {
+        Self {
+            style: Some("hero".to_string()),
+            r#type: "mixed".to_string(),
+            ..PlatformHeroStyle::default()
+        }
+    }
+
+    pub fn for_client(platform: Platform, product: String) -> Self {
         match platform {
             Platform::Android => PlatformHeroStyle::android(product),
-            _ => PlatformHeroStyle::default(),
+            _ => {
+                if product.starts_with("Plex HTPC") {
+                    PlatformHeroStyle::htpc_style()
+                } else {
+                    PlatformHeroStyle::default()
+                }
+            }
         }
     }
 }
@@ -577,7 +591,7 @@ impl Transform for HubStyleTransform {
             let is_hero =
                 item.is_hero(plex_client.clone()).await.unwrap_or(false);
             if is_hero {
-                let mut style = PlatformHeroStyle::by_platform(
+                let mut style = PlatformHeroStyle::for_client(
                     options.platform,
                     options.product.unwrap_or_default(),
                 );
@@ -727,7 +741,7 @@ impl Transform for CollecionStyleTransform {
             let mut futures = FuturesOrdered::new();
             // let now = Instant::now();
 
-            let mut style = PlatformHeroStyle::by_platform(
+            let mut style = PlatformHeroStyle::for_client(
                 options.platform,
                 options.product.unwrap_or_default(),
             );
@@ -938,7 +952,7 @@ impl Transform for MediaContainerScriptingTransform {
         let mut media_container: Dynamic = to_dynamic(item).unwrap();
         let mut context: Dynamic = to_dynamic(options).unwrap();
         let mut engine = Engine::new();
-    
+
         engine
             .register_type_with_name::<Dynamic>("MediaContainer")
             .register_type_with_name::<Dynamic>("PlexContext");
@@ -950,10 +964,10 @@ impl Transform for MediaContainerScriptingTransform {
         engine
             .run_file_with_scope(&mut scope, config.test_script.unwrap().into())
             .unwrap();
-        let result = from_dynamic::<MediaContainer>(&scope
-            .get_value::<Dynamic>("media_container")
-            .unwrap()).unwrap();
+        let result = from_dynamic::<MediaContainer>(
+            &scope.get_value::<Dynamic>("media_container").unwrap(),
+        )
+        .unwrap();
         result
-
     }
 }

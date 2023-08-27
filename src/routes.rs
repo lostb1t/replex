@@ -626,7 +626,7 @@ async fn auto_select_version(req: &mut Request) {
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let media_index = req.queries().get("mediaIndex");
-    if media_index.is_none() && params.screen_resolution.len() > 0 {
+    if (media_index.is_none() || media_index.unwrap() == "-1" ) && params.screen_resolution.len() > 0 {
         let item = plex_client
             .get_item_by_key(req.queries().get("path").unwrap().to_string())
             .await
