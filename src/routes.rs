@@ -104,12 +104,10 @@ pub fn route() -> Router {
 
     let mut decision_router = Router::new()
         .path("/video/<colon:colon>/transcode/universal/decision")
-        // .hoop(force_maximum_quality)
         .handle(proxy.clone());
 
     let mut start_router = Router::new()
         .path("/video/<colon:colon>/transcode/universal/start<**rest>")
-        // .hoop(force_maximum_quality)
         .handle(proxy.clone());
 
     if config.force_maximum_quality || config.disable_transcode {
@@ -627,9 +625,8 @@ async fn force_maximum_quality(req: &mut Request) {
 async fn auto_select_version(req: &mut Request) {
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
-
     let media_index = req.queries().get("mediaIndex");
-    if media_index.is_none() {
+    if media_index.is_none() && params.screen_resolution.len() > 0 {
         let item = plex_client
             .get_item_by_key(req.queries().get("path").unwrap().to_string())
             .await
