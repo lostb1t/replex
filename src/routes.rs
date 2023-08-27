@@ -102,20 +102,26 @@ pub fn route() -> Router {
             );
     }
 
+    let mut decision_router = Router::new()
+        .path("/video/<colon:colon>/transcode/universal/decision")
+        // .hoop(force_maximum_quality)
+        .handle(proxy.clone());
+
+    let mut start_router = Router::new()
+        .path("/video/<colon:colon>/transcode/universal/start<**rest>")
+        // .hoop(force_maximum_quality)
+        .handle(proxy.clone());
+
     if config.force_maximum_quality || config.disable_transcode {
-        router = router.push(
-            Router::new()
-                .path("/video/<colon:colon>/transcode/universal/decision")
-                .hoop(force_maximum_quality)
-                .handle(proxy.clone()),
-        )
-        .push(
-            Router::new()
-                .path("/video/<colon:colon>/transcode/universal/start<**rest>")
-                .hoop(force_maximum_quality)
-                .handle(proxy.clone()),
-        )
+        decision_router = decision_router.hoop(force_maximum_quality);
+        start_router = start_router.hoop(force_maximum_quality);
     }
+    if config.auto_select_version {
+        decision_router = decision_router.hoop(auto_select_version);
+        start_router = start_router.hoop(auto_select_version);
+    }
+
+    router = router.push(decision_router).push(start_router);
 
     router = router
         .push(
@@ -306,7 +312,7 @@ pub async fn get_hubs_promoted(
         // })
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
-        .with_transform(MediaContainerScriptingTransform)
+        //.with_transform(MediaContainerScriptingTransform)
         .apply_to(&mut container)
         .await;
 
@@ -355,7 +361,7 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
         .with_transform(HubStyleTransform { is_home: false })
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
-        .with_transform(MediaContainerScriptingTransform)
+        //.with_transform(MediaContainerScriptingTransform)
         // .with_filter(CollectionHubPermissionFilter)
         .with_filter(WatchedFilter)
         .apply_to(&mut container)
@@ -414,7 +420,7 @@ pub async fn get_collections_children(
                 && !params.exclude_all_leaves,
         })
         .with_transform(UserStateTransform)
-        .with_transform(MediaContainerScriptingTransform)
+        //.with_transform(MediaContainerScriptingTransform)
         .apply_to(&mut container)
         .await;
 
@@ -614,6 +620,46 @@ async fn force_maximum_quality(req: &mut Request) {
 
     replace_query(queries, req);
     // dbg!(&req);
+}
+
+/// When multiple qualities are avaiable, select the most relevant one.
+#[handler]
+async fn auto_select_version(req: &mut Request) {
+    let params: PlexContext = req.extract().await.unwrap();
+    let plex_client = PlexClient::from_request(req, params.clone());
+
+    let media_index = req.queries().get("mediaIndex");
+    if media_index.is_none() {
+        let item = plex_client
+            .get_item_by_key(req.queries().get("path").unwrap().to_string())
+            .await
+            .unwrap();
+        let mut media = item.media_container.metadata[0].media.clone();
+        let device_density = params.screen_resolution[0].height
+            * params.screen_resolution[0].width;
+        if media.len() > 1 {
+            media.sort_by(|x, y| {
+                let current_density = x.height.unwrap() * x.width.unwrap();
+                let next_density = y.height.unwrap() * y.width.unwrap();
+                let q = current_density - device_density;
+                let qq = next_density - device_density;
+
+                if q > qq {
+                    return std::cmp::Ordering::Greater;
+                } else {
+                    return std::cmp::Ordering::Less;
+                }
+            })
+        }
+
+        for (index, m) in item.media_container.metadata[0].media.iter().enumerate() {
+            if m.id == media[0].id {
+                add_query_param_salvo(req, "mediaIndex".to_string(), index.to_string());
+            }
+        }
+        //dbg!(&media[0]);
+    }
+    // dbg!(&media_index);
 }
 
 #[handler]
