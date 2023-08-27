@@ -1,7 +1,3 @@
-use std::collections::HashMap;
-use std::path::PathBuf;
-use std::sync::Arc;
-use rhai::{Engine, EvalAltResult};
 use crate::cache::*;
 use crate::config::Config;
 use crate::headers;
@@ -19,6 +15,10 @@ use moka::future::Cache as MokaCache;
 use moka::notification::RemovalCause;
 use moka::sync::Cache as MokaCacheSync;
 use moka::sync::CacheBuilder as MokaCacheBuilder;
+use rhai::{Engine, EvalAltResult};
+use std::collections::HashMap;
+use std::path::PathBuf;
+use std::sync::Arc;
 // use salvo::cache::{Cache, CachedEntry};
 use salvo::compression::Compression;
 use salvo::cors::Cors;
@@ -48,15 +48,13 @@ pub fn route() -> Router {
             .unwrap(),
     );
 
-    
-
     let mut router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
         .hoop(Timeout::new(Duration::from_secs(30)))
         .hoop(Compression::new().enable_gzip(CompressionLevel::Fastest))
         // .hoop(max_concurrency(500))
         .hoop(affix::insert("proxy", Arc::new(proxy.clone())));
-        // .hoop(affix::insert("script_engine", Arc::new(script_engine)));
+    // .hoop(affix::insert("script_engine", Arc::new(script_engine)));
 
     if config.redirect_streams {
         router = router
@@ -69,8 +67,10 @@ pub fn route() -> Router {
             //        .handle(redirect_stream),
             //)
             .push(
-                Router::with_path("/video/<colon:colon>/transcode/universal/session/<**rest>")
-                    .handle(redirect_stream),
+                Router::with_path(
+                    "/video/<colon:colon>/transcode/universal/session/<**rest>",
+                )
+                .handle(redirect_stream),
             )
             .push(
                 Router::with_path(
@@ -96,9 +96,9 @@ pub fn route() -> Router {
             //         .handle(proxy.clone()),
             // )
             .push(
-                 Router::with_path("/playQueues")
-                     .hoop(disable_related_query)
-                     .handle(proxy.clone()),
+                Router::with_path("/playQueues")
+                    .hoop(disable_related_query)
+                    .handle(proxy.clone()),
             );
     }
 
@@ -139,7 +139,7 @@ pub fn route() -> Router {
             Router::new()
                 .path("/ping")
                 .hoop(force_maximum_quality)
-                .get(ping)
+                .get(ping),
         )
         .push(
             Router::new()
@@ -352,9 +352,7 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
 
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubSectionDirectoryTransform)
-        .with_transform(HubStyleTransform {
-            is_home: false
-        })
+        .with_transform(HubStyleTransform { is_home: false })
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
         .with_transform(MediaContainerScriptingTransform)
@@ -424,16 +422,19 @@ pub async fn get_collections_children(
     Ok(())
 }
 
-
 #[handler]
 pub async fn get_library_item_metadata(req: &mut Request, res: &mut Response) {
     let config: Config = Config::figment().extract().unwrap();
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
-    let content_type = get_content_type_from_headers(req.headers_mut());;
+    let content_type = get_content_type_from_headers(req.headers_mut());
 
     if config.disable_related {
-        add_query_param_salvo(req, "includeRelated".to_string(), "0".to_string());
+        add_query_param_salvo(
+            req,
+            "includeRelated".to_string(),
+            "0".to_string(),
+        );
     }
 
     let upstream_res = plex_client.request(req).await.unwrap();
@@ -456,7 +457,6 @@ pub async fn get_library_item_metadata(req: &mut Request, res: &mut Response) {
     res.render(container);
 }
 
-
 #[handler]
 pub async fn get_play_queues(req: &mut Request, res: &mut Response) {
     let config: Config = Config::figment().extract().unwrap();
@@ -465,7 +465,11 @@ pub async fn get_play_queues(req: &mut Request, res: &mut Response) {
     let content_type = get_content_type_from_headers(req.headers_mut());
 
     if config.disable_related {
-        add_query_param_salvo(req, "includeRelated".to_string(), "0".to_string());
+        add_query_param_salvo(
+            req,
+            "includeRelated".to_string(),
+            "0".to_string(),
+        );
     }
 
     let upstream_res = plex_client.request(req).await.unwrap();
@@ -574,7 +578,16 @@ async fn force_maximum_quality(req: &mut Request) {
     //queries.insert("directPlay".to_string(), "1".to_string());
     queries.remove("videoQuality");
     queries.insert("videoQuality".to_string(), "100".to_string());
+    queries.remove("videoResolution");
+    queries.insert("videoResolution".to_string(), "4096x2160".to_string());
 
+    // some clients send wrong buffer format
+    if let Some(size) = queries.remove("mediaBufferSize") {
+        queries.insert(
+            "mediaBufferSize".to_string(),
+            (size[0].parse::<f32>().unwrap() as i64).to_string(),
+        );
+    }
     // if let Some(i) = req.queries().get("protocol") {
     //     if i == "http" {
     //         queries.remove("copyts");
@@ -585,13 +598,9 @@ async fn force_maximum_quality(req: &mut Request) {
     // }
 
     let query_key = "X-Plex-Client-Profile-Extra".to_string();
-    if queries.contains_key(&query_key)
-    {
-        
-        let extra = &queries
-            .remove(&query_key.clone())
-            .unwrap()[0];
-        
+    if queries.contains_key(&query_key) {
+        let extra = &queries.remove(&query_key.clone()).unwrap()[0];
+
         let filtered_extra = extra
             .split("+")
             .filter(|s| {
@@ -600,14 +609,11 @@ async fn force_maximum_quality(req: &mut Request) {
             })
             .join("+");
 
-        queries.insert(
-            query_key,
-            filtered_extra,
-        );
+        queries.insert(query_key, filtered_extra);
     };
 
     replace_query(queries, req);
-    
+    dbg!(&req);
 }
 
 #[handler]
