@@ -236,7 +236,7 @@ impl YaSerializeTrait for SpecialBool {
         &self,
         writer: &mut yaserde::ser::Serializer<W>,
     ) -> Result<(), String> {
-        let content = format!("{}", self.inner as i32);
+        let content = format!("{}", self.inner as i64);
         let event = XmlEvent::characters(&content);
         let _ret = writer.write(event);
         Ok(())
@@ -605,7 +605,7 @@ pub struct Image {
 #[serde(rename_all = "camelCase")]
 pub struct Label {
     #[yaserde(attribute)]
-    id: i32,
+    id: i64,
     #[yaserde(attribute)]
     tag: String,
     #[yaserde(attribute)]
@@ -790,7 +790,7 @@ pub struct MetaData {
     #[yaserde(rename = "librarySectionID")]
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub library_section_id: Option<u32>,
+    pub library_section_id: Option<i64>,
     #[yaserde(attribute)]
     #[yaserde(rename = "librarySectionTitle")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -914,7 +914,7 @@ pub struct MetaData {
         skip_serializing_if = "Option::is_none",
         rename = "playQueueItemID"
     )]
-    pub play_queue_item_id: Option<i32>,
+    pub play_queue_item_id: Option<i64>,
 }
 
 pub(crate) fn deserialize_option_string_from_number<'de, D>(
@@ -1138,7 +1138,7 @@ pub struct MediaContainer {
         rename = "librarySectionID",
         skip_serializing_if = "Option::is_none"
     )]
-    pub library_section_id: Option<u32>,
+    pub library_section_id: Option<i64>,
     #[yaserde(attribute)]
     #[yaserde(rename = "librarySectionTitle")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1167,14 +1167,14 @@ pub struct MediaContainer {
     #[yaserde(attribute)]
     #[yaserde(rename = "playQueueID")]
     #[serde(skip_serializing_if = "Option::is_none", rename = "playQueueID")]
-    pub play_queue_id: Option<i32>,
+    pub play_queue_id: Option<i64>,
     #[yaserde(attribute)]
     #[yaserde(rename = "playQueueSelectedItemID")]
     #[serde(
         skip_serializing_if = "Option::is_none",
         rename = "playQueueSelectedItemID"
     )]
-    pub play_queue_selected_item_id: Option<i32>,
+    pub play_queue_selected_item_id: Option<i64>,
     #[yaserde(attribute)]
     #[yaserde(rename = "playQueueSelectedItemOffset")]
     #[serde(
