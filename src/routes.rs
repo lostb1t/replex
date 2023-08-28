@@ -125,7 +125,7 @@ pub fn route() -> Router {
         subtitles_router = subtitles_router.hoop(auto_select_version);
     }
 
-    router = router.push(decision_router).push(start_router).hoop(subtitles_router);
+    router = router.push(decision_router).push(start_router).push(subtitles_router);
 
     router = router
         .push(
