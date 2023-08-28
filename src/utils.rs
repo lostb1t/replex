@@ -45,7 +45,9 @@ pub fn get_collection_id_from_hub(hub: &MetaData) -> i32 {
 
 pub fn replace_query(query: MultiMap<String, String>, req: &mut SalvoRequest) {
     let mut url = Url::parse(req.uri_mut().to_string().as_str()).unwrap();
-    url.query_pairs_mut().clear().extend_pairs(&query.iter().map(|(k, v)| (k, v)).collect_vec());
+    url.query_pairs_mut()
+        .clear()
+        .extend_pairs(&query.iter().map(|(k, v)| (k, v)).collect_vec());
     *req.uri_mut() = hyper::Uri::try_from(url.as_str()).unwrap();
 }
 
@@ -154,23 +156,26 @@ pub async fn from_reqwest_response(
     res: reqwest::Response,
 ) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
     let bytes = res.bytes().await.unwrap();
-    // dbg!(&bytes);
-    // serde_json::from_reader(&*bytes).map_err(Error::other)
-    serde_json::from_reader(&*bytes).map_err(Error::other)
+    from_bytes(bytes)
 }
 
 pub async fn from_hyper_response(
     res: HyperResponse,
 ) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
     let bytes = res.into_body().collect().await.unwrap().to_bytes();
-    serde_json::from_reader(&*bytes).map_err(Error::other)
+    from_bytes(bytes)
 }
 
 pub async fn from_salvo_response(
     mut res: SalvoResponse,
 ) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
     let bytes = res.take_bytes(None).await.unwrap();
-    serde_json::from_reader(&*bytes).map_err(Error::other)
+    from_bytes(bytes)
+}
+
+pub fn from_bytes(bytes: bytes::Bytes) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
+    let deserializer = &mut serde_json::Deserializer::from_reader(&*bytes);
+    serde_path_to_error::deserialize(deserializer).map_err(Error::other)
 }
 
 // pub fn from_bytes(
