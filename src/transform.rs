@@ -426,7 +426,7 @@ impl Transform for LibraryMixTransform {
                 .clone()
                 .get_cached(
                     plex_client.get_collection_children(
-                        id,
+                        id as i64,
                         Some(self.offset),
                         Some(self.limit),
                     ),
