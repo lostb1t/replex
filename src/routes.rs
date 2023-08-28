@@ -319,7 +319,10 @@ pub async fn get_hubs_promoted(
 }
 
 #[handler]
-pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
+pub async fn get_hubs_sections(
+    req: &mut Request,
+    res: &mut Response,
+) -> Result<(), anyhow::Error> {
     let config: Config = Config::figment().extract().unwrap();
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
@@ -343,15 +346,18 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
     add_query_param_salvo(req, "includeGuids".to_string(), "1".to_string());
 
     let upstream_res = plex_client.request(req).await.unwrap();
+    match upstream_res.status() {
+        reqwest::StatusCode::OK => (),
+        status => {
+            tracing::error!(status = ?status, uri = ?req.uri(), "Failed to get plex response");
+            return Err(
+                salvo::http::StatusError::internal_server_error().into()
+            );
+        }
+    };
+
     let mut container: MediaContainerWrapper<MediaContainer> =
-        match from_reqwest_response(upstream_res).await {
-            Ok(r) => r,
-            Err(error) => {
-                tracing::error!(error = ?error, uri = ?req.uri(), "Failed to get plex response");
-                res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
-                return;
-            }
-        };
+        from_reqwest_response(upstream_res).await?;
     container.content_type = content_type;
 
     TransformBuilder::new(plex_client, params.clone())
@@ -366,6 +372,7 @@ pub async fn get_hubs_sections(req: &mut Request, res: &mut Response) {
         .await;
     // dbg!(container.media_container.count);
     res.render(container);
+    Ok(())
 }
 
 #[handler]
@@ -626,7 +633,9 @@ async fn auto_select_version(req: &mut Request) {
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let media_index = req.queries().get("mediaIndex");
-    if (media_index.is_none() || media_index.unwrap() == "-1" ) && params.screen_resolution.len() > 0 {
+    if (media_index.is_none() || media_index.unwrap() == "-1")
+        && params.screen_resolution.len() > 0
+    {
         let item = plex_client
             .get_item_by_key(req.queries().get("path").unwrap().to_string())
             .await
@@ -649,9 +658,15 @@ async fn auto_select_version(req: &mut Request) {
             })
         }
 
-        for (index, m) in item.media_container.metadata[0].media.iter().enumerate() {
+        for (index, m) in
+            item.media_container.metadata[0].media.iter().enumerate()
+        {
             if m.id == media[0].id {
-                add_query_param_salvo(req, "mediaIndex".to_string(), index.to_string());
+                add_query_param_salvo(
+                    req,
+                    "mediaIndex".to_string(),
+                    index.to_string(),
+                );
             }
         }
         //dbg!(&media[0]);
