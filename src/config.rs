@@ -60,7 +60,7 @@ pub struct Config {
         deserialize_with = "figment::util::bool_from_str_or_int"
     )]
     pub redirect_streams: bool,
-    pub redirect_streams_url: Option<String>,
+    pub redirect_streams_host: Option<String>,
     #[serde(
         default = "default_as_false",
         deserialize_with = "figment::util::bool_from_str_or_int"
