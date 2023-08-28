@@ -110,16 +110,22 @@ pub fn route() -> Router {
         .path("/video/<colon:colon>/transcode/universal/start<**rest>")
         .handle(proxy.clone());
 
+    let mut subtitles_router = Router::new()
+        .path("/video/<colon:colon>/transcode/universal/subtitles")
+        .handle(proxy.clone());
+
     if config.force_maximum_quality || config.disable_transcode {
         decision_router = decision_router.hoop(force_maximum_quality);
         start_router = start_router.hoop(force_maximum_quality);
+        subtitles_router = subtitles_router.hoop(force_maximum_quality);
     }
     if config.auto_select_version {
         decision_router = decision_router.hoop(auto_select_version);
         start_router = start_router.hoop(auto_select_version);
+        subtitles_router = subtitles_router.hoop(auto_select_version);
     }
 
-    router = router.push(decision_router).push(start_router);
+    router = router.push(decision_router).push(start_router).hoop(subtitles_router);
 
     router = router
         .push(
