@@ -49,7 +49,7 @@ xml-rs = "0.8.16"
 openssl = { version = "0.10", features = ["vendored"] }
 multimap = "0.9.0"
 rhai = { version = "1.15.1", features = ["serde"] }
-format_serde_error = "0.3"
+#format_serde_error = "0.3"
 
 [dev-dependencies]
 async-std = { version = "^1.12", features = ["attributes"] }
