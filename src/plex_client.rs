@@ -159,7 +159,7 @@ impl PlexClient {
     #[async_recursion]
     pub async fn load_collection_children_recursive(
         &self,
-        id: u32,
+        id: i64,
         offset: i32,
         limit: i32,
         original_limit: i32,
