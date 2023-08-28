@@ -173,10 +173,10 @@ async fn redirect_stream(
     res: &mut Response,
 ) {
     let config: Config = Config::figment().extract().unwrap();
-    let redirect_url = if config.redirect_streams_url.clone().is_some() {
+    let redirect_url = if config.redirect_streams_host.clone().is_some() {
         format!(
             "{}{}",
-            config.redirect_streams_url.clone().unwrap(),
+            config.redirect_streams_host.clone().unwrap(),
             req.uri_mut().path_and_query().unwrap()
         )
     } else {
