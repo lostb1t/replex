@@ -114,7 +114,7 @@ impl PlexClient {
 
     pub async fn get_section_collections(
         &self,
-        id: u32,
+        id: i64,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
         let res = self
             .get(format!("/library/sections/{}/collections", id))
