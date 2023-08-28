@@ -688,19 +688,19 @@ pub struct MetaData {
     pub view_group: Option<String>,
     #[yaserde(attribute, rename = "addedAt")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub added_at: Option<u32>,
+    pub added_at: Option<i64>,
     #[yaserde(attribute, rename = "updatedAt")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub updated_at: Option<u32>,
+    pub updated_at: Option<i64>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub view_mode: Option<u32>,
+    pub view_mode: Option<i32>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub art: Option<String>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub index: Option<u32>,
+    pub index: Option<i32>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub subtype: Option<String>,
