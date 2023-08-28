@@ -207,7 +207,7 @@ impl Filter for CollectionHubPermissionFilter {
         if !item.is_hub() {
             return true;
         }
-        let section_id: u32 = item.library_section_id.unwrap_or_else(|| {
+        let section_id: i64 = item.library_section_id.unwrap_or_else(|| {
             item.clone()
                 .children()
                 .get(0)
