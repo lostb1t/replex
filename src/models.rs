@@ -688,10 +688,10 @@ pub struct MetaData {
     pub view_group: Option<String>,
     #[yaserde(attribute, rename = "addedAt")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub added_at: Option<i32>,
+    pub added_at: Option<u32>,
     #[yaserde(attribute, rename = "updatedAt")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub updated_at: Option<i32>,
+    pub updated_at: Option<u32>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub view_mode: Option<u32>,
