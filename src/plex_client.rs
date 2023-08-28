@@ -131,7 +131,7 @@ impl PlexClient {
 
     pub async fn get_collection_children(
         &self,
-        id: u32,
+        id: i64,
         offset: Option<i32>,
         limit: Option<i32>,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
