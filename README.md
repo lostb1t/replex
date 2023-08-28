@@ -82,7 +82,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
 | REPLEX_DISABLE_RELATED  | false | See: https://github.com/sarendsen/replex/issues/26.        |
 | REPLEX_REDIRECT_STREAMS  | false    | Redirect streams to another endpoint.                                      |
-| REPLEX_REDIRECT_STREAMS_URL  | REPLEX_HOST    | Alternative streams endpoint                                         |
+| REPLEX_REDIRECT_STREAMS_HOST  | REPLEX_HOST    | Alternative streams endpoint                                         |
 | REPLEX_CACHE_TTL          | 1800    	 | Time to live for caches in seconds. Set to 0 to disable (not recommended).  |
 | REPLEX_CACHE_ROWS         | true       | Cache rows            	                            |
 | REPLEX_CACHE_ROWS_REFRESH | true     | Auto refresh cached rows           	                 |
@@ -136,7 +136,7 @@ Paths are subject to change. for an uptodate list see [routing](src/routes.rs)
 ## Redirect streams
 
 If you have for example an appbox it might not be ideal to stream media through replex. As that will take a lot of network resources.
-You can redirect streams by enabling `REPLEX_REDIRECT_STREAMS` and optionally set `REPLEX_REDIRECT_STREAMS_URL` if it needs to be different from REPLEX_HOST
+You can redirect streams by enabling `REPLEX_REDIRECT_STREAMS` and optionally set `REPLEX_REDIRECT_STREAMS_HOST` if it needs to be different from REPLEX_HOST
 
 ## Known limitations/issues
 
