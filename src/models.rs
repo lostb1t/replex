@@ -951,8 +951,16 @@ impl MetaData {
         plex_client: PlexClient,
     ) -> Option<String> {
         self.guid.as_ref()?;
+        let guid = self.guid.clone().unwrap();;
+        if guid.starts_with("local://") {
+            tracing::debug!(
+                "Skipping loading remote metadata for local item: {}",
+                guid,
+            );
+            return None;
+        }
 
-        let cache_key = format!("{}:cover_art", self.guid.clone().unwrap());
+        let cache_key = format!("{}:cover_art", guid);
 
         let cached_result: Option<Option<String>> =
             GLOBAL_CACHE.get(cache_key.as_str()).await;
