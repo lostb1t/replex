@@ -595,8 +595,8 @@ async fn force_maximum_quality(req: &mut Request) {
     //queries.insert("directPlay".to_string(), "1".to_string());
     queries.remove("videoQuality");
     //queries.insert("videoQuality".to_string(), "100".to_string());
-    queries.remove("videoResolution");
-    queries.insert("videoResolution".to_string(), "4096x2160".to_string());
+    //queries.remove("videoResolution");
+    //queries.insert("videoResolution".to_string(), "4096x2160".to_string());
 
     // some clients send wrong buffer format
     if let Some(size) = queries.remove("mediaBufferSize") {
