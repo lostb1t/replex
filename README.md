@@ -128,7 +128,7 @@ Use https instead of http if you using a custom domain, otherwise app.plex.tv wo
 If you have a reverse proxy running and dont want to proxy streaming through plex then you can route the following paths and it subpaths directly to plex.
 
 - /video/:/transcode/universal/session
-- /library/parts/
+- /library/parts
 
 ## Redirect streams
 
