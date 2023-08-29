@@ -10,7 +10,7 @@ Remix your plex recommendations.
 - Remove watched items from recommendations.
 - Choose between styles, shelf (default) or hero.
 - Auto load artwork for hero styles.
-- Disable user state: remove unwatched markers from artwork.
+- Disable user state: remove unwatched badges from artwork.
 - Disable leaf count: remove episode count from artwork.
 - Hot cache: auto refreshed cache for home and library recommended.
 - Force maximum quality.
