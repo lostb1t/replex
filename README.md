@@ -10,7 +10,7 @@ Remix your plex recommendations.
 - Remove watched items from recommendations.
 - Choose between styles, shelf (default) or hero.
 - Auto load artwork for hero styles.
-- Disable user state: remove unwatched badges from artwork.
+- Disable user state: remove unplayed badges from row items.
 - Disable leaf count: remove episode count from artwork.
 - Hot cache: auto refreshed cache for home and library recommended.
 - Force maximum quality.
@@ -76,7 +76,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_HERO_ROWS          |        	 | Comma seperated list of hubidentifiers to make hero stlye                  |
 | REPLEX_INCLUDE_WATCHED    | false    | If set to false, hide watched items for recommended rows                                     |
 | REPLEX_FORCE_MAXIMUM_QUALITY    | false    | This will force clients to use the maximum quality. Meaning that if a client requests anything other then the maximum quality this will be ignored and the maximum quality (direct play/stream when server allows for original) is used instead. This doesn't prevent transcoding. It only sets the bitrate to original quality. So if a client needs a different codec, container or audio it should still transcode.                                                                                                 |
-| REPLEX_DISABLE_USER_STATE | false    | Remove unwatched markers from artwork.|
+| REPLEX_DISABLE_USER_STATE | false    | Remove unplayed badges from row items |
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
 | REPLEX_DISABLE_RELATED  | false | See: https://github.com/sarendsen/replex/issues/26.        |
 | REPLEX_REDIRECT_STREAMS  | false    | Redirect streams to another endpoint.                                      |
