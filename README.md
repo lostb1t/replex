@@ -113,7 +113,9 @@ You have 2 options to provide remote access.
 
 1. By ip http://[replexip]:[replexport]
 
-   This option has 2 downsides. One it has no SSL so your connections will be insecure. Second app.plex.tv will not work. As browsers do not allow unsecure connections from a securew website. Gf you want to to use the web ui you can access it by ip. All other clients should work with unsecured connections. NOTE: If remote access was enabled before, then plex witll still try to use https for it. Even if disabled.
+   This option has 2 downsides. One it has no SSL so your connections will be insecure. 
+   Second app.plex.tv will not work. As browsers do not allow unsecure connections from a securew website. If you want to to use the web ui you can access it by ip. All other clients should work with unsecured connections. 
+   NOTE: If remote access was enabled before, then plex witll still try to use https for it. Even if disabled.
 
 2. Custom domain (reverse proxy)
 
