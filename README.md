@@ -125,13 +125,10 @@ Use https instead of http if you using a custom domain, otherwise app.plex.tv wo
 
 ## Reverse proxy
 
-If you have a reverse proxy running and only want to route the necessary paths, you can do so. (and all subpaths unless otherwise stated).
+If you have a reverse proxy running and dont want to proxy streaming through plex then you can route the following paths and it subpaths directly to plex.
 
-- /hubs (excluding /hubs/search)
-- /replex
-- /video/:/transcode/universal/decision (if force maximum quality is enabled) 
-
-Paths are subject to change. for an uptodate list see [routing](src/routes.rs)
+- /video/:/transcode/universal/session
+- /library/parts/
 
 ## Redirect streams
 
