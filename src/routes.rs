@@ -748,7 +748,7 @@ async fn video_transcode_fallback(
         let mut fallback_selected = false;
         for stream in streams {
             if stream.stream_type.clone().unwrap() == 1
-                && stream.decision.clone().unwrap() == "transcode"
+                && stream.decision.clone().unwrap_or("unknown".to_string()) == "transcode"
             {
                 tracing::trace!(
                     "{} ({}) is transcoding, looking for fallback",
