@@ -842,7 +842,7 @@ async fn auto_select_version(req: &mut Request) {
                       "0".to_string(),
                   );
                 }
-                dbg!(&req.queries().get("mediaIndex"));
+                dbg!(&req.queries().get("directPlay"));
             }
         }
         //dbg!(&media[0]);
