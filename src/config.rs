@@ -81,6 +81,10 @@ pub struct Config {
         deserialize_with = "figment::util::bool_from_str_or_int"
     )]
     pub auto_select_version: bool,
+    #[serde(
+        deserialize_with = "deserialize_comma_seperated_string"
+    )]
+    pub force_direct_play_for: Option<Vec<String>>,
     pub test_script: Option<String>,
 }
 

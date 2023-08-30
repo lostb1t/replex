@@ -56,9 +56,12 @@ pub fn add_query_param_salvo(
     param: String,
     value: String,
 ) {
-    let mut uri = pathetic::Uri::default()
-        .with_path(req.uri_mut().path())
-        .with_query(req.uri_mut().query());
+    // let mut uri = pathetic::Uri::default()
+    //     .with_path(req.uri_mut().path())
+    //     .with_query(req.uri_mut().query());
+    // let mut uri =
+    //     pathetic::Uri::new(req.uri_mut().to_string().as_str()).unwrap();
+    let mut uri = Url::parse(req.uri_mut().to_string().as_str()).unwrap();
     let mut query: Vec<(String, String)> = uri // remove existing values
         .query_pairs()
         .filter(|(name, _)| name.to_string() != param.to_string())
@@ -66,6 +69,7 @@ pub fn add_query_param_salvo(
         .collect();
     query.push((param.to_owned(), value.to_owned()));
     uri.query_pairs_mut().clear().extend_pairs(query);
+    // dbg!(uri.host());
     *req.uri_mut() = hyper::Uri::try_from(uri.as_str()).unwrap();
     // req
 }
@@ -173,7 +177,9 @@ pub async fn from_salvo_response(
     from_bytes(bytes)
 }
 
-pub fn from_bytes(bytes: bytes::Bytes) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
+pub fn from_bytes(
+    bytes: bytes::Bytes,
+) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
     let deserializer = &mut serde_json::Deserializer::from_reader(&*bytes);
     serde_path_to_error::deserialize(deserializer).map_err(Error::other)
 }
