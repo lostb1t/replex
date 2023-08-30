@@ -2970,6 +2970,7 @@ dependencies = [
  "tracing",
  "tracing-opentelemetry",
  "tracing-subscriber",
+ "uncased",
  "url",
  "xml-rs",
  "yaserde",

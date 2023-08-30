@@ -1,5 +1,6 @@
 use figment::{providers::Env, Figment};
 use salvo::prelude::*;
+use std::f32::consts::E;
 use std::fmt;
 use std::str::FromStr;
 use std::string::ToString;
@@ -17,7 +18,7 @@ use crate::tmdb::{TVShowImages, TMDB_CLIENT};
 use crate::utils::*;
 use anyhow::Result;
 use async_trait::async_trait;
-use serde_aux::prelude::deserialize_string_from_number;
+use serde_aux::prelude::{deserialize_string_from_number, deserialize_number_from_string};
 // use smartstring::alias::String;
 // use hyper::Body;
 use itertools::Itertools;
@@ -183,6 +184,21 @@ where
     }
 }
 
+// pub fn deserialize_comma_seperated_string<'de, D>(
+//     deserializer: D,
+// ) -> Result<Option<i64>, D::Error>
+// where
+//     D: Deserializer<'de>,
+// {
+//     match Deserialize::deserialize(deserializer)? {
+//         Some::<String>(s) => {
+//             let r: Vec<String> = s.split(',').map(|s| s.to_owned()).collect();
+//             Ok(Some(r))
+//         }
+//         None => Ok(None),
+//     }
+// }
+
 pub fn deserialize_screen_resolution<'de, D>(
     deserializer: D,
 ) -> Result<Vec<Resolution>, D::Error>
@@ -212,7 +228,116 @@ where
     }
 }
 
-/// For some fucking reason. Android for mobile (and only that) chokes on boolean in xml. It wants 0/1
+
+// fn skip_on_error<'de, D>(deserializer: D) -> Result<Option<>, D::Error>
+// where
+//     D: Deserializer<'de>,
+// {
+//     // Ignore the data in the input.
+//     match Deserialize::deserialize(deserializer) {
+//         Ok(v) => v,
+//         Err(e) => Ok(None),
+//     }
+// }
+
+// pub fn deserialize_optional_datetime<'de, D>(d: D) -> Result<Option<DateTime<Utc>>, D::Error>
+// where
+//     D: de::Deserializer<'de>,
+// {
+//     d.deserialize_option(OptionalDateTimeFromCustomFormatVisitor)
+// }
+
+// struct OptionalIntFromStr;
+
+pub fn optional_int_from_str<'de, D: Deserializer<'de>>(de: D) -> Result<Option<i64>, D::Error> {
+    struct Visitor;
+
+    impl<'de> serde::de::Visitor<'de> for Visitor {
+        type Value = Option<i64>;
+
+        fn expecting(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+            fmt.write_str("integer or string")
+        }
+
+        // fn visit_i64<E>(self, val: i64) -> Result<Self::Value, E>
+        // where
+        //     E: serde::de::Error,
+        // {
+        //     match NonZeroU32::new(val as i32) {
+        //         Some(val) => Ok(MyType(val)),
+        //         None => Err(E::custom("invalid integer value")),
+        //     }
+        // }
+
+        fn visit_str<E>(self, val: &str) -> Result<Self::Value, E>
+        where
+            E: serde::de::Error,
+        {   
+            dbg!("Matcging");
+            match val.parse::<i64>() {
+                Ok(val) => Ok(Some(val)),
+                Err(_) => Err(E::custom("failed to parse integer")),
+            }
+        }
+    }
+
+    de.deserialize_option(Visitor)
+}
+
+
+// pub fn int_from_str<'de, D>(
+//     deserializer: D,
+// ) -> Result<Option<i64>, D::Error>
+// where
+//     D: Deserializer<'de>,
+// {
+//     match Deserialize::deserialize(deserializer)? {
+//         Some::<i64>(s) => {
+//             Ok(Some(s))
+//         },
+//         None => Ok(None),
+//     }
+// }
+
+// pub fn int_from_str<'de, D: Deserializer<'de>>(de: D) -> Result<Option<i64>, D::Error> {
+//     struct Visitor;
+
+//     impl<'de> serde::de::Visitor<'de> for Visitor {
+//         type Value = Option<i64>;
+
+//         fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//             f.write_str("a boolean")
+//         }
+
+//         fn visit_str<E: serde::de::Error>(self, val: &str) -> Result<Option<i64>, E> {
+//            dbg!("yess");
+//            Ok(Some(val.parse::<i64>().unwrap()))
+//             // match val {
+//             //     v if uncased::eq(v, "true") => Ok(true),
+//             //     v if uncased::eq(v, "false") => Ok(false),
+//             //     s => Err(E::invalid_value(Unexpected::Str(s), &"true or false"))
+//             // }
+//         }
+
+//         // fn visit_u64<E: de::Error>(self, n: u64) -> Result<bool, E> {
+//         //     match n {
+//         //         0 | 1 => Ok(n != 0),
+//         //         n => Err(E::invalid_value(Unexpected::Unsigned(n), &"0 or 1"))
+//         //     }
+//         // }
+
+//         // fn visit_i64<E: de::Error>(self, n: i64) -> Result<bool, E> {
+//         //     match n {
+//         //         0 | 1 => Ok(n != 0),
+//         //         n => Err(E::invalid_value(Unexpected::Signed(n), &"0 or 1"))
+//         //     }
+//         // }
+//     }
+
+//     de.deserialize_any(Visitor)
+// }
+
+/// For some fucking reason. Android for mobile (and only that) chokes on boolean (true/false) in xml. It wants 0/1
 #[derive(Debug, Clone, PartialEq, Eq, Default, PartialOrd, YaDeserialize)]
 pub struct SpecialBool {
     inner: bool,
@@ -272,11 +397,22 @@ impl<'de> Deserialize<'de> for SpecialBool {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
-    {
-        let s = bool::deserialize(deserializer)?;
+    {   
+        let s = serde_aux::prelude::deserialize_bool_from_anything(deserializer).unwrap();
         Ok(SpecialBool::new(s))
     }
+
+    // fn deserialize_str<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    // where
+    //     V: Visitor<'de>;
 }
+
+// impl FromStr for SpecialBool {
+//     type Err = ParseBoolError
+//     fn from_str(s: &str) -> Result<bool, ParseBoolError> {
+
+//     }
+// }
 
 // pub fn deserialize_special_bool<'de, D>(
 //     deserializer: D,
@@ -326,6 +462,7 @@ pub struct Guid {
 #[serde(rename_all = "camelCase")]
 pub struct Media {
     #[yaserde(attribute)]
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     pub id: i64,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -369,9 +506,9 @@ pub struct Media {
     #[yaserde(attribute, rename = "container")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub container: Option<String>,
-    //#[yaserde(rename = "Part", child)]
-    //#[serde(skip_serializing_if = "Vec::is_empty", default, rename = "Part")]
-    //pub parts: Vec<MediaPart>,
+    #[yaserde(rename = "Part", child)]
+    #[serde(skip_serializing_if = "Vec::is_empty", default, rename = "Part")]
+    pub parts: Vec<MediaPart>,
 }
 
 #[derive(
@@ -390,16 +527,20 @@ pub struct Media {
 #[serde(rename_all = "camelCase")]
 pub struct MediaPart {
     #[yaserde(attribute)]
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     pub id: i64,
     #[yaserde(attribute)]
-    pub key: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub duration: Option<i64>,
     #[yaserde(attribute)]
-    pub file: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub file: Option<String>,
     #[yaserde(attribute)]
-    pub size: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub size: Option<i64>,
     #[yaserde(attribute, rename = "container")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub container: Option<String>,
@@ -427,6 +568,7 @@ pub struct MediaPart {
 #[serde(rename_all = "camelCase")]
 pub struct Stream {
     #[yaserde(attribute)]
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     pub id: i64,
     #[yaserde(attribute, rename = "streamType")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -563,6 +705,9 @@ pub struct Stream {
     #[yaserde(attribute, rename = "hearingImpaired")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub hearing_impaired: Option<bool>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub decision: Option<String>,
 }
 
 #[derive(
@@ -605,6 +750,7 @@ pub struct Image {
 #[serde(rename_all = "camelCase")]
 pub struct Label {
     #[yaserde(attribute)]
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     id: i64,
     #[yaserde(attribute)]
     tag: String,
@@ -784,12 +930,14 @@ pub struct MetaData {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[yaserde(rename = "grandparentArt")]
     pub grandparent_art: Option<String>,
-    #[yaserde(attribute)]
-    #[yaserde(rename = "type")]
-    #[serde(rename = "librarySectionID")]
     #[yaserde(rename = "librarySectionID")]
     #[yaserde(attribute)]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        rename = "librarySectionID",
+        skip_serializing_if = "Option::is_none", 
+        deserialize_with = "deserialize_option_number_from_string"
+    )]
     pub library_section_id: Option<i64>,
     #[yaserde(attribute)]
     #[yaserde(rename = "librarySectionTitle")]
@@ -926,22 +1074,27 @@ where
     Ok(Some(deserialize_string_from_number(deserializer)?))
 }
 
-pub fn deserialize_test<'de, D>(
+pub(crate) fn deserialize_option_number_from_string<'de, D>(
     deserializer: D,
-) -> Result<Option<i32>, D::Error>
+) -> Result<Option<i64>, D::Error>
 where
     D: Deserializer<'de>,
 {
-    dbg!("YO");
-    return Ok(Some(1));
-    // match Deserialize::deserialize(deserializer)? {
-    //     Some::<String>(s) => {
-    //         let r: Vec<i32> =
-    //             s.split(',').map(|s| s.parse().unwrap()).collect();
-    //         Ok(Some(r))
-    //     }
-    //     None => Ok(None),
+    // Deserialize::deserialize(deserializer)
+    // if s.parse::<f64>().is_ok() {
+    //    return s.parse::<f64>()
     // }
+
+    match serde_aux::prelude::deserialize_option_number_from_string::<i64, D>(deserializer) {
+        Ok(r) => {
+            Ok(r)},
+        Err(_) => {
+            Ok(None)},
+    }
+    // let b = deserialize_number_from_string::<i64, D>(deserializer)?;
+    // // dbg!(&b);
+    // Ok(Some(b))
+    
 }
 
 impl MetaData {
@@ -1120,6 +1273,7 @@ impl MetaData {
     Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default,
 )]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
+#[serde_as]
 #[serde(rename_all = "camelCase")]
 #[yaserde(root = "MediaContainer")]
 pub struct MediaContainer {
@@ -1143,8 +1297,10 @@ pub struct MediaContainer {
     pub identifier: Option<String>,
     #[yaserde(attribute, rename = "librarySectionID")]
     #[serde(
+        default,
         rename = "librarySectionID",
-        skip_serializing_if = "Option::is_none"
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "deserialize_option_number_from_string"
     )]
     pub library_section_id: Option<i64>,
     #[yaserde(attribute)]
@@ -1235,10 +1391,12 @@ pub struct MediaContainer {
     #[yaserde(attribute)]
     #[yaserde(rename = "mediaTagVersion")]
     #[serde(
+        default,
         skip_serializing_if = "Option::is_none",
-        rename = "mediaTagVersion"
+        rename = "mediaTagVersion",
+        deserialize_with = "deserialize_option_number_from_string"
     )]
-    pub media_tag_version: Option<i32>,
+    pub media_tag_version: Option<i64>,
 }
 
 #[derive(

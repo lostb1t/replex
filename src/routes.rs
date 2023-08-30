@@ -259,7 +259,7 @@ pub async fn get_hubs_promoted(
             MediaContainerWrapper::default();
         container.content_type = content_type.clone();
         container.media_container.size = Some(0);
-        container.media_container.allow_sync = Some(SpecialBool::new(true));
+        // container.media_container.allow_sync = Some("1".to_string());
         container.media_container.identifier =
             Some("com.plexapp.plugins.library".to_string());
         res.render(container);
@@ -591,7 +591,7 @@ pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
 //     HashMap::from([("1080p", "1920x1080"), ("4k", "4096x2160")]);
 
 #[handler]
-async fn force_maximum_quality(req: &mut Request) {
+async fn force_maximum_quality(req: &mut Request) -> Result<(), anyhow::Error> {
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let config: Config = Config::figment().extract().unwrap();
@@ -644,7 +644,8 @@ async fn force_maximum_quality(req: &mut Request) {
 
     if config.force_direct_play_for.is_some() {
         let resos = config.force_direct_play_for.unwrap();
-        let item = plex_client.clone()
+        let item = plex_client
+            .clone()
             .get_item_by_key(req.queries().get("path").unwrap().to_string())
             .await
             .unwrap();
@@ -682,14 +683,76 @@ async fn force_maximum_quality(req: &mut Request) {
 
     replace_query(queries, req);
 
-    if config.fallback_on_video_transcode {
-        let ress = plex_client.request(req).await.unwrap();
-        dbg!(&ress);
+    if config.video_transcode_fallback {
+        let item = plex_client
+            .clone()
+            .get_item_by_key(req.queries().get("path").unwrap().to_string())
+            .await
+            .unwrap();
+
+        if item.media_container.metadata[0].media.len() <= 1 {
+            tracing::trace!("Nothing to fallback on, skipping fallback check");
+        } else {
+            let response = plex_client.request(req).await?;
+            //dbg!("gping");
+            // dbg!(&response.text().await);
+            // return Ok(());
+            let mut transcode: MediaContainerWrapper<MediaContainer> =
+                from_reqwest_response(response).await?;
+
+            let streams = &transcode.media_container.metadata[0].media[0].parts
+                [0]
+            .streams;
+            let selected_media =
+                transcode.media_container.metadata[0].media[0].clone();
+            let mut fallback_selected = false;
+            for stream in streams {
+                if stream.stream_type.clone().unwrap() == 1
+                    && stream.decision.clone().unwrap() == "transcode"
+                {
+                    tracing::trace!(
+                        "{} ({}) is transcoding, looking for fallback",
+                        selected_media.video_resolution.clone().unwrap(),
+                        selected_media.video_codec.clone().unwrap()
+                    );
+                    // for now just select a random fallback
+                    for (index, media) in item.media_container.metadata[0]
+                        .media
+                        .iter()
+                        .enumerate()
+                    {
+                        if transcode.media_container.metadata[0].media[0].id
+                            != media.id
+                        {
+                            tracing::debug!(
+                                "Video transcode fallback from {:?} ({:?}) to {:?} ({:?})",
+                                selected_media.video_resolution.clone().unwrap(),
+                                selected_media.video_codec.clone().unwrap(),
+                                media.video_resolution.clone().unwrap(),
+                                media.video_codec.clone().unwrap()
+                            );
+                            add_query_param_salvo(
+                                req,
+                                "mediaIndex".to_string(),
+                                index.to_string(),
+                            );
+                            fallback_selected = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if !fallback_selected {
+                tracing::trace!("No suitable fallback found");
+            }
+        }
     }
 
     // replace_query(queries, req);
 
     // dbg!(&req);
+    Ok(())
 }
 
 /// When multiple qualities are avaiable, select the most relevant one.
@@ -732,7 +795,6 @@ async fn auto_select_version(req: &mut Request) {
                     "mediaIndex".to_string(),
                     index.to_string(),
                 );
-                dbg!(&req);
             }
         }
         //dbg!(&media[0]);

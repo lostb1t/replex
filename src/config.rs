@@ -85,7 +85,7 @@ pub struct Config {
         default = "default_as_false",
         deserialize_with = "figment::util::bool_from_str_or_int"
     )]
-    pub fallback_on_video_transcode: bool,
+    pub video_transcode_fallback: bool,
     #[serde(
         default,
         deserialize_with = "deserialize_comma_seperated_string"
