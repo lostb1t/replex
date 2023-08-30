@@ -127,7 +127,7 @@ pub fn route() -> Router {
         subtitles_router = subtitles_router.hoop(force_maximum_quality);
     }
 
-    if config.video_transcode_fallback {
+    if config.video_transcode_fallback_for.is_some() {
         decision_router = decision_router.hoop(video_transcode_fallback);
         subtitles_router = subtitles_router.hoop(video_transcode_fallback);
     }
@@ -695,15 +695,44 @@ async fn force_maximum_quality(req: &mut Request) -> Result<(), anyhow::Error> {
 }
 
 #[handler]
-async fn video_transcode_fallback(req: &mut Request) -> Result<(), anyhow::Error> {
+async fn video_transcode_fallback(
+    req: &mut Request,
+) -> Result<(), anyhow::Error> {
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
+    let config: Config = Config::figment().extract().unwrap();
+
+    let media_index: usize = if (req.queries().get("mediaIndex").is_none()
+        || req.queries().get("mediaIndex").unwrap() == "-1")
+    {
+        0
+    } else {
+        req.queries()
+            .get("mediaIndex")
+            .unwrap()
+            .parse::<usize>()
+            .unwrap()
+    };
+
+    let fallback_for =
+        config.video_transcode_fallback_for.unwrap()[0].to_lowercase();
 
     let item = plex_client
         .clone()
         .get_item_by_key(req.queries().get("path").unwrap().to_string())
         .await
         .unwrap();
+
+    if item.media_container.metadata[0].media[media_index]
+        .video_resolution
+        .clone()
+        .unwrap()
+        .to_lowercase()
+        != fallback_for
+    {
+        // tracing::trace!("Media item not marked for fallback");
+        return Ok(());
+    }
 
     if item.media_container.metadata[0].media.len() <= 1 {
         tracing::trace!("Nothing to fallback on, skipping fallback check");
@@ -712,9 +741,8 @@ async fn video_transcode_fallback(req: &mut Request) -> Result<(), anyhow::Error
         let mut transcode: MediaContainerWrapper<MediaContainer> =
             from_reqwest_response(response).await?;
         // dbg!()
-        let streams = &transcode.media_container.metadata[0].media[0].parts
-            [0]
-        .streams;
+        let streams =
+            &transcode.media_container.metadata[0].media[0].parts[0].streams;
         let selected_media =
             transcode.media_container.metadata[0].media[0].clone();
         let mut fallback_selected = false;
@@ -728,10 +756,8 @@ async fn video_transcode_fallback(req: &mut Request) -> Result<(), anyhow::Error
                     selected_media.video_codec.clone().unwrap()
                 );
                 // for now just select a random fallback
-                for (index, media) in item.media_container.metadata[0]
-                    .media
-                    .iter()
-                    .enumerate()
+                for (index, media) in
+                    item.media_container.metadata[0].media.iter().enumerate()
                 {
                     if transcode.media_container.metadata[0].media[0].id
                         != media.id

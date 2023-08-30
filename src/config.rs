@@ -82,10 +82,10 @@ pub struct Config {
     )]
     pub auto_select_version: bool,
     #[serde(
-        default = "default_as_false",
-        deserialize_with = "figment::util::bool_from_str_or_int"
+        default,
+        deserialize_with = "deserialize_comma_seperated_string"
     )]
-    pub video_transcode_fallback: bool,
+    pub video_transcode_fallback_for: Option<Vec<String>>,
     #[serde(
         default,
         deserialize_with = "deserialize_comma_seperated_string"
