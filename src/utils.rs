@@ -69,6 +69,7 @@ pub fn add_query_param_salvo(
         .collect();
     query.push((param.to_owned(), value.to_owned()));
     url.query_pairs_mut().clear().extend_pairs(&query);
+    // dbg!(&url.as_str());
     // dbg!(uri.host());
     *req.uri_mut() = hyper::Uri::try_from(url.as_str()).unwrap();
     // req

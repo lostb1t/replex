@@ -836,13 +836,14 @@ async fn auto_select_version(req: &mut Request) {
                 );
                 // directPlay is meant for the first media item
                 if index != 0 {
-                  add_query_param_salvo(
-                      req,
-                      "directPlay".to_string(),
-                      "0".to_string(),
-                  );
+                    add_query_param_salvo(
+                        req,
+                        "directPlay".to_string(),
+                        "0".to_string(),
+                    );
                 }
-                dbg!(&req.queries().get("directPlay"));
+                // dbg!(&req.uri_mut());
+                // dbg!(&req.queries().get("directPlay"));
             }
         }
         //dbg!(&media[0]);
