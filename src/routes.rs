@@ -751,9 +751,8 @@ async fn video_transcode_fallback(
                 && stream.decision.clone().unwrap_or("unknown".to_string()) == "transcode"
             {
                 tracing::trace!(
-                    "{} ({}) is transcoding, looking for fallback",
-                    selected_media.video_resolution.clone().unwrap(),
-                    selected_media.video_codec.clone().unwrap()
+                    "{} is transcoding, looking for fallback",
+                    selected_media
                 );
                 // for now just select a random fallback
                 for (index, media) in
@@ -763,16 +762,19 @@ async fn video_transcode_fallback(
                         != media.id
                     {
                         tracing::debug!(
-                            "Video transcode fallback from {:?} ({:?}) to {:?} ({:?})",
-                            selected_media.video_resolution.clone().unwrap(),
-                            selected_media.video_codec.clone().unwrap(),
-                            media.video_resolution.clone().unwrap(),
-                            media.video_codec.clone().unwrap()
+                            "Video transcode fallback from {} to {}",
+                            selected_media,
+                            media,
                         );
                         add_query_param_salvo(
                             req,
                             "mediaIndex".to_string(),
                             index.to_string(),
+                        );
+                        add_query_param_salvo(
+                            req,
+                            "directPlay".to_string(),
+                            "0".to_string(),
                         );
                         fallback_selected = true;
                         break;
@@ -788,15 +790,18 @@ async fn video_transcode_fallback(
     Ok(())
 }
 
-/// When multiple qualities are avaiable, select the most relevant one.
+/// When multiple qualities are avaiable, select the most relevant one. 
+/// Does not work for every client as some client decides themselfs which version to use.
 #[handler]
 async fn auto_select_version(req: &mut Request) {
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let media_index = req.queries().get("mediaIndex");
+
     if (media_index.is_none() || media_index.unwrap() == "-1")
         && params.screen_resolution.len() > 0
     {
+        
         let item = plex_client
             .get_item_by_key(req.queries().get("path").unwrap().to_string())
             .await
@@ -823,14 +828,22 @@ async fn auto_select_version(req: &mut Request) {
             item.media_container.metadata[0].media.iter().enumerate()
         {
             if m.id == media[0].id {
+                tracing::debug!("Auto selected {}", m);
                 add_query_param_salvo(
                     req,
                     "mediaIndex".to_string(),
                     index.to_string(),
                 );
+                add_query_param_salvo(
+                    req,
+                    "directPlay".to_string(),
+                    "0".to_string(),
+                );
             }
         }
         //dbg!(&media[0]);
+    } else {
+        tracing::trace!("Skipping auto selected as client specified a media index");
     }
     // dbg!(&media_index);
 }

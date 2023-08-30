@@ -18,7 +18,9 @@ use crate::tmdb::{TVShowImages, TMDB_CLIENT};
 use crate::utils::*;
 use anyhow::Result;
 use async_trait::async_trait;
-use serde_aux::prelude::{deserialize_string_from_number, deserialize_number_from_string};
+use serde_aux::prelude::{
+    deserialize_number_from_string, deserialize_string_from_number,
+};
 // use smartstring::alias::String;
 // use hyper::Body;
 use itertools::Itertools;
@@ -228,7 +230,6 @@ where
     }
 }
 
-
 // fn skip_on_error<'de, D>(deserializer: D) -> Result<Option<>, D::Error>
 // where
 //     D: Deserializer<'de>,
@@ -249,7 +250,9 @@ where
 
 // struct OptionalIntFromStr;
 
-pub fn optional_int_from_str<'de, D: Deserializer<'de>>(de: D) -> Result<Option<i64>, D::Error> {
+pub fn optional_int_from_str<'de, D: Deserializer<'de>>(
+    de: D,
+) -> Result<Option<i64>, D::Error> {
     struct Visitor;
 
     impl<'de> serde::de::Visitor<'de> for Visitor {
@@ -272,7 +275,7 @@ pub fn optional_int_from_str<'de, D: Deserializer<'de>>(de: D) -> Result<Option<
         fn visit_str<E>(self, val: &str) -> Result<Self::Value, E>
         where
             E: serde::de::Error,
-        {   
+        {
             dbg!("Matcging");
             match val.parse::<i64>() {
                 Ok(val) => Ok(Some(val)),
@@ -283,7 +286,6 @@ pub fn optional_int_from_str<'de, D: Deserializer<'de>>(de: D) -> Result<Option<
 
     de.deserialize_option(Visitor)
 }
-
 
 // pub fn int_from_str<'de, D>(
 //     deserializer: D,
@@ -397,8 +399,10 @@ impl<'de> Deserialize<'de> for SpecialBool {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
-    {   
-        let s = serde_aux::prelude::deserialize_bool_from_anything(deserializer).unwrap();
+    {
+        let s =
+            serde_aux::prelude::deserialize_bool_from_anything(deserializer)
+                .unwrap();
         Ok(SpecialBool::new(s))
     }
 
@@ -509,6 +513,18 @@ pub struct Media {
     #[yaserde(rename = "Part", child)]
     #[serde(skip_serializing_if = "Vec::is_empty", default, rename = "Part")]
     pub parts: Vec<MediaPart>,
+}
+
+impl fmt::Display for Media {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{} - {} - {}",
+            self.video_resolution.clone().unwrap_or_default(),
+            self.video_codec.clone().unwrap_or_default(),
+            self.audio_codec.clone().unwrap_or_default()
+        )
+    }
 }
 
 #[derive(
@@ -935,7 +951,7 @@ pub struct MetaData {
     #[serde(
         default,
         rename = "librarySectionID",
-        skip_serializing_if = "Option::is_none", 
+        skip_serializing_if = "Option::is_none",
         deserialize_with = "deserialize_option_number_from_string"
     )]
     pub library_section_id: Option<i64>,
@@ -1085,16 +1101,15 @@ where
     //    return s.parse::<f64>()
     // }
 
-    match serde_aux::prelude::deserialize_option_number_from_string::<i64, D>(deserializer) {
-        Ok(r) => {
-            Ok(r)},
-        Err(_) => {
-            Ok(None)},
+    match serde_aux::prelude::deserialize_option_number_from_string::<i64, D>(
+        deserializer,
+    ) {
+        Ok(r) => Ok(r),
+        Err(_) => Ok(None),
     }
     // let b = deserialize_number_from_string::<i64, D>(deserializer)?;
     // // dbg!(&b);
     // Ok(Some(b))
-    
 }
 
 impl MetaData {
@@ -1104,7 +1119,7 @@ impl MetaData {
         plex_client: PlexClient,
     ) -> Option<String> {
         self.guid.as_ref()?;
-        let guid = self.guid.clone().unwrap();;
+        let guid = self.guid.clone().unwrap();
         if guid.starts_with("local://") {
             tracing::debug!(
                 "Skipping loading remote metadata for local item: {}",
