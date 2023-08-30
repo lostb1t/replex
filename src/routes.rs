@@ -611,39 +611,6 @@ async fn force_maximum_quality(req: &mut Request) {
     //queries.remove("videoResolution");
     //queries.insert("videoResolution".to_string(), "4096x2160".to_string());
 
-    if config.force_direct_play_for.is_some() {
-        let resos = config.force_direct_play_for.unwrap();
-        let item = plex_client
-            .get_item_by_key(req.queries().get("path").unwrap().to_string())
-            .await
-            .unwrap();
-
-        let media_index: usize = if (req.queries().get("mediaIndex").is_none()
-            || req.queries().get("mediaIndex").unwrap() == "-1")
-        {
-            0
-        } else {
-            req.queries().get("mediaIndex").unwrap().parse::<usize>().unwrap()
-        };
-
-        let media_item = item.media_container.metadata[0].media[media_index].clone();
-
-        for reso in resos {
-            if let Some(video_resolution) = media_item.video_resolution.clone()
-            {
-                if video_resolution.to_lowercase() == reso.to_lowercase() {
-                    queries.remove("directPlay");
-                    queries.insert("directPlay".to_string(), "1".to_string());
-                    queries.remove("videoResolution");
-                    // queries.insert(
-                    //     "videoResolution".to_string(),
-                    //     RESOLUTIONS.get(&reso.to_lowercase()),
-                    // );
-                }
-            }
-        }
-    }
-
     // some clients send wrong buffer format
     if let Some(size) = queries.remove("mediaBufferSize") {
         queries.insert(
@@ -675,7 +642,52 @@ async fn force_maximum_quality(req: &mut Request) {
         queries.insert(query_key, filtered_extra);
     };
 
+    if config.force_direct_play_for.is_some() {
+        let resos = config.force_direct_play_for.unwrap();
+        let item = plex_client.clone()
+            .get_item_by_key(req.queries().get("path").unwrap().to_string())
+            .await
+            .unwrap();
+
+        let media_index: usize = if (req.queries().get("mediaIndex").is_none()
+            || req.queries().get("mediaIndex").unwrap() == "-1")
+        {
+            0
+        } else {
+            req.queries()
+                .get("mediaIndex")
+                .unwrap()
+                .parse::<usize>()
+                .unwrap()
+        };
+
+        let media_item =
+            item.media_container.metadata[0].media[media_index].clone();
+
+        for reso in resos {
+            if let Some(video_resolution) = media_item.video_resolution.clone()
+            {
+                if video_resolution.to_lowercase() == reso.to_lowercase() {
+                    queries.remove("directPlay");
+                    queries.insert("directPlay".to_string(), "1".to_string());
+                    queries.remove("videoResolution");
+                    // queries.insert(
+                    //     "videoResolution".to_string(),
+                    //     RESOLUTIONS.get(&reso.to_lowercase()),
+                    // );
+                }
+            }
+        }
+    }
+
     replace_query(queries, req);
+
+    if config.fallback_on_video_transcode {
+        let ress = plex_client.request(req).await.unwrap();
+        dbg!(&ress);
+    }
+
+    // replace_query(queries, req);
 
     // dbg!(&req);
 }

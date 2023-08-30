@@ -82,6 +82,12 @@ pub struct Config {
     )]
     pub auto_select_version: bool,
     #[serde(
+        default = "default_as_false",
+        deserialize_with = "figment::util::bool_from_str_or_int"
+    )]
+    pub fallback_on_video_transcode: bool,
+    #[serde(
+        default,
         deserialize_with = "deserialize_comma_seperated_string"
     )]
     pub force_direct_play_for: Option<Vec<String>>,
