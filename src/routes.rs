@@ -701,7 +701,7 @@ async fn video_transcode_fallback(
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let config: Config = Config::figment().extract().unwrap();
-
+    let mut queries = req.queries().clone();
     let media_index: usize = if (req.queries().get("mediaIndex").is_none()
         || req.queries().get("mediaIndex").unwrap() == "-1")
     {
@@ -766,16 +766,10 @@ async fn video_transcode_fallback(
                             selected_media,
                             media,
                         );
-                        add_query_param_salvo(
-                            req,
-                            "mediaIndex".to_string(),
-                            index.to_string(),
-                        );
-                        add_query_param_salvo(
-                            req,
-                            "directPlay".to_string(),
-                            "0".to_string(),
-                        );
+                        queries.remove("mediaIndex");
+                        queries.insert("mediaIndex".to_string(), index.to_string());
+                        queries.remove("directPlay");
+                        queries.insert("directPlay".to_string(), "0".to_string());
                         fallback_selected = true;
                         break;
                     }
@@ -787,6 +781,8 @@ async fn video_transcode_fallback(
             tracing::trace!("No suitable fallback found");
         }
     }
+    
+    replace_query(queries, req);
     Ok(())
 }
 
@@ -796,7 +792,8 @@ async fn video_transcode_fallback(
 async fn auto_select_version(req: &mut Request) {
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
-    let media_index = req.queries().get("mediaIndex");
+    let mut queries = req.queries().clone();
+    let media_index = queries.get("mediaIndex");
 
     if (media_index.is_none() || media_index.unwrap() == "-1")
         && params.screen_resolution.len() > 0
@@ -829,18 +826,22 @@ async fn auto_select_version(req: &mut Request) {
         {
             if m.id == media[0].id {
                 tracing::debug!("Auto selected {}", m);
-                add_query_param_salvo(
-                    req,
-                    "mediaIndex".to_string(),
-                    index.to_string(),
-                );
+                //add_query_param_salvo(
+                //    req,
+                //    "mediaIndex".to_string(),
+                //    index.to_string(),
+                //);
+                queries.remove("mediaIndex");
+                queries.insert("mediaIndex".to_string(), index.to_string());
                 // directPlay is meant for the first media item
                 if index != 0 {
-                    add_query_param_salvo(
-                        req,
-                        "directPlay".to_string(),
-                        "0".to_string(),
-                    );
+                    //add_query_param_salvo(
+                    //    req,
+                    //    "directPlay".to_string(),
+                    //    "0".to_string(),
+                    //);
+                    queries.remove("directPlay");
+                    queries.insert("directPlay".to_string(), "0".to_string());
                 }
                 // dbg!(&req.uri_mut());
                 // dbg!(&req.queries().get("directPlay"));
@@ -850,6 +851,7 @@ async fn auto_select_version(req: &mut Request) {
     } else {
         tracing::trace!("Skipping auto selected as client specified a media index");
     }
+    replace_query(queries, req);
     // dbg!(&media_index);
 }
 
