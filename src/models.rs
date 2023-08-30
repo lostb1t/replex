@@ -470,9 +470,9 @@ pub struct Media {
     #[yaserde(attribute, rename = "bitrate")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bitrate: Option<i64>,
-    #[yaserde(attribute, rename = "aspectRation")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub aspect_ratio: Option<f64>,
+    //#[yaserde(attribute, rename = "aspectRation")]
+    //#[serde(skip_serializing_if = "Option::is_none")]
+    //pub aspect_ratio: Option<f64>,
     #[yaserde(attribute, rename = "audioChannels")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub audio_channels: Option<i64>,
