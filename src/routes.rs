@@ -834,11 +834,15 @@ async fn auto_select_version(req: &mut Request) {
                     "mediaIndex".to_string(),
                     index.to_string(),
                 );
-                add_query_param_salvo(
-                    req,
-                    "directPlay".to_string(),
-                    "0".to_string(),
-                );
+                
+                // directPlay is meant for the first media item
+                if index != 0 {
+                  add_query_param_salvo(
+                      req,
+                      "directPlay".to_string(),
+                      "0".to_string(),
+                  );
+                }
             }
         }
         //dbg!(&media[0]);
