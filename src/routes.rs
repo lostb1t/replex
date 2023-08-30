@@ -114,7 +114,7 @@ pub fn route() -> Router {
         .path("/video/<colon:colon>/transcode/universal/subtitles")
         .handle(proxy.clone());
 
-    // should go before force_maximum_quality
+    // should go before force_maximum_quality and video_transcode_fallback
     if config.auto_select_version {
         decision_router = decision_router.hoop(auto_select_version);
         start_router = start_router.hoop(auto_select_version);
@@ -125,6 +125,11 @@ pub fn route() -> Router {
         decision_router = decision_router.hoop(force_maximum_quality);
         start_router = start_router.hoop(force_maximum_quality);
         subtitles_router = subtitles_router.hoop(force_maximum_quality);
+    }
+
+    if config.video_transcode_fallback {
+        decision_router = decision_router.hoop(video_transcode_fallback);
+        subtitles_router = subtitles_router.hoop(video_transcode_fallback);
     }
 
     router = router
@@ -683,75 +688,77 @@ async fn force_maximum_quality(req: &mut Request) -> Result<(), anyhow::Error> {
 
     replace_query(queries, req);
 
-    if config.video_transcode_fallback {
-        let item = plex_client
-            .clone()
-            .get_item_by_key(req.queries().get("path").unwrap().to_string())
-            .await
-            .unwrap();
-
-        if item.media_container.metadata[0].media.len() <= 1 {
-            tracing::trace!("Nothing to fallback on, skipping fallback check");
-        } else {
-            let response = plex_client.request(req).await?;
-            //dbg!("gping");
-            // dbg!(&response.text().await);
-            // return Ok(());
-            let mut transcode: MediaContainerWrapper<MediaContainer> =
-                from_reqwest_response(response).await?;
-
-            let streams = &transcode.media_container.metadata[0].media[0].parts
-                [0]
-            .streams;
-            let selected_media =
-                transcode.media_container.metadata[0].media[0].clone();
-            let mut fallback_selected = false;
-            for stream in streams {
-                if stream.stream_type.clone().unwrap() == 1
-                    && stream.decision.clone().unwrap() == "transcode"
-                {
-                    tracing::trace!(
-                        "{} ({}) is transcoding, looking for fallback",
-                        selected_media.video_resolution.clone().unwrap(),
-                        selected_media.video_codec.clone().unwrap()
-                    );
-                    // for now just select a random fallback
-                    for (index, media) in item.media_container.metadata[0]
-                        .media
-                        .iter()
-                        .enumerate()
-                    {
-                        if transcode.media_container.metadata[0].media[0].id
-                            != media.id
-                        {
-                            tracing::debug!(
-                                "Video transcode fallback from {:?} ({:?}) to {:?} ({:?})",
-                                selected_media.video_resolution.clone().unwrap(),
-                                selected_media.video_codec.clone().unwrap(),
-                                media.video_resolution.clone().unwrap(),
-                                media.video_codec.clone().unwrap()
-                            );
-                            add_query_param_salvo(
-                                req,
-                                "mediaIndex".to_string(),
-                                index.to_string(),
-                            );
-                            fallback_selected = true;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if !fallback_selected {
-                tracing::trace!("No suitable fallback found");
-            }
-        }
-    }
-
     // replace_query(queries, req);
 
     // dbg!(&req);
+    Ok(())
+}
+
+#[handler]
+async fn video_transcode_fallback(req: &mut Request) -> Result<(), anyhow::Error> {
+    let params: PlexContext = req.extract().await.unwrap();
+    let plex_client = PlexClient::from_request(req, params.clone());
+
+    let item = plex_client
+        .clone()
+        .get_item_by_key(req.queries().get("path").unwrap().to_string())
+        .await
+        .unwrap();
+
+    if item.media_container.metadata[0].media.len() <= 1 {
+        tracing::trace!("Nothing to fallback on, skipping fallback check");
+    } else {
+        let response = plex_client.request(req).await?;
+        let mut transcode: MediaContainerWrapper<MediaContainer> =
+            from_reqwest_response(response).await?;
+        // dbg!()
+        let streams = &transcode.media_container.metadata[0].media[0].parts
+            [0]
+        .streams;
+        let selected_media =
+            transcode.media_container.metadata[0].media[0].clone();
+        let mut fallback_selected = false;
+        for stream in streams {
+            if stream.stream_type.clone().unwrap() == 1
+                && stream.decision.clone().unwrap() == "transcode"
+            {
+                tracing::trace!(
+                    "{} ({}) is transcoding, looking for fallback",
+                    selected_media.video_resolution.clone().unwrap(),
+                    selected_media.video_codec.clone().unwrap()
+                );
+                // for now just select a random fallback
+                for (index, media) in item.media_container.metadata[0]
+                    .media
+                    .iter()
+                    .enumerate()
+                {
+                    if transcode.media_container.metadata[0].media[0].id
+                        != media.id
+                    {
+                        tracing::debug!(
+                            "Video transcode fallback from {:?} ({:?}) to {:?} ({:?})",
+                            selected_media.video_resolution.clone().unwrap(),
+                            selected_media.video_codec.clone().unwrap(),
+                            media.video_resolution.clone().unwrap(),
+                            media.video_codec.clone().unwrap()
+                        );
+                        add_query_param_salvo(
+                            req,
+                            "mediaIndex".to_string(),
+                            index.to_string(),
+                        );
+                        fallback_selected = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if !fallback_selected {
+            tracing::trace!("No suitable fallback found");
+        }
+    }
     Ok(())
 }
 
