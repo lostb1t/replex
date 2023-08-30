@@ -61,16 +61,16 @@ pub fn add_query_param_salvo(
     //     .with_query(req.uri_mut().query());
     // let mut uri =
     //     pathetic::Uri::new(req.uri_mut().to_string().as_str()).unwrap();
-    let mut uri = Url::parse(req.uri_mut().to_string().as_str()).unwrap();
-    let mut query: Vec<(String, String)> = uri // remove existing values
+    let mut url = Url::parse(req.uri_mut().to_string().as_str()).unwrap();
+    let mut query: Vec<(String, String)> = url // remove existing values
         .query_pairs()
         .filter(|(name, _)| name.to_string() != param.to_string())
         .map(|(name, value)| (name.into_owned(), value.into_owned()))
         .collect();
     query.push((param.to_owned(), value.to_owned()));
-    uri.query_pairs_mut().clear().extend_pairs(&query);
+    url.query_pairs_mut().clear().extend_pairs(&query);
     // dbg!(uri.host());
-    *req.uri_mut() = hyper::Uri::try_from(uri.as_str()).unwrap();
+    *req.uri_mut() = hyper::Uri::try_from(url.as_str()).unwrap();
     // req
 }
 
