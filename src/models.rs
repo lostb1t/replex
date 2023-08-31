@@ -71,12 +71,12 @@ pub enum Platform {
     Safari,
     Chrome,
     #[serde(other)]
-    Unknown,
+    Generic,
 }
 
 impl Default for Platform {
     fn default() -> Self {
-        Platform::Unknown
+        Platform::Generic
     }
 }
 
@@ -104,7 +104,7 @@ pub struct PlexContext {
     #[serde(default, deserialize_with = "deserialize_comma_seperated_string")]
     #[salvo(extract(rename = "pinnedContentDirectoryID"))]
     pub pinned_content_directory_id: Option<Vec<String>>,
-    #[serde(default)]
+    #[serde(default="default_platform")]
     #[salvo(extract(rename = "X-Plex-Platform"))]
     pub platform: Platform,
     #[serde(default, deserialize_with = "deserialize_screen_resolution")]
@@ -136,6 +136,10 @@ pub struct PlexContext {
     pub height: Option<i32>,
     pub quality: Option<i32>,
     pub url: Option<String>,
+}
+
+fn default_platform() -> Platform {
+    Platform::Generic
 }
 
 fn bool_from_int<'de, D>(deserializer: D) -> Result<bool, D::Error>

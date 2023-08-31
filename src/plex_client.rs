@@ -377,7 +377,7 @@ impl PlexClient {
             .expect("Expected to have an token in header or query");
         let client_identifier = params.clone().client_identifier;
         let platform = params.clone().platform;
-
+  
         let mut headers = header::HeaderMap::new();
         headers.insert(
             "X-Plex-Token",
@@ -416,7 +416,7 @@ impl PlexClient {
         let config: Config = Config::figment().extract().unwrap();
         let token = "DUMMY".to_string();
         let client_identifier: Option<String> = None;
-        let platform: Platform = Platform::Unknown;
+        let platform: Platform = Platform::Generic;
 
         // Dont do the headers here. Do it in prepare function
         let mut headers = header::HeaderMap::new();
