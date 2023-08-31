@@ -48,7 +48,7 @@ pub fn replace_query(query: MultiMap<String, String>, req: &mut SalvoRequest) {
     url.query_pairs_mut()
         .clear()
         .extend_pairs(&query.iter().map(|(k, v)| (k, v)).collect_vec());
-    *req.uri_mut() = hyper::Uri::try_from(url.as_str()).unwrap();
+    req.set_uri(hyper::Uri::try_from(url.as_str()).unwrap())
 }
 
 pub fn add_query_param_salvo(
@@ -71,7 +71,8 @@ pub fn add_query_param_salvo(
     url.query_pairs_mut().clear().extend_pairs(&query);
     // dbg!(&url.as_str());
     // dbg!(uri.host());
-    *req.uri_mut() = hyper::Uri::try_from(url.as_str()).unwrap();
+    //*req.uri_mut() = hyper::Uri::try_from(url.as_str()).unwrap();
+    req.set_uri(hyper::Uri::try_from(url.as_str()).unwrap())
     // req
 }
 

@@ -687,10 +687,6 @@ async fn force_maximum_quality(req: &mut Request) -> Result<(), anyhow::Error> {
     }
 
     replace_query(queries, req);
-
-    // replace_query(queries, req);
-
-    // dbg!(&req);
     Ok(())
 }
 
@@ -826,33 +822,19 @@ async fn auto_select_version(req: &mut Request) {
         {
             if m.id == media[0].id {
                 tracing::debug!("Auto selected {}", m);
-                //add_query_param_salvo(
-                //    req,
-                //    "mediaIndex".to_string(),
-                //    index.to_string(),
-                //);
                 queries.remove("mediaIndex");
                 queries.insert("mediaIndex".to_string(), index.to_string());
                 // directPlay is meant for the first media item
                 if index != 0 {
-                    //add_query_param_salvo(
-                    //    req,
-                    //    "directPlay".to_string(),
-                    //    "0".to_string(),
-                    //);
                     queries.remove("directPlay");
                     queries.insert("directPlay".to_string(), "0".to_string());
                 }
-                // dbg!(&req.uri_mut());
-                // dbg!(&req.queries().get("directPlay"));
             }
         }
-        //dbg!(&media[0]);
     } else {
         tracing::trace!("Skipping auto selected as client specified a media index");
     }
     replace_query(queries, req);
-    // dbg!(&media_index);
 }
 
 #[handler]
