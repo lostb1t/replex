@@ -647,7 +647,7 @@ async fn force_maximum_quality(req: &mut Request) -> Result<(), anyhow::Error> {
         queries.insert(query_key, filtered_extra);
     };
 
-    if config.force_direct_play_for.is_some() {
+    if config.force_direct_play_for.is_some() && queries.get("path").is_some() {
         let resos = config.force_direct_play_for.unwrap();
         let item = plex_client
             .clone()
@@ -792,7 +792,7 @@ async fn auto_select_version(req: &mut Request) {
     let media_index = queries.get("mediaIndex");
 
     if (media_index.is_none() || media_index.unwrap() == "-1")
-        && params.screen_resolution.len() > 0
+        && params.screen_resolution.len() > 0 && queries.get("path").is_some()
     {
         
         let item = plex_client
