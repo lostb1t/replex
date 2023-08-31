@@ -71,6 +71,7 @@ pub enum Platform {
     Safari,
     Chrome,
     #[serde(other)]
+    #[strum(serialize = "Generic")]
     Generic,
 }
 

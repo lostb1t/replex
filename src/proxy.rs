@@ -122,6 +122,7 @@ pub fn default_url_query_getter(
     req: &Request,
     _depot: &Depot,
 ) -> Option<String> {
+    // dbg!(&req.uri().query());
     match req.uri().query() {
         Some(i) => Some(i.to_string()),
         _ => None

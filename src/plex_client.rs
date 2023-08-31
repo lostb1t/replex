@@ -377,7 +377,7 @@ impl PlexClient {
             .expect("Expected to have an token in header or query");
         let client_identifier = params.clone().client_identifier;
         let platform = params.clone().platform;
-  
+
         let mut headers = header::HeaderMap::new();
         headers.insert(
             "X-Plex-Token",
@@ -397,6 +397,7 @@ impl PlexClient {
             "X-Plex-Platform",
             header::HeaderValue::from_str(platform.to_string().as_str()).unwrap(),
         );
+        // dbg!(&headers);
         Self {
             http_client: reqwest::Client::builder()
                 .default_headers(headers)
