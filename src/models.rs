@@ -70,6 +70,7 @@ pub enum Platform {
     Ios,
     Safari,
     Chrome,
+    Roku,
     #[serde(other)]
     #[strum(serialize = "Generic")]
     Generic,

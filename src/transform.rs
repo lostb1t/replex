@@ -553,6 +553,14 @@ impl PlatformHeroStyle {
         }
     }
 
+    pub fn roku(product: String) -> Self {
+        Self {
+            style: Some("hero".to_string()),
+            r#type: "mixed".to_string(),
+            ..PlatformHeroStyle::default()
+        }        
+    }
+
     pub fn htpc_style() -> Self {
         Self {
             style: Some("hero".to_string()),
@@ -564,6 +572,7 @@ impl PlatformHeroStyle {
     pub fn for_client(platform: Platform, product: String) -> Self {
         match platform {
             Platform::Android => PlatformHeroStyle::android(product),
+            Platform::Roku => PlatformHeroStyle::roku(product),
             _ => {
                 if product.starts_with("Plex HTPC") {
                     PlatformHeroStyle::htpc_style()
