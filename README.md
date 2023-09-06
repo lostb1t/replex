@@ -104,7 +104,7 @@ For custom collections you can change the hub style to hero elements by setting 
 For built in rows you can use the hubidentifier in the `REPLEX_HERO_ROWS`. See the setting for available know options.
 
 Note: hero style elements uses coverart from plex. Banner or background is not used.
-Note: Hero elements are not supported for continue watching by plex.
+Note: Hero elements are not supported for continue watching by plex. You can replicate this functionality by creating a smart collection which filters on in progress.
 
 
 ## Remote access (force clients to use the proxy)
