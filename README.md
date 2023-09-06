@@ -26,7 +26,7 @@ Remix your plex recommendations.
 Run the docker image with REPLEX_HOST set to your plex instance.
 
 ```
-docker run --rm -it -p 3001:80 -e REPLEX_HOST="http://PLEXIP:PLEXPORT" ghcr.io/lostb1t/replex:latest
+docker run --rm -it -p 3001:80 -e REPLEX_HOST="http://0.0.0.0:32400" ghcr.io/lostb1t/replex:latest
 ```
 
 add your proxy url to plex "Custom server access URLs" (ex http://0.0.0.0:3001)
@@ -73,7 +73,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 
 | Setting        	          | Default 	| Description                                                            	  |
 |---------------------------|----------|---------------------------------------------------------------------------|
-| REPLEX_HOST               |        	 | Plex target host to proxy.                                             	  |
+| REPLEX_HOST               |        	 | Url of your plex instance. ex: http://0.0.0.0:32400                                             	  |
 | REPLEX_HERO_ROWS          |        	 | Comma seperated list of hubidentifiers to make hero stlye                  |
 | REPLEX_INCLUDE_WATCHED    | false    | If set to false, hide watched items for recommended rows                                     |
 | REPLEX_DISABLE_USER_STATE | false    | Remove unplayed badges from row items |
