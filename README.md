@@ -26,7 +26,7 @@ Remix your plex recommendations.
 Run the docker image with REPLEX_HOST set to your plex instance.
 
 ```
-docker run --rm -it -p 3001:80 -e REPLEX_HOST="http://0.0.0.0:32400" ghcr.io/lostb1t/replex:latest
+docker run --rm -it -p 3001:80 -e REPLEX_HOST="http://0.0.0.0:32400" REPLEX_HERO_ROWS="movies.recent,movie.recentlyadded" ghcr.io/lostb1t/replex:latest
 ```
 
 add your proxy url to plex "Custom server access URLs" (ex http://0.0.0.0:3001)
