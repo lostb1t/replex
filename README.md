@@ -76,6 +76,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_HOST               |        	 | Url of your plex instance. ex: http://0.0.0.0:32400                                             	  |
 | REPLEX_HERO_ROWS          |        	 | Comma seperated list of hubidentifiers to make hero style, options are: <br />movies.recent <br />movie.recentlyadded<br />movie.topunwatched<br />movie.recentlyviewed<br />hub.movie.recentlyreleased<br />home.television.recent<br />tv.recentlyadded<br />tv.toprated<br />tv.inprogress     |
 | REPLEX_INCLUDE_WATCHED    | false    | If set to false, hide watched items for recommended rows                                     |
+| REPLEX_DISABLE_CONTINUE_WATCHING | false    | Disable/remove the continue watching row |
 | REPLEX_DISABLE_USER_STATE | false    | Remove unplayed badges from row items |
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
 | REPLEX_FORCE_MAXIMUM_QUALITY    | false    | This will force clients to use the maximum quality. Meaning that if a client requests anything other then the maximum quality this will be ignored and the maximum quality (direct play/stream when server allows for original) is used instead. This doesn't prevent transcoding. It only sets the bitrate to original quality. So if a client needs a different codec, container or audio it should still transcode. 

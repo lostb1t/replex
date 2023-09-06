@@ -137,6 +137,14 @@ pub fn route() -> Router {
         .push(start_router)
         .push(subtitles_router);
 
+    if config.disable_continue_watching {
+        router = router.push(
+            Router::new()
+                .path(PLEX_CONTINUE_WATCHING)
+                .get(empty_handler),
+        );
+    }
+
     router = router
         .push(
             Router::new()
@@ -150,12 +158,6 @@ pub fn route() -> Router {
                 .hoop(auto_refresh_cache())
                 .get(get_hubs_sections),
         )
-        // .push(
-        //     Router::new()
-        //         .path(PLEX_CONTINUE_WATCHING)
-        //         .hoop(auto_refresh_cache())
-        //         .get(transform_hubs_home),
-        // )
         //.push(
         //    Router::new()
         //        .path(format!("{}/<id>", PLEX_LIBRARY_METADATA))
@@ -253,6 +255,22 @@ async fn disable_related_query(
 }
 
 #[handler]
+pub async fn empty_handler(
+    req: &mut Request,
+    res: &mut Response,
+) -> Result<(), anyhow::Error> {
+    let content_type = get_content_type_from_headers(req.headers_mut());
+    let mut container: MediaContainerWrapper<MediaContainer> =
+        MediaContainerWrapper::default();
+    container.content_type = content_type.clone();
+    // container.media_container.size = Some(0);
+    container.media_container.identifier =
+        Some("com.plexapp.plugins.library".to_string());
+    res.render(container);
+    return Ok(());
+}
+
+#[handler]
 pub async fn transform_hubs_home(
     req: &mut Request,
     res: &mut Response,
@@ -298,6 +316,9 @@ pub async fn transform_hubs_home(
     // we want guids for banners
     add_query_param_salvo(req, "includeGuids".to_string(), "1".to_string());
 
+    // we want continue watching
+    // add_query_param_salvo(req, "excludeContinueWatching".to_string(), "0".to_string());
+
     let mut count = params.clone().count.unwrap_or(25);
 
     // some androids have trouble loading more for hero style. So load more at once
@@ -336,7 +357,6 @@ pub async fn transform_hubs_home(
         // })
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
-        //.with_transform(MediaContainerScriptingTransform)
         .apply_to(&mut container)
         .await;
 

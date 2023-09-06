@@ -48,7 +48,11 @@ pub struct Config {
         deserialize_with = "figment::util::bool_from_str_or_int"
     )]
     pub enable_console: bool,
-    pub tmdb_api_key: Option<String>,
+    #[serde(
+        default = "default_as_false",
+        deserialize_with = "figment::util::bool_from_str_or_int"
+    )]
+    pub disable_continue_watching: bool,
     #[serde(
         default = "default_as_false",
         deserialize_with = "figment::util::bool_from_str_or_int"

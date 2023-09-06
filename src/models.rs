@@ -13,8 +13,6 @@ extern crate mime;
 use crate::cache::GLOBAL_CACHE;
 use crate::config::*;
 use crate::plex_client::PlexClient;
-
-use crate::tmdb::{TVShowImages, TMDB_CLIENT};
 use crate::utils::*;
 use anyhow::Result;
 use async_trait::async_trait;
