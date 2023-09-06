@@ -912,9 +912,9 @@ pub struct MetaData {
     #[yaserde(attribute, rename = "viewOffset")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub view_offset: Option<i64>,
-    #[yaserde(attribute, rename = "skipCount")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub skip_count: Option<i64>,
+    //#[yaserde(attribute, rename = "skipCount")]
+    //#[serde(skip_serializing_if = "Option::is_none")]
+    //pub skip_count: Option<i64>,
     #[yaserde(attribute, rename = "primaryExtraKey")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub primary_extra_key: Option<String>,
