@@ -74,7 +74,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | Setting        	          | Default 	| Description                                                            	  |
 |---------------------------|----------|---------------------------------------------------------------------------|
 | REPLEX_HOST               |        	 | Url of your plex instance. ex: http://0.0.0.0:32400                                             	  |
-| REPLEX_HERO_ROWS          |        	 | Comma seperated list of hubidentifiers to make hero stlye                  |
+| REPLEX_HERO_ROWS          |        	 | Comma seperated list of hubidentifiers to make hero style, options are: <br />continueWatching<br />movies.recent <br />movie.recentlyadded<br />movie.topunwatched<br />movie.recentlyviewed<br />hub.movie.recentlyreleased<br />home.television.recent<br />tv.recentlyadded<br />tv.toprated<br />tv.inprogress     |
 | REPLEX_INCLUDE_WATCHED    | false    | If set to false, hide watched items for recommended rows                                     |
 | REPLEX_DISABLE_USER_STATE | false    | Remove unplayed badges from row items |
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
@@ -101,8 +101,7 @@ You can recreate the builtin rows with smart collections if you wish to have tha
 
 For custom collections you can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection.
 
-For built in rows you can use the hubidentifier in the `REPLEX_HERO_ROWS` env like so `REPLEX_HERO_ROWS="movies.recent,movie.recentlyadded"`
-This also works for collections.
+For built in rows you can use the hubidentifier in the `REPLEX_HERO_ROWS`. See the setting for available know options.
 
 Note: hero style elements uses coverart from plex. Banner or background is not used.
 
@@ -140,8 +139,14 @@ If you have a reverse proxy running and dont want to proxy streaming through ple
 If you have for example an appbox it might not be ideal to stream media through replex. As that will take a lot of network resources.
 You can redirect streams by enabling `REPLEX_REDIRECT_STREAMS` and optionally set `REPLEX_REDIRECT_STREAMS_HOST` if it needs to be different from REPLEX_HOST
 
-## Known limitations/issues
+## Known limitations
 
 - hero rows on Android devices dont load more content. so hero rows have a maximum of 100 items on Android.
 - when include_watched is false a maximum item limit per library is opposed of 250 items. So if you have a mixed row of 2 libraries the max results of that row will be 500 items.
 - disable_user_state: For movies this works in the webapp. Shows work accross clients
+
+## Known issues
+
+### Replex works on on app.plex.tv but not on my clients
+
+Try to clear the cache on the client. Old plex domains might linger.

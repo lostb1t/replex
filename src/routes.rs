@@ -142,7 +142,7 @@ pub fn route() -> Router {
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
                 .hoop(auto_refresh_cache())
-                .get(get_hubs_promoted),
+                .get(transform_hubs_home),
         )
         .push(
             Router::new()
@@ -150,6 +150,12 @@ pub fn route() -> Router {
                 .hoop(auto_refresh_cache())
                 .get(get_hubs_sections),
         )
+        // .push(
+        //     Router::new()
+        //         .path(PLEX_CONTINUE_WATCHING)
+        //         .hoop(auto_refresh_cache())
+        //         .get(transform_hubs_home),
+        // )
         //.push(
         //    Router::new()
         //        .path(format!("{}/<id>", PLEX_LIBRARY_METADATA))
@@ -247,7 +253,7 @@ async fn disable_related_query(
 }
 
 #[handler]
-pub async fn get_hubs_promoted(
+pub async fn transform_hubs_home(
     req: &mut Request,
     res: &mut Response,
 ) -> Result<(), anyhow::Error> {
@@ -256,34 +262,38 @@ pub async fn get_hubs_promoted(
     let plex_client = PlexClient::from_request(req, params.clone());
     let content_type = get_content_type_from_headers(req.headers_mut());
 
-    if params.clone().content_directory_id.unwrap()[0]
-        != params.clone().pinned_content_directory_id.unwrap()[0]
-    {
-        // We only fill the first one.
-        let mut container: MediaContainerWrapper<MediaContainer> =
-            MediaContainerWrapper::default();
-        container.content_type = content_type.clone();
-        container.media_container.size = Some(0);
-        // container.media_container.allow_sync = Some("1".to_string());
-        container.media_container.identifier =
-            Some("com.plexapp.plugins.library".to_string());
-        res.render(container);
-        return Ok(());
+    if params.clone().pinned_content_directory_id.is_some() {
+        if params.clone().content_directory_id.unwrap()[0]
+            != params.clone().pinned_content_directory_id.unwrap()[0]
+        {
+            // We only fill the first one.
+            let mut container: MediaContainerWrapper<MediaContainer> =
+                MediaContainerWrapper::default();
+            container.content_type = content_type.clone();
+            container.media_container.size = Some(0);
+            // container.media_container.allow_sync = Some("1".to_string());
+            container.media_container.identifier =
+                Some("com.plexapp.plugins.library".to_string());
+            res.render(container);
+            return Ok(());
+        }
     }
 
-    // first directory, load everything here because we wanna reemiiiixxx
-    add_query_param_salvo(
-        req,
-        "contentDirectoryID".to_string(),
-        params
-            .clone()
-            .pinned_content_directory_id
-            .clone()
-            .unwrap()
-            .iter()
-            .join(",")
-            .to_string(),
-    );
+    if params.clone().pinned_content_directory_id.is_some() {
+        // first directory, load everything here because we wanna reemiiiixxx
+        add_query_param_salvo(
+            req,
+            "contentDirectoryID".to_string(),
+            params
+                .clone()
+                .pinned_content_directory_id
+                .clone()
+                .unwrap()
+                .iter()
+                .join(",")
+                .to_string(),
+        );
+    }
 
     // we want guids for banners
     add_query_param_salvo(req, "includeGuids".to_string(), "1".to_string());

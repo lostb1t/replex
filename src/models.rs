@@ -462,6 +462,25 @@ pub struct Guid {
     Deserialize,
     Clone,
     PartialEq,
+    Eq,
+    YaDeserialize,
+    YaSerialize,
+    Default,
+    PartialOrd,
+)]
+#[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
+pub struct Tag {
+    #[yaserde(attribute)]
+    tag: String,
+}
+
+
+#[derive(
+    Debug,
+    Serialize,
+    Deserialize,
+    Clone,
+    PartialEq,
     // Eq,
     YaDeserialize,
     YaSerialize,
@@ -480,9 +499,9 @@ pub struct Media {
     #[yaserde(attribute, rename = "bitrate")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bitrate: Option<i64>,
-    //#[yaserde(attribute, rename = "aspectRation")]
-    //#[serde(skip_serializing_if = "Option::is_none")]
-    //pub aspect_ratio: Option<f64>,
+    #[yaserde(attribute, rename = "aspectRatio")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub aspect_ratio: Option<f64>,
     #[yaserde(attribute, rename = "audioChannels")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub audio_channels: Option<i64>,
@@ -860,6 +879,14 @@ pub struct MetaData {
     #[yaserde(attribute, rename = "updatedAt")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub updated_at: Option<i64>,
+    #[yaserde(attribute, rename = "lastViewedAt")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub last_viewed_at: Option<i64>,
+    #[yaserde(attribute, rename = "includedAt")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub included_at: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub duration: Option<i64>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub view_mode: Option<i32>,
@@ -881,9 +908,15 @@ pub struct MetaData {
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rating: Option<f64>,
-    #[yaserde(attribute, rename = "audianceRating")]
+    #[yaserde(attribute, rename = "audienceRating")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub audiance_rating: Option<f64>,
+    pub audience_rating: Option<f64>,
+    #[yaserde(attribute, rename = "viewOffset")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub view_offset: Option<i64>,
+    #[yaserde(attribute, rename = "skipCount")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub skip_count: Option<i64>,
     #[yaserde(attribute, rename = "primaryExtraKey")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub primary_extra_key: Option<String>,
@@ -1059,12 +1092,12 @@ pub struct MetaData {
     #[yaserde(attribute, rename = "originallyAvailableAt")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub originally_available_at: Option<String>,
-    #[serde(rename = "Guid", default, skip_serializing_if = "Vec::is_empty")]
-    #[yaserde(rename = "Guid", default, child)]
-    pub guids: Vec<Guid>,
     #[serde(rename = "Media", default, skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Media", default, child)]
     pub media: Vec<Media>,
+    #[serde(rename = "Guid", default, skip_serializing_if = "Vec::is_empty")]
+    #[yaserde(rename = "Guid", default, child)]
+    pub guids: Vec<Guid>,
     #[yaserde(attribute, rename = "userState")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user_state: Option<SpecialBool>,
@@ -1085,6 +1118,18 @@ pub struct MetaData {
         rename = "playQueueItemID"
     )]
     pub play_queue_item_id: Option<i64>,
+    #[serde(rename = "Collection", default, skip_serializing_if = "Vec::is_empty")]
+    #[yaserde(rename = "Collection", default, child)]
+    pub collections: Vec<Tag>,
+    #[serde(rename = "Country", default, skip_serializing_if = "Vec::is_empty")]
+    #[yaserde(rename = "Country", default, child)]
+    pub countries: Vec<Tag>,
+    #[serde(rename = "Director", default, skip_serializing_if = "Vec::is_empty")]
+    #[yaserde(rename = "Director", default, child)]
+    pub directors: Vec<Tag>,
+    #[serde(rename = "Genre", default, skip_serializing_if = "Vec::is_empty")]
+    #[yaserde(rename = "Genre", default, child)]
+    pub genres: Vec<Tag>,
 }
 
 pub(crate) fn deserialize_option_string_from_number<'de, D>(
