@@ -1,6 +1,7 @@
 use crate::models::deserialize_comma_seperated_string;
+use serde::{Deserialize, Deserializer, Serialize};
 use figment::{providers::Env, Figment};
-use serde::Deserialize;
+// use serde::Deserialize;
 
 fn default_as_false() -> bool {
     false
@@ -8,6 +9,9 @@ fn default_as_false() -> bool {
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub struct Config {
+    #[serde(
+        deserialize_with = "deserialize_host"
+    )]
     pub host: Option<String>,
     pub port: Option<u64>,
     #[serde(
@@ -98,21 +102,31 @@ fn default_cache_ttl() -> u64 {
     30 * 60 // 30 minutes
 }
 
-// fn default_port() -> u64 {
-//     80
-// }
 
-// fn default_hero_rows() -> Option<Vec<String>> {
-//     Some(vec![
-//         "movies.recent".to_string(),
-//         "television.recent".to_string(),
-//         "movie.recentlyadded".to_string(),
-//     ])
-// }
+pub(crate) fn deserialize_host<'de, D>(
+    deserializer: D,
+) -> Result<Option<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{   
+    match Deserialize::deserialize(deserializer)? {
+        Some::<String>(mut s) => {
+            if s.ends_with('/') { s.pop(); }
+            Ok(Some(s))
+        }
+        None => Ok(None),
+    }
+}
+
 
 fn default_as_true() -> bool {
     true
 }
+
+fn deserialize_hosr() -> bool {
+    true
+}
+
 
 impl Config {
     // Note the `nested` option on both `file` providers. This makes each
