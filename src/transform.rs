@@ -685,11 +685,11 @@ impl Transform for HubStyleTransform {
                                     url: cover_art.clone().unwrap(),
                                     alt: Some(c.title.clone()),
                                 },
-                                Image {
-                                    r#type: "background".to_string(),
-                                    url: cover_art.clone().unwrap(),
-                                    alt: Some(c.title.clone()),
-                                },
+                                //Image {
+                                //    r#type: "background".to_string(),
+                                //    url: cover_art.clone().unwrap(),
+                                //    alt: Some(c.title.clone()),
+                                //},
                             ];
                             // lots of clients dont listen to the above
                             if style.cover_art_as_art {
