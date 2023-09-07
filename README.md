@@ -115,7 +115,7 @@ Because this app sits before Plex the builtin remote access (and auto SSL) will 
 For testing purposes you can use http://[replexip]:[replexport]
 
 But if you want other clients to connext to replex you need to setup a reverse proxy with a domain and preferable ssl.
-
+A few easy to setup reverse proxys are: https://caddyserver.com or https://nginxproxymanager.com
 
 Once you have your domain hooked up to replex change add your replex url to 'Custom server access URLs' field under network.
 and lastly disable remote access under remote access. 
