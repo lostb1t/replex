@@ -112,21 +112,12 @@ Note: Hero elements are not supported for continue watching by plex. You can rep
 
 Because this app sits before Plex the builtin remote access (and auto SSL) will not work and needs to be disabled.
 
-You have 2 options to provide remote access.
+For testing purposes you can use http://[replexip]:[replexport]
 
-1. By ip http://[replexip]:[replexport]
+But if you want other clients to connext to replex you need to setup a reverse proxy with a domain and preferable ssl.
 
-   This option has a few downsides. One it has no SSL so your connections will be insecure.  
-   Second, app.plex.tv will not work. As browsers do not allow unsecure connections from a securew website. If you want to to use the web ui you can access it by ip. All other clients should work with unsecured connections. 
-   
-   NOTE: If remote access was enabled before, then plex witll still try to use https for it. Even if disabled.
 
-2. Custom domain (reverse proxy)
-
-   You can setup a reverse proxy with a custom domain. This solves both the issues from option 1.
-   This is the prefered way.
-
-Next set your replex url in the 'Custom server access URLs' field under network.
+Once you have your domain hooked up to replex change add your replex url to 'Custom server access URLs' field under network.
 and lastly disable remote access under remote access. 
 
 Use https instead of http if you using a custom domain, otherwise app.plex.tv wont work.
