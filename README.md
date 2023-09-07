@@ -112,7 +112,7 @@ Note: Hero elements are not supported for continue watching by plex. You can rep
 
 Because this app sits before Plex the builtin remote access (and auto SSL) will not work and needs to be disabled.
 
-For testing purposes you can use http://[replexip]:[replexport]
+For testing purposes you can access through the browser at http://[replexip]:[replexport]
 But if you want other clients to connect to replex you need to setup a reverse proxy with a domain and preferable ssl.
 
 A few easy to setup reverse proxys are: https://caddyserver.com or https://nginxproxymanager.com
