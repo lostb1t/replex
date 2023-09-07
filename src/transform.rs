@@ -577,7 +577,14 @@ impl PlatformHeroStyle {
                 if product.starts_with("Plex HTPC") {
                     PlatformHeroStyle::htpc_style()
                 } else {
-                    PlatformHeroStyle::default()
+                    match product.to_lowercase().as_ref() {
+                        "plex for lg" => PlatformHeroStyle::htpc_style(),
+                        "plex for xbox" => PlatformHeroStyle::htpc_style(),
+                        "plex for ps4" => PlatformHeroStyle::htpc_style(),
+                        "plex for ps5" => PlatformHeroStyle::htpc_style(),
+                        _ => PlatformHeroStyle::default()
+                    }
+                    
                 }
             }
         }

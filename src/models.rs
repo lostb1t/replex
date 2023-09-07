@@ -1177,9 +1177,11 @@ impl MetaData {
             return None;
         }
         
-        if guid.starts_with("plex://episode") {
-            self.parent_guid.clone().unwrap();
-        }
+        // if guid.starts_with("plex://episode") {
+            
+        //     guid = self.parent_guid.clone().unwrap();
+        //     dbg!(&guid);
+        // }
 
         let cache_key = format!("{}:cover_art", guid);
 
@@ -1194,7 +1196,9 @@ impl MetaData {
             .clone()
             .unwrap()
             .replace("plex://show/", "")
-            .replace("plex://movie/", "");
+            .replace("plex://movie/", "")
+            .replace("plex://season/", "")
+            .replace("plex://episode/", "");
 
         let mut container: MediaContainerWrapper<MediaContainer> =
             match plex_client.get_provider_data(guid).await {
