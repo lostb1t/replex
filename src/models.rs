@@ -1461,6 +1461,9 @@ pub struct MediaContainer {
         deserialize_with = "deserialize_option_number_from_string"
     )]
     pub media_tag_version: Option<i64>,
+    #[yaserde(attribute, rename = "Meta")]
+    #[serde(skip_serializing_if = "Option::is_none", rename = "Meta")]
+    pub meta: Option<Meta>,
 }
 
 #[derive(

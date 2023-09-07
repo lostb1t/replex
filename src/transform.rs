@@ -496,7 +496,7 @@ pub struct PlatformHeroStyle {
     r#type: String,
     style: Option<String>,
     child_type: Option<String>,
-    cover_art_as_thumb: bool, // if we should return the coverart in the thumb field
+    // cover_art_as_thumb: bool, // if we should return the coverart in the thumb field
     cover_art_as_art: bool, // if we should return the coverart in the art field
 }
 
@@ -505,8 +505,8 @@ impl Default for PlatformHeroStyle {
         Self {
             style: Some("hero".to_string()),
             r#type: "clip".to_string(),
-            child_type: None,
-            cover_art_as_thumb: false,
+            child_type: Some("clip".to_string()),
+            // cover_art_as_thumb: false,
             cover_art_as_art: true,
         }
     }
@@ -539,7 +539,7 @@ impl PlatformHeroStyle {
                     r#type: "mixed".to_string(),
                     // using clip makes it load thumbs instead of art as cover art. So we dont have to touch the background
                     child_type: Some("clip".to_string()),
-                    cover_art_as_thumb: true,
+                    // cover_art_as_thumb: true,
                     cover_art_as_art: false,
                     ..PlatformHeroStyle::default()
                 }
@@ -696,9 +696,7 @@ impl Transform for HubStyleTransform {
                                 c.art = cover_art.clone();
                             }
 
-                            if style.cover_art_as_thumb {
-                                c.thumb = cover_art.clone()
-                            }
+                            c.thumb = cover_art.clone();
                         }
                         c
                     });
@@ -755,6 +753,33 @@ impl Transform for CollecionStyleTransform {
                 options.product.unwrap_or_default(),
             );
 
+            item.meta = Some(Meta {
+                r#type: None,
+                display_fields: vec![],
+                display_images: vec![
+                    DisplayImage {
+                        r#type: Some("hero".to_string()),
+                        image_type: Some("coverArt".to_string()),
+                    },
+                    DisplayImage {
+                        r#type: Some("mixed".to_string()),
+                        image_type: Some("coverArt".to_string()),
+                    },
+                    DisplayImage {
+                        r#type: Some("clip".to_string()),
+                        image_type: Some("coverArt".to_string()),
+                    },
+                    DisplayImage {
+                        r#type: Some("movie".to_string()),
+                        image_type: Some("coverArt".to_string()),
+                    },
+                    DisplayImage {
+                        r#type: Some("show".to_string()),
+                        image_type: Some("coverArt".to_string()),
+                    },
+                ],
+            });
+
             for mut child in item.children() {
                 if style.child_type.clone().is_some() {
                     child.r#type = style.child_type.clone().unwrap();
@@ -784,9 +809,7 @@ impl Transform for CollecionStyleTransform {
                             c.art = cover_art.clone();
                         }
 
-                        if style.cover_art_as_thumb {
-                            c.thumb = cover_art.clone()
-                        }
+                        c.thumb = cover_art.clone();
                     }
                     c
                 });
