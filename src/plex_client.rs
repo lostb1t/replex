@@ -9,6 +9,7 @@ use anyhow::Result;
 use async_recursion::async_recursion;
 use futures_util::Future;
 use futures_util::TryStreamExt;
+use http::Uri;
 // use hyper::client::HttpConnector;
 // use hyper::Body;
 use hyper::body::Body;
@@ -90,7 +91,16 @@ impl PlexClient {
             &req.uri_mut().path_and_query().unwrap()
         );
         let mut headers = req.headers_mut().to_owned();
+        let target_uri = url::Url::parse(self.host.as_str()).unwrap();
+        let target_host = target_uri.host().unwrap().to_string().clone();
+    
         headers.remove(ACCEPT); // remove accept as we always do json request
+        headers.insert(
+            http::header::HOST,
+            header::HeaderValue::from_str(
+                &target_host,
+            ).unwrap(),
+        );
         let res = self
             .http_client
             .request(req.method_mut().to_owned(), uri)
@@ -171,7 +181,7 @@ impl PlexClient {
         c.media_container.children_mut().retain(|x| !x.is_watched());
         // if !config.include_watched {
         //     let original_size = c.media_container.size.unwrap();
-        //     //let children = 
+        //     //let children =
         //     c.media_container.children_mut().retain(|x| !x.is_watched());
         //     let children_lenght = c.media_container.children_mut().len() as i32;
         //     let total_size = c.media_container.total_size.unwrap();
@@ -343,7 +353,7 @@ impl PlexClient {
         // if res.status() == 500 {
         //     return Err(salvo::http::StatusError::);
         // }
-  
+
         let container: MediaContainerWrapper<MediaContainer> =
             from_reqwest_response(res).await?;
         Ok(container)
@@ -395,7 +405,8 @@ impl PlexClient {
         );
         headers.insert(
             "X-Plex-Platform",
-            header::HeaderValue::from_str(platform.to_string().as_str()).unwrap(),
+            header::HeaderValue::from_str(platform.to_string().as_str())
+                .unwrap(),
         );
         // dbg!(&headers);
         Self {
@@ -431,7 +442,8 @@ impl PlexClient {
         );
         headers.insert(
             "X-Plex-Platform",
-            header::HeaderValue::from_str(platform.to_string().as_str()).unwrap(),
+            header::HeaderValue::from_str(platform.to_string().as_str())
+                .unwrap(),
         );
         Self {
             http_client: reqwest::Client::builder()

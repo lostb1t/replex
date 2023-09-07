@@ -280,21 +280,20 @@ pub async fn transform_hubs_home(
     let plex_client = PlexClient::from_request(req, params.clone());
     let content_type = get_content_type_from_headers(req.headers_mut());
 
-    if params.clone().pinned_content_directory_id.is_some() {
-        if params.clone().content_directory_id.unwrap()[0]
+    if params.clone().pinned_content_directory_id.is_some()
+        && params.clone().content_directory_id.unwrap()[0]
             != params.clone().pinned_content_directory_id.unwrap()[0]
-        {
-            // We only fill the first one.
-            let mut container: MediaContainerWrapper<MediaContainer> =
-                MediaContainerWrapper::default();
-            container.content_type = content_type.clone();
-            container.media_container.size = Some(0);
-            // container.media_container.allow_sync = Some("1".to_string());
-            container.media_container.identifier =
-                Some("com.plexapp.plugins.library".to_string());
-            res.render(container);
-            return Ok(());
-        }
+    {
+        // We only fill the first one.
+        let mut container: MediaContainerWrapper<MediaContainer> =
+            MediaContainerWrapper::default();
+        container.content_type = content_type.clone();
+        container.media_container.size = Some(0);
+        // container.media_container.allow_sync = Some("1".to_string());
+        container.media_container.identifier =
+            Some("com.plexapp.plugins.library".to_string());
+        res.render(container);
+        return Ok(());
     }
 
     if params.clone().pinned_content_directory_id.is_some() {
@@ -337,7 +336,7 @@ pub async fn transform_hubs_home(
     match upstream_res.status() {
         reqwest::StatusCode::OK => (),
         status => {
-            tracing::error!(status = ?status, uri = ?req.uri(), "Failed to get plex response");
+            tracing::error!(status = ?status, res = ?upstream_res, "Failed to get plex response");
             return Err(
                 salvo::http::StatusError::internal_server_error().into()
             );
@@ -395,7 +394,7 @@ pub async fn get_hubs_sections(
     match upstream_res.status() {
         reqwest::StatusCode::OK => (),
         status => {
-            tracing::error!(status = ?status, uri = ?req.uri(), "Failed to get plex response");
+            tracing::error!(status = ?status, res = ?upstream_res, "Failed to get plex response");
             return Err(
                 salvo::http::StatusError::internal_server_error().into()
             );
@@ -774,7 +773,8 @@ async fn video_transcode_fallback(
         let mut fallback_selected = false;
         for stream in streams {
             if stream.stream_type.clone().unwrap() == 1
-                && stream.decision.clone().unwrap_or("unknown".to_string()) == "transcode"
+                && stream.decision.clone().unwrap_or("unknown".to_string())
+                    == "transcode"
             {
                 tracing::trace!(
                     "{} is transcoding, looking for fallback",
@@ -793,9 +793,13 @@ async fn video_transcode_fallback(
                             media,
                         );
                         queries.remove("mediaIndex");
-                        queries.insert("mediaIndex".to_string(), index.to_string());
+                        queries.insert(
+                            "mediaIndex".to_string(),
+                            index.to_string(),
+                        );
                         queries.remove("directPlay");
-                        queries.insert("directPlay".to_string(), "0".to_string());
+                        queries
+                            .insert("directPlay".to_string(), "0".to_string());
                         fallback_selected = true;
                         break;
                     }
@@ -807,12 +811,12 @@ async fn video_transcode_fallback(
             tracing::trace!("No suitable fallback found");
         }
     }
-    
+
     replace_query(queries, req);
     Ok(())
 }
 
-/// When multiple qualities are avaiable, select the most relevant one. 
+/// When multiple qualities are avaiable, select the most relevant one.
 /// Does not work for every client as some client decides themselfs which version to use.
 #[handler]
 async fn auto_select_version(req: &mut Request) {
@@ -822,9 +826,9 @@ async fn auto_select_version(req: &mut Request) {
     let media_index = queries.get("mediaIndex");
 
     if (media_index.is_none() || media_index.unwrap() == "-1")
-        && params.screen_resolution.len() > 0 && queries.get("path").is_some()
+        && params.screen_resolution.len() > 0
+        && queries.get("path").is_some()
     {
-        
         let item = plex_client
             .get_item_by_key(req.queries().get("path").unwrap().to_string())
             .await
@@ -862,7 +866,9 @@ async fn auto_select_version(req: &mut Request) {
             }
         }
     } else {
-        tracing::trace!("Skipping auto selected as client specified a media index");
+        tracing::trace!(
+            "Skipping auto selected as client specified a media index"
+        );
     }
     replace_query(queries, req);
 }
