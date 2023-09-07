@@ -1168,13 +1168,17 @@ impl MetaData {
         plex_client: PlexClient,
     ) -> Option<String> {
         self.guid.as_ref()?;
-        let guid = self.guid.clone().unwrap();
+        let mut guid = self.guid.clone().unwrap();
         if guid.starts_with("local://") {
             tracing::debug!(
                 "Skipping loading remote metadata for local item: {}",
                 guid,
             );
             return None;
+        }
+        
+        if guid.starts_with("plex://episode") {
+            self.parent_guid.clone().unwrap();
         }
 
         let cache_key = format!("{}:cover_art", guid);
