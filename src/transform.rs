@@ -893,7 +893,7 @@ impl Transform for HubKeyTransform {
         if item.is_collection_hub() {
             if !item.key.contains("replex") {
                 // might already been set by the mixings
-                item.key = format!("/replex{}", item.key);
+                item.key = format!("/replex/children{}", item.key);
             }
         }
     }
