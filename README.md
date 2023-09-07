@@ -83,7 +83,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_FORCE_DIRECT_PLAY_FOR    | false    | Force direct play for the given resolutions. Options are "4k", "1080p" and "720p".  This wil result in an error message if the client does not support directplay. Not recommended      
 | REPLEX_VIDEO_TRANSCODE_FALLBACK_FOR    |     | If the selected media triggers a video transcode. Fallback to another version of the media. Only triggers on video transcoding. Remuxing is still allowed. <br />Options are "4k", "1080p" and "720p". <br /> <br /> Example if  REPLEX_VIDEO_TRANSCODE_FALLBACK_FOR is set to "4k" then 4k transcodes will fallback to another version if avaiable |
 | REPLEX_AUTO_SELECT_VERSION    | false    | If you have multiple versions of a media item then this setting will choose the one thats closest to the client resolution. So a 1080p TV will get the 1080P version while 4k gets the 4k version. A user can still override this by selecting a different version from the client.   |
-| REPLEX_DISABLE_RELATED  | false | See: https://github.com/sarendsen/replex/issues/26.        |
+| REPLEX_DISABLE_RELATED  | false | See: https://github.com/lostb1t/replex/issues/26.        |
 | REPLEX_REDIRECT_STREAMS  | false    | Redirect streams to another endpoint.                                      |
 | REPLEX_REDIRECT_STREAMS_HOST  | REPLEX_HOST    | Alternative streams endpoint                                         |
 | REPLEX_CACHE_TTL          | 1800    	 | Time to live for caches in seconds. Set to 0 to disable (not recommended).  |

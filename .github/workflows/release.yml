@@ -206,7 +206,7 @@ jobs:
         with:
           images: |
             ${{ env.REGISTRY_IMAGE }}
-            sarendsen/replex
+            lostb1t/replex
           tags: |
             type=raw,value=${{ needs.get-next-version.outputs.new-release-version }},enable={{is_default_branch}}
             type=raw,value=latest,enable={{is_default_branch}}

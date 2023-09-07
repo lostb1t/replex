@@ -61,4 +61,4 @@ jobs:
           platforms: linux/arm64,linux/amd64
           push: true 
           tags: | 
-            ghcr.io/sarendsen/replex:${{ steps.docker-tag.outputs.tag }}
+            ghcr.io/lostb1t/replex:${{ steps.docker-tag.outputs.tag }}
