@@ -1190,11 +1190,10 @@ impl MetaData {
             return None;
         }
         
-        // if guid.starts_with("plex://episode") {
-            
-        //     guid = self.parent_guid.clone().unwrap();
+        if guid.starts_with("plex://episode") {    
+             guid = self.parent_guid.clone().unwrap();
         //     dbg!(&guid);
-        // }
+        }
 
         let cache_key = format!("{}:cover_art", guid);
 
