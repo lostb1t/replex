@@ -570,6 +570,8 @@ impl PlatformHeroStyle {
         Self {
             style: Some("hero".to_string()),
             r#type: "mixed".to_string(),
+            child_type: None,
+            cover_art_as_art: false,
             ..PlatformHeroStyle::default()
         }
     }
