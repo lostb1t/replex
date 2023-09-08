@@ -1001,15 +1001,15 @@ async fn video_transcode_fallback(
                             .get("videoBitrate")
                             .unwrap_or_else(|| queries.get("maxVideoBitrate").unwrap()).parse().unwrap();
 
-                        if (resolution == "1080" && requested_bitrate >= 8000)
-                            || (resolution == "720"
-                                && requested_bitrate >= 2000)
-                        {
-                            force_maximum_quality
-                                .handle(req, depot, res, ctrl)
-                                .await;
-                            queries = req.queries().clone();
-                        }
+                        //if (resolution == "1080" && requested_bitrate >= 8000)
+                        //    || (resolution == "720"
+                        //        && requested_bitrate >= 2000)
+                        //{
+                        //    force_maximum_quality
+                        //        .handle(req, depot, res, ctrl)
+                        //        .await;
+                        //    queries = req.queries().clone();
+                        //}
                     }
 
                     // force_maximum_quality
