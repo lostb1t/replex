@@ -833,7 +833,6 @@ async fn video_transcode_fallback(
         let response = plex_client.request(req).await?;
         let mut transcode: MediaContainerWrapper<MediaContainer> =
             from_reqwest_response(response).await?;
-        // dbg!()
         let streams =
             &transcode.media_container.metadata[0].media[0].parts[0].streams;
         let selected_media =
@@ -868,6 +867,10 @@ async fn video_transcode_fallback(
                         queries.remove("directPlay");
                         queries
                             .insert("directPlay".to_string(), "0".to_string());
+
+                        queries.remove("directStream");
+                        queries
+                            .insert("directStream".to_string(), "1".to_string());
                         fallback_selected = true;
                         break;
                     }
