@@ -889,7 +889,10 @@ async fn get_transcoding_for_request(
 // TODO: Fallback to a version close to the requested bitrate
 #[handler]
 async fn video_transcode_fallback(
-    req: &mut Request,
+    req: &mut salvo::Request,
+    depot: &mut Depot,
+    res: &mut salvo::Response,
+    ctrl: &mut FlowCtrl,
 ) -> Result<(), anyhow::Error> {
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
@@ -959,7 +962,8 @@ async fn video_transcode_fallback(
                 selected_media
             );
 
-            let mut media_items = item.media_container.metadata[0].media.clone();
+            let mut media_items =
+                item.media_container.metadata[0].media.clone();
             media_items.sort_by(|x, y| {
                 let current_density = x.height.unwrap() * x.width.unwrap();
                 let next_density = y.height.unwrap() * y.width.unwrap();
@@ -974,6 +978,41 @@ async fn video_transcode_fallback(
             // for now just select a random fallback
             for (index, media) in media_items.iter().enumerate() {
                 if available_media_ids.contains(&media.id) {
+                    if queries.get("maxVideoBitrate").is_some()
+                        || queries.get("videoBitrate").is_some()
+                    {
+                        // tracing::trace!(
+                        //     "Video has max bitrate which always forces transcode. Forcing max quality for fallback {}",
+                        //     media,
+                        // );
+
+                        // if same resolution we can assume it will transcode again. Fallback to another resolution
+                        let resolution = media
+                            .video_resolution
+                            .clone()
+                            .unwrap()
+                            .to_lowercase();
+                        if resolution == fallback_for {
+                            continue;
+                        }
+
+                        // check if requested falls into a resolution range. Either we remove the max bitrate or allow it
+                        let requested_bitrate: i64 = queries
+                            .get("videoBitrate")
+                            .unwrap_or(queries.get("maxVideoBitrate").unwrap()).parse().unwrap();
+
+                        if (resolution == "1080" && requested_bitrate >= 8000)
+                            || (resolution == "720"
+                                && requested_bitrate >= 2000)
+                        {
+                            force_maximum_quality
+                                .handle(req, depot, res, ctrl)
+                                .await;
+                            queries = req.queries().clone();
+                        }
+                    }
+
+                    // force_maximum_quality
                     tracing::debug!(
                         "Video transcode fallback from {} to {}",
                         selected_media,
