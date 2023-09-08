@@ -252,7 +252,7 @@ pub fn merge_children_keys(
     key_right = key_right.replace("/children", "");
 
     format!(
-        "/replex/library/collections/{},{}/children",
+        "/library/collections/{},{}/children",
         key_left,
         key_right // order is important. As thhis order is used to generated the library collections
     )

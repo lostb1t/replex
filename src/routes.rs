@@ -19,6 +19,7 @@ use rhai::{Engine, EvalAltResult};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
+use url::Url;
 // use salvo::cache::{Cache, CachedEntry};
 use salvo::compression::Compression;
 use salvo::cors::Cors;
@@ -171,9 +172,15 @@ pub fn route() -> Router {
         )
         .push(
             Router::new()
-                .path("/replex/library/collections/<ids>/children")
+                .path("/replex/<style>/library/collections/<ids>/children")
                 .hoop(default_cache())
                 .get(get_collections_children),
+        )
+        .push(
+            Router::new()
+                .path("/replex/<style>/<**rest>")
+                .hoop(default_cache())
+                .get(default_transform),
         )
         //.push(
         //    Router::new()
@@ -420,6 +427,14 @@ pub async fn get_hubs_sections(
     Ok(())
 }
 
+// pub async fn transform_section(
+//     req: &mut Request,
+//     _depot: &mut Depot,
+//     res: &mut Response,
+// ) -> Result<(), anyhow::Error> {
+
+// }
+
 #[handler]
 pub async fn get_collections_children(
     req: &mut Request,
@@ -462,7 +477,7 @@ pub async fn get_collections_children(
             offset,
             limit,
         })
-        .with_transform(CollecionStyleTransform {
+        .with_transform(CollectionStyleTransform {
             collection_ids: collection_ids.clone(),
             hub: params.content_directory_id.is_some() // its a guessing game
                 && !params.include_collections
@@ -475,6 +490,59 @@ pub async fn get_collections_children(
         .await;
 
     res.render(container); // TODO: FIx XML
+    Ok(())
+}
+
+#[handler]
+pub async fn default_transform(
+    req: &mut Request,
+    _depot: &mut Depot,
+    res: &mut Response,
+) -> Result<(), anyhow::Error> {
+    let config: Config = Config::figment().extract().unwrap();
+    let params: PlexContext = req.extract().await.unwrap();
+    let plex_client = PlexClient::from_request(req, params.clone());
+    let content_type = get_content_type_from_headers(req.headers_mut());
+    let style = req.param::<Style>("style").unwrap();
+    let rest_path = req.param::<String>("**rest").unwrap();
+
+    // We dont listen to pagination. We have a hard max of 250 per collection
+    let mut limit: i32 = 250;
+    let mut offset: i32 = 0;
+
+    // in we dont remove watched then we dont need to limit
+    if config.include_watched {
+        limit = params.container_size.unwrap_or(50);
+        offset = params.container_start.unwrap_or(0);
+    }
+
+    let mut url = Url::parse(req.uri_mut().to_string().as_str()).unwrap();
+    url.set_path(&rest_path);
+    req.set_uri(hyper::Uri::try_from(url.as_str()).unwrap());
+
+    let upstream_res = plex_client.request(req).await?;
+    match upstream_res.status() {
+        reqwest::StatusCode::OK => (),
+        status => {
+            tracing::error!(status = ?status, res = ?upstream_res, "Failed to get plex response");
+            return Err(
+                salvo::http::StatusError::internal_server_error().into()
+            );
+        }
+    };
+
+    let mut container: MediaContainerWrapper<MediaContainer> =
+        from_reqwest_response(upstream_res).await?;
+    container.content_type = content_type;
+    // container.media_container.meta
+
+    TransformBuilder::new(plex_client, params.clone())
+        .with_transform(MediaStyleTransform { style: style })
+        .with_transform(UserStateTransform)
+        .apply_to(&mut container)
+        .await;
+
+    res.render(container);
     Ok(())
 }
 

@@ -20,6 +20,10 @@ use std::sync::Arc;
 use std::{cell::Cell, collections::HashMap};
 use tokio::task::JoinSet;
 use tokio::time::Instant;
+use serde::{Deserialize, Deserializer, Serialize};
+use strum_macros::Display as EnumDisplay;
+use strum_macros::EnumString;
+
 
 #[async_trait]
 pub trait Transform: Send + Sync + 'static {
@@ -39,6 +43,7 @@ pub trait Transform: Send + Sync + 'static {
         item
     }
 }
+
 
 #[async_trait]
 pub trait Filter: Send + Sync + 'static {
@@ -608,69 +613,15 @@ impl Transform for HubStyleTransform {
                 item.is_hero(plex_client.clone()).await.unwrap_or(false);
             if is_hero {
                 let mut style = PlatformHeroStyle::for_client(
-                    options.platform,
-                    options.product.unwrap_or_default(),
+                    options.platform.clone(),
+                    options.product.clone().unwrap_or_default(),
                 );
 
                 item.style = style.style;
 
                 item.r#type = style.r#type;
-                item.meta = Some(Meta {
-                    r#type: None,
-                    display_fields: vec![],
-                    // display_fields: vec![
-                    //     DisplayField {
-                    //         r#type: Some("movie".to_string()),
-                    //         fields: vec![
-                    //             // "title".to_string(),
-                    //             // "originallyAvailableAt".to_string(),
-                    //         ],
-                    //     },
-                    //     DisplayField {
-                    //         r#type: Some("show".to_string()),
-                    //         fields: vec![
-                    //             // "title".to_string(),
-                    //             // "originallyAvailableAt".to_string(),
-                    //         ],
-                    //     },
-                    //     DisplayField {
-                    //         r#type: Some("clip".to_string()),
-                    //         fields: vec![
-                    //             // "title".to_string(),
-                    //             // "originallyAvailableAt".to_string(),
-                    //         ],
-                    //     },
-                    //     DisplayField {
-                    //         r#type: Some("mixed".to_string()),
-                    //         fields: vec![
-                    //             // "title".to_string(),
-                    //             // "originallyAvailableAt".to_string(),
-                    //         ],
-                    //     },
-                    // ],
-                    display_images: vec![
-                        DisplayImage {
-                            r#type: Some("hero".to_string()),
-                            image_type: Some("coverArt".to_string()),
-                        },
-                        DisplayImage {
-                            r#type: Some("mixed".to_string()),
-                            image_type: Some("coverArt".to_string()),
-                        },
-                        DisplayImage {
-                            r#type: Some("clip".to_string()),
-                            image_type: Some("coverArt".to_string()),
-                        },
-                        DisplayImage {
-                            r#type: Some("movie".to_string()),
-                            image_type: Some("coverArt".to_string()),
-                        },
-                        DisplayImage {
-                            r#type: Some("show".to_string()),
-                            image_type: Some("coverArt".to_string()),
-                        },
-                    ],
-                });
+                item.meta = Some(hero_meta());
+
                 let mut futures = FuturesOrdered::new();
                 // let now = Instant::now();
 
@@ -680,38 +631,20 @@ impl Transform for HubStyleTransform {
                     }
 
                     let client = plex_client.clone();
+                    let _options = options.clone();
                     futures.push_back(async move {
                         let mut c = child.clone();
-
-                        let cover_art = child.get_hero_art(client).await;
-                        if cover_art.is_some() {
-                            // c.art = art.clone();
-                            c.images = vec![
-                                Image {
-                                    r#type: "coverArt".to_string(),
-                                    url: cover_art.clone().unwrap(),
-                                    alt: Some(c.title.clone()),
-                                },
-                                //Image {
-                                //    r#type: "background".to_string(),
-                                //    url: cover_art.clone().unwrap(),
-                                //    alt: Some(c.title.clone()),
-                                //},
-                            ];
-                            // lots of clients dont listen to the above
-                            if style.cover_art_as_art {
-                                c.art = cover_art.clone();
-                            }
-
-                            c.thumb = cover_art.clone();
-                        }
+                        let transform = MediaStyleTransform {
+                            style: Style::Hero
+                        };
+                        transform.transform_metadata(
+                            &mut c,
+                            client,
+                            _options
+                        ).await;
                         c
                     });
                 }
-                // let elapsed = now.elapsed();
-                // println!("Elapsed: {:.2?}", elapsed);
-                // let now = Instant::now();
-
                 let children: Vec<MetaData> = futures.collect().await;
                 item.set_children(children);
             }
@@ -719,16 +652,75 @@ impl Transform for HubStyleTransform {
     }
 }
 
+pub struct MediaStyleTransform {
+    pub style: Style
+}
+
+#[async_trait]
+impl Transform for MediaStyleTransform {
+    async fn transform_mediacontainer(
+        &self,
+        mut item: MediaContainer,
+        plex_client: PlexClient,
+        options: PlexContext,
+    ) -> MediaContainer {
+        if self.style == Style::Hero {
+            item.meta = Some(hero_meta());
+        }
+        item
+    }
+
+    async fn transform_metadata(
+        &self,
+        item: &mut MetaData,
+        plex_client: PlexClient,
+        options: PlexContext,
+    ) {
+        if self.style == Style::Hero {
+            let mut style_def = PlatformHeroStyle::for_client(
+                options.platform,
+                options.product.unwrap_or_default(),
+            );
+            if style_def.child_type.clone().is_some() {
+                item.r#type = style_def.child_type.clone().unwrap();
+            }
+            let cover_art = item.get_hero_art(plex_client).await;
+            if cover_art.is_some() {
+                // c.art = art.clone();
+                item.images = vec![
+                    Image {
+                        r#type: "coverArt".to_string(),
+                        url: cover_art.clone().unwrap(),
+                        alt: Some(item.title.clone()),
+                    },
+                    //Image {
+                    //    r#type: "background".to_string(),
+                    //    url: cover_art.clone().unwrap(),
+                    //    alt: Some(c.title.clone()),
+                    //},
+                ];
+                // lots of clients dont listen to the above
+                if style_def.cover_art_as_art {
+                    item.art = cover_art.clone();
+                }
+
+                item.thumb = cover_art.clone();
+            }
+        }
+        // item
+    }
+}
+
 /// Collections can be called from hubs as a refresh. But also standalone.
 /// We need to know if if its hub called and if the hub is hero styled for media.
 #[derive(Default, Debug)]
-pub struct CollecionStyleTransform {
+pub struct CollectionStyleTransform {
     pub collection_ids: Vec<u32>,
     pub hub: bool, // if collections is meant for hubs
 }
 
 #[async_trait]
-impl Transform for CollecionStyleTransform {
+impl Transform for CollectionStyleTransform {
     async fn transform_mediacontainer(
         &self,
         mut item: MediaContainer,
@@ -752,76 +744,37 @@ impl Transform for CollecionStyleTransform {
                 .unwrap()
                 .has_label("REPLEXHERO".to_string())
         {
-            let mut futures = FuturesOrdered::new();
+            // let mut futures = FuturesOrdered::new();
             // let now = Instant::now();
 
             let mut style = PlatformHeroStyle::for_client(
-                options.platform,
-                options.product.unwrap_or_default(),
+                options.platform.clone(),
+                options.product.clone().unwrap_or_default(),
             );
 
-            item.meta = Some(Meta {
-                r#type: None,
-                display_fields: vec![],
-                display_images: vec![
-                    DisplayImage {
-                        r#type: Some("hero".to_string()),
-                        image_type: Some("coverArt".to_string()),
-                    },
-                    DisplayImage {
-                        r#type: Some("mixed".to_string()),
-                        image_type: Some("coverArt".to_string()),
-                    },
-                    DisplayImage {
-                        r#type: Some("clip".to_string()),
-                        image_type: Some("coverArt".to_string()),
-                    },
-                    DisplayImage {
-                        r#type: Some("movie".to_string()),
-                        image_type: Some("coverArt".to_string()),
-                    },
-                    DisplayImage {
-                        r#type: Some("show".to_string()),
-                        image_type: Some("coverArt".to_string()),
-                    },
-                ],
-            });
+            item.meta = Some(hero_meta());
 
+            let mut futures = FuturesOrdered::new();
             for mut child in item.children() {
                 if style.child_type.clone().is_some() {
                     child.r#type = style.child_type.clone().unwrap();
                 }
 
-                //child.r#type = "clip".to_string();
-                // let style = item.style.clone().unwrap();
                 let client = plex_client.clone();
+                let _options = options.clone();
                 futures.push_back(async move {
                     let mut c = child.clone();
-
-                    let cover_art = child.get_hero_art(client).await;
-                    if cover_art.is_some() {
-                        c.images = vec![
-                            Image {
-                                r#type: "coverArt".to_string(),
-                                url: cover_art.clone().unwrap(),
-                                alt: Some(c.title.clone()),
-                            },
-                            Image {
-                                r#type: "coverPoster".to_string(),
-                                url: cover_art.clone().unwrap(),
-                                alt: Some(c.title.clone()),
-                            },
-                        ];
-                        if style.cover_art_as_art {
-                            c.art = cover_art.clone();
-                        }
-
-                        c.thumb = cover_art.clone();
-                    }
+                    let transform = MediaStyleTransform {
+                        style: Style::Hero
+                    };
+                    transform.transform_metadata(
+                        &mut c,
+                        client,
+                        _options
+                    ).await;
                     c
                 });
             }
-
             let children: Vec<MetaData> = futures.collect().await;
             item.set_children(children);
         }
@@ -890,11 +843,13 @@ impl Transform for HubKeyTransform {
         plex_client: PlexClient,
         options: PlexContext,
     ) {
-        if item.is_collection_hub() {
-            if !item.key.contains("replex") {
-                // might already been set by the mixings
-                item.key = format!("/replex{}", item.key);
-            }
+        // if item.is_hub() {
+        //     dbg!(&item.key);
+        // }
+        if item.is_hub() && !item.key.starts_with("/replex") {
+            // might already been set by the mixings
+            // setting an url argument crashes client. So we use the path
+            item.key = format!("/replex/{}{}", item.style.clone().unwrap(), item.key);
         }
     }
 }
@@ -1008,5 +963,167 @@ impl Transform for MediaContainerScriptingTransform {
         )
         .unwrap();
         result
+    }
+}
+
+// #[async_trait]
+// impl Transform for CollectionStyleTransform {
+//     async fn transform_mediacontainer(
+//         &self,
+//         mut item: MediaContainer,
+//         plex_client: PlexClient,
+//         options: PlexContext,
+//     ) -> MediaContainer {
+//         let mut collection_details = plex_client
+//             .clone()
+//             .get_cached(
+//                 plex_client.get_collection(self.collection_ids[0] as i32),
+//                 format!("collection:{}", self.collection_ids[0].to_string()),
+//             )
+//             .await;
+
+//         if collection_details.is_ok()
+//             && collection_details
+//                 .unwrap()
+//                 .media_container
+//                 .children()
+//                 .get(0)
+//                 .unwrap()
+//                 .has_label("REPLEXHERO".to_string())
+//         {
+//             let mut futures = FuturesOrdered::new();
+//             // let now = Instant::now();
+
+//             let mut style = PlatformHeroStyle::for_client(
+//                 options.platform,
+//                 options.product.unwrap_or_default(),
+//             );
+
+//             item.meta = Some(Meta {
+//                 r#type: None,
+//                 display_fields: vec![],
+//                 display_images: vec![
+//                     DisplayImage {
+//                         r#type: Some("hero".to_string()),
+//                         image_type: Some("coverArt".to_string()),
+//                     },
+//                     DisplayImage {
+//                         r#type: Some("mixed".to_string()),
+//                         image_type: Some("coverArt".to_string()),
+//                     },
+//                     DisplayImage {
+//                         r#type: Some("clip".to_string()),
+//                         image_type: Some("coverArt".to_string()),
+//                     },
+//                     DisplayImage {
+//                         r#type: Some("movie".to_string()),
+//                         image_type: Some("coverArt".to_string()),
+//                     },
+//                     DisplayImage {
+//                         r#type: Some("show".to_string()),
+//                         image_type: Some("coverArt".to_string()),
+//                     },
+//                 ],
+//             });
+
+//             for mut child in item.children() {
+//                 if style.child_type.clone().is_some() {
+//                     child.r#type = style.child_type.clone().unwrap();
+//                 }
+
+//                 //child.r#type = "clip".to_string();
+//                 // let style = item.style.clone().unwrap();
+//                 let client = plex_client.clone();
+//                 futures.push_back(async move {
+//                     let mut c = child.clone();
+
+//                     let cover_art = child.get_hero_art(client).await;
+//                     if cover_art.is_some() {
+//                         c.images = vec![
+//                             Image {
+//                                 r#type: "coverArt".to_string(),
+//                                 url: cover_art.clone().unwrap(),
+//                                 alt: Some(c.title.clone()),
+//                             },
+//                             Image {
+//                                 r#type: "coverPoster".to_string(),
+//                                 url: cover_art.clone().unwrap(),
+//                                 alt: Some(c.title.clone()),
+//                             },
+//                         ];
+//                         if style.cover_art_as_art {
+//                             c.art = cover_art.clone();
+//                         }
+
+//                         c.thumb = cover_art.clone();
+//                     }
+//                     c
+//                 });
+//             }
+
+//             let children: Vec<MetaData> = futures.collect().await;
+//             item.set_children(children);
+//         }
+//         item
+//     }
+// }
+
+
+pub fn hero_meta() -> Meta {
+    Meta {
+        r#type: None,
+        // display_fields: vec![],
+        display_fields: vec![
+            DisplayField {
+                r#type: Some("movie".to_string()),
+                fields: vec![
+                    "title".to_string(),
+                    "originallyAvailableAt".to_string(),
+                ],
+            },
+            DisplayField {
+                r#type: Some("show".to_string()),
+                fields: vec![
+                    "title".to_string(),
+                    "originallyAvailableAt".to_string(),
+                ],
+            },
+            DisplayField {
+                r#type: Some("clip".to_string()),
+                fields: vec![
+                    "title".to_string(),
+                    "originallyAvailableAt".to_string(),
+                ],
+            },
+            DisplayField {
+                r#type: Some("mixed".to_string()),
+                fields: vec![
+                    "title".to_string(),
+                    "originallyAvailableAt".to_string(),
+                ],
+            },
+        ],
+        display_images: vec![
+            DisplayImage {
+                r#type: Some("hero".to_string()),
+                image_type: Some("coverArt".to_string()),
+            },
+            DisplayImage {
+                r#type: Some("mixed".to_string()),
+                image_type: Some("coverArt".to_string()),
+            },
+            DisplayImage {
+                r#type: Some("clip".to_string()),
+                image_type: Some("coverArt".to_string()),
+            },
+            DisplayImage {
+                r#type: Some("movie".to_string()),
+                image_type: Some("coverArt".to_string()),
+            },
+            DisplayImage {
+                r#type: Some("show".to_string()),
+                image_type: Some("coverArt".to_string()),
+            },
+        ],
     }
 }

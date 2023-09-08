@@ -53,6 +53,16 @@ pub struct ReplexOptions {
     pub include_watched: bool,
 }
 
+#[derive(
+    Debug, Clone, PartialEq, Eq, EnumString, EnumDisplay, Serialize, Deserialize,
+)]
+pub enum Style {
+    #[serde(rename = "hero")]
+    Hero,
+    #[serde(rename = "shelf")]
+    Shelf
+}
+
 fn default_as_false() -> bool {
     false
 }
@@ -136,6 +146,9 @@ pub struct PlexContext {
     pub height: Option<i32>,
     pub quality: Option<i32>,
     pub url: Option<String>,
+
+    // this our own fields
+    // pub style: Option<Style>,
 }
 
 fn default_platform() -> Platform {
