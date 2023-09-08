@@ -787,6 +787,106 @@ async fn force_maximum_quality(req: &mut Request) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
+// async fn execute_video_transcode_fallback(
+//     req: &mut Request,
+//     item: MediaContainerWrapper<MediaContainer>,
+//     media_index: usize,
+// ) -> Result<(), anyhow::Error> {
+//     let params: PlexContext = req.extract().await.unwrap();
+//     let plex_client = PlexClient::from_request(req, params.clone());
+//     let mut queries = req.queries().clone();
+//     let mut original_queries = req.queries().clone();
+
+//     let response = plex_client.request(req).await?;
+//     let mut transcode: MediaContainerWrapper<MediaContainer> =
+//         from_reqwest_response(response).await?;
+
+//     let streams =
+//         &transcode.media_container.metadata[0].media[media_index].parts[0].streams;
+//     let selected_media = transcode.media_container.metadata[0].media[media_index].clone();
+//     let mut fallback_selected = false;
+//     for stream in streams {
+//         if stream.stream_type.clone().unwrap() == 1
+//             && stream.decision.clone().unwrap_or("unknown".to_string())
+//                 == "transcode"
+//         {
+//             tracing::trace!(
+//                 "{} is transcoding, looking for fallback",
+//                 selected_media
+//             );
+//             // for now just select a random fallback
+//             for (index, media) in
+//                 item.media_container.metadata[0].media.iter().enumerate()
+//             {
+//                 if transcode.media_container.metadata[0].media[media_index].id != media.id
+//                 {
+//                     tracing::debug!(
+//                         "Video transcode fallback from {} to {}",
+//                         selected_media,
+//                         media,
+//                     );
+//                     queries.remove("mediaIndex");
+//                     queries.insert("mediaIndex".to_string(), index.to_string());
+//                     queries.remove("directPlay");
+//                     queries.insert("directPlay".to_string(), "0".to_string());
+//                     queries.remove("directStream");
+//                     queries.insert("directStream".to_string(), "1".to_string());
+//                     fallback_selected = true;
+//                     break;
+//                 }
+//             }
+//         }
+//     }
+//     if !fallback_selected {
+//         replace_query(original_queries, req);
+//     }
+//     Ok(())
+// }
+
+pub struct TranscodingStatus {
+    pub is_transcoding: bool,
+    pub decision_result: MediaContainerWrapper<MediaContainer>,
+}
+
+async fn get_transcoding_for_request(
+    req: &mut Request,
+) -> Result<TranscodingStatus, anyhow::Error> {
+    let params: PlexContext = req.extract().await.unwrap();
+    let plex_client = PlexClient::from_request(req, params.clone());
+    let response = plex_client.request(req).await?;
+    let mut transcode: MediaContainerWrapper<MediaContainer> =
+        from_reqwest_response(response).await?;
+    let mut is_transcoding = false;
+
+    if transcode.media_container.size.is_some()
+        && transcode.media_container.size.unwrap() == 0
+    {
+        return Ok(TranscodingStatus {
+            is_transcoding,
+            decision_result: transcode,
+        });
+    }
+
+    let streams =
+        &transcode.media_container.metadata[0].media[0].parts[0].streams;
+    // let selected_media = transcode.media_container.metadata[0].media[0].clone();
+    for stream in streams {
+        if stream.stream_type.clone().unwrap() == 1
+            && stream.decision.clone().unwrap_or("unknown".to_string())
+                == "transcode"
+        {
+            is_transcoding = true;
+            break;
+        }
+    }
+
+    Ok(TranscodingStatus {
+        is_transcoding,
+        decision_result: transcode,
+    })
+}
+
+// TODO: Fallback to a version close to the requested bitrate
 #[handler]
 async fn video_transcode_fallback(
     req: &mut Request,
@@ -795,6 +895,7 @@ async fn video_transcode_fallback(
     let plex_client = PlexClient::from_request(req, params.clone());
     let config: Config = Config::figment().extract().unwrap();
     let mut queries = req.queries().clone();
+    let mut original_queries = req.queries().clone();
     let media_index: usize = if (req.queries().get("mediaIndex").is_none()
         || req.queries().get("mediaIndex").unwrap() == "-1")
     {
@@ -823,67 +924,105 @@ async fn video_transcode_fallback(
         .to_lowercase()
         != fallback_for
     {
-        // tracing::trace!("Media item not marked for fallback");
+        tracing::trace!("Media item not marked for fallback, continue playing");
         return Ok(());
     }
 
     if item.media_container.metadata[0].media.len() <= 1 {
         tracing::trace!("Nothing to fallback on, skipping fallback check");
     } else {
-        let response = plex_client.request(req).await?;
-        let mut transcode: MediaContainerWrapper<MediaContainer> =
-            from_reqwest_response(response).await?;
-        let streams =
-            &transcode.media_container.metadata[0].media[0].parts[0].streams;
-        let selected_media =
-            transcode.media_container.metadata[0].media[0].clone();
-        let mut fallback_selected = false;
-        for stream in streams {
-            if stream.stream_type.clone().unwrap() == 1
-                && stream.decision.clone().unwrap_or("unknown".to_string())
-                    == "transcode"
-            {
-                tracing::trace!(
-                    "{} is transcoding, looking for fallback",
-                    selected_media
-                );
-                // for now just select a random fallback
-                for (index, media) in
-                    item.media_container.metadata[0].media.iter().enumerate()
-                {
-                    if transcode.media_container.metadata[0].media[0].id
-                        != media.id
-                    {
-                        tracing::debug!(
-                            "Video transcode fallback from {} to {}",
-                            selected_media,
-                            media,
-                        );
-                        queries.remove("mediaIndex");
-                        queries.insert(
-                            "mediaIndex".to_string(),
-                            index.to_string(),
-                        );
-                        queries.remove("directPlay");
-                        queries
-                            .insert("directPlay".to_string(), "0".to_string());
+        // execute_video_transcode_fallback(req, item, media_index).await?;
+        // let response = plex_client.request(req).await?;
+        // let mut transcode: MediaContainerWrapper<MediaContainer> =
+        //     from_reqwest_response(response).await?;
+        // let streams =
+        //     &transcode.media_container.metadata[0].media[0].parts[0].streams;
+        // let selected_media =
+        //     transcode.media_container.metadata[0].media[0].clone();
 
-                        queries.remove("directStream");
-                        queries
-                            .insert("directStream".to_string(), "1".to_string());
+        let mut fallback_selected = false;
+        // this could fail.
+        let status: TranscodingStatus =
+            get_transcoding_for_request(req).await?;
+        let selected_media = item.media_container.metadata[0].media[0].clone();
+        let mut available_media_ids: Vec<i64> = item.media_container.metadata
+            [0]
+        .media
+        .iter()
+        .map(|x| x.id)
+        .collect();
+        available_media_ids.retain(|x| *x != selected_media.id);
+        // available_media_ids.remove(selected_media.id);
+        if status.is_transcoding {
+            tracing::trace!(
+                "{} transcoding, looking for fallback",
+                selected_media
+            );
+
+            let mut media_items = item.media_container.metadata[0].media.clone();
+            media_items.sort_by(|x, y| {
+                let current_density = x.height.unwrap() * x.width.unwrap();
+                let next_density = y.height.unwrap() * y.width.unwrap();
+
+                if current_density < next_density {
+                    return std::cmp::Ordering::Greater;
+                } else {
+                    return std::cmp::Ordering::Less;
+                }
+            });
+            // dbg!(&media_items.iter().map(|x| x.video_resolution.clone()));
+            // for now just select a random fallback
+            for (index, media) in media_items.iter().enumerate() {
+                if available_media_ids.contains(&media.id) {
+                    tracing::debug!(
+                        "Video transcode fallback from {} to {}",
+                        selected_media,
+                        media,
+                    );
+                    // let mut media_queries = req.queries().clone();
+                    queries.remove("mediaIndex");
+                    queries.insert("mediaIndex".to_string(), index.to_string());
+                    queries.remove("directPlay");
+                    queries.insert("directPlay".to_string(), "0".to_string());
+                    queries.remove("directStream");
+                    queries.insert("directStream".to_string(), "1".to_string());
+
+                    replace_query(queries.clone(), req);
+                    // processed_media_indexes.append(selected_media.id);
+                    // available_media_ids.remove(selected_media.id);
+
+                    if media.video_resolution.clone().unwrap().to_lowercase()
+                        != fallback_for
+                    {
                         fallback_selected = true;
                         break;
                     }
+
+                    let status: TranscodingStatus =
+                        get_transcoding_for_request(req).await?;
+                    available_media_ids.retain(|x| *x != media.id);
+                    if status.is_transcoding && available_media_ids.len() != 0 {
+                        tracing::debug!(
+                            "Fallback is transcoding, getting another fallback",
+                        );
+                        continue;
+                    }
+                    // let mut transcode: MediaContainerWrapper<MediaContainer> =
+                    //     from_reqwest_response(response).await?;
+                    fallback_selected = true;
+                    break;
                 }
             }
+            // }
         }
 
         if !fallback_selected {
             tracing::trace!("No suitable fallback found");
+            replace_query(original_queries, req);
         }
     }
 
-    replace_query(queries, req);
+    // replace_query(queries, req);
     Ok(())
 }
 

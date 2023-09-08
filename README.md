@@ -15,6 +15,7 @@ Remix your plex recommendations.
 - Hot cache: auto refreshed cache for home and library recommended.
 - Force maximum quality.
 - Auto select version based on resolution of the client.
+- Fallback to different version if selected version is video transcoding.
 - Works on every client/app not only plex web!
 - Plays nice with PMM (and without).
 

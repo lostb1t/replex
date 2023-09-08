@@ -91,7 +91,7 @@ impl PlexClient {
             &req.uri_mut().path_and_query().unwrap()
         );
         let mut headers = req.headers_mut().to_owned();
-        let target_uri = url::Url::parse(self.host.as_str()).unwrap();
+        let target_uri: url::Url = url::Url::parse(self.host.as_str()).unwrap();
         let target_host = target_uri.host().unwrap().to_string().clone();
     
         headers.remove(ACCEPT); // remove accept as we always do json request
@@ -101,6 +101,13 @@ impl PlexClient {
                 &target_host,
             ).unwrap(),
         );
+
+        let mut url = url::Url::parse(req.uri_mut().to_string().as_str()).unwrap();
+        url.set_host(Some(self.host.replace("http://", "").replace("https://", "").as_str())).unwrap();
+        url.set_scheme(target_uri.scheme()).unwrap();
+        url.set_port(target_uri.port()).unwrap();
+        req.set_uri(hyper::Uri::try_from(url.as_str()).unwrap());        
+
         let res = self
             .http_client
             .request(req.method_mut().to_owned(), uri)
@@ -117,6 +124,13 @@ impl PlexClient {
         //     .map_err(Error::other)?;
         Ok(res)
     }
+
+    // pub async fn proxy_request(
+    //     &self,
+    //     req: &mut Request,
+    // ) -> Result<reqwest::Response, Error> {
+    //     self.request(req)
+    // }
 
     // pub fn request(&self, req) -> hyper::client::ResponseFuture {
     //     self.http_client.request(req)
