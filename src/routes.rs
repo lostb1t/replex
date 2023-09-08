@@ -129,7 +129,7 @@ pub fn route() -> Router {
 
     if config.video_transcode_fallback_for.is_some() {
         decision_router = decision_router.hoop(video_transcode_fallback);
-        subtitles_router = subtitles_router.hoop(video_transcode_fallback);
+        //subtitles_router = subtitles_router.hoop(video_transcode_fallback);
     }
 
     router = router
