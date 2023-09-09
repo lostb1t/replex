@@ -862,7 +862,7 @@ impl Transform for HubKeyTransform {
         if item.is_hub() && !item.key.starts_with("/replex") {
             // might already been set by the mixings
             // setting an url argument crashes client. So we use the path
-            item.key = format!("/replex/{}{}", item.style.clone().unwrap(), item.key);
+            item.key = format!("/replex/{}{}", item.style.clone().unwrap_or(Style::Shelf.to_string().to_lowercase()), item.key);
         }
     }
 }
