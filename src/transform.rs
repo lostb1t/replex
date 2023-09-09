@@ -576,6 +576,16 @@ impl PlatformHeroStyle {
         }
     }
 
+    pub fn ios_style() -> Self {
+        Self {
+            // style: Some("hero".to_string()),
+            // r#type: "mixed".to_string(),
+            child_type: Some("clip".to_string()),
+            cover_art_as_art: true,
+            ..PlatformHeroStyle::default()
+        }
+    }
+
     pub fn for_client(platform: Platform, product: String) -> Self {
         match platform {
             Platform::Android => PlatformHeroStyle::android(product),
@@ -589,6 +599,7 @@ impl PlatformHeroStyle {
                         "plex for xbox" => PlatformHeroStyle::htpc_style(),
                         "plex for ps4" => PlatformHeroStyle::htpc_style(),
                         "plex for ps5" => PlatformHeroStyle::htpc_style(),
+                        "plex for ios" => PlatformHeroStyle::ios_style(),
                         _ => PlatformHeroStyle::default()
                     }
                     
@@ -1074,6 +1085,12 @@ impl Transform for MediaContainerScriptingTransform {
 pub fn hero_meta() -> Meta {
     Meta {
         r#type: None,
+        // r#type: Some(MetaType {
+        //     active: Some(true),
+        //     r#type: Some("mixed".to_string()),
+        //     title: Some("All".to_string()),
+        // }),
+        // style: Some(Style::Hero.to_string().to_lowercase()),
         // display_fields: vec![],
         display_fields: vec![
             DisplayField {

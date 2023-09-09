@@ -1505,6 +1505,24 @@ pub struct DisplayField {
 )]
 #[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
 #[serde(rename_all = "camelCase")]
+pub struct MetaType {
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[yaserde(rename = "type")]
+    pub r#type: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub active: Option<bool>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+}
+
+#[derive(
+    Debug, Serialize, Deserialize, Clone, YaDeserialize, YaSerialize, Default,
+)]
+#[cfg_attr(feature = "tests_deny_unknown_fields", serde(deny_unknown_fields))]
+#[serde(rename_all = "camelCase")]
 pub struct DisplayImage {
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1531,7 +1549,10 @@ pub struct Meta {
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[yaserde(rename = "type")]
-    pub r#type: Option<String>,
+    pub r#type: Option<MetaType>,
+    // #[yaserde(attribute)]
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub style: Option<String>,
 }
 
 impl MediaContainer {
