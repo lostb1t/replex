@@ -997,9 +997,9 @@ async fn video_transcode_fallback(
                         }
 
                         // check if requested falls into a resolution range. Either we remove the max bitrate or allow it
-                        let requested_bitrate: i64 = queries
-                            .get("videoBitrate")
-                            .unwrap_or_else(|| queries.get("maxVideoBitrate").unwrap()).parse().unwrap();
+                        //let requested_bitrate: i64 = queries
+                        //    .get("videoBitrate")
+                        //    .unwrap_or_else(|| queries.get("maxVideoBitrate").unwrap()).parse().unwrap();
 
                         //if (resolution == "1080" && requested_bitrate >= 8000)
                         //    || (resolution == "720"
