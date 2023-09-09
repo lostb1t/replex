@@ -501,7 +501,7 @@ pub struct PlatformHeroStyle {
     r#type: String,
     style: Option<String>,
     child_type: Option<String>,
-    // cover_art_as_thumb: bool, // if we should return the coverart in the thumb field
+    cover_art_as_thumb: bool, // if we should return the coverart in the thumb field
     cover_art_as_art: bool, // if we should return the coverart in the art field
 }
 
@@ -511,8 +511,7 @@ impl Default for PlatformHeroStyle {
             style: Some("hero".to_string()),
             r#type: "mixed".to_string(),
             child_type: None,
-            // child_type: Some("clip".to_string()),
-            // cover_art_as_thumb: false,
+            cover_art_as_thumb: true,
             cover_art_as_art: false,
         }
     }
@@ -545,7 +544,6 @@ impl PlatformHeroStyle {
                     r#type: "mixed".to_string(),
                     // using clip makes it load thumbs instead of art as cover art. So we dont have to touch the background
                     child_type: Some("clip".to_string()),
-                    // cover_art_as_thumb: true,
                     cover_art_as_art: false,
                     ..PlatformHeroStyle::default()
                 }
@@ -579,10 +577,8 @@ impl PlatformHeroStyle {
 
     pub fn ios_style() -> Self {
         Self {
-            // style: Some("hero".to_string()),
-            // r#type: "mixed".to_string(),
-            child_type: Some("clip".to_string()),
             cover_art_as_art: true,
+            cover_art_as_thumb: false, // ios doesnt load the subview as hero. 
             ..PlatformHeroStyle::default()
         }
     }
@@ -718,7 +714,9 @@ impl Transform for MediaStyleTransform {
                     item.art = cover_art.clone();
                 }
 
-                item.thumb = cover_art.clone();
+                if style_def.cover_art_as_thumb {
+                    item.thumb = cover_art.clone();
+                }
             }
         }
         // item
