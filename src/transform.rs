@@ -509,10 +509,11 @@ impl Default for PlatformHeroStyle {
     fn default() -> Self {
         Self {
             style: Some("hero".to_string()),
-            r#type: "clip".to_string(),
-            child_type: Some("clip".to_string()),
+            r#type: "mixed".to_string(),
+            child_type: None,
+            // child_type: Some("clip".to_string()),
             // cover_art_as_thumb: false,
-            cover_art_as_art: true,
+            cover_art_as_art: false,
         }
     }
 }
@@ -561,17 +562,16 @@ impl PlatformHeroStyle {
     pub fn roku(product: String) -> Self {
         Self {
             style: Some("hero".to_string()),
-            r#type: "mixed".to_string(),
             ..PlatformHeroStyle::default()
         }        
     }
 
     pub fn htpc_style() -> Self {
         Self {
-            style: Some("hero".to_string()),
-            r#type: "mixed".to_string(),
-            child_type: None,
-            cover_art_as_art: false,
+            // style: Some("hero".to_string()),
+            // r#type: "mixed".to_string(),
+            // child_type: None,
+            // cover_art_as_art: false,
             ..PlatformHeroStyle::default()
         }
     }
