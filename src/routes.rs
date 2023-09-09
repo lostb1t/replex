@@ -53,7 +53,7 @@ pub fn route() -> Router {
         .hoop(Logger::new())
         .hoop(Timeout::new(Duration::from_secs(30)))
         .hoop(Compression::new().enable_gzip(CompressionLevel::Fastest))
-        .hoop(max_concurrency(300))
+        //.hoop(max_concurrency(300))
         .hoop(affix::insert("proxy", Arc::new(proxy.clone())));
     // .hoop(affix::insert("script_engine", Arc::new(script_engine)));
 
