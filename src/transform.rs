@@ -554,6 +554,7 @@ impl PlatformHeroStyle {
                 style: None,
                 r#type: "clip".to_string(),
                 child_type: Some("clip".to_string()),
+                cover_art_as_art: true,
                 ..PlatformHeroStyle::default()
             },
         }
