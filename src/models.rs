@@ -1190,7 +1190,7 @@ impl MetaData {
             return None;
         }
         
-        if guid.starts_with("plex://episode") {    
+        if guid.starts_with("plex://episode") && self.parent_guid.is_some() {    
              guid = self.parent_guid.clone().unwrap();
         //     dbg!(&guid);
         }
