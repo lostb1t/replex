@@ -1072,7 +1072,6 @@ async fn auto_select_version(req: &mut Request) {
         let mut media = item.media_container.metadata[0].media.clone();
         let device_density = params.screen_resolution[0].height
             * params.screen_resolution[0].width;
-        dbg!(&params);
         if media.len() > 1 {
             media.sort_by(|x, y| {
                 let current_density = x.height.unwrap() * x.width.unwrap();
