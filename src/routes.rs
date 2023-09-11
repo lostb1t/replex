@@ -491,7 +491,7 @@ pub async fn get_collections_children(
     let mut offset: i32 = 0;
 
     // in we dont remove watched then we dont need to limit
-    if config.include_watched {
+    if config.include_watched || collection_ids.len() == 1 {
         limit = params.container_size.unwrap_or(50);
         offset = params.container_start.unwrap_or(0);
     }
