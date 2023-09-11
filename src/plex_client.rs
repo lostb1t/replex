@@ -458,22 +458,22 @@ impl PlexClient {
         let mut headers = req.headers().clone();
 
         // lets copy x-plex querys to the header. Otherwise we have to handle queries and headers.
-        let request_url =
-            url::Url::parse(req.uri().to_string().as_str()).unwrap();
-        for query in request_url.query_pairs() {
-            let key = query.0.clone().into_owned().to_lowercase();
-            let val = query.1.clone().into_owned();
-            if key.starts_with("x-plex") {
+        //let request_url =
+        //    url::Url::parse(req.uri().to_string().as_str()).unwrap();
+        //for query in request_url.query_pairs() {
+        //    let key = query.0.clone().into_owned().to_lowercase();
+        //    let val = query.1.clone().into_owned();
+        //    if key.starts_with("x-plex") {
                 // dbg!(key.clone());
-                headers.insert(
-                    header::HeaderName::from_static(Box::leak(
-                        key.into_boxed_str(),
-                    )),
-                    header::HeaderValue::from_str(val.clone().as_str())
-                        .unwrap(),
-                );
-            }
-        }
+        //        headers.insert(
+        //            header::HeaderName::from_static(Box::leak(
+        //                key.into_boxed_str(),
+        //            )),
+        //            header::HeaderValue::from_str(val.clone().as_str())
+        //                .unwrap(),
+        //        );
+        //    }
+        //}
 
         headers.insert(
             "X-Plex-Token",
