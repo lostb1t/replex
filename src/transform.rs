@@ -702,13 +702,6 @@ impl Transform for MediaStyleTransform {
                         r#type: "coverArt".to_string(),
                         url: cover_art.clone().unwrap(),
                         alt: Some(item.title.clone()),
-                    },
-                    if item.art.is_some() {
-                      Image {
-                         r#type: "background".to_string(),
-                         url: item.art.clone().unwrap(),
-                         alt: Some(item.title.clone()),
-                      },
                     }
                 ];
                 // lots of clients dont listen to the above
