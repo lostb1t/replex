@@ -11,15 +11,15 @@ use crate::utils::*;
 use itertools::Itertools;
 use moka::notification::RemovalCause;
 use moka::sync::Cache as MokaCacheSync;
-use std::sync::Arc;
-use url::Url;
 use salvo::compression::Compression;
 use salvo::cors::Cors;
 use salvo::http::header::CONTENT_TYPE;
 use salvo::http::{Request, Response, StatusCode};
 use salvo::prelude::*;
 use salvo::routing::PathFilter;
-use tokio::time::{Duration};
+use std::sync::Arc;
+use tokio::time::Duration;
+use url::Url;
 
 pub fn route() -> Router {
     let config: Config = Config::figment().extract().unwrap();
@@ -119,6 +119,8 @@ pub fn route() -> Router {
         decision_router = decision_router.hoop(video_transcode_fallback);
         //subtitles_router = subtitles_router.hoop(video_transcode_fallback);
     }
+
+    decision_router = decision_router.hoop(direct_stream_fallback);
 
     router = router
         .push(decision_router)
@@ -261,6 +263,51 @@ pub async fn empty_handler(
     container.media_container.identifier =
         Some("com.plexapp.plugins.library".to_string());
     res.render(container);
+    return Ok(());
+}
+
+// if directplay fails we remove it.
+#[handler]
+pub async fn direct_stream_fallback(
+    req: &mut Request,
+    res: &mut Response,
+) -> Result<(), anyhow::Error> {
+    return Ok(());
+    let config: Config = Config::figment().extract().unwrap();
+    let params: PlexContext = req.extract().await.unwrap();
+    let plex_client = PlexClient::from_request(req, params.clone());
+    let mut queries = req.queries().clone();
+
+    let direct_play = queries
+        .get("directPlay")
+        .unwrap_or(&"1".to_string())
+        .to_owned();
+    if direct_play != "1" {
+        return Ok(());
+    }
+    let upstream_res = plex_client.request(req).await?;
+    match upstream_res.status_code.unwrap() {
+        http::StatusCode::OK => (),
+        status => {
+            tracing::error!(status = ?status, res = ?upstream_res, "Failed to get plex response");
+            return Err(
+                salvo::http::StatusError::internal_server_error().into()
+            );
+        }
+    };
+    let mut container: MediaContainerWrapper<MediaContainer> =
+        from_salvo_response(upstream_res).await?;
+
+    if container.media_container.general_decision_code.is_some()
+        && container.media_container.general_decision_code.unwrap() == 2000
+    {
+        tracing::debug!(
+            "Direct play not avaiable, falling back to direct stream"
+        );
+        add_query_param_salvo(req, "directPlay".to_string(), "0".to_string());
+        add_query_param_salvo(req, "directStream".to_string(), "1".to_string());
+    };
+
     return Ok(());
 }
 
@@ -914,12 +961,12 @@ async fn video_transcode_fallback(
         .to_lowercase()
         != fallback_for
     {
-        tracing::trace!("Media item not marked for fallback, continue playing");
+        tracing::debug!("Media item not marked for fallback, continue playing");
         return Ok(());
     }
 
     if item.media_container.metadata[0].media.len() <= 1 {
-        tracing::trace!("Nothing to fallback on, skipping fallback check");
+        tracing::debug!("Nothing to fallback on, skipping fallback check");
     } else {
         // execute_video_transcode_fallback(req, item, media_index).await?;
         // let response = plex_client.request(req).await?;
@@ -929,6 +976,14 @@ async fn video_transcode_fallback(
         //     &transcode.media_container.metadata[0].media[0].parts[0].streams;
         // let selected_media =
         //     transcode.media_container.metadata[0].media[0].clone();
+        let mut requested_bitrate: Option<i64> = None;
+        if queries.get("videoBitrate").is_some() {
+            requested_bitrate =
+                Some(queries.get("videoBitrate").unwrap().parse().unwrap());
+        } else if queries.get("maxVideoBitrate").is_some() {
+            requested_bitrate =
+                Some(queries.get("maxVideoBitrate").unwrap().parse().unwrap());
+        }
 
         let mut fallback_selected = false;
         // this could fail.
@@ -944,7 +999,7 @@ async fn video_transcode_fallback(
         available_media_ids.retain(|x| *x != selected_media.id);
         // available_media_ids.remove(selected_media.id);
         if status.is_transcoding {
-            tracing::trace!(
+            tracing::debug!(
                 "{} transcoding, looking for fallback",
                 selected_media
             );
@@ -1008,10 +1063,17 @@ async fn video_transcode_fallback(
                     // let mut media_queries = req.queries().clone();
                     queries.remove("mediaIndex");
                     queries.insert("mediaIndex".to_string(), index.to_string());
-                    queries.remove("directPlay");
-                    queries.insert("directPlay".to_string(), "1".to_string());
                     queries.remove("directStream");
                     queries.insert("directStream".to_string(), "1".to_string());
+
+                    if requested_bitrate.is_none() {
+                        queries.remove("directPlay");
+                        queries
+                            .insert("directPlay".to_string(), "1".to_string());
+                    }
+
+                    queries.remove("subtitles");
+                    queries.insert("subtitles".to_string(), "auto".to_string());
 
                     replace_query(queries.clone(), req);
                     // processed_media_indexes.append(selected_media.id);
@@ -1039,12 +1101,10 @@ async fn video_transcode_fallback(
                     break;
                 }
             }
-            // }
-        }
-
-        if !fallback_selected {
-            tracing::trace!("No suitable fallback found");
-            replace_query(original_queries, req);
+            if !fallback_selected {
+                tracing::debug!("No suitable fallback found");
+                replace_query(original_queries, req);
+            }
         }
     }
 
@@ -1069,6 +1129,23 @@ async fn auto_select_version(req: &mut Request) {
             .get_item_by_key(req.queries().get("path").unwrap().to_string())
             .await
             .unwrap();
+
+        if item.media_container.metadata[0].media.len() <= 1 {
+            tracing::debug!(
+                "Only one media version available, skipping auto select"
+            );
+            return;
+        }
+
+        let mut requested_bitrate: Option<i64> = None;
+        if queries.get("videoBitrate").is_some() {
+            requested_bitrate =
+                Some(queries.get("videoBitrate").unwrap().parse().unwrap());
+        } else if queries.get("maxVideoBitrate").is_some() {
+            requested_bitrate =
+                Some(queries.get("maxVideoBitrate").unwrap().parse().unwrap());
+        }
+
         let mut media = item.media_container.metadata[0].media.clone();
         let device_density = params.screen_resolution[0].height
             * params.screen_resolution[0].width;
@@ -1095,8 +1172,14 @@ async fn auto_select_version(req: &mut Request) {
                 queries.remove("mediaIndex");
                 queries.insert("mediaIndex".to_string(), index.to_string());
                 // directPlay is meant for the first media item
-                queries.remove("directPlay");
-                queries.insert("directPlay".to_string(), "1".to_string());                
+                if requested_bitrate.is_none() {
+                    queries.remove("directPlay");
+                    queries.insert("directPlay".to_string(), "1".to_string());
+                }
+                
+
+                queries.remove("subitles");
+                queries.insert("subitles".to_string(), "auto".to_string());
                 // if index != 0 {
                 //     queries.remove("directPlay");
                 //     queries.insert("directPlay".to_string(), "0".to_string());
@@ -1104,7 +1187,7 @@ async fn auto_select_version(req: &mut Request) {
             }
         }
     } else {
-        tracing::trace!(
+        tracing::debug!(
             "Skipping auto selected as client specified a media index"
         );
     }

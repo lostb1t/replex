@@ -546,6 +546,15 @@ pub struct Media {
     #[yaserde(attribute, rename = "container")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub container: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub protocol: Option<String>,
+    #[yaserde(attribute, rename = "optimizedForStreaming")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub optimized_for_streaming: Option<SpecialBool>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub selected: Option<bool>,
     #[yaserde(rename = "Part", child)]
     #[serde(skip_serializing_if = "Vec::is_empty", default, rename = "Part")]
     pub parts: Vec<MediaPart>,
@@ -599,6 +608,15 @@ pub struct MediaPart {
     #[yaserde(attribute, rename = "videoProfile")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub video_profile: Option<String>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub protocol: Option<String>,
+    #[yaserde(attribute, rename = "optimizedForStreaming")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub optimized_for_streaming: Option<SpecialBool>,
+    #[yaserde(attribute)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub selected: Option<bool>,
     #[yaserde(rename = "Stream", child)]
     #[serde(skip_serializing_if = "Vec::is_empty", default, rename = "Stream")]
     pub streams: Vec<Stream>,
@@ -1481,6 +1499,60 @@ pub struct MediaContainer {
         deserialize_with = "deserialize_option_number_from_string"
     )]
     pub media_tag_version: Option<i64>,
+    #[yaserde(attribute)]
+    #[yaserde(rename = "directPlayDecisionCode")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        rename = "directPlayDecisionCode",
+        deserialize_with = "deserialize_option_number_from_string"
+    )]
+    pub direct_play_decision_code: Option<i64>,
+    #[yaserde(attribute, rename = "directPlayDecisionText")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        rename = "directPlayDecisionText",
+    )]
+    pub direct_play_decision_text: Option<String>,
+    #[yaserde(attribute, rename = "generalDecisionCode")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        rename = "generalDecisionCode",
+        deserialize_with = "deserialize_option_number_from_string"
+    )]
+    pub general_decision_code: Option<i64>,
+    #[yaserde(attribute, rename = "generalDecisionText")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        rename = "generalDecisionText",
+    )]
+    pub general_decision_text: Option<String>,
+    #[yaserde(attribute, rename = "resourceSession")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        rename = "resourceSession",
+    )]
+    pub resource_session: Option<String>,
+    #[yaserde(attribute, rename = "transcodeDecisionCode")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        rename = "transcodeDecisionCode",
+        deserialize_with = "deserialize_option_number_from_string"
+    )]
+    pub transcode_decision_code: Option<i64>,
+    #[yaserde(attribute, rename = "transcodeDecisionText")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        rename = "transcodeDecisionText",
+    )]
+    pub transcode_decision_text: Option<String>,
+
     #[yaserde(attribute, rename = "Meta")]
     #[serde(skip_serializing_if = "Option::is_none", rename = "Meta")]
     pub meta: Option<Meta>,
