@@ -3234,9 +3234,9 @@ checksum = "1ad4cc8da4ef723ed60bced201181d83791ad433213d8c24efffda1eec85d741"
 
 [[package]]
 name = "salvo"
-version = "0.53.0"
+version = "0.54.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67719be6f9e9cf2e89d9e3d5cceafd9840e1c7a073d689dee9f9e766fadeeaea"
+checksum = "bc0f93ee6e16dce0c87cc3c4f03eca1fc0cbeec5294c65a33b12725db6a621cf"
 dependencies = [
  "salvo-cache",
  "salvo-compression",
@@ -3249,9 +3249,9 @@ dependencies = [
 
 [[package]]
 name = "salvo-cache"
-version = "0.53.0"
+version = "0.54.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81d9dae8c1e9561000e80822f7e05c48645b00de35b6d17abe42ad91777610f7"
+checksum = "3eb6bf9f88d40c7ecf25ebd691f4d538e42c63f8d6ae3361069293043a977c78"
 dependencies = [
  "bytes",
  "lru",
@@ -3262,9 +3262,9 @@ dependencies = [
 
 [[package]]
 name = "salvo-compression"
-version = "0.53.0"
+version = "0.54.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f687ff7f9737f1c21c60857623966074ef0b2345e21b5d72977487d08da5ad08"
+checksum = "abdd84352449a5498b268188d0942ca9ed64b0350aa0ff3e842e199a1b5edf83"
 dependencies = [
  "brotli",
  "bytes",
@@ -3281,9 +3281,9 @@ dependencies = [
 
 [[package]]
 name = "salvo-cors"
-version = "0.53.0"
+version = "0.54.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "321a5affbe85e5598d43ed4db669851d67457f4c8439feec41fa3b5f1aeaaaf1"
+checksum = "469976b94b21e74bca66c5b752a7b9a1bff775f3b8537b35657a9e1b4cbff3ba"
 dependencies = [
  "bytes",
  "salvo_core",
@@ -3292,9 +3292,9 @@ dependencies = [
 
 [[package]]
 name = "salvo-otel"
-version = "0.53.0"
+version = "0.54.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd1c8e7d045c8b3fa29bc1efeaae10000ee5874bf4b2ba4b0821db87e1b0940c"
+checksum = "c36434bc2bb381f0e1c2ade4cd390047f29e5506294b366c2d1a70d391a1eee7"
 dependencies = [
  "opentelemetry 0.20.0",
  "opentelemetry-http 0.9.0",
@@ -3305,9 +3305,9 @@ dependencies = [
 
 [[package]]
 name = "salvo-proxy"
-version = "0.53.0"
+version = "0.54.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0bb0f7a5eae20ddc81e2ece2aa0a4e9a0732f67be6c02651de6750c743751939"
+checksum = "40db2c5b387523d962ac9ceffdddf56fe7a2cfeec861053480e2bf7fc8b092af"
 dependencies = [
  "fastrand 2.0.0",
  "futures-util",
@@ -3334,9 +3334,9 @@ dependencies = [
 
 [[package]]
 name = "salvo_core"
-version = "0.53.0"
+version = "0.54.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "167cc790726600118a5fc4cd3391fad736ee86ec65d752d0b1f00106749bb580"
+checksum = "ea68f2bb62548bda63f9752197d14dbe7fa0645aab0ea7f322efda1cacfa5af0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3389,9 +3389,9 @@ dependencies = [
 
 [[package]]
 name = "salvo_extra"
-version = "0.53.0"
+version = "0.54.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "319358ae0fbbb2cbe9aa4319879728638aaa1eafd64af7fd7c5081c4064ccb6b"
+checksum = "ccae2a3db479d338ebc95e00d9a36c58d89f51743799cbfae1cf5c4c63f01d41"
 dependencies = [
  "base64 0.21.2",
  "etag",
@@ -3404,13 +3404,14 @@ dependencies = [
  "tokio",
  "tokio-tungstenite",
  "tracing",
+ "ulid",
 ]
 
 [[package]]
 name = "salvo_macros"
-version = "0.53.0"
+version = "0.54.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e4ae5b1a03676e4fcc8afcfd06f078034d9f30d4eb10c28f20910f21bf24fd0"
+checksum = "2a896f7117c5ebcae078ac1110086f4fc269ef843dba097f79797dad95fb3302"
 dependencies = [
  "cruet",
  "proc-macro-crate",
@@ -4339,6 +4340,15 @@ name = "typenum"
 version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "497961ef93d974e23eb6f433eb5fe1b7930b659f06d12dec6fc44a8f554c0bba"
+
+[[package]]
+name = "ulid"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7e37c4b6cbcc59a8dcd09a6429fbc7890286bcbb79215cea7b38a3c4c0921d93"
+dependencies = [
+ "rand 0.8.5",
+]
 
 [[package]]
 name = "uncased"

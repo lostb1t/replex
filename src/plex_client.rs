@@ -1,8 +1,10 @@
+use std::str::FromStr;
 use std::sync::Arc;
 use std::time::Duration;
 
 use crate::config::Config;
 use crate::models::*;
+use crate::proxy::Proxy;
 use crate::utils::*;
 use anyhow::Result;
 
@@ -10,6 +12,8 @@ use async_recursion::async_recursion;
 use futures_util::Future;
 use futures_util::TryStreamExt;
 use http::Uri;
+use salvo::proxy::Upstreams;
+use salvo::BoxedError;
 // use hyper::client::HttpConnector;
 // use hyper::Body;
 use hyper::body::Body;
@@ -42,7 +46,7 @@ static CACHE: Lazy<Cache<String, MediaContainerWrapper<MediaContainer>>> =
 #[derive(Debug, Clone)]
 pub struct PlexClient {
     pub http_client: Client,
-    pub host: String, // TODO: Dont think this suppsoed to be here. Should be higher up
+    // pub host: String, // TODO: Dont think this suppsoed to be here. Should be higher up
     pub cache: Cache<String, MediaContainerWrapper<MediaContainer>>,
 
     // /// `X-Plex-Platform` header value.
@@ -50,10 +54,6 @@ pub struct PlexClient {
     // /// Platform name, e.g. iOS, macOS, etc.
     pub x_plex_platform: Platform,
 
-    // /// `X-Plex-Device-Name` header value.
-    // ///
-    // /// Primary name for the device, e.g. "Plex Web (Chrome)".
-    // pub x_plex_device_name: String,
     /// `X-Plex-Client-Identifier` header value.
     ///
     /// UUID, serial number, or other number unique per device.
@@ -65,75 +65,107 @@ pub struct PlexClient {
     ///
     /// Auth token for Plex.
     pub x_plex_token: String,
+
+    pub proxy: Proxy,
+
+    // other non eseential headers
+    pub headers: Option<header::HeaderMap>,
 }
 
+// impl PlexClient {
 impl PlexClient {
     // TODO: Handle 404s/500 etc
     // TODO: Map reqwest response and error to salvo
-    pub async fn get(&self, path: String) -> Result<reqwest::Response, Error> {
-        let uri = format!("{}{}", self.host, path);
-        let res = self
-            .http_client
-            .get(uri)
-            .send()
-            .await
-            .map_err(Error::other)?;
-        Ok(res)
+    pub async fn get(&self, path: String) -> Result<Response, Error> {
+        // let uri = format!("{}{}", self.host, path);
+        let mut req = Request::default();
+        *req.method_mut() = http::Method::GET;
+        if self.headers.is_some() {
+            *req.headers_mut() = self.headers.clone().unwrap()
+        }
+        // dbg!(&self.headers);
+        req.set_uri(Uri::builder().path_and_query(path).build().unwrap());
+        self.request(&mut req).await
     }
 
-    pub async fn request(
-        &self,
-        req: &mut Request,
-    ) -> Result<reqwest::Response, Error> {
-        let uri = format!(
-            "{}{}",
-            self.host,
-            &req.uri_mut().path_and_query().unwrap()
-        );
-        let mut headers = req.headers_mut().to_owned();
-        let target_uri: url::Url = url::Url::parse(self.host.as_str()).unwrap();
-        let target_host = target_uri.host().unwrap().to_string().clone();
-    
-        headers.remove(ACCEPT); // remove accept as we always do json request
-        headers.insert(
-            http::header::HOST,
-            header::HeaderValue::from_str(
-                &target_host,
-            ).unwrap(),
-        );
-
-        let mut url = url::Url::parse(req.uri_mut().to_string().as_str()).unwrap();
-        url.set_host(Some(self.host.replace("http://", "").replace("https://", "").as_str())).unwrap();
-        url.set_scheme(target_uri.scheme()).unwrap();
-        url.set_port(target_uri.port()).unwrap();
-        req.set_uri(hyper::Uri::try_from(url.as_str()).unwrap());        
-
-        let res = self
-            .http_client
-            .request(req.method_mut().to_owned(), uri)
-            .headers(headers)
-            .send()
-            .await
-            .map_err(Error::other)?;
-        // let res = self
-        //     .http_client
-        //     .get(uri)
-        //     .headers(headers)
-        //     .send()
-        //     .await
-        //     .map_err(Error::other)?;
-        Ok(res)
-    }
-
-    // pub async fn proxy_request(
+    // pub async fn request(
     //     &self,
     //     req: &mut Request,
     // ) -> Result<reqwest::Response, Error> {
-    //     self.request(req)
+    //     let config: Config = Config::figment().extract().unwrap();
+    //     let proxy = Proxy::with_client(
+    //         config.host.clone().unwrap(),
+    //         reqwest::Client::builder()
+    //             .timeout(Duration::from_secs(30))
+    //             .build()
+    //             .unwrap(),
+    //     );
+
+    //     let res = proxy.request(req).await.unwrap();
+    //     let reqwest_res = reqwest::Response::
+    //     Ok(reqwest_res)
     // }
 
-    // pub fn request(&self, req) -> hyper::client::ResponseFuture {
-    //     self.http_client.request(req)
+    pub async fn request(&self, req: &mut Request) -> Result<Response, Error> {
+        // let uri = format!(
+        //     "{}{}",
+        //     self.host,
+        //     &req.uri_mut().path_and_query().unwrap()
+        // );
+        // dbg!(&req);
+
+        req.headers_mut().remove(ACCEPT); // remove accept as we always do json request
+        req.headers_mut().insert(
+            ACCEPT,
+            header::HeaderValue::from_static("application/json"),
+        );
+
+        let res = self.proxy.request(req).await?;
+        Ok(res)
+    }
+
+    // pub async fn request(
+    //     &self,
+    //     req: &mut Request,
+    // ) -> Result<reqwest::Response, Error> {
+    //     let uri = format!(
+    //         "{}{}",
+    //         self.host,
+    //         &req.uri_mut().path_and_query().unwrap()
+    //     );
+    //     let mut headers = req.headers_mut().to_owned();
+    //     let target_uri: url::Url = url::Url::parse(self.host.as_str()).unwrap();
+    //     let target_host = target_uri.host().unwrap().to_string().clone();
+
+    //     headers.remove(ACCEPT); // remove accept as we always do json request
+    //     headers.insert(
+    //         http::header::HOST,
+    //         header::HeaderValue::from_str(
+    //             &target_host,
+    //         ).unwrap(),
+    //     );
+
+    //     let mut url = url::Url::parse(req.uri_mut().to_string().as_str()).unwrap();
+    //     url.set_host(Some(self.host.replace("http://", "").replace("https://", "").as_str())).unwrap();
+    //     url.set_scheme(target_uri.scheme()).unwrap();
+    //     url.set_port(target_uri.port()).unwrap();
+    //     req.set_uri(hyper::Uri::try_from(url.as_str()).unwrap());
+
+    //     let res = self
+    //         .http_client
+    //         .request(req.method_mut().to_owned(), uri)
+    //         .headers(headers)
+    //         .send()
+    //         .await
+    //         .map_err(Error::other)?;
+    //     // let res = self
+    //     //     .http_client
+    //     //     .get(uri)
+    //     //     .headers(headers)
+    //     //     .send()
+    //     //     .await
+    //     //     .map_err(Error::other)?;
+    //     Ok(res)
     // }
 
     pub async fn get_section_collections(
@@ -146,7 +178,7 @@ impl PlexClient {
             .unwrap();
 
         let mut container: MediaContainerWrapper<MediaContainer> =
-            from_reqwest_response(res)
+            from_salvo_response(res)
                 .await
                 .expect("Cannot get MediaContainerWrapper from response");
 
@@ -176,7 +208,7 @@ impl PlexClient {
 
         let resp = self.get(path).await.unwrap();
         let container: MediaContainerWrapper<MediaContainer> =
-            from_reqwest_response(resp).await.unwrap();
+            from_salvo_response(resp).await.unwrap();
         Ok(container)
     }
 
@@ -264,12 +296,12 @@ impl PlexClient {
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
         let res = self.get(format!("/library/collections/{}", id)).await?;
 
-        if res.status() == 404 {
+        if res.status_code.unwrap() == http::StatusCode::NOT_FOUND {
             return Err(salvo::http::StatusError::not_found().into());
         }
 
         let container: MediaContainerWrapper<MediaContainer> =
-            from_reqwest_response(res).await.unwrap();
+            from_salvo_response(res).await.unwrap();
         Ok(container)
     }
 
@@ -299,12 +331,12 @@ impl PlexClient {
         // dbg!(&path);
         let res = self.get(path).await?;
 
-        if res.status() == 404 {
+        if res.status_code.unwrap() == http::StatusCode::NOT_FOUND {
             return Err(salvo::http::StatusError::not_found().into());
         }
 
         let container: MediaContainerWrapper<MediaContainer> =
-            from_reqwest_response(res).await.unwrap();
+            from_salvo_response(res).await.unwrap();
         Ok(container)
     }
 
@@ -314,7 +346,7 @@ impl PlexClient {
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
         let resp = self.get("/hubs".to_string()).await.unwrap();
         let container: MediaContainerWrapper<MediaContainer> =
-            from_reqwest_response(resp).await.unwrap();
+            from_salvo_response(resp).await.unwrap();
         Ok(container)
     }
 
@@ -324,7 +356,7 @@ impl PlexClient {
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
         let resp = self.get(key).await.unwrap();
         let container: MediaContainerWrapper<MediaContainer> =
-            from_reqwest_response(resp).await.unwrap();
+            from_salvo_response(resp).await.unwrap();
         Ok(container)
     }
 
@@ -352,13 +384,33 @@ impl PlexClient {
             "https://metadata.provider.plex.tv/library/metadata/{}",
             guid
         );
-        let res = self
-            .http_client
+
+        // we dont want the default headers and client as we aint talking to a plex server
+        let mut headers = header::HeaderMap::new();
+        headers.insert(
+            "X-Plex-Token",
+            header::HeaderValue::from_str(self.x_plex_token.clone().as_str())
+                .unwrap(),
+        );
+        headers.insert(
+            "Accept",
+            header::HeaderValue::from_static("application/json"),
+        );
+
+        let client = reqwest::Client::builder()
+                // .default_headers(headers.clone())
+                .gzip(true)
+                .timeout(Duration::from_secs(30))
+                .build()
+                .unwrap();
+    
+        let res = client
             .get(uri)
+            .headers(headers)
             .send()
             .await
             .map_err(Error::other)?;
-
+        // dbg!(&res.status());
         // dbg!(res.status());
         // if res.status() == 404 {
         //     return Err(salvo::http::StatusError::not_found().into());
@@ -402,7 +454,27 @@ impl PlexClient {
         let client_identifier = params.clone().client_identifier;
         let platform = params.clone().platform;
 
-        let mut headers = header::HeaderMap::new();
+        //let mut headers = header::HeaderMap::new();
+        let mut headers = req.headers().clone();
+
+        // lets copy x-plex querys to the header. Otherwise we have to handle queries and headers.
+        let request_url =
+            url::Url::parse(req.uri().to_string().as_str()).unwrap();
+        for query in request_url.query_pairs() {
+            let key = query.0.clone().into_owned().to_lowercase();
+            let val = query.1.clone().into_owned();
+            if key.starts_with("x-plex") {
+                // dbg!(key.clone());
+                headers.insert(
+                    header::HeaderName::from_static(Box::leak(
+                        key.into_boxed_str(),
+                    )),
+                    header::HeaderValue::from_str(val.clone().as_str())
+                        .unwrap(),
+                );
+            }
+        }
+
         headers.insert(
             "X-Plex-Token",
             header::HeaderValue::from_str(token.clone().as_str()).unwrap(),
@@ -422,18 +494,29 @@ impl PlexClient {
             header::HeaderValue::from_str(platform.to_string().as_str())
                 .unwrap(),
         );
+
+        let config: Config = Config::figment().extract().unwrap();
+        let proxy = Proxy::with_client(
+            config.host.clone().unwrap(),
+            reqwest::Client::builder()
+                .timeout(Duration::from_secs(30))
+                .build()
+                .unwrap(),
+        );
         // dbg!(&headers);
         Self {
             http_client: reqwest::Client::builder()
-                .default_headers(headers)
+                .default_headers(headers.clone())
                 .gzip(true)
                 .timeout(Duration::from_secs(30))
                 .build()
                 .unwrap(),
-            host: config.host.unwrap(),
+            // host: config.host.unwrap(),
             x_plex_token: token,
             x_plex_client_identifier: client_identifier,
             x_plex_platform: platform,
+            headers: Some(headers.clone()),
+            proxy: proxy,
             cache: CACHE.clone(),
         }
     }
@@ -459,6 +542,14 @@ impl PlexClient {
             header::HeaderValue::from_str(platform.to_string().as_str())
                 .unwrap(),
         );
+        let config: Config = Config::figment().extract().unwrap();
+        let proxy = Proxy::with_client(
+            config.host.clone().unwrap(),
+            reqwest::Client::builder()
+                .timeout(Duration::from_secs(30))
+                .build()
+                .unwrap(),
+        );
         Self {
             http_client: reqwest::Client::builder()
                 .default_headers(headers)
@@ -466,10 +557,12 @@ impl PlexClient {
                 .timeout(Duration::from_secs(30))
                 .build()
                 .unwrap(),
-            host: config.host.unwrap(),
+            // host: config.host.unwrap(),
             x_plex_token: token,
             x_plex_client_identifier: client_identifier,
             x_plex_platform: platform,
+            proxy: proxy,
+            headers: None,
             cache: CACHE.clone(),
         }
     }

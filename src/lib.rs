@@ -1,3 +1,4 @@
+// #![feature(string_leak)]
 #[macro_use]
 extern crate yaserde;
 extern crate yaserde_derive;
