@@ -691,8 +691,8 @@ async fn force_maximum_quality(req: &mut Request) -> Result<(), anyhow::Error> {
     queries.insert("autoAdjustQuality".to_string(), "0".to_string());
     queries.remove("directStream");
     queries.insert("directStream".to_string(), "1".to_string());
-    // queries.remove("directPlay");
-    // queries.insert("directPlay".to_string(), "1".to_string());
+    queries.remove("directPlay");
+    queries.insert("directPlay".to_string(), "1".to_string());
     //queries.remove("directPlay");
     //queries.insert("directPlay".to_string(), "1".to_string());
     queries.remove("videoQuality");
@@ -1009,7 +1009,7 @@ async fn video_transcode_fallback(
                     queries.remove("mediaIndex");
                     queries.insert("mediaIndex".to_string(), index.to_string());
                     queries.remove("directPlay");
-                    queries.insert("directPlay".to_string(), "0".to_string());
+                    queries.insert("directPlay".to_string(), "1".to_string());
                     queries.remove("directStream");
                     queries.insert("directStream".to_string(), "1".to_string());
 
@@ -1095,10 +1095,12 @@ async fn auto_select_version(req: &mut Request) {
                 queries.remove("mediaIndex");
                 queries.insert("mediaIndex".to_string(), index.to_string());
                 // directPlay is meant for the first media item
-                if index != 0 {
-                    queries.remove("directPlay");
-                    queries.insert("directPlay".to_string(), "0".to_string());
-                }
+                queries.remove("directPlay");
+                queries.insert("directPlay".to_string(), "1".to_string());                
+                // if index != 0 {
+                //     queries.remove("directPlay");
+                //     queries.insert("directPlay".to_string(), "0".to_string());
+                // }
             }
         }
     } else {
