@@ -49,8 +49,12 @@ jobs:
       - id: docker-tag
         uses: yuya-takeyama/docker-tag-from-github-ref-action@v1
       - name: Build
-        run: CARGO_TARGET_DIR=./bin/x86_64-unknown-linux-gnu cargo build --release
+        run: CARGO_TARGET_DIR=bin/x86_64-unknown-linux-gnu cargo build --release
         #run: cargo build --release
+      - name: Move bin
+        shell: bash
+        run: |
+          mv bin/x86_64-unknown-linux-gnu/release/replex bin/x86_64-unknown-linux-gnu/replex
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2
