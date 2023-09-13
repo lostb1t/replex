@@ -58,13 +58,13 @@ pub fn route() -> Router {
                 Router::with_path(
                     "/video/<colon:colon>/transcode/universal/session/<**rest>",
                 )
-                .handle(redirect_stream),
+                .goal(redirect_stream),
             )
             .push(
                 Router::with_path(
                     "/library/parts/<itemid>/<partid>/file.<extension>",
                 )
-                .handle(redirect_stream),
+                .goal(redirect_stream),
             );
     }
 
@@ -76,7 +76,7 @@ pub fn route() -> Router {
                 Router::new()
                     .path("/library/metadata/<id>/related")
                     .hoop(Timeout::new(Duration::from_secs(5)))
-                    .handle(proxy.clone()),
+                    .goal(proxy.clone()),
             )
             // .push(
             //     Router::with_path("/library/metadata/<id>")
@@ -86,21 +86,21 @@ pub fn route() -> Router {
             .push(
                 Router::with_path("/playQueues")
                     .hoop(disable_related_query)
-                    .handle(proxy.clone()),
+                    .goal(proxy.clone()),
             );
     }
 
     let mut decision_router = Router::new()
         .path("/video/<colon:colon>/transcode/universal/decision")
-        .handle(proxy.clone());
+        .goal(proxy.clone());
 
     let mut start_router = Router::new()
         .path("/video/<colon:colon>/transcode/universal/start<**rest>")
-        .handle(proxy.clone());
+        .goal(proxy.clone());
 
     let mut subtitles_router = Router::new()
         .path("/video/<colon:colon>/transcode/universal/subtitles")
-        .handle(proxy.clone());
+        .goal(proxy.clone());
 
     // should go before force_maximum_quality and video_transcode_fallback
     if config.auto_select_version {
@@ -179,9 +179,9 @@ pub fn route() -> Router {
         .push(
             Router::with_path("/photo/<colon:colon>/transcode")
                 .hoop(fix_photo_transcode_request)
-                .handle(proxy.clone()),
+                .goal(proxy.clone()),
         )
-        .push(Router::with_path("<**rest>").handle(proxy.clone()));
+        .push(Router::with_path("<**rest>").goal(proxy.clone()));
 
     router
 }
