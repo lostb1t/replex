@@ -31,7 +31,7 @@ serde-aux = "^4.2.0"
 serde_with = { version = "3.0", features = ["json"] }
 futures = "0.3.28"
 figment = { version = "0.10.10", features = ["env"] }
-salvo = { version = "0.53.0", features = ["anyhow", "websocket", "proxy", "cors", "acme", "cache", "otel", "compression", "concurrency-limiter", "affix"] }
+salvo = { version = "0.55.2", features = ["anyhow", "websocket", "proxy", "cors", "acme", "cache", "otel", "compression", "concurrency-limiter", "affix"] }
 #salvo = { git = "https://github.com/salvo-rs/salvo", branch = "proxy", features = ["websocket", "proxy", "cors", "acme", "cache", "otel", "compression", "concurrency-limiter", "affix"] }
 reqwest = { version = "0.11", features = ["gzip", "json"] }
 http-body-util = "0.1.0-rc.3"
