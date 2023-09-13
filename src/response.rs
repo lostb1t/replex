@@ -5,7 +5,7 @@ use yaserde::YaSerialize;
 use yaserde::ser::to_string as to_xml_str;
 use async_trait::async_trait;
 use yaserde;
-use salvo::Scribe;
+use salvo::Piece;
 use salvo::http::header::{HeaderValue, CONTENT_TYPE};
 use salvo::http::{Response, StatusError};
 use salvo::writing::Json;
@@ -13,7 +13,7 @@ use crate::models::MediaContainerWrapper;
 use crate::utils::*;
 
 
-impl<T> Scribe for MediaContainerWrapper<T>
+impl<T> Piece for MediaContainerWrapper<T>
     where
     T: Serialize  + YaSerialize + Send,
 {
@@ -31,7 +31,7 @@ pub struct Xml<T>(pub T);
 
 
 #[async_trait]
-impl<T> Scribe for Xml<T>
+impl<T> Piece for Xml<T>
 where
     T: YaSerialize + Send
 {

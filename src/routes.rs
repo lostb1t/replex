@@ -286,7 +286,7 @@ pub async fn direct_stream_fallback(
         return Ok(());
     }
     let upstream_res = plex_client.request(req).await?;
-    match upstream_res.status_code.unwrap() {
+    match upstream_res.status() {
         http::StatusCode::OK => (),
         status => {
             tracing::error!(status = ?status, res = ?upstream_res, "Failed to get plex response");
@@ -296,7 +296,7 @@ pub async fn direct_stream_fallback(
         }
     };
     let mut container: MediaContainerWrapper<MediaContainer> =
-        from_salvo_response(upstream_res).await?;
+        from_reqwest_response(upstream_res).await?;
 
     if container.media_container.general_decision_code.is_some()
         && container.media_container.general_decision_code.unwrap() == 2000
@@ -374,8 +374,8 @@ pub async fn transform_hubs_home(
     add_query_param_salvo(req, "count".to_string(), count.to_string());
 
     let upstream_res = plex_client.request(req).await?;
-    match upstream_res.status_code.unwrap() {
-        http::StatusCode::OK => (),
+    match upstream_res.status() {
+        reqwest::StatusCode::OK => (),
         status => {
             tracing::error!(status = ?status, res = ?upstream_res, "Failed to get plex response");
             return Err(
@@ -385,7 +385,7 @@ pub async fn transform_hubs_home(
     };
 
     let mut container: MediaContainerWrapper<MediaContainer> =
-        from_salvo_response(upstream_res).await?;
+        from_reqwest_response(upstream_res).await?;
     container.content_type = content_type;
 
     TransformBuilder::new(plex_client, params.clone())
@@ -432,8 +432,8 @@ pub async fn get_hubs_sections(
     add_query_param_salvo(req, "includeGuids".to_string(), "1".to_string());
 
     let upstream_res = plex_client.request(req).await.unwrap();
-    match upstream_res.status_code.unwrap() {
-        http::StatusCode::OK => (),
+    match upstream_res.status() {
+        reqwest::StatusCode::OK => (),
         status => {
             tracing::error!(status = ?status, res = ?upstream_res, "Failed to get plex response");
             return Err(
@@ -443,7 +443,7 @@ pub async fn get_hubs_sections(
     };
 
     let mut container: MediaContainerWrapper<MediaContainer> =
-        from_salvo_response(upstream_res).await?;
+        from_reqwest_response(upstream_res).await?;
     container.content_type = content_type;
 
     TransformBuilder::new(plex_client, params.clone())
@@ -555,8 +555,8 @@ pub async fn default_transform(
     req.set_uri(hyper::Uri::try_from(url.as_str()).unwrap());
 
     let upstream_res = plex_client.request(req).await?;
-    match upstream_res.status_code.unwrap() {
-        http::StatusCode::OK => (),
+    match upstream_res.status() {
+        reqwest::StatusCode::OK => (),
         status => {
             tracing::error!(status = ?status, res = ?upstream_res, "Failed to get plex response");
             return Err(
@@ -566,7 +566,7 @@ pub async fn default_transform(
     };
 
     let mut container: MediaContainerWrapper<MediaContainer> =
-        from_salvo_response(upstream_res).await?;
+        from_reqwest_response(upstream_res).await?;
     container.content_type = content_type;
     // container.media_container.meta
 
@@ -597,7 +597,7 @@ pub async fn get_library_item_metadata(req: &mut Request, res: &mut Response) {
 
     let upstream_res = plex_client.request(req).await.unwrap();
     let mut container: MediaContainerWrapper<MediaContainer> =
-        match from_salvo_response(upstream_res).await {
+        match from_reqwest_response(upstream_res).await {
             Ok(r) => r,
             Err(error) => {
                 tracing::error!(error = ?error, uri = ?req.uri(), "Failed to get plex response");
@@ -632,7 +632,7 @@ pub async fn get_play_queues(req: &mut Request, res: &mut Response) {
 
     let upstream_res = plex_client.request(req).await.unwrap();
     let mut container: MediaContainerWrapper<MediaContainer> =
-        match from_salvo_response(upstream_res).await {
+        match from_reqwest_response(upstream_res).await {
             Ok(r) => r,
             Err(error) => {
                 tracing::error!(error = ?error, uri = ?req.uri(), "Failed to get plex response");
@@ -889,7 +889,7 @@ async fn get_transcoding_for_request(
     let plex_client = PlexClient::from_request(req, params.clone());
     let response = plex_client.request(req).await?;
     let mut transcode: MediaContainerWrapper<MediaContainer> =
-        from_salvo_response(response).await?;
+        from_reqwest_response(response).await?;
     let mut is_transcoding = false;
 
     if transcode.media_container.size.is_some()

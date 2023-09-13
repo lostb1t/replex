@@ -10,7 +10,7 @@ use salvo::Error;
 use http::uri::{Scheme, Uri};
 use http::Extensions;
 use salvo::http::header::HeaderValue;
-use std::fmt;
+
 // use reqwest::Client;
 use salvo::http::header::CONNECTION;
 use salvo::http::header::UPGRADE;
@@ -42,60 +42,38 @@ use tokio::net::{TcpListener, TcpStream};
 type HyperRequest = hyper::Request<ReqBody>;
 type HyperResponse = hyper::Response<ResBody>;
 
-
-pub struct Proxy {
-    pub inner: SalvoProxy<String>,
+pub struct Proxy<U> {
+    pub inner: SalvoProxy<U>,
 }
 
-impl fmt::Debug for Proxy {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Proxy")
-    }
-}
-
-impl Proxy {
-// impl<U> Proxy<U>
-// where
-//     U: Upstreams,
-//     U::Error: Into<BoxedError>,
-// {
+impl<U> Proxy<U>
+where
+    U: Upstreams,
+    U::Error: Into<BoxedError>,
+{
     /// Create new `Proxy` with upstreams list.
-    pub fn new(upstream: String) -> Self {
+    pub fn new(upstreams: U) -> Self {
         Proxy {
-            inner: SalvoProxy::new(upstream)
+            inner: SalvoProxy::new(upstreams)
                 .url_path_getter(default_url_path_getter)
                 .url_query_getter(default_url_query_getter),
         }
     }
     /// Create new `Proxy` with upstreams list and [`Client`].
-    pub fn with_client(upstream: String, client: reqwest::Client) -> Self {
+    pub fn with_client(upstreams: U, client: reqwest::Client) -> Self {
         Proxy {
-            inner: SalvoProxy::with_client(upstream, client)
+            inner: SalvoProxy::with_client(upstreams, client)
                 .url_path_getter(default_url_path_getter)
                 .url_query_getter(default_url_query_getter),
         }
     }
-
-    #[inline]
-    pub async fn request(
-        &self,
-        req: &mut salvo::Request,
-    ) -> Result<salvo::Response, BoxedError> {
-        let mut depot = Depot::new();
-        let mut res = Response::new();
-        let mut ctrl = FlowCtrl::new(vec![]);
-        self.inner.handle(req, &mut depot, &mut res, &mut ctrl).await;
-        Ok(res)
-    }
 }
 
-
-impl Clone for Proxy {
-// impl<U> Clone for Proxy<U>
-// where
-//     U: Upstreams + Clone,
-//     U::Error: Into<BoxedError>,
-// {
+impl<U> Clone for Proxy<U>
+where
+    U: Upstreams + Clone,
+    U::Error: Into<BoxedError>,
+{
     fn clone(&self) -> Self {
         let upstreams = self.inner.upstreams().clone();
         Proxy {
@@ -114,12 +92,11 @@ impl Clone for Proxy {
 }
 
 #[async_trait]
-impl Handler for Proxy {
-// impl<U> Handler for Proxy<U>
-// where
-//     U: Upstreams,
-//     U::Error: Into<BoxedError>,
-// {
+impl<U> Handler for Proxy<U>
+where
+    U: Upstreams,
+    U::Error: Into<BoxedError>,
+{
     #[inline]
     async fn handle(
         &self,
