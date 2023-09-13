@@ -59,7 +59,7 @@ jobs:
         with:
           context: .
           file: docker/Dockerfile.github
-          platforms: linux/arm64,linux/amd64
+          platforms: linux/amd64
           push: true 
           tags: | 
             ghcr.io/lostb1t/replex:${{ steps.docker-tag.outputs.tag }}
