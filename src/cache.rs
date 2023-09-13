@@ -195,7 +195,7 @@ impl RequestIssuer {
                 http::header::ACCEPT_ENCODING,
                 headers::PLEX_TOKEN,
                 headers::PLEX_LANGUAGE,
-                headers::PLEX_PLATFORM,
+                headers::PLEX_CLIENT_IDENTIFIER,
             ],
         }
     }
@@ -499,7 +499,10 @@ where
         let req_local_addr = req.local_addr().clone();
 
         let cache = match self.store.load_entry(&key).await {
-            Some(cache) => cache,
+            Some(cache) => { 
+                tracing::debug!("returning response from cache");
+                cache
+            },
             None => {
                 ctrl.call_next(req, depot, res).await;
                 if !res.body.is_stream() && !res.body.is_error() {

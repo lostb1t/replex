@@ -22,7 +22,7 @@ run:
 	REPLEX_VIDEO_TRANSCODE_FALLBACK_FOR="4k" \
 	REPLEX_AUTO_SELECT_VERSION=1 \
 	REPLEX_FORCE_MAXIMUM_QUALITY=0 \
-	REPLEX_CACHE_ROWS=0 \
+	REPLEX_CACHE_ROWS=1 \
 	REPLEX_HERO_ROWS="movie.topunwatched,movie.recentlyviewed,hub.movie.recentlyreleased,home.television.recent,tv.recentlyadded,tv.toprated,tv.inprogress,tv.recentlyaired" \
 	REPLEX_PORT=80 \
 	REPLEX_INCLUDE_WATCHED=0 \
@@ -31,7 +31,7 @@ run:
 	REPLEX_DISABLE_LEAF_COUNT=0 \
 	REPLEX_DISABLE_USER_STATE=0 \
 	REPLEX_ENABLE_CONSOLE=0 \
-	REPLEX_CACHE_TTL=0 \
+	REPLEX_CACHE_TTL=60 \
 	RUST_LOG="info,replex=debug" \
 	cargo watch -x run
 
