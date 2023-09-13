@@ -49,7 +49,7 @@ jobs:
       - id: docker-tag
         uses: yuya-takeyama/docker-tag-from-github-ref-action@v1
       - name: Build
-        run: CARGO_TARGET_DIR=./bin/aarch64-unknown-linux-gnu cargo build --release
+        run: CARGO_TARGET_DIR=./bin/x86_64-unknown-linux-gnu cargo build --release
         #run: cargo build --release
       -
         name: Set up QEMU
