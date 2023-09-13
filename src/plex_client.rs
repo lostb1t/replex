@@ -66,7 +66,7 @@ pub struct PlexClient {
     /// Auth token for Plex.
     pub x_plex_token: String,
 
-    pub proxy: Proxy,
+    //pub proxy: Proxy,
 
     // other non eseential headers
     pub headers: Option<header::HeaderMap>,
@@ -119,8 +119,15 @@ impl PlexClient {
             ACCEPT,
             header::HeaderValue::from_static("application/json"),
         );
-
-        let res = self.proxy.request(req).await?;
+        let config: Config = Config::figment().extract().unwrap();
+        let proxy = Proxy::with_client(
+             config.host.clone().unwrap(),
+             reqwest::Client::builder()
+                 .timeout(Duration::from_secs(30))
+                 .build()
+                 .unwrap(),
+         );
+        let res = proxy.request(req).await?;
         Ok(res)
     }
 
@@ -496,13 +503,7 @@ impl PlexClient {
         );
 
         let config: Config = Config::figment().extract().unwrap();
-        let proxy = Proxy::with_client(
-            config.host.clone().unwrap(),
-            reqwest::Client::builder()
-                .timeout(Duration::from_secs(30))
-                .build()
-                .unwrap(),
-        );
+
         // dbg!(&headers);
         Self {
             http_client: reqwest::Client::builder()
@@ -516,7 +517,7 @@ impl PlexClient {
             x_plex_client_identifier: client_identifier,
             x_plex_platform: platform,
             headers: Some(headers.clone()),
-            proxy: proxy,
+            //proxy: proxy,
             cache: CACHE.clone(),
         }
     }
@@ -543,13 +544,6 @@ impl PlexClient {
                 .unwrap(),
         );
         let config: Config = Config::figment().extract().unwrap();
-        let proxy = Proxy::with_client(
-            config.host.clone().unwrap(),
-            reqwest::Client::builder()
-                .timeout(Duration::from_secs(30))
-                .build()
-                .unwrap(),
-        );
         Self {
             http_client: reqwest::Client::builder()
                 .default_headers(headers)
@@ -561,7 +555,7 @@ impl PlexClient {
             x_plex_token: token,
             x_plex_client_identifier: client_identifier,
             x_plex_platform: platform,
-            proxy: proxy,
+            //proxy: proxy,
             headers: None,
             cache: CACHE.clone(),
         }
