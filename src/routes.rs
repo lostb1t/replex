@@ -392,7 +392,7 @@ pub async fn transform_hubs_home(
     // return Ok(());
 
     TransformBuilder::new(plex_client, params.clone())
-        .with_transform(HubStyleTransform { is_home: true })
+        //.with_transform(HubStyleTransform { is_home: true })
         // .with_transform(HubSectionDirectoryTransform)
         .with_transform(HubMixTransform)
         // .with_transform(HubChildrenLimitTransform {
