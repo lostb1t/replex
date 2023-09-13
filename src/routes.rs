@@ -388,6 +388,9 @@ pub async fn transform_hubs_home(
         from_salvo_response(upstream_res).await?;
     container.content_type = content_type;
 
+    res.render(container);
+    return Ok(());
+
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubStyleTransform { is_home: true })
         // .with_transform(HubSectionDirectoryTransform)
