@@ -143,8 +143,9 @@ You can redirect streams by enabling `REPLEX_REDIRECT_STREAMS` and optionally se
 - when include_watched is false a maximum item limit per library is opposed of 250 items. So if you have a mixed row of 2 libraries the max results of that row will be 500 items.
 - disable_user_state: For movies this works in the webapp. Shows work accross clients
 
-## Known issues
+## Help it doesnt work!
 
 ### Replex works on on app.plex.tv but not on my clients
 
-Try to clear the cache on the client. Old plex domains might linger.
+- disable GDM in plex and make sure plex is not directly acccesible. you can use this url to check what servers plex communicates to your clients: https://clients.plex.tv/api/v2/resources?includeIPv6=1&includeRelay=1&X-Plex-Language=en-NL&X-Plex-Token=YOURTOKEN&X-Plex-Client-Identifier=1234
+- Try to clear the cache on the client. Old plex domains might linger.
