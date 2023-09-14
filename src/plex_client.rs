@@ -410,6 +410,18 @@ impl PlexClient {
                 header::HeaderValue::from_str(i.as_str()).unwrap(),
             );
         }
+        if let Some(i) = forwarded_for.clone() {
+            headers.insert(
+                "X-Forwarded-For",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+        if let Some(i) = session_id.clone() {
+            headers.insert(
+                "X-Plex-Session-Id",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
         headers.insert(
             "Accept",
             header::HeaderValue::from_static("application/json"),
