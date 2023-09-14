@@ -107,24 +107,17 @@ impl PlexClient {
         url.set_scheme(target_uri.scheme()).unwrap();
         url.set_port(target_uri.port()).unwrap();
         req.set_uri(hyper::Uri::try_from(url.as_str()).unwrap());        
-
-        let mut builder = self
-            .http_client
-            .request(req.method_mut().to_owned(), uri);
-        for (key, value) in headers {
-          builder = builder.header(key, value);
-        }
-        let res = builder
-            .send()
-            .await
-            .map_err(Error::other)?;
-        // let res = self
-        //     .http_client
-        //     .get(uri)
-        //     .headers(headers)
-        //     .send()
-        //     .await
-        //     .map_err(Error::other)?;
+        //todo: build a hyper request or reqwest rrwuest from salvo reqiesy and pass to execute
+        let res = reqwest::Client::builder()
+             .gzip(true)
+             .timeout(Duration::from_secs(30))
+             .build()
+             .unwrap()
+             .get(uri)
+             .headers(headers)
+             .send()
+             .await
+             .map_err(Error::other)?;
         Ok(res)
     }
 
