@@ -109,12 +109,12 @@ impl PlexClient {
         req.set_uri(hyper::Uri::try_from(url.as_str()).unwrap());        
         //todo: build a hyper request or reqwest rrwuest from salvo reqiesy and pass to execute
         let res = reqwest::Client::builder()
+             .default_headers(headers)
              .gzip(true)
              .timeout(Duration::from_secs(30))
              .build()
              .unwrap()
              .get(uri)
-             .headers(headers)
              .send()
              .await
              .map_err(Error::other)?;
