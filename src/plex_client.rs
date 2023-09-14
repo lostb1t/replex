@@ -114,7 +114,7 @@ impl PlexClient {
              .timeout(Duration::from_secs(30))
              .build()
              .unwrap()
-             .get(uri)
+             .request(req.method_mut().to_owned(), uri)
              .send()
              .await
              .map_err(Error::other)?;
