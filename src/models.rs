@@ -125,6 +125,8 @@ pub struct PlexContext {
     pub count: Option<i32>,
     #[salvo(extract(rename = "X-Plex-Client-Identifier"))]
     pub client_identifier: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Session-Id"))]
+    pub session_id: Option<String>,
     #[salvo(extract(rename = "X-Plex-Token"))]
     pub token: Option<String>,
     #[salvo(extract(rename = "X-Plex-Container-Size"))]
