@@ -108,10 +108,12 @@ impl PlexClient {
         url.set_port(target_uri.port()).unwrap();
         req.set_uri(hyper::Uri::try_from(url.as_str()).unwrap());        
 
-        let res = self
+        let builder = self
             .http_client
             .request(req.method_mut().to_owned(), uri)
-            .headers(headers)
+            .headers(headers);
+        dbg!(&builder.headers());
+        let res = builder
             .send()
             .await
             .map_err(Error::other)?;
