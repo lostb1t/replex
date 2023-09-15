@@ -163,7 +163,7 @@ pub struct PlexContext {
     #[serde(default = "default_as_false", deserialize_with = "bool_from_int")]
     #[salvo(extract(rename = "includeAdvanced"))]
     pub include_advanced: bool,
-    #[salvo(extract(rename = "X-Forwarded-For"))]
+    #[salvo(extract(rename = "X-Forwarded-For", alias = "X-Real-Ip"))]
     pub forwarded_for: Option<String>,
     #[serde(default = "default_as_false", deserialize_with = "bool_from_int")]
     #[salvo(extract(rename = "excludeAllLeaves"))]
