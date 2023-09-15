@@ -120,6 +120,8 @@ pub struct PlexContext {
     #[serde(default, deserialize_with = "deserialize_screen_resolution")]
     #[salvo(extract(rename = "X-Plex-Device-Screen-Resolution"))]
     pub screen_resolution: Vec<Resolution>,
+    #[salvo(extract(rename = "X-Plex-Device-Screen-Resolution"))]
+    pub screen_resolution_original: Option<String>,
     #[salvo(extract(rename = "X-Plex-Product"))]
     pub product: Option<String>,
     #[salvo(extract(rename = "X-Plex-Version"))]

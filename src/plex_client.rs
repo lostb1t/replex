@@ -476,6 +476,13 @@ impl PlexClient {
             );
         }
 
+        if let Some(i) = params.clone().screen_resolution_original.clone() {
+            headers.insert(
+                "X-Plex-Device-Screen-Resolution",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
         headers.insert(
             "Accept",
             header::HeaderValue::from_static("application/json"),
