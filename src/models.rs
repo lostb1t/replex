@@ -122,6 +122,8 @@ pub struct PlexContext {
     pub screen_resolution: Vec<Resolution>,
     #[salvo(extract(rename = "X-Plex-Device-Screen-Resolution"))]
     pub screen_resolution_original: Option<String>,
+    #[salvo(extract(rename = "x-plex-client-capabilities"))]
+    pub client_capabilities: Option<String>, 
     #[salvo(extract(rename = "X-Plex-Product"))]
     pub product: Option<String>,
     #[salvo(extract(rename = "X-Plex-Version"))]

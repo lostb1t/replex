@@ -10,6 +10,9 @@ use async_recursion::async_recursion;
 use futures_util::Future;
 use futures_util::TryStreamExt;
 use http::Uri;
+use http::header::ACCEPT_LANGUAGE;
+use http::header::CONNECTION;
+use http::header::COOKIE;
 use http::header::FORWARDED;
 // use hyper::client::HttpConnector;
 // use hyper::Body;
@@ -119,9 +122,20 @@ impl PlexClient {
         //     .http_client
         //     .get(url.clone());
         // dbg!(&req);
+
+        // reqwest::Client::builder()
+        // .proxy(reqwest::Proxy::all("http://192.168.2.10:9090".to_string()).unwrap())
+        // .timeout(Duration::from_secs(30))
+        // .build()
+        // .unwrap()
+        // .get("http://nu.nl")
+        // .send()
+        // .await;
+
         let res = self
             .http_client
             .request(req.method_mut().to_owned(), url)
+            // .get(url)
             .headers(headers)
             .send()
             .await
@@ -349,6 +363,7 @@ impl PlexClient {
         let client_identifier = params.clone().client_identifier;
         let platform = params.clone().platform;
 
+        let req_headers = req.headers().clone();
         let mut headers = header::HeaderMap::new();
 
         headers.insert(
@@ -480,6 +495,34 @@ impl PlexClient {
             headers.insert(
                 "X-Plex-Device-Screen-Resolution",
                 header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
+        if let Some(i) = params.clone().client_capabilities.clone() {
+            headers.insert(
+                "x-plex-client-capabilities",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
+        if let Some(i) = req_headers.get(COOKIE) {
+            headers.insert(
+                COOKIE,
+                i.clone(),
+            );
+        }
+
+        if let Some(i) = req_headers.get(ACCEPT_LANGUAGE) {
+            headers.insert(
+                ACCEPT_LANGUAGE,
+                i.clone(),
+            );
+        }
+
+        if let Some(i) = req_headers.get(CONNECTION) {
+            headers.insert(
+                CONNECTION,
+                i.clone(),
             );
         }
 
