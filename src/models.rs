@@ -120,13 +120,41 @@ pub struct PlexContext {
     #[serde(default, deserialize_with = "deserialize_screen_resolution")]
     #[salvo(extract(rename = "X-Plex-Device-Screen-Resolution"))]
     pub screen_resolution: Vec<Resolution>,
+    #[salvo(extract(rename = "X-Plex-Device-Screen-Resolution"))]
+    pub screen_resolution_original: Option<String>,
     #[salvo(extract(rename = "X-Plex-Product"))]
     pub product: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Version"))]
+    pub version: Option<String>,
     pub count: Option<i32>,
     #[salvo(extract(rename = "X-Plex-Client-Identifier"))]
     pub client_identifier: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Session-Id"))]
+    pub session_id: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Session-Identifier"))]
+    pub session_identifier: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Playback-Session-Id"))]
+    pub playback_session_id: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Playback-Id"))]
+    pub playback_id: Option<String>,
     #[salvo(extract(rename = "X-Plex-Token"))]
     pub token: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Platform-Version"))]
+    pub platform_version: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Features"))]
+    pub features: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Model"))]
+    pub model: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Device"))]
+    pub device: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Device-Name"))]
+    pub device_name: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Drm"))]
+    pub drm: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Text-Format"))]
+    pub text_format: Option<String>,
+    #[salvo(extract(rename = "X-Plex-Provider-Version"))]
+    pub provider_version: Option<String>,
     #[salvo(extract(rename = "X-Plex-Container-Size"))]
     pub container_size: Option<i32>,
     #[salvo(extract(rename = "X-Plex-Container-Start"))]
@@ -137,6 +165,8 @@ pub struct PlexContext {
     #[serde(default = "default_as_false", deserialize_with = "bool_from_int")]
     #[salvo(extract(rename = "includeAdvanced"))]
     pub include_advanced: bool,
+    #[salvo(extract(rename = "X-Forwarded-For", alias = "X-Real-Ip"))]
+    pub forwarded_for: Option<String>,
     #[serde(default = "default_as_false", deserialize_with = "bool_from_int")]
     #[salvo(extract(rename = "excludeAllLeaves"))]
     pub exclude_all_leaves: bool,

@@ -10,6 +10,7 @@ use async_recursion::async_recursion;
 use futures_util::Future;
 use futures_util::TryStreamExt;
 use http::Uri;
+use http::header::FORWARDED;
 // use hyper::client::HttpConnector;
 // use hyper::Body;
 use hyper::body::Body;
@@ -71,21 +72,19 @@ impl PlexClient {
     // TODO: Handle 404s/500 etc
     // TODO: Map reqwest response and error to salvo
     pub async fn get(&self, path: String) -> Result<reqwest::Response, Error> {
-        let uri = format!("{}{}", self.host, path);
-        let res = self
-            .http_client
-            .get(uri)
-            .send()
-            .await
-            .map_err(Error::other)?;
-        Ok(res)
+        let mut req = Request::default();
+        *req.method_mut() = http::Method::GET;
+        req.set_uri(Uri::builder()
+            .path_and_query(path).build().unwrap());
+        self.request(&mut req).await        
+
     }
 
     pub async fn request(
         &self,
         req: &mut Request,
     ) -> Result<reqwest::Response, Error> {
-        let uri = format!(
+        let url = format!(
             "{}{}",
             self.host,
             &req.uri_mut().path_and_query().unwrap()
@@ -102,26 +101,32 @@ impl PlexClient {
             ).unwrap(),
         );
 
-        let mut url = url::Url::parse(req.uri_mut().to_string().as_str()).unwrap();
-        url.set_host(Some(self.host.replace("http://", "").replace("https://", "").as_str())).unwrap();
-        url.set_scheme(target_uri.scheme()).unwrap();
-        url.set_port(target_uri.port()).unwrap();
-        req.set_uri(hyper::Uri::try_from(url.as_str()).unwrap());        
+        // let i = "47.250.115.151".to_string();
+        // headers.insert(
+        //     FORWARDED,
+        //     header::HeaderValue::from_str(i.as_str()).unwrap(),
+        // );
+        // headers.insert(
+        //     "X-Forwarded-For",
+        //     header::HeaderValue::from_str(i.as_str()).unwrap(),
+        // );
+        // headers.insert(
+        //     "X-Real-Ip",
+        //     header::HeaderValue::from_str(i.as_str()).unwrap(),
+        // );
 
+        // let reqq = self
+        //     .http_client
+        //     .get(url.clone());
+        // dbg!(&req);
         let res = self
             .http_client
-            .request(req.method_mut().to_owned(), uri)
+            .request(req.method_mut().to_owned(), url)
             .headers(headers)
             .send()
             .await
             .map_err(Error::other)?;
-        // let res = self
-        //     .http_client
-        //     .get(uri)
-        //     .headers(headers)
-        //     .send()
-        //     .await
-        //     .map_err(Error::other)?;
+
         Ok(res)
     }
 
@@ -193,68 +198,10 @@ impl PlexClient {
             .get_collection_children(id, Some(offset), Some(limit))
             .await?;
         c.media_container.children_mut().retain(|x| !x.is_watched());
-        // if !config.include_watched {
-        //     let original_size = c.media_container.size.unwrap();
-        //     //let children =
-        //     c.media_container.children_mut().retain(|x| !x.is_watched());
-        //     let children_lenght = c.media_container.children_mut().len() as i32;
-        //     let total_size = c.media_container.total_size.unwrap();
-
-        //     // dbg!("checking", original_size, children_lenght, offset, total_size, limit, original_limit);
-        //     // if original_size != children_lenght {
-        //     //     dbg!("checking", original_size, children_lenght, offset, total_size, limit, original_limit);
-        //     // }
-        //     // take into account watched, reload if we are under the requested limit
-        //     if (children_lenght < original_limit
-        //         && total_size > offset + limit
-        //         && offset < total_size)
-        //         || (children_lenght < original_limit
-        //             && total_size > offset + original_size)
-        //     {
-        //         let mut children = c.media_container.children();
-        //         // dbg!("recursive");
-        //         // dbg!("checking", original_size, children_lenght, offset, total_size, limit);
-        //         let new_limit = match limit {
-        //             x if x < 25 => 25 + x,
-        //             x if x > 25 => x * 2,
-        //             _ => 25 + limit,
-        //         };
-        //         let mut r = self
-        //             .load_collection_children_recursive(
-        //                 id,
-        //                 offset + children_lenght,
-        //                 new_limit,
-        //                 // limit + 10,
-        //                 original_limit,
-        //             )
-        //             .await.unwrap();
-        //         children.append(r.media_container.children_mut());
-        //         c.media_container.set_children(children);
-        //         // return self
-        //         //     .load_collection_children_recursive(
-        //         //         id,
-        //         //         offset,
-        //         //         new_limit,
-        //         //         // limit + 10,
-        //         //         original_limit,
-        //         //     )
-        //         //     .await;
-        //     }
-        // }
-        // dbg!(c.media_container.children_mut().len());
-        // dbg!(limit);
         c.media_container
             .children_mut()
             .truncate(original_limit as usize);
 
-        // for (pos, child) in c.media_container.children().iter().enumerate() {
-        //     if child.title == "Plane" {
-        //         dbg!(pos);
-        //     }
-        // }
-        // dbg!(c.media_container.children_mut().len());
-        // dbg!("-----");
-        // dbg!("checking", offset, c.media_container.total_size.unwrap(), limit, original_limit, c.media_container.children_mut().len());
         Ok(c)
     }
 
@@ -414,6 +361,128 @@ impl PlexClient {
                 header::HeaderValue::from_str(i.as_str()).unwrap(),
             );
         }
+
+        if let Some(i) = params.clone().forwarded_for.clone() {
+            headers.insert(
+                FORWARDED,
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+            headers.insert(
+                "X-Forwarded-For",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+            headers.insert(
+                "X-Real-Ip",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        };
+
+        // dbg!(headers.clone());
+        if let Some(i) = params.clone().session_id.clone() {
+            headers.insert(
+                "X-Plex-Session-Id",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
+        if let Some(i) = params.clone().session_identifier.clone() {
+            headers.insert(
+                "X-Plex-Client-Identifier",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
+        if let Some(i) = params.clone().playback_session_id.clone() {
+            headers.insert(
+                "X-Plex-Playback-Session-Id",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
+        if let Some(i) = params.clone().playback_id.clone() {
+            headers.insert(
+                "X-Plex-Playback-Id",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
+        if let Some(i) = params.clone().product.clone() {
+            headers.insert(
+                "X-Plex-Product",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
+        if let Some(i) = params.clone().version.clone() {
+            headers.insert(
+                "X-Plex-Version",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
+        if let Some(i) = params.clone().platform_version.clone() {
+            headers.insert(
+                "X-Plex-Platform-Version",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
+        if let Some(i) = params.clone().features.clone() {
+            headers.insert(
+                "X-Plex-Features",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
+        if let Some(i) = params.clone().model.clone() {
+            headers.insert(
+                "X-Plex-Model",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
+        if let Some(i) = params.clone().device.clone() {
+            headers.insert(
+                "X-Plex-Device",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
+        if let Some(i) = params.clone().device_name.clone() {
+            headers.insert(
+                "X-Plex-Device-Name",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
+        if let Some(i) = params.clone().drm.clone() {
+            headers.insert(
+                "X-Plex-Drm",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
+        if let Some(i) = params.clone().text_format.clone() {
+            headers.insert(
+                "X-Plex-Text-Format",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
+        if let Some(i) = params.clone().provider_version.clone() {
+            headers.insert(
+                "X-Plex-Provider-Version",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
+        if let Some(i) = params.clone().screen_resolution_original.clone() {
+            headers.insert(
+                "X-Plex-Device-Screen-Resolution",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
         headers.insert(
             "Accept",
             header::HeaderValue::from_static("application/json"),
