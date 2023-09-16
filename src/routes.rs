@@ -186,6 +186,20 @@ pub fn route() -> Router {
     router
 }
 
+]
+async fn should_skip(
+    req: &mut Request,
+    res: &mut Response,
+    ctrl: &mut FlowCtrl
+) {
+    let params: PlexContext = req.extract().await.unwrap();
+    if params.product.clone().unwrap.to_lowercase() == "plexamp" {
+      res.render(StatusError::bad_request().brief("Request body size is unknown."));
+      ctrl.skip_rest();
+    }
+}
+
+
 #[handler]
 async fn redirect_stream(
     req: &mut Request,
