@@ -38,6 +38,7 @@ pub fn route() -> Router {
 
     let mut router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
+        .hoop(should_skip)
         .hoop(Timeout::new(Duration::from_secs(30)))
         .hoop(Compression::new().enable_gzip(CompressionLevel::Fastest))
         //.hoop(max_concurrency(300))
@@ -186,7 +187,6 @@ pub fn route() -> Router {
     router
 }
 
-]
 async fn should_skip(
     req: &mut Request,
     res: &mut Response,
