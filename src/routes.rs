@@ -201,7 +201,7 @@ async fn should_skip(
     // let proxy = depot.obtain::<Proxy<String>>().unwrap().clone().to_owned();
 
     let params: PlexContext = req.extract().await.unwrap();
-    if params.product.clone().unwrap().to_lowercase() == "plexamp" {
+    if params.product.is_some() && params.product.clone().unwrap().to_lowercase() == "plexamp" {
         let config: Config = Config::figment().extract().unwrap();
         let proxy = Proxy::with_client(
             config.host.clone().unwrap(),
