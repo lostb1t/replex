@@ -187,6 +187,7 @@ pub fn route() -> Router {
     router
 }
 
+#[handler]
 async fn should_skip(
     req: &mut Request,
     res: &mut Response,
