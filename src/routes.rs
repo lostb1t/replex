@@ -42,7 +42,9 @@ pub fn route() -> Router {
         .hoop(Timeout::new(Duration::from_secs(30)))
         .hoop(Compression::new().enable_gzip(CompressionLevel::Fastest))
         //.hoop(max_concurrency(300))
-        .hoop(affix::insert("proxy", Arc::new(proxy.clone())));
+        // .hoop(affix::inject(Arc::new(proxy.clone())));
+        // .hoop(affix::insert("proxy", Arc::new(proxy.clone())));
+        .hoop(affix::insert("proxy", proxy.clone()));
     // .hoop(affix::insert("script_engine", Arc::new(script_engine)));
 
     if config.redirect_streams {
@@ -194,9 +196,21 @@ async fn should_skip(
     depot: &mut Depot,
     ctrl: &mut FlowCtrl
 ) {
-    let proxy = depot.obtain::<Proxy>().unwrap();
+    // let proxy = depot.obtain::<Proxy<String>>().unwrap().clone().to_owned();
+    // let proxy = depot.get::<Proxy<String>>("proxy").unwrap().to_owned();
+    // let proxy = depot.obtain::<Proxy<String>>().unwrap().clone().to_owned();
+
     let params: PlexContext = req.extract().await.unwrap();
-    if params.product.clone().unwrap.to_lowercase() == "plexamp" {
+    if params.product.clone().unwrap().to_lowercase() == "plexamp" {
+        let config: Config = Config::figment().extract().unwrap();
+        let proxy = Proxy::with_client(
+            config.host.clone().unwrap(),
+            reqwest::Client::builder()
+                .timeout(Duration::from_secs(30))
+                .build()
+                .unwrap(),
+        );
+
       proxy.handle(req, depot, res, ctrl).await;
       ctrl.skip_rest();
     }
