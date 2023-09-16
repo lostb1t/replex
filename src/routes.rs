@@ -190,11 +190,13 @@ pub fn route() -> Router {
 async fn should_skip(
     req: &mut Request,
     res: &mut Response,
+    depot: &mut Depot,
     ctrl: &mut FlowCtrl
 ) {
+    let proxy = depot.obtain::<Proxy>().unwrap();
     let params: PlexContext = req.extract().await.unwrap();
     if params.product.clone().unwrap.to_lowercase() == "plexamp" {
-      res.render(StatusError::bad_request().brief("Request body size is unknown."));
+      proxy.handle(req, depot, res, ctrl).await;
       ctrl.skip_rest();
     }
 }
