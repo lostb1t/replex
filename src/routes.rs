@@ -771,8 +771,6 @@ async fn force_maximum_quality(req: &mut Request) -> Result<(), anyhow::Error> {
     queries.insert("directStream".to_string(), "1".to_string());
     queries.remove("directPlay");
     queries.insert("directPlay".to_string(), "1".to_string());
-    //queries.remove("directPlay");
-    //queries.insert("directPlay".to_string(), "1".to_string());
     queries.remove("videoQuality");
     queries.insert("videoQuality".to_string(), "100".to_string());
     //queries.remove("videoResolution");
