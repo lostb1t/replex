@@ -377,6 +377,8 @@ impl PlexClient {
             );
         }
 
+        // let mut params = params.clone();
+        // params.forwarded_for = Some("182.32.122.20".to_string());
         if let Some(i) = params.clone().forwarded_for.clone() {
             headers.insert(
                 FORWARDED,
@@ -502,6 +504,13 @@ impl PlexClient {
         if let Some(i) = params.clone().text_format.clone() {
             headers.insert(
                 "X-Plex-Text-Format",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        }
+
+        if let Some(i) = params.clone().http_pipeline.clone() {
+            headers.insert(
+                "x-plex-http-pipeline",
                 header::HeaderValue::from_str(i.as_str()).unwrap(),
             );
         }

@@ -161,6 +161,8 @@ pub struct PlexContext {
     pub container_size: Option<i32>,
     #[salvo(extract(rename = "X-Plex-Container-Start"))]
     pub container_start: Option<i32>,
+    #[salvo(extract(rename = "x-plex-http-pipeline"))]
+    pub http_pipeline: Option<String>,
     #[serde(default = "default_as_false", deserialize_with = "bool_from_int")]
     #[salvo(extract(rename = "includeCollections"))]
     pub include_collections: bool,
