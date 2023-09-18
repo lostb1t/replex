@@ -169,6 +169,12 @@ pub struct PlexContext {
     pub include_advanced: bool,
     #[salvo(extract(rename = "X-Forwarded-For", alias = "X-Real-Ip"))]
     pub forwarded_for: Option<String>,
+    #[salvo(extract(rename = "X-Forwarded-Proto"))]
+    pub forwarded_proto: Option<String>,
+    #[salvo(extract(rename = "x-forwarded-host"))]
+    pub forwarded_host: Option<String>,
+    #[salvo(extract(rename = "X-Forwarded-Port"))]
+    pub forwarded_port: Option<String>,
     #[serde(default = "default_as_false", deserialize_with = "bool_from_int")]
     #[salvo(extract(rename = "excludeAllLeaves"))]
     pub exclude_all_leaves: bool,

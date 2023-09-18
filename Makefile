@@ -23,7 +23,7 @@ run:
 	REPLEX_AUTO_SELECT_VERSION=1 \
 	REPLEX_FORCE_MAXIMUM_QUALITY=0 \
 	REPLEX_CACHE_ROWS=0 \
-	REPLEX_HERO_ROWS="movie.topunwatched,movie.recentlyviewed,hub.movie.recentlyreleased,home.television.recent,tv.recentlyadded,tv.toprated,tv.inprogress,tv.recentlyaired" \
+	REPLEX_HERO_ROWS="home.movies.recent,movies.recent,movie.recentlyadded,movie.topunwatched,movie.recentlyviewed,hub.movie.recentlyreleased,home.television.recent,tv.inprogress,tv.recentlyaired" \
 	REPLEX_PORT=80 \
 	REPLEX_INCLUDE_WATCHED=0 \
 	REPLEX_REDIRECT_STREAMS=0 \

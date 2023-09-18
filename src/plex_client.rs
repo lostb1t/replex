@@ -392,6 +392,28 @@ impl PlexClient {
             );
         };
 
+        if let Some(i) = params.clone().forwarded_proto.clone() {
+            headers.insert(
+                "x-forwarded-proto",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        };
+
+
+        if let Some(i) = params.clone().forwarded_port.clone() {
+            headers.insert(
+                "x-forwarded-port",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        };
+
+        if let Some(i) = params.clone().forwarded_host.clone() {
+            headers.insert(
+                "x-forwarded-host",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        };
+
         // dbg!(headers.clone());
         if let Some(i) = params.clone().session_id.clone() {
             headers.insert(
