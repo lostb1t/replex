@@ -15,15 +15,14 @@ use futures_util::{
 use itertools::Itertools;
 use rhai::serde::{from_dynamic, to_dynamic};
 use rhai::{Dynamic, Engine, EvalAltResult, Scope};
+use serde::{Deserialize, Deserializer, Serialize};
 use std::cell::RefCell;
 use std::sync::Arc;
 use std::{cell::Cell, collections::HashMap};
-use tokio::task::JoinSet;
-use tokio::time::Instant;
-use serde::{Deserialize, Deserializer, Serialize};
 use strum_macros::Display as EnumDisplay;
 use strum_macros::EnumString;
-
+use tokio::task::JoinSet;
+use tokio::time::Instant;
 
 #[async_trait]
 pub trait Transform: Send + Sync + 'static {
@@ -43,7 +42,6 @@ pub trait Transform: Send + Sync + 'static {
         item
     }
 }
-
 
 #[async_trait]
 pub trait Filter: Send + Sync + 'static {
@@ -343,10 +341,10 @@ impl Transform for HubMixTransform {
             // }
             match p {
                 Some(v) => {
-                    new_hubs[v].key = merge_children_keys(
-                        new_hubs[v].key.clone(),
-                        hub.key.clone(),
-                    );
+                    new_hubs[v].key = Some(merge_children_keys(
+                        new_hubs[v].key.clone().unwrap(),
+                        hub.key.clone().unwrap(),
+                    ));
                     let c = new_hubs[v].children();
                     new_hubs[v].set_children(
                         c.into_iter()
@@ -562,7 +560,7 @@ impl PlatformHeroStyle {
         Self {
             style: Some("hero".to_string()),
             ..PlatformHeroStyle::default()
-        }        
+        }
     }
 
     pub fn htpc_style() -> Self {
@@ -578,7 +576,7 @@ impl PlatformHeroStyle {
     pub fn ios_style() -> Self {
         Self {
             cover_art_as_art: true,
-            cover_art_as_thumb: false, // ios doesnt load the subview as hero. 
+            cover_art_as_thumb: false, // ios doesnt load the subview as hero.
             ..PlatformHeroStyle::default()
         }
     }
@@ -597,9 +595,8 @@ impl PlatformHeroStyle {
                         "plex for ps4" => PlatformHeroStyle::htpc_style(),
                         "plex for ps5" => PlatformHeroStyle::htpc_style(),
                         "plex for ios" => PlatformHeroStyle::ios_style(),
-                        _ => PlatformHeroStyle::default()
+                        _ => PlatformHeroStyle::default(),
                     }
-                    
                 }
             }
         }
@@ -644,14 +641,11 @@ impl Transform for HubStyleTransform {
                     let _options = options.clone();
                     futures.push_back(async move {
                         let mut c = child.clone();
-                        let transform = MediaStyleTransform {
-                            style: Style::Hero
-                        };
-                        transform.transform_metadata(
-                            &mut c,
-                            client,
-                            _options
-                        ).await;
+                        let transform =
+                            MediaStyleTransform { style: Style::Hero };
+                        transform
+                            .transform_metadata(&mut c, client, _options)
+                            .await;
                         c
                     });
                 }
@@ -663,7 +657,7 @@ impl Transform for HubStyleTransform {
 }
 
 pub struct MediaStyleTransform {
-    pub style: Style
+    pub style: Style,
 }
 
 #[async_trait]
@@ -697,13 +691,11 @@ impl Transform for MediaStyleTransform {
             let cover_art = item.get_hero_art(plex_client).await;
             if cover_art.is_some() {
                 // c.art = art.clone();
-                item.images = vec![
-                    Image {
-                        r#type: "coverArt".to_string(),
-                        url: cover_art.clone().unwrap(),
-                        alt: Some(item.title.clone()),
-                    }
-                ];
+                item.images = vec![Image {
+                    r#type: "coverArt".to_string(),
+                    url: cover_art.clone().unwrap(),
+                    alt: Some(item.title.clone()),
+                }];
                 // lots of clients dont listen to the above
                 if style_def.cover_art_as_art {
                     item.art = cover_art.clone();
@@ -771,14 +763,10 @@ impl Transform for CollectionStyleTransform {
                 let _options = options.clone();
                 futures.push_back(async move {
                     let mut c = child.clone();
-                    let transform = MediaStyleTransform {
-                        style: Style::Hero
-                    };
-                    transform.transform_metadata(
-                        &mut c,
-                        client,
-                        _options
-                    ).await;
+                    let transform = MediaStyleTransform { style: Style::Hero };
+                    transform
+                        .transform_metadata(&mut c, client, _options)
+                        .await;
                     c
                 });
             }
@@ -853,10 +841,20 @@ impl Transform for HubKeyTransform {
         // if item.is_hub() {
         //     dbg!(&item.key);
         // }
-        if item.is_hub() && !item.key.starts_with("/replex") {
+        // let key = item.key.clone().unwrap();
+        if item.is_hub()
+            && item.key.is_some()
+            && !item.key.clone().unwrap().starts_with("/replex")
+        {
             // might already been set by the mixings
             // setting an url argument crashes client. So we use the path
-            item.key = format!("/replex/{}{}", item.style.clone().unwrap_or(Style::Shelf.to_string().to_lowercase()), item.key);
+            item.key = Some(format!(
+                "/replex/{}{}",
+                item.style
+                    .clone()
+                    .unwrap_or(Style::Shelf.to_string().to_lowercase()),
+                item.key.clone().unwrap()
+            ));
         }
     }
 }
@@ -1074,7 +1072,6 @@ impl Transform for MediaContainerScriptingTransform {
 //         item
 //     }
 // }
-
 
 pub fn hero_meta() -> Meta {
     Meta {
