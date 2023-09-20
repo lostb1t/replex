@@ -123,7 +123,7 @@ pub fn route() -> Router {
         //subtitles_router = subtitles_router.hoop(video_transcode_fallback);
     }
 
-    decision_router = decision_router.hoop(direct_stream_fallback);
+    //decision_router = decision_router.hoop(direct_stream_fallback);
 
     router = router
         .push(decision_router)
