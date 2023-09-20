@@ -20,7 +20,7 @@ docker-run:
 run:
 	REPLEX_DISABLE_CONTINUE_WATCHING=0 \
 	REPLEX_VIDEO_TRANSCODE_FALLBACK_FOR="4k" \
-	REPLEX_AUTO_SELECT_VERSION=1 \
+	REPLEX_AUTO_SELECT_VERSION=0 \
 	REPLEX_FORCE_MAXIMUM_QUALITY=0 \
 	REPLEX_CACHE_ROWS=0 \
 	REPLEX_HERO_ROWS="home.movies.recent,movies.recent,movie.recentlyadded,movie.topunwatched,movie.recentlyviewed,hub.movie.recentlyreleased,home.television.recent,tv.inprogress,tv.recentlyaired" \

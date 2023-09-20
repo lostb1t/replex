@@ -194,14 +194,16 @@ async fn should_skip(
     req: &mut Request,
     res: &mut Response,
     depot: &mut Depot,
-    ctrl: &mut FlowCtrl
+    ctrl: &mut FlowCtrl,
 ) {
     // let proxy = depot.obtain::<Proxy<String>>().unwrap().clone().to_owned();
     // let proxy = depot.get::<Proxy<String>>("proxy").unwrap().to_owned();
     // let proxy = depot.obtain::<Proxy<String>>().unwrap().clone().to_owned();
 
     let params: PlexContext = req.extract().await.unwrap();
-    if params.product.is_some() && params.product.clone().unwrap().to_lowercase() == "plexamp" {
+    if params.product.is_some()
+        && params.product.clone().unwrap().to_lowercase() == "plexamp"
+    {
         let config: Config = Config::figment().extract().unwrap();
         let proxy = Proxy::with_client(
             config.host.clone().unwrap(),
@@ -211,11 +213,10 @@ async fn should_skip(
                 .unwrap(),
         );
 
-      proxy.handle(req, depot, res, ctrl).await;
-      ctrl.skip_rest();
+        proxy.handle(req, depot, res, ctrl).await;
+        ctrl.skip_rest();
     }
 }
-
 
 #[handler]
 async fn redirect_stream(
@@ -303,22 +304,47 @@ pub async fn direct_stream_fallback(
     req: &mut Request,
     res: &mut Response,
 ) -> Result<(), anyhow::Error> {
-    return Ok(());
     let config: Config = Config::figment().extract().unwrap();
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let mut queries = req.queries().clone();
-
+    // dbg!("yo");
     let direct_play = queries
         .get("directPlay")
         .unwrap_or(&"1".to_string())
         .to_owned();
+
     if direct_play != "1" {
         return Ok(());
     }
+
     let upstream_res = plex_client.request(req).await?;
+    // dbg!(&upstream_res);
+
     match upstream_res.status() {
-        http::StatusCode::OK => (),
+        http::StatusCode::OK => {
+            let mut container: MediaContainerWrapper<MediaContainer> =
+            from_reqwest_response(upstream_res).await?;
+    
+            if container.media_container.general_decision_code.is_some()
+                && container.media_container.general_decision_code.unwrap() == 2000
+            {
+                tracing::debug!(
+                    "Direct play not avaiable, falling back to direct stream"
+                );
+                add_query_param_salvo(req, "directPlay".to_string(), "0".to_string());
+                add_query_param_salvo(req, "directStream".to_string(), "1".to_string());
+            };
+            return Ok(());
+        },
+        http::StatusCode::BAD_REQUEST => {
+            tracing::debug!(
+                "Got 400 bad request, falling back to direct stream"
+            );
+            add_query_param_salvo(req, "directPlay".to_string(), "0".to_string());
+            add_query_param_salvo(req, "directStream".to_string(), "1".to_string());   
+            return Ok(());   
+        },
         status => {
             tracing::error!(status = ?status, res = ?upstream_res, "Failed to get plex response");
             return Err(
@@ -326,18 +352,9 @@ pub async fn direct_stream_fallback(
             );
         }
     };
-    let mut container: MediaContainerWrapper<MediaContainer> =
-        from_reqwest_response(upstream_res).await?;
 
-    if container.media_container.general_decision_code.is_some()
-        && container.media_container.general_decision_code.unwrap() == 2000
-    {
-        tracing::debug!(
-            "Direct play not avaiable, falling back to direct stream"
-        );
-        add_query_param_salvo(req, "directPlay".to_string(), "0".to_string());
-        add_query_param_salvo(req, "directStream".to_string(), "1".to_string());
-    };
+
+
 
     return Ok(());
 }
@@ -1150,10 +1167,21 @@ async fn auto_select_version(req: &mut Request) {
     let mut queries = req.queries().clone();
     let media_index = queries.get("mediaIndex");
 
-    if (media_index.is_none() || media_index.unwrap() == "-1")
-        && params.screen_resolution.len() > 0
-        && queries.get("path").is_some()
-    {
+    if media_index.is_some() && media_index.unwrap() != "-1" {
+        tracing::debug!(
+            "Skipping auto selected as client specified a media index"
+        );
+        return;
+    }
+
+    if params.screen_resolution.len() == 0 {
+        tracing::debug!(
+            "Skipping auto selected as no screen resolution has been specified"
+        );
+        return;
+    }
+
+    if queries.get("path").is_some() {
         let item = plex_client
             .get_item_by_key(req.queries().get("path").unwrap().to_string())
             .await
@@ -1205,20 +1233,15 @@ async fn auto_select_version(req: &mut Request) {
                     queries.remove("directPlay");
                     queries.insert("directPlay".to_string(), "1".to_string());
                 }
-                
 
-                queries.remove("subitles");
-                queries.insert("subitles".to_string(), "auto".to_string());
+                queries.remove("subtitles");
+                queries.insert("subtitles".to_string(), "auto".to_string());
                 // if index != 0 {
                 //     queries.remove("directPlay");
                 //     queries.insert("directPlay".to_string(), "0".to_string());
                 // }
             }
         }
-    } else {
-        tracing::debug!(
-            "Skipping auto selected as client specified a media index"
-        );
     }
     replace_query(queries, req);
 }
