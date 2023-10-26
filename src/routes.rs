@@ -31,7 +31,7 @@ pub fn route() -> Router {
     let proxy = Proxy::with_client(
         config.host.clone().unwrap(),
         reqwest::Client::builder()
-            .timeout(Duration::from_secs(60 * 100))
+            .timeout(Duration::from_secs(60 * 200))
             .build()
             .unwrap(),
     );
@@ -39,7 +39,7 @@ pub fn route() -> Router {
     let mut router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
         .hoop(should_skip)
-        .hoop(Timeout::new(Duration::from_secs(60 * 100)))
+        .hoop(Timeout::new(Duration::from_secs(60 * 200)))
         .hoop(Compression::new().enable_gzip(CompressionLevel::Fastest))
         //.hoop(max_concurrency(300))
         // .hoop(affix::inject(Arc::new(proxy.clone())));
