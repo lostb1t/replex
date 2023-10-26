@@ -32,7 +32,7 @@ run:
 	REPLEX_DISABLE_USER_STATE=0 \
 	REPLEX_ENABLE_CONSOLE=0 \
 	REPLEX_CACHE_TTL=0 \
-	RUST_LOG="info,replex=debug" \
+	RUST_LOG="info,replex=trace" \
 	cargo watch -x run
 
 fix:
