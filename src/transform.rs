@@ -495,7 +495,8 @@ pub struct HubStyleTransform {
     pub is_home: bool, // use clip instead of hero for android
 }
 
-pub struct PlatformHeroStyle {
+pub struct ClientHeroStyle {
+    enabled: bool,
     r#type: String,
     style: Option<String>,
     child_type: Option<String>,
@@ -503,9 +504,10 @@ pub struct PlatformHeroStyle {
     cover_art_as_art: bool, // if we should return the coverart in the art field
 }
 
-impl Default for PlatformHeroStyle {
+impl Default for ClientHeroStyle {
     fn default() -> Self {
         Self {
+            enabled: true,
             style: Some("hero".to_string()),
             r#type: "mixed".to_string(),
             child_type: None,
@@ -530,46 +532,69 @@ impl DeviceType {
     }
 }
 
-impl PlatformHeroStyle {
-    pub fn android(product: String) -> Self {
+impl ClientHeroStyle {
+    pub fn from_context(context: PlexContext) -> Self {
+        // pub fn android(product: String, platform_version: String) -> Self {
+        let product = context.product.clone().unwrap_or_default();
         let device_type = DeviceType::from_product(product);
+        let platform = context.platform.clone();
+        let platform_version =
+            context.platform_version.clone().unwrap_or_default();
 
-        match device_type {
-            DeviceType::Tv => {
-                Self {
-                    style: Some("hero".to_string()),
-                    // clip wil make the item info dissapear on TV
-                    r#type: "mixed".to_string(),
-                    // using clip makes it load thumbs instead of art as cover art. So we dont have to touch the background
-                    child_type: Some("clip".to_string()),
-                    cover_art_as_art: false,
-                    ..PlatformHeroStyle::default()
+        match platform {
+            Platform::Android => {
+                match device_type {
+                    DeviceType::Tv => {
+                      Self {
+                          style: Some("hero".to_string()),
+                          // clip wil make the item info disappear on TV
+                          r#type: "mixed".to_string(),
+                          // using clip makes it load thumbs instead of art as cover art. So we don't have to touch the background
+                          child_type: Some("clip".to_string()),
+                          cover_art_as_art: false,
+                          ..ClientHeroStyle::default()
+                      }
+                    }
+                    _ => Self {
+                        style: None,
+                        r#type: "clip".to_string(),
+                        child_type: Some("clip".to_string()),
+                        cover_art_as_art: true,
+                        ..ClientHeroStyle::default()
+                    },
                 }
             }
-            _ => Self {
-                style: None,
-                r#type: "clip".to_string(),
-                child_type: Some("clip".to_string()),
-                cover_art_as_art: true,
-                ..PlatformHeroStyle::default()
-            },
+            Platform::Roku => ClientHeroStyle::roku(),
+            _ => {
+              ClientHeroStyle::default()
+          }
+            // _ => {
+            //     if product.starts_with("Plex HTPC") {
+            //         ClientHeroStyle::htpc_style()
+            //     } else {
+            //         match product.to_lowercase().as_ref() {
+            //             "plex for lg" => ClientHeroStyle::htpc_style(),
+            //             "plex for xbox" => ClientHeroStyle::htpc_style(),
+            //             "plex for ps4" => ClientHeroStyle::htpc_style(),
+            //             "plex for ps5" => ClientHeroStyle::htpc_style(),
+            //             "plex for ios" => ClientHeroStyle::ios_style(),
+            //             _ => ClientHeroStyle::default(),
+            //         }
+            //     }
+            // }
         }
     }
 
-    pub fn roku(product: String) -> Self {
+    pub fn roku() -> Self {
         Self {
             style: Some("hero".to_string()),
-            ..PlatformHeroStyle::default()
+            ..ClientHeroStyle::default()
         }
     }
 
     pub fn htpc_style() -> Self {
         Self {
-            // style: Some("hero".to_string()),
-            // r#type: "mixed".to_string(),
-            // child_type: None,
-            // cover_art_as_art: false,
-            ..PlatformHeroStyle::default()
+            ..ClientHeroStyle::default()
         }
     }
 
@@ -577,30 +602,30 @@ impl PlatformHeroStyle {
         Self {
             cover_art_as_art: true,
             cover_art_as_thumb: false, // ios doesnt load the subview as hero.
-            ..PlatformHeroStyle::default()
+            ..ClientHeroStyle::default()
         }
     }
 
-    pub fn for_client(platform: Platform, product: String) -> Self {
-        match platform {
-            Platform::Android => PlatformHeroStyle::android(product),
-            Platform::Roku => PlatformHeroStyle::roku(product),
-            _ => {
-                if product.starts_with("Plex HTPC") {
-                    PlatformHeroStyle::htpc_style()
-                } else {
-                    match product.to_lowercase().as_ref() {
-                        "plex for lg" => PlatformHeroStyle::htpc_style(),
-                        "plex for xbox" => PlatformHeroStyle::htpc_style(),
-                        "plex for ps4" => PlatformHeroStyle::htpc_style(),
-                        "plex for ps5" => PlatformHeroStyle::htpc_style(),
-                        "plex for ios" => PlatformHeroStyle::ios_style(),
-                        _ => PlatformHeroStyle::default(),
-                    }
-                }
-            }
-        }
-    }
+    // pub fn for_client(platform: Platform, product: String, platform_version: String) -> Self {
+    //     match platform {
+    //         Platform::Android => PlatformHeroStyle::android(product, platform_version),
+    //         Platform::Roku => PlatformHeroStyle::roku(product),
+    //         _ => {
+    //             if product.starts_with("Plex HTPC") {
+    //               ClientHeroStyle::htpc_style()
+    //             } else {
+    //                 match product.to_lowercase().as_ref() {
+    //                     "plex for lg" => ClientHeroStyle::htpc_style(),
+    //                     "plex for xbox" => ClientHeroStyle::htpc_style(),
+    //                     "plex for ps4" => ClientHeroStyle::htpc_style(),
+    //                     "plex for ps5" => ClientHeroStyle::htpc_style(),
+    //                     "plex for ios" => ClientHeroStyle::ios_style(),
+    //                     _ => ClientHeroStyle::default(),
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 #[async_trait]
@@ -619,10 +644,7 @@ impl Transform for HubStyleTransform {
             let is_hero =
                 item.is_hero(plex_client.clone()).await.unwrap_or(false);
             if is_hero {
-                let mut style = PlatformHeroStyle::for_client(
-                    options.platform.clone(),
-                    options.product.clone().unwrap_or_default(),
-                );
+                let mut style = ClientHeroStyle::from_context(options.clone());
 
                 item.style = style.style;
 
@@ -681,10 +703,7 @@ impl Transform for MediaStyleTransform {
         options: PlexContext,
     ) {
         if self.style == Style::Hero {
-            let mut style_def = PlatformHeroStyle::for_client(
-                options.platform,
-                options.product.unwrap_or_default(),
-            );
+            let mut style_def = ClientHeroStyle::from_context(options.clone());
             if style_def.child_type.clone().is_some() {
                 item.r#type = style_def.child_type.clone().unwrap();
             }
@@ -746,10 +765,7 @@ impl Transform for CollectionStyleTransform {
             // let mut futures = FuturesOrdered::new();
             // let now = Instant::now();
 
-            let mut style = PlatformHeroStyle::for_client(
-                options.platform.clone(),
-                options.product.clone().unwrap_or_default(),
-            );
+            let mut style = ClientHeroStyle::from_context(options.clone());
 
             item.meta = Some(hero_meta());
 
