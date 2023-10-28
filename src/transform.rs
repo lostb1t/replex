@@ -552,6 +552,7 @@ impl ClientHeroStyle {
                           // using clip makes it load thumbs instead of art as cover art. So we don't have to touch the background
                           child_type: Some("clip".to_string()),
                           cover_art_as_art: false,
+                          cover_art_as_thumb: true,
                           ..ClientHeroStyle::default()
                       }
                     }
@@ -767,7 +768,7 @@ impl Transform for CollectionStyleTransform {
 
             let mut style = ClientHeroStyle::from_context(options.clone());
 
-            item.meta = Some(hero_meta());
+            // item.meta = Some(hero_meta());
 
             let mut futures = FuturesOrdered::new();
             for mut child in item.children() {
