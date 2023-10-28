@@ -566,6 +566,8 @@ impl ClientHeroStyle {
                 }
             }
             Platform::Roku => ClientHeroStyle::roku(),
+            Platform::Ios => ClientHeroStyle::ios_style(),
+            Platform::TvOS => ClientHeroStyle::tvos_style(),
             _ => {
               ClientHeroStyle::default()
           }
@@ -606,6 +608,14 @@ impl ClientHeroStyle {
             ..ClientHeroStyle::default()
         }
     }
+
+    pub fn tvos_style() -> Self {
+      Self {
+          cover_art_as_art: true,
+          cover_art_as_thumb: false, // ios doesnt load the subview as hero.
+          ..ClientHeroStyle::default()
+      }
+  }
 
     // pub fn for_client(platform: Platform, product: String, platform_version: String) -> Self {
     //     match platform {

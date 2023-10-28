@@ -76,6 +76,9 @@ pub enum Platform {
     #[serde(rename = "iOS")]
     #[strum(serialize = "iOS")]
     Ios,
+    #[serde(rename = "tvOS")]
+    #[strum(serialize = "tvOS")]
+    TvOS,
     Safari,
     Chrome,
     Roku,
