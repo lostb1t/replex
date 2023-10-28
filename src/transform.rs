@@ -768,7 +768,7 @@ impl Transform for CollectionStyleTransform {
 
             let mut style = ClientHeroStyle::from_context(options.clone());
 
-            // item.meta = Some(hero_meta());
+            item.meta = Some(hero_meta());
 
             let mut futures = FuturesOrdered::new();
             for mut child in item.children() {
