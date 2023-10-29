@@ -1279,7 +1279,7 @@ impl MetaData {
                 Ok(r) => r,
                 Err(e) => {
                     tracing::warn!(
-                        "Problem loading prodiver metadata for: {} Error: {}",
+                        "Problem loading provider metadata for: {} Error: {}",
                         self.guid.clone().unwrap(),
                         e
                     );

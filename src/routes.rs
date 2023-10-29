@@ -123,7 +123,7 @@ pub fn route() -> Router {
         //subtitles_router = subtitles_router.hoop(video_transcode_fallback);
     }
 
-    //decision_router = decision_router.hoop(direct_stream_fallback);
+    decision_router = decision_router.hoop(direct_stream_fallback);
 
     router = router
         .push(decision_router)
@@ -780,6 +780,11 @@ async fn force_maximum_quality(req: &mut Request) -> Result<(), anyhow::Error> {
     let plex_client = PlexClient::from_request(req, params.clone());
     let config: Config = Config::figment().extract().unwrap();
     let mut queries = req.queries().clone();
+
+    if queries.get("maxVideoBitrate").is_none() && queries.get("videoBitrate").is_none() {
+        return Ok(())
+    }
+
     queries.remove("maxVideoBitrate");
     queries.remove("videoBitrate");
     queries.remove("autoAdjustQuality");
@@ -790,6 +795,7 @@ async fn force_maximum_quality(req: &mut Request) -> Result<(), anyhow::Error> {
     queries.insert("directPlay".to_string(), "1".to_string());
     queries.remove("videoQuality");
     queries.insert("videoQuality".to_string(), "100".to_string());
+    // queries.insert("directStreamAudio".to_string(), "0".to_string());
     //queries.remove("videoResolution");
     //queries.insert("videoResolution".to_string(), "4096x2160".to_string());
 
@@ -1236,10 +1242,7 @@ async fn auto_select_version(req: &mut Request) {
 
                 queries.remove("subtitles");
                 queries.insert("subtitles".to_string(), "auto".to_string());
-                // if index != 0 {
-                //     queries.remove("directPlay");
-                //     queries.insert("directPlay".to_string(), "0".to_string());
-                // }
+
             }
         }
     }

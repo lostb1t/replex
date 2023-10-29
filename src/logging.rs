@@ -40,7 +40,6 @@ impl Handler for Logger {
             let now = Instant::now();
             ctrl.call_next(req, depot, res).await;
             let duration = now.elapsed();
-
             let status = res.status_code.unwrap_or(StatusCode::OK);
             tracing::debug!(
                 status = %status,
