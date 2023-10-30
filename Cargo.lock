@@ -3297,6 +3297,8 @@ dependencies = [
 [[package]]
 name = "salvo-proxy"
 version = "0.58.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "29d90e485a13ecb0f0f4b27db0888d96b3899b3c6718c268a9350667e921577e"
 dependencies = [
  "fastrand 2.0.0",
  "futures-util",
@@ -3331,6 +3333,8 @@ dependencies = [
 [[package]]
 name = "salvo_core"
 version = "0.58.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "661eabf006e4b5dde529a7a31dd875f82b9505d64ac82a517538729d9110941a"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3405,6 +3409,8 @@ dependencies = [
 [[package]]
 name = "salvo_macros"
 version = "0.58.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b9d3886e7c3e07d17664800b7aa0015839759e231c29069dc101f7e351531bd1"
 dependencies = [
  "cruet",
  "proc-macro-crate",

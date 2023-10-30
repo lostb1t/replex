@@ -104,6 +104,12 @@ pub struct Resolution {
     pub width: i64,
 }
 
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+pub struct PlexContextProduct { 
+    #[serde(default, rename(deserialize = "x-plex-product"))]
+    pub product: Option<String>,
+}
+
 #[derive(Serialize, Deserialize, Debug, Extractible, Default, Clone)]
 #[salvo(extract(
     default_source(from = "query"),
