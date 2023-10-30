@@ -54,8 +54,10 @@ pub enum Expiration {
     Never,
     /// Global TTL from the config
     Global,
-    /// Expires after a mint
+    /// Expires after a month
     Month,
+    /// Expires after a day
+    Day,
 }
 
 impl Expiration {
@@ -66,6 +68,7 @@ impl Expiration {
             Expiration::Never => None,
             Expiration::Global => Some(Duration::from_secs(config.cache_ttl)),
             Expiration::Month => Some(Duration::from_secs(30 * 24 * 60 * 60)),
+            Expiration::Day => Some(Duration::from_secs(60 * 60 * 24)),
         }
     }
 }

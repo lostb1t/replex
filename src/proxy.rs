@@ -77,7 +77,6 @@ where
         res: &mut salvo::Response,
         ctrl: &mut FlowCtrl,
     ) {
-        // let mut reqq = RequestBuilder::new(req.uri_mut().to_string(), req.method_mut().clone()).build();
         self.inner.handle(req, depot, res, ctrl).await;
     }
 }
