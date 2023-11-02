@@ -28,23 +28,19 @@ pub fn route() -> Router {
     let guid = regex::Regex::new(":").unwrap();
     PathFilter::register_wisp_regex("colon", guid);
 
-    let proxy = Proxy::with_client(
-        config.host.clone().unwrap(),
-        reqwest::Client::builder()
-            .timeout(Duration::from_secs(60 * 200))
-            .build()
-            .unwrap(),
-    );
+    // let proxy = Proxy::with_client(
+    //     config.host.clone().unwrap(),
+    //     reqwest::Client::builder()
+    //         .timeout(Duration::from_secs(60 * 200))
+    //         .build()
+    //         .unwrap(),
+    // );
 
     let mut router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
         .hoop(should_skip)
         .hoop(Timeout::new(Duration::from_secs(60 * 200)))
-        .hoop(Compression::new().enable_gzip(CompressionLevel::Fastest))
-        //.hoop(max_concurrency(300))
-        // .hoop(affix::inject(Arc::new(proxy.clone())));
-        // .hoop(affix::insert("proxy", Arc::new(proxy.clone())));
-        .hoop(affix::insert("proxy", proxy.clone()));
+        .hoop(Compression::new().enable_gzip(CompressionLevel::Fastest));
     // .hoop(affix::insert("script_engine", Arc::new(script_engine)));
 
     if config.redirect_streams {
@@ -79,7 +75,7 @@ pub fn route() -> Router {
                 Router::new()
                     .path("/library/metadata/<id>/related")
                     .hoop(Timeout::new(Duration::from_secs(5)))
-                    .goal(proxy.clone()),
+                    .goal(proxy_request),
             )
             // .push(
             //     Router::with_path("/library/metadata/<id>")
@@ -89,21 +85,21 @@ pub fn route() -> Router {
             .push(
                 Router::with_path("/playQueues")
                     .hoop(disable_related_query)
-                    .goal(proxy.clone()),
+                    .goal(proxy_request),
             );
     }
 
     let mut decision_router = Router::new()
         .path("/video/<colon:colon>/transcode/universal/decision")
-        .goal(proxy.clone());
+        .goal(proxy_request);
 
     let mut start_router = Router::new()
         .path("/video/<colon:colon>/transcode/universal/start<**rest>")
-        .goal(proxy.clone());
+        .goal(proxy_request);
 
     let mut subtitles_router = Router::new()
         .path("/video/<colon:colon>/transcode/universal/subtitles")
-        .goal(proxy.clone());
+        .goal(proxy_request);
 
     // should go before force_maximum_quality and video_transcode_fallback
     if config.auto_select_version {
@@ -182,12 +178,33 @@ pub fn route() -> Router {
         .push(
             Router::with_path("/photo/<colon:colon>/transcode")
                 .hoop(fix_photo_transcode_request)
-                .goal(proxy.clone()),
+                .goal(proxy_request),
         )
-        .push(Router::with_path("<**rest>").goal(proxy.clone()));
+        .push(Router::with_path("<**rest>").goal(proxy_request));
 
     router
 }
+
+#[handler]
+async fn proxy_request(
+    req: &mut Request,
+    res: &mut Response,
+    depot: &mut Depot,
+    ctrl: &mut FlowCtrl,
+) {
+    let config: Config = Config::dynamic(req).extract().unwrap();
+    let proxy = Proxy::with_client(
+        config.host.clone().unwrap(),
+        reqwest::Client::builder()
+            .timeout(Duration::from_secs(60 * 200))
+            .build()
+            .unwrap(),
+    );
+
+    proxy.handle(req, depot, res, ctrl).await;
+}
+
+
 
 #[handler]
 async fn should_skip(
@@ -212,7 +229,7 @@ async fn should_skip(
         && product.clone().unwrap().to_lowercase() == "plexamp"
     {
 
-        let config: Config = Config::figment().extract().unwrap();
+        let config: Config = Config::dynamic(req).extract().unwrap();
         let proxy = Proxy::with_client(
             config.host.clone().unwrap(),
             reqwest::Client::builder()
@@ -232,7 +249,7 @@ async fn redirect_stream(
     _depot: &mut Depot,
     res: &mut Response,
 ) {
-    let config: Config = Config::figment().extract().unwrap();
+    let config: Config = Config::dynamic(req).extract().unwrap();
     let redirect_url = if config.redirect_streams_host.clone().is_some() {
         format!(
             "{}{}",
@@ -312,7 +329,7 @@ pub async fn direct_stream_fallback(
     req: &mut Request,
     res: &mut Response,
 ) -> Result<(), anyhow::Error> {
-    let config: Config = Config::figment().extract().unwrap();
+    let config: Config = Config::dynamic(req).extract().unwrap();
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let mut queries = req.queries().clone();
@@ -372,7 +389,7 @@ pub async fn transform_hubs_home(
     req: &mut Request,
     res: &mut Response,
 ) -> Result<(), anyhow::Error> {
-    let config: Config = Config::figment().extract().unwrap();
+    let config: Config = Config::dynamic(req).extract().unwrap();
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let content_type = get_content_type_from_headers(req.headers_mut());
@@ -465,7 +482,7 @@ pub async fn get_hubs_sections(
     req: &mut Request,
     res: &mut Response,
 ) -> Result<(), anyhow::Error> {
-    let config: Config = Config::figment().extract().unwrap();
+    let config: Config = Config::dynamic(req).extract().unwrap();
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let content_type = get_content_type_from_headers(req.headers_mut());
@@ -531,7 +548,7 @@ pub async fn get_collections_children(
     _depot: &mut Depot,
     res: &mut Response,
 ) -> Result<(), anyhow::Error> {
-    let config: Config = Config::figment().extract().unwrap();
+    let config: Config = Config::dynamic(req).extract().unwrap();
     let params: PlexContext = req.extract().await.unwrap();
     let collection_ids = req.param::<String>("ids").unwrap();
     let collection_ids: Vec<u32> = collection_ids
@@ -589,7 +606,7 @@ pub async fn default_transform(
     _depot: &mut Depot,
     res: &mut Response,
 ) -> Result<(), anyhow::Error> {
-    let config: Config = Config::figment().extract().unwrap();
+    let config: Config = Config::dynamic(req).extract().unwrap();
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let content_type = get_content_type_from_headers(req.headers_mut());
@@ -638,7 +655,7 @@ pub async fn default_transform(
 
 #[handler]
 pub async fn get_library_item_metadata(req: &mut Request, res: &mut Response) {
-    let config: Config = Config::figment().extract().unwrap();
+    let config: Config = Config::dynamic(req).extract().unwrap();
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let content_type = get_content_type_from_headers(req.headers_mut());
@@ -673,7 +690,7 @@ pub async fn get_library_item_metadata(req: &mut Request, res: &mut Response) {
 
 #[handler]
 pub async fn get_play_queues(req: &mut Request, res: &mut Response) {
-    let config: Config = Config::figment().extract().unwrap();
+    let config: Config = Config::dynamic(req).extract().unwrap();
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let content_type = get_content_type_from_headers(req.headers_mut());
@@ -786,7 +803,7 @@ pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
 async fn force_maximum_quality(req: &mut Request) -> Result<(), anyhow::Error> {
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
-    let config: Config = Config::figment().extract().unwrap();
+    let config: Config = Config::dynamic(req).extract().unwrap();
     let mut queries = req.queries().clone();
 
     if queries.get("maxVideoBitrate").is_none() && queries.get("videoBitrate").is_none() {
@@ -990,7 +1007,7 @@ async fn video_transcode_fallback(
 ) -> Result<(), anyhow::Error> {
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
-    let config: Config = Config::figment().extract().unwrap();
+    let config: Config = Config::dynamic(req).extract().unwrap();
     let mut queries = req.queries().clone();
     let mut original_queries = req.queries().clone();
     let media_index: usize = if (req.queries().get("mediaIndex").is_none()

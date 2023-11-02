@@ -355,7 +355,9 @@ impl PlexClient {
     }
 
     pub fn from_request(req: &Request, params: PlexContext) -> Self {
-        let config: Config = Config::figment().extract().unwrap();
+        // dbg!(&req);
+        //let config: Config = Config::figment().extract().unwrap();
+        let config: Config = Config::dynamic(req).extract().unwrap();
         let token = params
             .clone()
             .token

@@ -60,7 +60,7 @@ checksum = "2c99f64d1e06488f620f932677e24bc6e2897582980441ae90a671415bd7ec2f"
 dependencies = [
  "cfg-if",
  "const-random",
- "getrandom 0.2.10",
+ "getrandom",
  "once_cell",
  "version_check",
 ]
@@ -467,12 +467,6 @@ dependencies = [
 
 [[package]]
 name = "base64"
-version = "0.12.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3441f0f7b02788e948e47f457ca01f1d7e6d92c693bc132c22b087d3141c03ff"
-
-[[package]]
-name = "base64"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9e1b586273c5702936fe7b7d6896644d8be71e6314cfe09d3167c95f712589e8"
@@ -735,7 +729,7 @@ version = "0.1.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9d7d6ab3c3a2282db210df5f02c4dab6e0a7057af0fb7ebd4070f30fe05c0ddb"
 dependencies = [
- "getrandom 0.2.10",
+ "getrandom",
  "once_cell",
  "proc-macro-hack",
  "tiny-keccak",
@@ -757,7 +751,7 @@ dependencies = [
  "base64 0.21.5",
  "hmac",
  "percent-encoding",
- "rand 0.8.5",
+ "rand",
  "sha2",
  "subtle",
  "time",
@@ -853,7 +847,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1bfb12502f3fc46cca1bb51ac28df9d618d813cdc3d2f25b9fe775a34af26bb3"
 dependencies = [
  "generic-array",
- "rand_core 0.6.4",
+ "rand_core",
  "typenum",
 ]
 
@@ -1328,24 +1322,13 @@ dependencies = [
 
 [[package]]
 name = "getrandom"
-version = "0.1.16"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fc3cb4d91f53b50155bdcfd23f6a4c39ae1969c2ae85982b135750cccaf5fce"
-dependencies = [
- "cfg-if",
- "libc",
- "wasi 0.9.0+wasi-snapshot-preview1",
-]
-
-[[package]]
-name = "getrandom"
 version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be4136b2a15dd319360be1c07d9933517ccf0be8f16bf62a3bee4f0d618df427"
 dependencies = [
  "cfg-if",
  "libc",
- "wasi 0.11.0+wasi-snapshot-preview1",
+ "wasi",
 ]
 
 [[package]]
@@ -2033,7 +2016,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "927a765cd3fc26206e66b296465fa9d3e5ab003e651c1b3c060e7956d96b19d2"
 dependencies = [
  "libc",
- "wasi 0.11.0+wasi-snapshot-preview1",
+ "wasi",
  "windows-sys",
 ]
 
@@ -2416,7 +2399,7 @@ dependencies = [
  "once_cell",
  "opentelemetry_api 0.19.0",
  "percent-encoding",
- "rand 0.8.5",
+ "rand",
  "thiserror",
  "tokio",
  "tokio-stream",
@@ -2437,7 +2420,7 @@ dependencies = [
  "opentelemetry_api 0.20.0",
  "ordered-float",
  "percent-encoding",
- "rand 0.8.5",
+ "rand",
  "regex",
  "thiserror",
 ]
@@ -2733,7 +2716,7 @@ dependencies = [
  "mach2",
  "once_cell",
  "raw-cpuid",
- "wasi 0.11.0+wasi-snapshot-preview1",
+ "wasi",
  "web-sys",
  "winapi",
 ]
@@ -2749,36 +2732,13 @@ dependencies = [
 
 [[package]]
 name = "rand"
-version = "0.7.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a6b1679d49b24bbfe0c803429aa1874472f50d9b363131f0e89fc356b544d03"
-dependencies = [
- "getrandom 0.1.16",
- "libc",
- "rand_chacha 0.2.2",
- "rand_core 0.5.1",
- "rand_hc",
-]
-
-[[package]]
-name = "rand"
 version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "34af8d1a0e25924bc5b7c43c079c942339d8f0a8b57c39049bef581b46327404"
 dependencies = [
  "libc",
- "rand_chacha 0.3.1",
- "rand_core 0.6.4",
-]
-
-[[package]]
-name = "rand_chacha"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f4c8ed856279c9737206bf725bf36935d8666ead7aa69b52be55af369d193402"
-dependencies = [
- "ppv-lite86",
- "rand_core 0.5.1",
+ "rand_chacha",
+ "rand_core",
 ]
 
 [[package]]
@@ -2788,16 +2748,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e6c10a63a0fa32252be49d21e7709d4d4baf8d231c2dbce1eaa8141b9b127d88"
 dependencies = [
  "ppv-lite86",
- "rand_core 0.6.4",
-]
-
-[[package]]
-name = "rand_core"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90bde5296fc891b0cef12a6d03ddccc162ce7b2aff54160af9338f8d40df6d19"
-dependencies = [
- "getrandom 0.1.16",
+ "rand_core",
 ]
 
 [[package]]
@@ -2806,16 +2757,7 @@ version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
- "getrandom 0.2.10",
-]
-
-[[package]]
-name = "rand_hc"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca3129af7b92a17112d59ad498c6f81eaf463253766b90396d39ea7a39d6613c"
-dependencies = [
- "rand_core 0.5.1",
+ "getrandom",
 ]
 
 [[package]]
@@ -2863,7 +2805,7 @@ version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b033d837a7cf162d7993aded9304e30a83213c648b6e389db233191f891e5c2b"
 dependencies = [
- "getrandom 0.2.10",
+ "getrandom",
  "redox_syscall 0.2.16",
  "thiserror",
 ]
@@ -2927,6 +2869,7 @@ dependencies = [
  "async-std",
  "async-trait",
  "axum-test-helper",
+ "base64 0.21.5",
  "bincode",
  "bytes",
  "console-subscriber",
@@ -3072,7 +3015,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9babe80d5c16becf6594aa32ad2be8fe08498e7ae60b77de8df700e67f191d7e"
 dependencies = [
  "cc",
- "getrandom 0.2.10",
+ "getrandom",
  "libc",
  "spin 0.9.8",
  "untrusted 0.9.0",
@@ -3229,8 +3172,7 @@ checksum = "1ad4cc8da4ef723ed60bced201181d83791ad433213d8c24efffda1eec85d741"
 [[package]]
 name = "salvo"
 version = "0.58.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0206b25c533ed47049843951c74e884a005dcfe057b3af783059d9ae0e40d0f"
+source = "git+https://github.com/salvo-rs/salvo.git#05c907e0787f18e50f41dce5df4babc229f30c9b"
 dependencies = [
  "salvo-cache",
  "salvo-compression",
@@ -3244,8 +3186,7 @@ dependencies = [
 [[package]]
 name = "salvo-cache"
 version = "0.58.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d5b91f0f513442dac3ea0e1c64e84f0fc27fc464f2f5971009f64e5d7b77719"
+source = "git+https://github.com/salvo-rs/salvo.git#05c907e0787f18e50f41dce5df4babc229f30c9b"
 dependencies = [
  "bytes",
  "moka 0.12.1",
@@ -3256,8 +3197,7 @@ dependencies = [
 [[package]]
 name = "salvo-compression"
 version = "0.58.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26f3a40c0d9afe4582536a8c3af8cf4e1924408d11495c46688611ba3b6b2c3c"
+source = "git+https://github.com/salvo-rs/salvo.git#05c907e0787f18e50f41dce5df4babc229f30c9b"
 dependencies = [
  "brotli",
  "bytes",
@@ -3274,8 +3214,7 @@ dependencies = [
 [[package]]
 name = "salvo-cors"
 version = "0.58.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dfb22893312d2d456a9c8cf0dacddd66b8237ca52ebfbf0815dc102f8d7c937b"
+source = "git+https://github.com/salvo-rs/salvo.git#05c907e0787f18e50f41dce5df4babc229f30c9b"
 dependencies = [
  "bytes",
  "salvo_core",
@@ -3285,8 +3224,7 @@ dependencies = [
 [[package]]
 name = "salvo-otel"
 version = "0.58.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "218fd04f86f9ba0d5c9662cdcff008d8011a3f68ad9e6897eabfb77ed687d184"
+source = "git+https://github.com/salvo-rs/salvo.git#05c907e0787f18e50f41dce5df4babc229f30c9b"
 dependencies = [
  "opentelemetry 0.20.0",
  "opentelemetry-http 0.9.0",
@@ -3297,8 +3235,7 @@ dependencies = [
 [[package]]
 name = "salvo-proxy"
 version = "0.58.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "29d90e485a13ecb0f0f4b27db0888d96b3899b3c6718c268a9350667e921577e"
+source = "git+https://github.com/salvo-rs/salvo.git#05c907e0787f18e50f41dce5df4babc229f30c9b"
 dependencies = [
  "fastrand 2.0.0",
  "futures-util",
@@ -3333,8 +3270,7 @@ dependencies = [
 [[package]]
 name = "salvo_core"
 version = "0.58.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "661eabf006e4b5dde529a7a31dd875f82b9505d64ac82a517538729d9110941a"
+source = "git+https://github.com/salvo-rs/salvo.git#05c907e0787f18e50f41dce5df4babc229f30c9b"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3362,6 +3298,7 @@ dependencies = [
  "parking_lot",
  "percent-encoding",
  "pin-project",
+ "rand",
  "rcgen",
  "regex",
  "reqwest",
@@ -3375,7 +3312,6 @@ dependencies = [
  "serde_urlencoded",
  "sync_wrapper",
  "tempfile",
- "textnonce",
  "thiserror",
  "tokio",
  "tokio-rustls 0.24.1",
@@ -3389,8 +3325,7 @@ dependencies = [
 [[package]]
 name = "salvo_extra"
 version = "0.58.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "783da9bd48e8ac99b2c389f8986ac312498ee38e90597e027f40a1f5928af746"
+source = "git+https://github.com/salvo-rs/salvo.git#05c907e0787f18e50f41dce5df4babc229f30c9b"
 dependencies = [
  "base64 0.21.5",
  "etag",
@@ -3409,8 +3344,7 @@ dependencies = [
 [[package]]
 name = "salvo_macros"
 version = "0.58.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9d3886e7c3e07d17664800b7aa0015839759e231c29069dc101f7e351531bd1"
+source = "git+https://github.com/salvo-rs/salvo.git#05c907e0787f18e50f41dce5df4babc229f30c9b"
 dependencies = [
  "cruet",
  "proc-macro-crate",
@@ -3897,16 +3831,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "textnonce"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7743f8d70cd784ed1dc33106a18998d77758d281dc40dc3e6d050cf0f5286683"
-dependencies = [
- "base64 0.12.3",
- "rand 0.7.3",
-]
-
-[[package]]
 name = "thiserror"
 version = "1.0.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4200,7 +4124,7 @@ dependencies = [
  "indexmap 1.9.3",
  "pin-project",
  "pin-project-lite",
- "rand 0.8.5",
+ "rand",
  "slab",
  "tokio",
  "tokio-util",
@@ -4329,7 +4253,7 @@ dependencies = [
  "byteorder",
  "bytes",
  "log",
- "rand 0.8.5",
+ "rand",
  "thiserror",
  "utf-8",
 ]
@@ -4346,7 +4270,7 @@ version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7e37c4b6cbcc59a8dcd09a6429fbc7890286bcbb79215cea7b38a3c4c0921d93"
 dependencies = [
- "rand 0.8.5",
+ "rand",
 ]
 
 [[package]]
@@ -4451,7 +4375,7 @@ version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "79daa5ed5740825c40b389c5e50312b9c86df53fccd33f281df655642b43869d"
 dependencies = [
- "getrandom 0.2.10",
+ "getrandom",
 ]
 
 [[package]]
@@ -4502,12 +4426,6 @@ checksum = "bfa7760aed19e106de2c7c0b581b509f2f25d3dacaf737cb82ac61bc6d760b0e"
 dependencies = [
  "try-lock",
 ]
-
-[[package]]
-name = "wasi"
-version = "0.9.0+wasi-snapshot-preview1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cccddf32554fecc6acb585f82a32a72e28b48f8c4c1883ddfeeeaa96f7d8e519"
 
 [[package]]
 name = "wasi"

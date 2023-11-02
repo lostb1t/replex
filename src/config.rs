@@ -1,6 +1,6 @@
 use crate::models::deserialize_comma_seperated_string;
-use serde::{Deserialize, Deserializer, Serialize};
 use figment::{providers::Env, Figment};
+use serde::{Deserialize, Deserializer, Serialize};
 // use serde::Deserialize;
 
 fn default_as_false() -> bool {
@@ -9,9 +9,7 @@ fn default_as_false() -> bool {
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub struct Config {
-    #[serde(
-        deserialize_with = "deserialize_host"
-    )]
+    #[serde(deserialize_with = "deserialize_host")]
     pub host: Option<String>,
     pub port: Option<u64>,
     #[serde(
@@ -31,10 +29,7 @@ pub struct Config {
         deserialize_with = "figment::util::bool_from_str_or_int"
     )]
     pub cache_rows_refresh: bool,
-    #[serde(
-        default,
-        deserialize_with = "deserialize_comma_seperated_string"
-    )]
+    #[serde(default, deserialize_with = "deserialize_comma_seperated_string")]
     pub hero_rows: Option<Vec<String>>,
     #[serde(
         default = "default_as_false",
@@ -89,15 +84,9 @@ pub struct Config {
         deserialize_with = "figment::util::bool_from_str_or_int"
     )]
     pub auto_select_version: bool,
-    #[serde(
-        default,
-        deserialize_with = "deserialize_comma_seperated_string"
-    )]
+    #[serde(default, deserialize_with = "deserialize_comma_seperated_string")]
     pub video_transcode_fallback_for: Option<Vec<String>>,
-    #[serde(
-        default,
-        deserialize_with = "deserialize_comma_seperated_string"
-    )]
+    #[serde(default, deserialize_with = "deserialize_comma_seperated_string")]
     pub force_direct_play_for: Option<Vec<String>>,
     pub test_script: Option<String>,
 }
@@ -106,22 +95,22 @@ fn default_cache_ttl() -> u64 {
     30 * 60 // 30 minutes
 }
 
-
 pub(crate) fn deserialize_host<'de, D>(
     deserializer: D,
 ) -> Result<Option<String>, D::Error>
 where
     D: Deserializer<'de>,
-{   
+{
     match Deserialize::deserialize(deserializer)? {
         Some::<String>(mut s) => {
-            if s.ends_with('/') { s.pop(); }
+            if s.ends_with('/') {
+                s.pop();
+            }
             Ok(Some(s))
         }
         None => Ok(None),
     }
 }
-
 
 fn default_as_true() -> bool {
     true
@@ -131,12 +120,27 @@ fn deserialize_hosr() -> bool {
     true
 }
 
-
 impl Config {
     // Note the `nested` option on both `file` providers. This makes each
     // top-level dictionary act as a profile.
     pub fn figment() -> Figment {
         Figment::new().merge(Env::prefixed("REPLEX_"))
+    }
+
+    pub fn dynamic(req: &salvo::Request) -> Figment {
+        // dbg!(&req);
+        use base64::{Engine as _, alphabet, engine::{self, general_purpose}};
+        let host = req.headers().get("HOST").unwrap().to_str().unwrap();
+        let mut config = Config::figment();
+        if host.contains("replex.stream") {
+            let val: Vec<&str> = host.split(".replex.stream").collect();
+            // let mut decoded_host: String = String::new();
+            let decoded_host = general_purpose::STANDARD
+            .decode(val[0]).unwrap();
+            config = config.join(("host", std::str::from_utf8(&decoded_host).unwrap()));
+        }
+        config
+        // Figment::new().merge(Env::prefixed("REPLEX_"))
     }
     // pub fn default() -> Self {
     //     Config { include_watched: false}

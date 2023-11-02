@@ -11,6 +11,8 @@ use salvo::{
 };
 use tokio::net::{TcpListener, TcpStream};
 
+use crate::config::Config;
+
 type HyperRequest = hyper::Request<ReqBody>;
 type HyperResponse = hyper::Response<ResBody>;
 
@@ -72,11 +74,16 @@ where
     #[inline]
     async fn handle(
         &self,
-        req: &mut salvo::Request,
+        mut req: &mut salvo::Request,
         depot: &mut Depot,
         res: &mut salvo::Response,
         ctrl: &mut FlowCtrl,
     ) {
+        // req.he
+        //bit of a hack
+        // let config: Config = Config::dynamic(req).extract().unwrap();
+        // req = req.add_header("HOST", config.host.unwrap(), true).unwrap();
+        // self.ups
         self.inner.handle(req, depot, res, ctrl).await;
     }
 }
