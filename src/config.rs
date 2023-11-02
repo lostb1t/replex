@@ -129,15 +129,27 @@ impl Config {
 
     pub fn dynamic(req: &salvo::Request) -> Figment {
         // dbg!(&req);
-        use base64::{Engine as _, alphabet, engine::{self, general_purpose}};
+        // use base64::{Engine as _, alphabet, engine::{self, general_purpose}};
+        // use base32::{decode, CrockfordBase32};
+        // use crockford::decode;
         let host = req.headers().get("HOST").unwrap().to_str().unwrap();
         let mut config = Config::figment();
         if host.contains("replex.stream") {
+            use data_encoding::BASE32;
             let val: Vec<&str> = host.split(".replex.stream").collect();
+            let owned_val = val[0].to_ascii_uppercase().to_owned();
+            // dbg!(&val);
             // let mut decoded_host: String = String::new();
-            let decoded_host = general_purpose::STANDARD
-            .decode(val[0]).unwrap();
+            // let decoded_host = general_purpose::STANDARD
+            // .decode(val[0]).unwrap();
+            // let decoded_host = decode(CrockfordBase32, &owned_val[..]);
+            // let decoded_host: String = crockford::decode(val[0].to_uppercase()).unwrap().to_string();
+            let mut output = vec![0; BASE32.decode_len(owned_val.len()).unwrap()];
+            let len = BASE32.decode_mut(owned_val.as_bytes(), &mut output).unwrap();
+            // dbg!(std::str::from_utf8(&output[0 .. len]).unwrap());
             config = config.join(("host", std::str::from_utf8(&decoded_host).unwrap()));
+            // config = config.join(("host", decoded_host));
+            
         }
         config
         // Figment::new().merge(Env::prefixed("REPLEX_"))

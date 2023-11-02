@@ -23,17 +23,17 @@ Remix your plex recommendations.
 
 ## Test server
 
-There is a test server available, you can use it by base64 encoding your plex url and put it in front of replex.stream as a subdomain.
+There is a test server available, you can use it by base32 encoding your plex url and put it in front of replex.stream as a subdomain.
 
 Example:
 
-http://56.29.34.34:32400 -> aHR0cDovLzU2LjI5LjM0LjM0OjMyNDAwIA==
-your test url would be: https://aHR0cDovLzU2LjI5LjM0LjM0OjMyNDAwIA==.replex.stream
+http://56.29.34.34:32400 -> NB2HI4B2F4XTKNROGI4S4MZUFYZTIORTGI2DAMA=
+your test url would be: https://NB2HI4B2F4XTKNROGI4S4MZUFYZTIORTGI2DAMA=.replex.stream
 
 Add the url to the "Custom server access URLs" in plex under network and disable remote access.
 Continue with [Mixed Rows](#mixed-rows) to continue setting up.
 
-Base64 online encoding tool: https://emn178.github.io/online-tools/base64_encode.html
+Base32 online encoding tool: https://emn178.github.io/online-tools/base32_encode.html
 
 ## Installation
 
