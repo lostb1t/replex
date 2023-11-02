@@ -21,6 +21,18 @@ Remix your plex recommendations.
 
 !!This does not alter your plex data in anyway. it only alters outgoing api requests. All your collections or rows are kept intact!!
 
+## Test server
+
+There is a test server available, you can use it by base64 encoding your plex url and put it in front of replex.stream as a subdomain.
+
+Example:
+
+http://56.29.34.34:32400 -> aHR0cDovLzU2LjI5LjM0LjM0OjMyNDAwIA==
+your test url would be: https://aHR0cDovLzU2LjI5LjM0LjM0OjMyNDAwIA==.replex.stream
+
+Add the url to the "Custom server access URLs" in plex under network and disable remote access.
+
+Base64 online encoding tool: https://emn178.github.io/online-tools/base64_encode.html
 
 ## Installation
 
