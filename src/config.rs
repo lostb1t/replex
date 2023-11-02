@@ -146,8 +146,8 @@ impl Config {
             // let decoded_host: String = crockford::decode(val[0].to_uppercase()).unwrap().to_string();
             let mut output = vec![0; BASE32.decode_len(owned_val.len()).unwrap()];
             let len = BASE32.decode_mut(owned_val.as_bytes(), &mut output).unwrap();
-            // dbg!(std::str::from_utf8(&output[0 .. len]).unwrap());
-            config = config.join(("host", std::str::from_utf8(&decoded_host).unwrap()));
+            dbg!(std::str::from_utf8(&output[0 .. len]).unwrap());
+            config = config.join(("host", std::str::from_utf8(&output[0 .. len]).unwrap()));
             // config = config.join(("host", decoded_host));
             
         }

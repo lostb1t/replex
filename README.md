@@ -23,7 +23,7 @@ Remix your plex recommendations.
 
 ## Test server
 
-There is a test server available, you can use it by base32 encoding your plex url and put it in front of replex.stream as a subdomain.
+There is a Replex test server available, you can use it by base32 encoding your plex url and put it in front of replex.stream as a subdomain.
 
 Example:
 
