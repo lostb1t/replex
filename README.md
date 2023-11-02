@@ -31,6 +31,7 @@ http://56.29.34.34:32400 -> aHR0cDovLzU2LjI5LjM0LjM0OjMyNDAwIA==
 your test url would be: https://aHR0cDovLzU2LjI5LjM0LjM0OjMyNDAwIA==.replex.stream
 
 Add the url to the "Custom server access URLs" in plex under network and disable remote access.
+Continue with [Mixed Rows](#mixed-rows) to continue setting up.
 
 Base64 online encoding tool: https://emn178.github.io/online-tools/base64_encode.html
 
