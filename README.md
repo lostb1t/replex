@@ -28,10 +28,11 @@ There is a Replex test server available, you can use it by base32 encoding your 
 Example:
 
 http://56.29.34.34:32400 -> NB2HI4B2F4XTKNROGI4S4MZUFYZTIORTGI2DAMA=
-your test url would be: https://NB2HI4B2F4XTKNROGI4S4MZUFYZTIORTGI2DAMA=.replex.stream
+
+Your test url would be: https://NB2HI4B2F4XTKNROGI4S4MZUFYZTIORTGI2DAMA=.replex.stream
 
 Add the url to the "Custom server access URLs" in plex under network and disable remote access.
-Continue with [Mixed Rows](#mixed-rows) to continue setting up.
+Continue with [Mixed Rows](#mixed-rows) to continue setting up custom collections.
 
 Base32 online encoding tool: https://emn178.github.io/online-tools/base32_encode.html
 
