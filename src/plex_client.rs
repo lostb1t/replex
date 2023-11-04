@@ -9,11 +9,12 @@ use anyhow::Result;
 use async_recursion::async_recursion;
 use futures_util::Future;
 use futures_util::TryStreamExt;
-use http::Uri;
 use http::header::ACCEPT_LANGUAGE;
 use http::header::CONNECTION;
 use http::header::COOKIE;
 use http::header::FORWARDED;
+use http::HeaderMap;
+use http::Uri;
 // use hyper::client::HttpConnector;
 // use hyper::Body;
 use hyper::body::Body;
@@ -32,6 +33,7 @@ use salvo::Response;
 // use hyper::client::HttpConnector;
 
 use salvo::http::ResBody;
+use url::Url;
 
 static CACHE: Lazy<Cache<String, MediaContainerWrapper<MediaContainer>>> =
     Lazy::new(|| {
@@ -77,10 +79,8 @@ impl PlexClient {
     pub async fn get(&self, path: String) -> Result<reqwest::Response, Error> {
         let mut req = Request::default();
         *req.method_mut() = http::Method::GET;
-        req.set_uri(Uri::builder()
-            .path_and_query(path).build().unwrap());
-        self.request(&mut req).await        
-
+        req.set_uri(Uri::builder().path_and_query(path).build().unwrap());
+        self.request(&mut req).await
     }
 
     pub async fn request(
@@ -95,13 +95,11 @@ impl PlexClient {
         let mut headers = req.headers_mut().to_owned();
         let target_uri: url::Url = url::Url::parse(self.host.as_str()).unwrap();
         let target_host = target_uri.host().unwrap().to_string().clone();
-    
+
         headers.remove(ACCEPT); // remove accept as we always do json request
         headers.insert(
             http::header::HOST,
-            header::HeaderValue::from_str(
-                &target_host,
-            ).unwrap(),
+            header::HeaderValue::from_str(&target_host).unwrap(),
         );
 
         // let i = "47.250.115.151".to_string();
@@ -309,21 +307,51 @@ impl PlexClient {
         self,
         guid: String,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
-        let uri = format!(
+        let url = format!(
             "https://metadata.provider.plex.tv/library/metadata/{}",
             guid
         );
-        let res = self
-            .http_client
-            .get(uri)
-            .send()
-            .await
-            .map_err(Error::other)?;
 
-        // dbg!(res.status());
-        // if res.status() == 404 {
-        //     return Err(salvo::http::StatusError::not_found().into());
-        // }
+        // let wut = reqwest::RequestBuilder::new(http::Method::GET);
+
+        let mut req = reqwest::Request::new(
+            http::Method::GET,
+            url.parse::<url::Url>().unwrap(),
+        );
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            "X-Plex-Token",
+            header::HeaderValue::from_str(self.x_plex_token.clone().as_str())
+                .unwrap(),
+        );
+        headers.insert(
+            "Accept",
+            header::HeaderValue::from_static("application/json"),
+        );
+        // req.add_header("X-Plex-Token", self.x_plex_token.clone().as_str(), true);
+        // *req.method_mut() = http::Method::GET;
+        // req.set_uri(uri.try_into().unwrap());
+        *req.headers_mut() = headers;
+
+        let res = Client::new().execute(req).await.map_err(Error::other)?;
+        // headers.insert(
+        //     "X-Plex-Token",
+        //     header::HeaderValue::from_str(self.x_plex_token.clone().as_str()).unwrap(),
+        // );
+
+        // let res = self
+        //     .http_client
+        //     .get(uri)
+        //     .send()
+        //     .await
+        //     .map_err(Error::other)?;
+
+        if res.status() != salvo::http::StatusCode::OK {
+            return Err(anyhow::anyhow!(format!(
+                "unexpected status code: status = {}",
+                res.status()
+            )));
+        }
 
         // if res.status() == 500 {
         //     return Err(salvo::http::StatusError::);
@@ -402,7 +430,6 @@ impl PlexClient {
                 header::HeaderValue::from_str(i.as_str()).unwrap(),
             );
         };
-
 
         if let Some(i) = params.clone().forwarded_port.clone() {
             headers.insert(
@@ -539,24 +566,15 @@ impl PlexClient {
         }
 
         if let Some(i) = req_headers.get(COOKIE) {
-            headers.insert(
-                COOKIE,
-                i.clone(),
-            );
+            headers.insert(COOKIE, i.clone());
         }
 
         if let Some(i) = req_headers.get(ACCEPT_LANGUAGE) {
-            headers.insert(
-                ACCEPT_LANGUAGE,
-                i.clone(),
-            );
+            headers.insert(ACCEPT_LANGUAGE, i.clone());
         }
 
         if let Some(i) = req_headers.get(CONNECTION) {
-            headers.insert(
-                CONNECTION,
-                i.clone(),
-            );
+            headers.insert(CONNECTION, i.clone());
         }
 
         headers.insert(
