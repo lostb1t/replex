@@ -1308,9 +1308,9 @@ impl MetaData {
         if image.is_none() {
             cache_expiry = crate::cache::Expiration::Day;
         }
-        let _ = GLOBAL_CACHE
-            .insert(cache_key, image.clone(), cache_expiry)
-            .await;
+        //let _ = GLOBAL_CACHE
+        //    .insert(cache_key, image.clone(), cache_expiry)
+        //    .await;
         image
     }
 
