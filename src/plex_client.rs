@@ -363,7 +363,7 @@ impl PlexClient {
         .with(RetryTransientMiddleware::new_with_policy_and_strategy(
             ExponentialBackoff::builder()
                 .retry_bounds(
-                    Duration::from_millis(250),
+                    Duration::from_millis(500),
                     Duration::from_secs(2),
                 )
                 .build_with_max_retries(3),
