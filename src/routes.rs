@@ -436,12 +436,12 @@ pub async fn transform_hubs_home(
 
     // some androids have trouble loading more for hero style. So load more at once
     match params.platform {
-        Platform::Android => count = 40,
+        Platform::Android => count = 50,
         _ => (),
     }
     // Hack, as the list could be smaller when removing watched items. So we request more.
-    if !config.include_watched && count < 40 {
-        count = 40;
+    if !config.include_watched && count < 50 {
+        count = 50;
     }
 
     add_query_param_salvo(req, "count".to_string(), count.to_string());
@@ -490,13 +490,13 @@ pub async fn get_hubs_sections(
     let mut count = params.clone().count.unwrap_or(25);
 
     match params.platform {
-        Platform::Android => count = 40,
+        Platform::Android => count = 50,
         _ => (),
     }
 
     // Hack, as the list could be smaller when removing watched items. So we request more.
-    if !config.include_watched && count < 40 {
-        count = 40;
+    if !config.include_watched && count < 50 {
+        count = 50;
     }
 
     add_query_param_salvo(req, "count".to_string(), count.to_string());

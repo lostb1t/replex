@@ -936,7 +936,7 @@ dependencies = [
  "hashbrown 0.14.0",
  "lock_api",
  "once_cell",
- "parking_lot_core",
+ "parking_lot_core 0.9.8",
 ]
 
 [[package]]
@@ -1327,8 +1327,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be4136b2a15dd319360be1c07d9933517ccf0be8f16bf62a3bee4f0d618df427"
 dependencies = [
  "cfg-if",
+ "js-sys",
  "libc",
  "wasi",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -1718,6 +1720,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a5bbe824c507c5da5956355e86a746d82e0e1464f65d862cc5e71da70e94b2c"
 dependencies = [
  "cfg-if",
+ "js-sys",
+ "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]
@@ -2033,7 +2038,7 @@ dependencies = [
  "crossbeam-utils",
  "futures-util",
  "once_cell",
- "parking_lot",
+ "parking_lot 0.12.1",
  "quanta",
  "rustc_version",
  "scheduled-thread-pool",
@@ -2058,7 +2063,7 @@ dependencies = [
  "crossbeam-utils",
  "futures-util",
  "once_cell",
- "parking_lot",
+ "parking_lot 0.12.1",
  "quanta",
  "rustc_version",
  "skeptic",
@@ -2448,12 +2453,37 @@ checksum = "14f2252c834a40ed9bb5422029649578e63aa341ac401f74e719dd1afda8394e"
 
 [[package]]
 name = "parking_lot"
+version = "0.11.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7d17b78036a60663b797adeaee46f5c9dfebb86948d1255007a1d6be0271ff99"
+dependencies = [
+ "instant",
+ "lock_api",
+ "parking_lot_core 0.8.6",
+]
+
+[[package]]
+name = "parking_lot"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3742b2c103b9f06bc9fff0a37ff4912935851bee6d36f3c02bcc755bcfec228f"
 dependencies = [
  "lock_api",
- "parking_lot_core",
+ "parking_lot_core 0.9.8",
+]
+
+[[package]]
+name = "parking_lot_core"
+version = "0.8.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "60a2cfe6f0ad2bfc16aefa463b497d5c7a5ecd44a23efa72aa342d90177356dc"
+dependencies = [
+ "cfg-if",
+ "instant",
+ "libc",
+ "redox_syscall 0.2.16",
+ "smallvec",
+ "winapi",
 ]
 
 [[package]]
@@ -2896,6 +2926,8 @@ dependencies = [
  "pretty_assertions",
  "regex",
  "reqwest",
+ "reqwest-middleware",
+ "reqwest-retry",
  "rhai",
  "rstest",
  "salvo",
@@ -2964,6 +2996,55 @@ dependencies = [
  "web-sys",
  "webpki-roots",
  "winreg",
+]
+
+[[package]]
+name = "reqwest-middleware"
+version = "0.2.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "88a3e86aa6053e59030e7ce2d2a3b258dd08fc2d337d52f73f6cb480f5858690"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "http",
+ "reqwest",
+ "serde",
+ "task-local-extensions",
+ "thiserror",
+]
+
+[[package]]
+name = "reqwest-retry"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9af20b65c2ee9746cc575acb6bd28a05ffc0d15e25c992a8f4462d8686aacb4f"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "chrono",
+ "futures",
+ "getrandom",
+ "http",
+ "hyper 0.14.27",
+ "parking_lot 0.11.2",
+ "reqwest",
+ "reqwest-middleware",
+ "retry-policies",
+ "task-local-extensions",
+ "tokio",
+ "tracing",
+ "wasm-timer",
+]
+
+[[package]]
+name = "retry-policies"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "17dd00bff1d737c40dbcd47d4375281bf4c17933f9eef0a185fc7bacca23ecbd"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "rand",
 ]
 
 [[package]]
@@ -3171,8 +3252,9 @@ checksum = "1ad4cc8da4ef723ed60bced201181d83791ad433213d8c24efffda1eec85d741"
 
 [[package]]
 name = "salvo"
-version = "0.58.2"
-source = "git+https://github.com/salvo-rs/salvo.git#05c907e0787f18e50f41dce5df4babc229f30c9b"
+version = "0.58.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "510e7dbb3e5bf53bd7144a17a71d2be3db5f4bfdf698fa3dc76e0e0f0a9810a5"
 dependencies = [
  "salvo-cache",
  "salvo-compression",
@@ -3185,8 +3267,9 @@ dependencies = [
 
 [[package]]
 name = "salvo-cache"
-version = "0.58.2"
-source = "git+https://github.com/salvo-rs/salvo.git#05c907e0787f18e50f41dce5df4babc229f30c9b"
+version = "0.58.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "19048bcc74b3fc77a1b736855431e852afb804d73a6abb708a50e5ea5c886e0f"
 dependencies = [
  "bytes",
  "moka 0.12.1",
@@ -3196,8 +3279,9 @@ dependencies = [
 
 [[package]]
 name = "salvo-compression"
-version = "0.58.2"
-source = "git+https://github.com/salvo-rs/salvo.git#05c907e0787f18e50f41dce5df4babc229f30c9b"
+version = "0.58.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1d68b52f4ddfcfd8d066f9545d751d347a89cc7e209e1a69f60d220bacf5daa9"
 dependencies = [
  "brotli",
  "bytes",
@@ -3213,8 +3297,9 @@ dependencies = [
 
 [[package]]
 name = "salvo-cors"
-version = "0.58.2"
-source = "git+https://github.com/salvo-rs/salvo.git#05c907e0787f18e50f41dce5df4babc229f30c9b"
+version = "0.58.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ca5cb573d5d7dd63bfccdcb80f4f390b1cbae470b9ba33d8641c121aa826f78"
 dependencies = [
  "bytes",
  "salvo_core",
@@ -3223,8 +3308,9 @@ dependencies = [
 
 [[package]]
 name = "salvo-otel"
-version = "0.58.2"
-source = "git+https://github.com/salvo-rs/salvo.git#05c907e0787f18e50f41dce5df4babc229f30c9b"
+version = "0.58.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d319c63493ca8910e58ed9a32f761592ed6b050b24c36197d5baffcb109db673"
 dependencies = [
  "opentelemetry 0.20.0",
  "opentelemetry-http 0.9.0",
@@ -3234,8 +3320,9 @@ dependencies = [
 
 [[package]]
 name = "salvo-proxy"
-version = "0.58.2"
-source = "git+https://github.com/salvo-rs/salvo.git#05c907e0787f18e50f41dce5df4babc229f30c9b"
+version = "0.58.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bc1794014eddebcc1897f83ee6a93a4bf49ad8c18fd3a33d51e8a485892e3477"
 dependencies = [
  "fastrand 2.0.0",
  "futures-util",
@@ -3269,8 +3356,9 @@ dependencies = [
 
 [[package]]
 name = "salvo_core"
-version = "0.58.2"
-source = "git+https://github.com/salvo-rs/salvo.git#05c907e0787f18e50f41dce5df4babc229f30c9b"
+version = "0.58.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "95c1ffacceac361b0e502f5bd78060ef6ca4c4c2a76cecc3c91b6100495b121b"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3295,7 +3383,7 @@ dependencies = [
  "multer",
  "multimap",
  "once_cell",
- "parking_lot",
+ "parking_lot 0.12.1",
  "percent-encoding",
  "pin-project",
  "rand",
@@ -3324,8 +3412,9 @@ dependencies = [
 
 [[package]]
 name = "salvo_extra"
-version = "0.58.2"
-source = "git+https://github.com/salvo-rs/salvo.git#05c907e0787f18e50f41dce5df4babc229f30c9b"
+version = "0.58.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9cf1ce97f5128170731dea2e3d073f1436fdcbc7ae5d2fe03bad1ff2b0c80f1b"
 dependencies = [
  "base64 0.21.5",
  "etag",
@@ -3343,8 +3432,9 @@ dependencies = [
 
 [[package]]
 name = "salvo_macros"
-version = "0.58.2"
-source = "git+https://github.com/salvo-rs/salvo.git#05c907e0787f18e50f41dce5df4babc229f30c9b"
+version = "0.58.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "21d6ffc291795b0dae3c5a9f279ae538274dbbdf53602f7dcf7a1314d7b0e2d9"
 dependencies = [
  "cruet",
  "proc-macro-crate",
@@ -3378,7 +3468,7 @@ version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3cbc66816425a074528352f5789333ecff06ca41b36b0b0efdfbb29edc391a19"
 dependencies = [
- "parking_lot",
+ "parking_lot 0.12.1",
 ]
 
 [[package]]
@@ -3724,7 +3814,7 @@ checksum = "f91138e76242f575eb1d3b38b4f1362f10d3a43f47d182a5b359af488a02293b"
 dependencies = [
  "new_debug_unreachable",
  "once_cell",
- "parking_lot",
+ "parking_lot 0.12.1",
  "phf_shared",
  "precomputed-hash",
 ]
@@ -3805,6 +3895,15 @@ name = "tagptr"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7b2093cf4c8eb1e67749a6762251bc9cd836b6fc171623bd0a9d324d37af2417"
+
+[[package]]
+name = "task-local-extensions"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ba323866e5d033818e3240feeb9f7db2c4296674e4d9e16b97b7bf8f490434e8"
+dependencies = [
+ "pin-utils",
+]
 
 [[package]]
 name = "tempfile"
@@ -3935,7 +4034,7 @@ dependencies = [
  "libc",
  "mio",
  "num_cpus",
- "parking_lot",
+ "parking_lot 0.12.1",
  "pin-project-lite",
  "signal-hook-registry",
  "socket2 0.5.3",
@@ -4507,6 +4606,21 @@ checksum = "6bbae3363c08332cadccd13b67db371814cd214c2524020932f0804b8cf7c078"
 dependencies = [
  "futures-util",
  "js-sys",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
+name = "wasm-timer"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "be0ecb0db480561e9a7642b5d3e4187c128914e58aa84330b9493e3eb68c5e7f"
+dependencies = [
+ "futures",
+ "js-sys",
+ "parking_lot 0.11.2",
+ "pin-utils",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",

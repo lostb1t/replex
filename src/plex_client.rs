@@ -26,6 +26,10 @@ use reqwest::header;
 use reqwest::header::HeaderValue;
 use reqwest::header::ACCEPT;
 use reqwest::Client;
+use reqwest_retry::{
+    default_on_request_failure, policies::ExponentialBackoff,
+    RetryTransientMiddleware, Retryable, RetryableStrategy,
+};
 use salvo::http::ReqBody;
 use salvo::Error;
 use salvo::Request;
@@ -44,10 +48,27 @@ static CACHE: Lazy<Cache<String, MediaContainerWrapper<MediaContainer>>> =
             .build()
     });
 
+struct Retry401;
+impl RetryableStrategy for Retry401 {
+    fn handle(
+        &self,
+        res: &std::result::Result<reqwest::Response, reqwest_middleware::Error>,
+    ) -> Option<Retryable> {
+        match res {
+            Ok(success) if success.status() == 401 => {
+                Some(Retryable::Transient)
+            }
+            Ok(success) => None,
+            // otherwise do not retry a successful request
+            Err(error) => default_on_request_failure(error),
+        }
+    }
+}
+
 /// TODO: Implement clone
 #[derive(Debug, Clone)]
 pub struct PlexClient {
-    pub http_client: Client,
+    pub http_client: reqwest_middleware::ClientWithMiddleware,
     pub host: String, // TODO: Dont think this suppsoed to be here. Should be higher up
     pub cache: Cache<String, MediaContainerWrapper<MediaContainer>>,
 
@@ -311,7 +332,7 @@ impl PlexClient {
             "https://metadata.provider.plex.tv/library/metadata/{}",
             guid
         );
-
+        // let url = "https://httpbin.org/status/401".to_string();
         // let wut = reqwest::RequestBuilder::new(http::Method::GET);
 
         let mut req = reqwest::Request::new(
@@ -333,7 +354,24 @@ impl PlexClient {
         // req.set_uri(uri.try_into().unwrap());
         *req.headers_mut() = headers;
 
-        let res = Client::new().execute(req).await.map_err(Error::other)?;
+        let client = reqwest_middleware::ClientBuilder::new(
+            reqwest::Client::builder()
+                .timeout(Duration::from_secs(30))
+                .build()
+                .unwrap(),
+        )
+        .with(RetryTransientMiddleware::new_with_policy_and_strategy(
+            ExponentialBackoff::builder()
+                .retry_bounds(
+                    Duration::from_millis(250),
+                    Duration::from_secs(2),
+                )
+                .build_with_max_retries(3),
+            Retry401,
+        ))
+        .build();
+        let res = client.execute(req).await.map_err(Error::other)?;
+        // let res = Client::new().execute(req).await.map_err(Error::other)?;
         // headers.insert(
         //     "X-Plex-Token",
         //     header::HeaderValue::from_str(self.x_plex_token.clone().as_str()).unwrap(),
@@ -588,12 +626,15 @@ impl PlexClient {
         );
         // dbg!(&headers);
         Self {
-            http_client: reqwest::Client::builder()
-                .default_headers(headers)
-                .gzip(true)
-                .timeout(Duration::from_secs(30))
-                .build()
-                .unwrap(),
+            http_client: reqwest_middleware::ClientBuilder::new(
+                reqwest::Client::builder()
+                    .default_headers(headers)
+                    .gzip(true)
+                    .timeout(Duration::from_secs(30))
+                    .build()
+                    .unwrap(),
+            )
+            .build(),
             host: config.host.unwrap(),
             x_plex_token: token,
             x_plex_client_identifier: client_identifier,
@@ -602,41 +643,41 @@ impl PlexClient {
         }
     }
 
-    pub fn dummy() -> Self {
-        let config: Config = Config::figment().extract().unwrap();
-        let token = "DUMMY".to_string();
-        let client_identifier: Option<String> = None;
-        let platform: Platform = Platform::Generic;
+    // pub fn dummy() -> Self {
+    //     let config: Config = Config::figment().extract().unwrap();
+    //     let token = "DUMMY".to_string();
+    //     let client_identifier: Option<String> = None;
+    //     let platform: Platform = Platform::Generic;
 
-        // Dont do the headers here. Do it in prepare function
-        let mut headers = header::HeaderMap::new();
-        headers.insert(
-            "X-Plex-Token",
-            header::HeaderValue::from_str(token.clone().as_str()).unwrap(),
-        );
-        headers.insert(
-            "Accept",
-            header::HeaderValue::from_static("application/json"),
-        );
-        headers.insert(
-            "X-Plex-Platform",
-            header::HeaderValue::from_str(platform.to_string().as_str())
-                .unwrap(),
-        );
-        Self {
-            http_client: reqwest::Client::builder()
-                .default_headers(headers)
-                .gzip(true)
-                .timeout(Duration::from_secs(30))
-                .build()
-                .unwrap(),
-            host: config.host.unwrap(),
-            x_plex_token: token,
-            x_plex_client_identifier: client_identifier,
-            x_plex_platform: platform,
-            cache: CACHE.clone(),
-        }
-    }
+    //     // Dont do the headers here. Do it in prepare function
+    //     let mut headers = header::HeaderMap::new();
+    //     headers.insert(
+    //         "X-Plex-Token",
+    //         header::HeaderValue::from_str(token.clone().as_str()).unwrap(),
+    //     );
+    //     headers.insert(
+    //         "Accept",
+    //         header::HeaderValue::from_static("application/json"),
+    //     );
+    //     headers.insert(
+    //         "X-Plex-Platform",
+    //         header::HeaderValue::from_str(platform.to_string().as_str())
+    //             .unwrap(),
+    //     );
+    //     Self {
+    //         http_client: reqwest::Client::builder()
+    //             .default_headers(headers)
+    //             .gzip(true)
+    //             .timeout(Duration::from_secs(30))
+    //             .build()
+    //             .unwrap(),
+    //         host: config.host.unwrap(),
+    //         x_plex_token: token,
+    //         x_plex_client_identifier: client_identifier,
+    //         x_plex_platform: platform,
+    //         cache: CACHE.clone(),
+    //     }
+    // }
 }
 
 // #[cfg(test)]
