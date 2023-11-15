@@ -354,24 +354,24 @@ impl PlexClient {
         // req.set_uri(uri.try_into().unwrap());
         *req.headers_mut() = headers;
 
-        let client = reqwest_middleware::ClientBuilder::new(
-            reqwest::Client::builder()
-                .timeout(Duration::from_secs(30))
-                .build()
-                .unwrap(),
-        )
-        .with(RetryTransientMiddleware::new_with_policy_and_strategy(
-            ExponentialBackoff::builder()
-                .retry_bounds(
-                    Duration::from_millis(500),
-                    Duration::from_secs(2),
-                )
-                .build_with_max_retries(3),
-            Retry401,
-        ))
-        .build();
-        let res = client.execute(req).await.map_err(Error::other)?;
-        // let res = Client::new().execute(req).await.map_err(Error::other)?;
+        // let client = reqwest_middleware::ClientBuilder::new(
+        //     reqwest::Client::builder()
+        //         .timeout(Duration::from_secs(30))
+        //         .build()
+        //         .unwrap(),
+        // )
+        // .with(RetryTransientMiddleware::new_with_policy_and_strategy(
+        //     ExponentialBackoff::builder()
+        //         .retry_bounds(
+        //             Duration::from_millis(100),
+        //             Duration::from_secs(2),
+        //         )
+        //         .build_with_max_retries(3),
+        //     Retry401,
+        // ))
+        // .build();
+        // let res = client.execute(req).await.map_err(Error::other)?;
+        let res = Client::new().execute(req).await.map_err(Error::other)?;
         // headers.insert(
         //     "X-Plex-Token",
         //     header::HeaderValue::from_str(self.x_plex_token.clone().as_str()).unwrap(),
@@ -390,7 +390,6 @@ impl PlexClient {
                 res.status()
             )));
         }
-
         // if res.status() == 500 {
         //     return Err(salvo::http::StatusError::);
         // }

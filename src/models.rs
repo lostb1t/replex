@@ -1292,6 +1292,7 @@ impl MetaData {
                     MediaContainerWrapper::default()
                 }
             };
+            
         // let mut container = plex_client.get_provider_data(guid).await.unwrap();
         let metadata = container.media_container.children_mut().get(0);
         let mut image: Option<String> = None;
@@ -1305,9 +1306,7 @@ impl MetaData {
         }
 
         let mut cache_expiry = crate::cache::Expiration::Month;
-        if image.is_none() {
-            cache_expiry = crate::cache::Expiration::Day;
-        }
+        image.as_ref()?; // dont return and dont cache, let us just retry next time.
         let _ = GLOBAL_CACHE
             .insert(cache_key, image.clone(), cache_expiry)
             .await;
