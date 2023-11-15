@@ -1304,7 +1304,6 @@ impl MetaData {
                 }
             }
         }
-
         let mut cache_expiry = crate::cache::Expiration::Month;
         image.as_ref()?; // dont return and dont cache, let us just retry next time.
         let _ = GLOBAL_CACHE
