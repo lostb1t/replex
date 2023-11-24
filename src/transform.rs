@@ -447,7 +447,7 @@ impl Transform for LibraryMixTransform {
                 .await
                 .unwrap();
 
-            if !collection.media_container.include_watched() {
+            if collection.media_container.exclude_watched() {
                 c.media_container.children_mut().retain(|x| !x.is_watched());
             }
 
@@ -705,12 +705,12 @@ impl Transform for HubWatchedTransform {
         let config: Config = Config::figment().extract().unwrap();
 
         if item.is_hub() {
-            let include_watched = item
-                .include_watched(plex_client.clone())
+            let exclude_watched = item
+                .exclude_watched(plex_client.clone())
                 .await
                 .unwrap_or(false);
 
-            if !include_watched {
+            if exclude_watched {
                 item.children_mut().retain(|x| !x.is_watched());
             }
         }
@@ -844,8 +844,8 @@ impl Filter for WatchedFilter {
         options: PlexContext,
     ) -> bool {
         let config: Config = Config::figment().extract().unwrap();
-        if config.include_watched {
-            return true;
+        if config.exclude_watched {
+            return false;
         }
 
         if !item.is_hub() {

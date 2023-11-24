@@ -1398,7 +1398,7 @@ impl MetaData {
         false
     }
 
-    pub async fn include_watched(
+    pub async fn exclude_watched(
         &self,
         plex_client: PlexClient,
     ) -> Result<bool> {
@@ -1417,13 +1417,13 @@ impl MetaData {
             )
             .await?;
 
-        Ok(config.include_watched
+        Ok(config.exclude_watched
             || collection
                 .media_container
                 .metadata
                 .get(0)
                 .unwrap()
-                .has_label("REPLEX_INCLUDE_WATCHED".to_string()))
+                .has_label("REPLEX_EXCLUDE_WATCHED".to_string()))
     }
 
     // TODO: Does not work when using a new instance
@@ -1712,15 +1712,15 @@ impl MediaContainer {
         !self.hub.is_empty()
     }
 
-    pub fn include_watched(&self) -> bool {
+    pub fn exclude_watched(&self) -> bool {
         let config: Config = Config::figment().extract().unwrap();
 
-        return config.include_watched
+        return config.exclude_watched
             || self
                 .metadata
                 .get(0)
                 .unwrap()
-                .has_label("REPLEX_INCLUDE_WATCHED".to_string());
+                .has_label("REPLEX_EXCLUDE_WATCHED".to_string());
     }
 
     pub fn set_type(&mut self, value: String) {

@@ -440,7 +440,7 @@ pub async fn transform_hubs_home(
         _ => (),
     }
     // Hack, as the list could be smaller when removing watched items. So we request more.
-    if !config.include_watched && count < 50 {
+    if config.exclude_watched && count < 50 {
         count = 50;
     }
 
@@ -496,7 +496,7 @@ pub async fn get_hubs_sections(
     }
 
     // Hack, as the list could be smaller when removing watched items. So we request more.
-    if !config.include_watched && count < 50 {
+    if config.exclude_watched && count < 50 {
         count = 50;
     }
 
@@ -562,14 +562,8 @@ pub async fn get_collections_children(
     let content_type = get_content_type_from_headers(req.headers_mut());
 
     // We dont listen to pagination. We have a hard max of 250 per collection
-    let mut limit: i32 = 250;
-    let mut offset: i32 = 0;
-
-    // in we dont remove watched then we dont need to limit
-    if config.include_watched {
-        limit = params.container_size.unwrap_or(50);
-        offset = params.container_start.unwrap_or(0);
-    }
+    let limit: i32 = 250;
+    let offset: i32 = 0;
 
     // create a stub
     let mut container: MediaContainerWrapper<MediaContainer> =
@@ -616,14 +610,8 @@ pub async fn default_transform(
     let rest_path = req.param::<String>("**rest").unwrap();
 
     // We dont listen to pagination. We have a hard max of 250 per collection
-    let mut limit: i32 = 250;
-    let mut offset: i32 = 0;
-
-    // in we dont remove watched then we dont need to limit
-    if config.include_watched {
-        limit = params.container_size.unwrap_or(50);
-        offset = params.container_start.unwrap_or(0);
-    }
+    let limit: i32 = 250;
+    let offset: i32 = 0;
 
     let mut url = Url::parse(req.uri_mut().to_string().as_str()).unwrap();
     url.set_path(&rest_path);
