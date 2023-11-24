@@ -464,6 +464,7 @@ pub async fn transform_hubs_home(
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubStyleTransform { is_home: true })
         // .with_transform(HubSectionDirectoryTransform)
+        .with_transform(HubWatchedTransform)
         .with_transform(HubMixTransform)
         // .with_transform(HubChildrenLimitTransform {
         //     limit: params.clone().count.unwrap(),
@@ -522,11 +523,12 @@ pub async fn get_hubs_sections(
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubSectionDirectoryTransform)
         .with_transform(HubStyleTransform { is_home: false })
+        .with_transform(HubWatchedTransform)
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
         //.with_transform(MediaContainerScriptingTransform)
         // .with_filter(CollectionHubPermissionFilter)
-        .with_filter(WatchedFilter)
+        // .with_filter(WatchedFilter)
         .apply_to(&mut container)
         .await;
     // dbg!(container.media_container.count);

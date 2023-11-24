@@ -327,9 +327,6 @@ impl Transform for HubMixTransform {
                 continue;
             }
 
-            if !config.include_watched {
-                hub.children_mut().retain(|x| !x.is_watched());
-            }
             //hub.context = Some("hub.home.watchlist_available".to_string());
             //hub.r#type = "clip".to_string();
             // hub.placeholder = Some(SpecialBool::new(true));
@@ -422,7 +419,7 @@ impl Transform for LibraryMixTransform {
     ) -> MediaContainer {
         let config: Config = Config::figment().extract().unwrap();
         let mut children: Vec<MetaData> = vec![];
-        let mut total_size_including_watched = 0;
+        let mut total_size = 0;
 
         for id in self.collection_ids.clone() {
             let mut c = plex_client
@@ -441,11 +438,20 @@ impl Transform for LibraryMixTransform {
                 .await
                 .unwrap();
 
-            total_size_including_watched +=
-                c.media_container.total_size.unwrap();
-            if !config.include_watched {
+            let collection = plex_client
+                .clone()
+                .get_cached(
+                    plex_client.get_collection(id as i32),
+                    format!("collection:{}", id.to_string()),
+                )
+                .await
+                .unwrap();
+
+            if !collection.media_container.include_watched() {
                 c.media_container.children_mut().retain(|x| !x.is_watched());
             }
+
+            total_size += c.media_container.children().len() as i32;
 
             match children.is_empty() {
                 false => {
@@ -457,11 +463,7 @@ impl Transform for LibraryMixTransform {
                 true => children.append(&mut c.media_container.children()),
             }
         }
-        if !config.include_watched {
-            item.total_size = Some(children.len() as i32);
-        } else {
-            item.total_size = Some(total_size_including_watched);
-        };
+        item.total_size = Some(total_size);
         // always metadata
         item.metadata = children;
         item
@@ -684,6 +686,32 @@ impl Transform for HubStyleTransform {
                 }
                 let children: Vec<MetaData> = futures.collect().await;
                 item.set_children(children);
+            }
+        }
+    }
+}
+
+#[derive(Default, Debug)]
+pub struct HubWatchedTransform;
+
+#[async_trait]
+impl Transform for HubWatchedTransform {
+    async fn transform_metadata(
+        &self,
+        item: &mut MetaData,
+        plex_client: PlexClient,
+        options: PlexContext,
+    ) {
+        let config: Config = Config::figment().extract().unwrap();
+
+        if item.is_hub() {
+            let include_watched = item
+                .include_watched(plex_client.clone())
+                .await
+                .unwrap_or(false);
+
+            if !include_watched {
+                item.children_mut().retain(|x| !x.is_watched());
             }
         }
     }

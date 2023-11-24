@@ -1398,6 +1398,34 @@ impl MetaData {
         false
     }
 
+    pub async fn include_watched(
+        &self,
+        plex_client: PlexClient,
+    ) -> Result<bool> {
+        if !self.is_collection_hub() {
+            return Ok(false);
+        }
+
+        let config: Config = Config::figment().extract().unwrap();
+        let collection = plex_client
+            .clone()
+            .get_cached(
+                plex_client
+                    .get_collection(get_collection_id_from_hub(self) as i32),
+                format!("collection:{}", get_collection_id_from_hub(self))
+                    .to_string(),
+            )
+            .await?;
+
+        Ok(config.include_watched
+            || collection
+                .media_container
+                .metadata
+                .get(0)
+                .unwrap()
+                .has_label("REPLEX_INCLUDE_WATCHED".to_string()))
+    }
+
     // TODO: Does not work when using a new instance
     pub fn set_children(&mut self, value: Vec<MetaData>) {
         let len: i32 = value.len().try_into().unwrap();
@@ -1682,6 +1710,17 @@ pub struct Meta {
 impl MediaContainer {
     pub fn is_hub(&self) -> bool {
         !self.hub.is_empty()
+    }
+
+    pub fn include_watched(&self) -> bool {
+        let config: Config = Config::figment().extract().unwrap();
+
+        return config.include_watched
+            || self
+                .metadata
+                .get(0)
+                .unwrap()
+                .has_label("REPLEX_INCLUDE_WATCHED".to_string());
     }
 
     pub fn set_type(&mut self, value: String) {
