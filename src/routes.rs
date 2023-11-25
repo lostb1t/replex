@@ -616,8 +616,14 @@ pub async fn default_transform(
     let rest_path = req.param::<String>("**rest").unwrap();
 
     // We dont listen to pagination. We have a hard max of 250 per collection
-    let limit: i32 = 250;
-    let offset: i32 = 0;
+    let mut limit: i32 = 250;
+    let mut offset: i32 = 0;
+
+    // in we dont remove watched then we dont need to limit
+    if !config.exclude_watched {
+        limit = params.container_size.unwrap_or(50);
+        offset = params.container_start.unwrap_or(0);
+    }
 
     let mut url = Url::parse(req.uri_mut().to_string().as_str()).unwrap();
     url.set_path(&rest_path);
