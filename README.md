@@ -90,7 +90,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 |---------------------------|----------|---------------------------------------------------------------------------|
 | REPLEX_HOST               |        	 | Url of your plex instance. ex: http://0.0.0.0:32400                                             	  |
 | REPLEX_HERO_ROWS          |        	 | Comma seperated list of hubidentifiers to make hero style, options are: <br />home.movies.recent<br />movies.recent <br />movie.recentlyadded<br />movie.topunwatched<br />movie.recentlyviewed<br />hub.movie.recentlyreleased<br />movie.recentlyreleased<br />home.television.recent<br />tv.recentlyadded<br />tv.toprated<br />tv.inprogress<br />tv.recentlyaired    |
-| REPLEX_INCLUDE_WATCHED    | false    | If set to false, hide watched items for recommended rows                                     |
+| REPLEX_EXCLUDE_WATCHED    | false    | If set to true, hide watched items for recommended rows                                     |
 | REPLEX_DISABLE_CONTINUE_WATCHING | false    | Disable/remove the continue watching row |
 | REPLEX_DISABLE_USER_STATE | false    | Remove unplayed badges from row items |
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
@@ -121,6 +121,10 @@ For built in rows you can use the hubidentifier in the `REPLEX_HERO_ROWS`. See t
 
 Note: hero style elements uses coverart from plex. Banner or background is not used.
 Note: Hero elements are not supported for continue watching by plex. You can replicate this functionality by creating a smart collection which filters on in progress and settinf REPLEX_DISABLE_CONTINUE_WATCHING
+
+## Exclude watched items
+
+If you want to hide watched items from your rows, you can set `REPLEX_EXCLUDE_WATCHED` to true. Alternatively, you can add the label "REPLEX_EXCLUDE_WATCHED" to a collection to exclude watched items from that collection only.
 
 
 ## Remote access (force clients to use the proxy)
@@ -156,7 +160,7 @@ You can redirect streams by enabling `REPLEX_REDIRECT_STREAMS` and optionally se
 
 - hero rows on Android devices dont load more content. so hero rows have a maximum of 100 items on Android.
 - On android mobile hero elements in libraries are slightly cutoff. This is plex limitation.
-- when include_watched is false a maximum item limit per library is opposed of 250 items. So if you have a mixed row of 2 libraries the max results of that row will be 500 items.
+- when exclude_watched is true a maximum item limit per library is opposed of 250 items. So if you have a mixed row of 2 libraries the max results of that row will be 500 items.
 - disable_user_state: For movies this works in the webapp. Shows work accross clients
 
 ## Help it doesnt work!

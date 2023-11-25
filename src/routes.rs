@@ -440,7 +440,7 @@ pub async fn transform_hubs_home(
         _ => (),
     }
     // Hack, as the list could be smaller when removing watched items. So we request more.
-    if !config.include_watched && count < 50 {
+    if config.exclude_watched && count < 50 {
         count = 50;
     }
 
@@ -464,6 +464,7 @@ pub async fn transform_hubs_home(
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubStyleTransform { is_home: true })
         // .with_transform(HubSectionDirectoryTransform)
+        .with_transform(HubWatchedTransform)
         .with_transform(HubMixTransform)
         // .with_transform(HubChildrenLimitTransform {
         //     limit: params.clone().count.unwrap(),
@@ -495,7 +496,7 @@ pub async fn get_hubs_sections(
     }
 
     // Hack, as the list could be smaller when removing watched items. So we request more.
-    if !config.include_watched && count < 50 {
+    if config.exclude_watched && count < 50 {
         count = 50;
     }
 
@@ -522,11 +523,12 @@ pub async fn get_hubs_sections(
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubSectionDirectoryTransform)
         .with_transform(HubStyleTransform { is_home: false })
+        .with_transform(HubWatchedTransform)
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
         //.with_transform(MediaContainerScriptingTransform)
         // .with_filter(CollectionHubPermissionFilter)
-        .with_filter(WatchedFilter)
+        // .with_filter(WatchedFilter)
         .apply_to(&mut container)
         .await;
     // dbg!(container.media_container.count);
@@ -564,7 +566,7 @@ pub async fn get_collections_children(
     let mut offset: i32 = 0;
 
     // in we dont remove watched then we dont need to limit
-    if config.include_watched {
+    if !config.exclude_watched {
         limit = params.container_size.unwrap_or(50);
         offset = params.container_start.unwrap_or(0);
     }
@@ -618,7 +620,7 @@ pub async fn default_transform(
     let mut offset: i32 = 0;
 
     // in we dont remove watched then we dont need to limit
-    if config.include_watched {
+    if !config.exclude_watched {
         limit = params.container_size.unwrap_or(50);
         offset = params.container_start.unwrap_or(0);
     }
