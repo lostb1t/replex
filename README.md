@@ -21,21 +21,6 @@ Remix your plex recommendations.
 
 !!This does not alter your plex data in anyway. it only alters outgoing api requests. All your collections or rows are kept intact!!
 
-## Test server
-
-There is a Replex test server available, you can use it by base32 encoding your plex url and put it in front of replex.stream as a subdomain.
-
-Example:
-
-http://56.29.34.34:32400 -> NB2HI4B2F4XTKNROGI4S4MZUFYZTIORTGI2DAMA=
-
-Your test url would be: https://NB2HI4B2F4XTKNROGI4S4MZUFYZTIORTGI2DAMA=.replex.stream
-
-Add the url to the "Custom server access URLs" in plex under network and disable remote access.
-Continue with [Mixed Rows](#mixed-rows) to continue setting up custom collections.
-
-Base32 online encoding tool: https://emn178.github.io/online-tools/base32_encode.html
-
 ## Installation
 
 Run the docker image with REPLEX_HOST set to your plex instance.
