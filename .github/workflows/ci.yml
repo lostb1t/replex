@@ -18,6 +18,21 @@ jobs:
         profile: minimal
         override: true
 
+    - name: Cache Cargo Registry
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+        
+    - name: Cache Cargo Build Output
+      uses: actions/cache@v2
+      with:
+        path: |
+          target
+        key: ${{ runner.os }}-cargo-build-output-${{ hashFiles('**/Cargo.lock') }}
+
     - name: Build Rust project
       run: |
         cargo build --release
