@@ -4,11 +4,18 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+env:
+  SANITIZED_BRANCH_NAME:
+
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
+    environment: github
     steps:
     - uses: actions/checkout@v3
+
+    - name: Sanitize branch name
+      run: echo "SANITIZED_BRANCH_NAME=$(echo ${{ github.head_ref }} | sed 's/\//-/g')" >> $GITHUB_ENV
     
     - name: Rust Build
       uses: ./.github/actions/rust-build
@@ -29,4 +36,4 @@ jobs:
         context: .
         file: .github/Dockerfile
         push: true
-        tags: ghcr.io/${{ github.repository_owner }}/replex:${{ github.head_ref }}
+        tags: ghcr.io/${{ github.repository_owner }}/replex:${{ env.SANITIZED_BRANCH_NAME }}
