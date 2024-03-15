@@ -1,9 +1,8 @@
-name: CI
+name: PR Workflow
 
 on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   build_and_push:
@@ -15,7 +14,7 @@ jobs:
       uses: ./.github/actions/rust-build
     
     - name: Log in to GitHub Container Registry
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
@@ -24,10 +23,10 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     
-    - name: Build and push Docker image
+    - name: Build and push PR Docker image
       uses: docker/build-push-action@v3
       with:
         context: .
         file: .github/Dockerfile
         push: true
-        tags: ghcr.io/luukleenders/replex:latest
+        tags: ghcr.io/${{ github.repository_owner }}/replex:${{ github.head_ref }}
