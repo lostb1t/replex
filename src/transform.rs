@@ -202,8 +202,6 @@ impl Filter for CollectionHubPermissionFilter {
         plex_client: PlexClient,
         options: PlexContext,
     ) -> bool {
-        tracing::debug!("filter collection permissions");
-
         if item.is_hub() && !item.is_collection_hub() {
             return true;
         }
@@ -352,7 +350,39 @@ impl Transform for HubMixTransform {
                 None => new_hubs.push(hub.to_owned()),
             }
         }
+
         item.set_children_mut(&mut new_hubs);
+        item
+    }
+}
+
+#[derive(Default, Debug)]
+pub struct ReorderHubsTransform;
+
+#[async_trait]
+impl Transform for ReorderHubsTransform {
+    async fn transform_mediacontainer(
+        &self,
+        mut item: MediaContainer,
+        plex_client: PlexClient,
+        options: PlexContext,
+    ) -> MediaContainer {
+        let config: Config = Config::figment().extract().unwrap();
+        let mut hubs_clone = item.children_mut().clone();
+
+        if let Some(priority_titles) = &config.priority_hubs {
+            // Iterate over priority titles in reverse to maintain the correct order when reinserting
+            for title in priority_titles.iter().rev() {
+                if let Some(pos) =
+                    hubs_clone.iter().position(|hub| &hub.title == title)
+                {
+                    let hub = hubs_clone.remove(pos);
+                    hubs_clone.insert(0, hub); // Insert the hub at the beginning of the Vec
+                }
+            }
+        }
+
+        *item.children_mut() = hubs_clone;
         item
     }
 }
@@ -547,16 +577,16 @@ impl ClientHeroStyle {
             Platform::Android => {
                 match device_type {
                     DeviceType::Tv => {
-                      Self {
-                          style: Some("hero".to_string()),
-                          // clip wil make the item info disappear on TV
-                          r#type: "mixed".to_string(),
-                          // using clip makes it load thumbs instead of art as cover art. So we don't have to touch the background
-                          child_type: Some("clip".to_string()),
-                          cover_art_as_art: false,
-                          cover_art_as_thumb: true,
-                          ..ClientHeroStyle::default()
-                      }
+                        Self {
+                            style: Some("hero".to_string()),
+                            // clip wil make the item info disappear on TV
+                            r#type: "mixed".to_string(),
+                            // using clip makes it load thumbs instead of art as cover art. So we don't have to touch the background
+                            child_type: Some("clip".to_string()),
+                            cover_art_as_art: false,
+                            cover_art_as_thumb: true,
+                            ..ClientHeroStyle::default()
+                        }
                     }
                     _ => Self {
                         style: None,
@@ -570,23 +600,20 @@ impl ClientHeroStyle {
             Platform::Roku => ClientHeroStyle::roku(),
             Platform::Ios => ClientHeroStyle::ios_style(),
             Platform::TvOS => ClientHeroStyle::tvos_style(),
-            _ => {
-              ClientHeroStyle::default()
-          }
-            // _ => {
-            //     if product.starts_with("Plex HTPC") {
-            //         ClientHeroStyle::htpc_style()
-            //     } else {
-            //         match product.to_lowercase().as_ref() {
-            //             "plex for lg" => ClientHeroStyle::htpc_style(),
-            //             "plex for xbox" => ClientHeroStyle::htpc_style(),
-            //             "plex for ps4" => ClientHeroStyle::htpc_style(),
-            //             "plex for ps5" => ClientHeroStyle::htpc_style(),
-            //             "plex for ios" => ClientHeroStyle::ios_style(),
-            //             _ => ClientHeroStyle::default(),
-            //         }
-            //     }
-            // }
+            _ => ClientHeroStyle::default(), // _ => {
+                                             //     if product.starts_with("Plex HTPC") {
+                                             //         ClientHeroStyle::htpc_style()
+                                             //     } else {
+                                             //         match product.to_lowercase().as_ref() {
+                                             //             "plex for lg" => ClientHeroStyle::htpc_style(),
+                                             //             "plex for xbox" => ClientHeroStyle::htpc_style(),
+                                             //             "plex for ps4" => ClientHeroStyle::htpc_style(),
+                                             //             "plex for ps5" => ClientHeroStyle::htpc_style(),
+                                             //             "plex for ios" => ClientHeroStyle::ios_style(),
+                                             //             _ => ClientHeroStyle::default(),
+                                             //         }
+                                             //     }
+                                             // }
         }
     }
 
@@ -612,12 +639,12 @@ impl ClientHeroStyle {
     }
 
     pub fn tvos_style() -> Self {
-      Self {
-          cover_art_as_art: true,
-          cover_art_as_thumb: false, // ios doesnt load the subview as hero.
-          ..ClientHeroStyle::default()
-      }
-  }
+        Self {
+            cover_art_as_art: true,
+            cover_art_as_thumb: false, // ios doesnt load the subview as hero.
+            ..ClientHeroStyle::default()
+        }
+    }
 
     // pub fn for_client(platform: Platform, product: String, platform_version: String) -> Self {
     //     match platform {

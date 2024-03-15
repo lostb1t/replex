@@ -31,6 +31,8 @@ pub struct Config {
     pub cache_rows_refresh: bool,
     #[serde(default, deserialize_with = "deserialize_comma_seperated_string")]
     pub hero_rows: Option<Vec<String>>,
+    #[serde(default, deserialize_with = "deserialize_comma_seperated_string")]
+    pub priority_hubs: Option<Vec<String>>,
     #[serde(
         default = "default_as_false",
         deserialize_with = "figment::util::bool_from_str_or_int"
@@ -144,12 +146,15 @@ impl Config {
             // .decode(val[0]).unwrap();
             // let decoded_host = decode(CrockfordBase32, &owned_val[..]);
             // let decoded_host: String = crockford::decode(val[0].to_uppercase()).unwrap().to_string();
-            let mut output = vec![0; BASE32.decode_len(owned_val.len()).unwrap()];
-            let len = BASE32.decode_mut(owned_val.as_bytes(), &mut output).unwrap();
+            let mut output =
+                vec![0; BASE32.decode_len(owned_val.len()).unwrap()];
+            let len = BASE32
+                .decode_mut(owned_val.as_bytes(), &mut output)
+                .unwrap();
             // dbg!(std::str::from_utf8(&output[0 .. len]).unwrap());
-            config = config.join(("host", std::str::from_utf8(&output[0 .. len]).unwrap()));
+            config = config
+                .join(("host", std::str::from_utf8(&output[0..len]).unwrap()));
             // config = config.join(("host", decoded_host));
-            
         }
         config
         // Figment::new().merge(Env::prefixed("REPLEX_"))

@@ -204,8 +204,6 @@ async fn proxy_request(
     proxy.handle(req, depot, res, ctrl).await;
 }
 
-
-
 #[handler]
 async fn should_skip(
     req: &mut Request,
@@ -213,7 +211,6 @@ async fn should_skip(
     depot: &mut Depot,
     ctrl: &mut FlowCtrl,
 ) {
-
     // We do this because of a bug in extract. Which taks the body which is needed for proy
     let queries: PlexContextProduct = req.parse_queries().unwrap();
     let headers: PlexContextProduct = req.parse_headers().unwrap();
@@ -225,10 +222,8 @@ async fn should_skip(
         None
     };
 
-    if product.is_some()
-        && product.clone().unwrap().to_lowercase() == "plexamp"
+    if product.is_some() && product.clone().unwrap().to_lowercase() == "plexamp"
     {
-
         let config: Config = Config::dynamic(req).extract().unwrap();
         let proxy = Proxy::with_client(
             config.host.clone().unwrap(),
@@ -349,27 +344,44 @@ pub async fn direct_stream_fallback(
     match upstream_res.status() {
         http::StatusCode::OK => {
             let mut container: MediaContainerWrapper<MediaContainer> =
-            from_reqwest_response(upstream_res).await?;
-    
+                from_reqwest_response(upstream_res).await?;
+
             if container.media_container.general_decision_code.is_some()
-                && container.media_container.general_decision_code.unwrap() == 2000
+                && container.media_container.general_decision_code.unwrap()
+                    == 2000
             {
                 tracing::debug!(
                     "Direct play not avaiable, falling back to direct stream"
                 );
-                add_query_param_salvo(req, "directPlay".to_string(), "0".to_string());
-                add_query_param_salvo(req, "directStream".to_string(), "1".to_string());
+                add_query_param_salvo(
+                    req,
+                    "directPlay".to_string(),
+                    "0".to_string(),
+                );
+                add_query_param_salvo(
+                    req,
+                    "directStream".to_string(),
+                    "1".to_string(),
+                );
             };
             return Ok(());
-        },
+        }
         http::StatusCode::BAD_REQUEST => {
             tracing::debug!(
                 "Got 400 bad request, falling back to direct stream"
             );
-            add_query_param_salvo(req, "directPlay".to_string(), "0".to_string());
-            add_query_param_salvo(req, "directStream".to_string(), "1".to_string());   
-            return Ok(());   
-        },
+            add_query_param_salvo(
+                req,
+                "directPlay".to_string(),
+                "0".to_string(),
+            );
+            add_query_param_salvo(
+                req,
+                "directStream".to_string(),
+                "1".to_string(),
+            );
+            return Ok(());
+        }
         status => {
             tracing::error!(status = ?status, res = ?upstream_res, "Failed to get plex response");
             return Err(
@@ -377,9 +389,6 @@ pub async fn direct_stream_fallback(
             );
         }
     };
-
-
-
 
     return Ok(());
 }
@@ -471,6 +480,7 @@ pub async fn transform_hubs_home(
         // })
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
+        .with_transform(ReorderHubsTransform)
         .apply_to(&mut container)
         .await;
 
@@ -808,8 +818,10 @@ async fn force_maximum_quality(req: &mut Request) -> Result<(), anyhow::Error> {
     let config: Config = Config::dynamic(req).extract().unwrap();
     let mut queries = req.queries().clone();
 
-    if queries.get("maxVideoBitrate").is_none() && queries.get("videoBitrate").is_none() {
-        return Ok(())
+    if queries.get("maxVideoBitrate").is_none()
+        && queries.get("videoBitrate").is_none()
+    {
+        return Ok(());
     }
 
     queries.remove("maxVideoBitrate");
@@ -1269,7 +1281,6 @@ async fn auto_select_version(req: &mut Request) {
 
                 queries.remove("subtitles");
                 queries.insert("subtitles".to_string(), "auto".to_string());
-
             }
         }
     }
