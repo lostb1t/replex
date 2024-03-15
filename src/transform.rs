@@ -313,39 +313,44 @@ impl Transform for HubMixTransform {
     ) -> MediaContainer {
         let config: Config = Config::figment().extract().unwrap();
         let mut new_hubs: Vec<MetaData> = vec![];
-        //item.identifier = Some("tv.plex.provider.discover".to_string());
-        // let mut library_section_id: Vec<Option<u32>> = vec![]; //librarySectionID
+
         for mut hub in item.children_mut() {
             if hub.size.unwrap() == 0 {
                 continue;
             }
-            // we only process collection hubs
+            // We only process collection hubs
             if !hub.is_collection_hub() {
                 new_hubs.push(hub.to_owned());
                 continue;
             }
 
-            //hub.context = Some("hub.home.watchlist_available".to_string());
-            //hub.r#type = "clip".to_string();
-            // hub.placeholder = Some(SpecialBool::new(true));
-            //hub.placeholder = Some(true);
-
-            let p = new_hubs.iter().position(|v| v.title == hub.title);
-            // if hub.r#type != "clip" {
-            //     hub.r#type = "mixed".to_string();
-            // }
-            match p {
-                Some(v) => {
-                    new_hubs[v].key = Some(merge_children_keys(
-                        new_hubs[v].key.clone().unwrap(),
+            let position = new_hubs.iter().position(|v| v.title == hub.title);
+            match position {
+                Some(pos) => {
+                    new_hubs[pos].key = Some(merge_children_keys(
+                        new_hubs[pos].key.clone().unwrap(),
                         hub.key.clone().unwrap(),
                     ));
-                    let c = new_hubs[v].children();
-                    new_hubs[v].set_children(
-                        c.into_iter()
-                            .interleave(hub.children())
-                            .collect::<Vec<MetaData>>(),
-                    );
+
+                    // Await the dont_interleave result and handle errors
+                    let should_not_interleave = hub
+                        .dont_interleave(plex_client.clone())
+                        .await
+                        .unwrap_or(false);
+
+                    if should_not_interleave {
+                        let mut combined = new_hubs[pos].children().to_vec();
+                        combined.extend(hub.children().to_vec());
+                        new_hubs[pos].set_children(combined);
+                    } else {
+                        let interleaved = new_hubs[pos]
+                            .children()
+                            .iter()
+                            .cloned()
+                            .interleave(hub.children().iter().cloned())
+                            .collect::<Vec<MetaData>>();
+                        new_hubs[pos].set_children(interleaved);
+                    }
                 }
                 None => new_hubs.push(hub.to_owned()),
             }
