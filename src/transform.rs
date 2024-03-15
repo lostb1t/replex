@@ -447,6 +447,8 @@ impl Transform for LibraryMixTransform {
         plex_client: PlexClient,
         options: PlexContext,
     ) -> MediaContainer {
+        tracing::info!("LibraryMixTransform");
+
         let config: Config = Config::figment().extract().unwrap();
         let mut children: Vec<MetaData> = vec![];
         let mut total_size = 0;
@@ -483,14 +485,16 @@ impl Transform for LibraryMixTransform {
 
             total_size += c.media_container.children().len() as i32;
 
-            match children.is_empty() {
-                false => {
-                    children = children
-                        .into_iter()
-                        .interleave(c.media_container.children())
-                        .collect::<Vec<MetaData>>();
-                }
-                true => children.append(&mut c.media_container.children()),
+            // Determine whether to interleave based on `dont_interleave()`
+            if !collection.media_container.dont_interleave()
+                && !children.is_empty()
+            {
+                children = children
+                    .into_iter()
+                    .interleave(c.media_container.children())
+                    .collect::<Vec<MetaData>>();
+            } else {
+                children.append(&mut c.media_container.children());
             }
         }
         item.total_size = Some(total_size);

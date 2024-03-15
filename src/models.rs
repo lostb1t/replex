@@ -60,7 +60,7 @@ pub enum Style {
     #[serde(rename = "hero")]
     Hero,
     #[serde(rename = "shelf")]
-    Shelf
+    Shelf,
 }
 
 fn default_as_false() -> bool {
@@ -105,7 +105,7 @@ pub struct Resolution {
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
-pub struct PlexContextProduct { 
+pub struct PlexContextProduct {
     #[serde(default, rename(deserialize = "x-plex-product"))]
     pub product: Option<String>,
 }
@@ -123,7 +123,7 @@ pub struct PlexContext {
     #[serde(default, deserialize_with = "deserialize_comma_seperated_string")]
     #[salvo(extract(rename = "pinnedContentDirectoryID"))]
     pub pinned_content_directory_id: Option<Vec<String>>,
-    #[serde(default="default_platform")]
+    #[serde(default = "default_platform")]
     #[salvo(extract(rename = "X-Plex-Platform"))]
     pub platform: Platform,
     #[serde(default, deserialize_with = "deserialize_screen_resolution")]
@@ -132,7 +132,7 @@ pub struct PlexContext {
     #[salvo(extract(rename = "X-Plex-Device-Screen-Resolution"))]
     pub screen_resolution_original: Option<String>,
     #[salvo(extract(rename = "x-plex-client-capabilities"))]
-    pub client_capabilities: Option<String>, 
+    pub client_capabilities: Option<String>,
     #[salvo(extract(rename = "X-Plex-Product"))]
     pub product: Option<String>,
     #[salvo(extract(rename = "X-Plex-Version"))]
@@ -195,7 +195,6 @@ pub struct PlexContext {
     pub height: Option<i32>,
     pub quality: Option<i32>,
     pub url: Option<String>,
-
     // this our own fields
     // pub style: Option<Style>,
 }
@@ -533,7 +532,6 @@ pub struct Tag {
     #[yaserde(attribute)]
     tag: String,
 }
-
 
 #[derive(
     Debug,
@@ -1197,13 +1195,25 @@ pub struct MetaData {
         rename = "playQueueItemID"
     )]
     pub play_queue_item_id: Option<i64>,
-    #[serde(rename = "Collection", default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        rename = "Collection",
+        default,
+        skip_serializing_if = "Vec::is_empty"
+    )]
     #[yaserde(rename = "Collection", default, child)]
     pub collections: Vec<Tag>,
-    #[serde(rename = "Country", default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        rename = "Country",
+        default,
+        skip_serializing_if = "Vec::is_empty"
+    )]
     #[yaserde(rename = "Country", default, child)]
     pub countries: Vec<Tag>,
-    #[serde(rename = "Director", default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        rename = "Director",
+        default,
+        skip_serializing_if = "Vec::is_empty"
+    )]
     #[yaserde(rename = "Director", default, child)]
     pub directors: Vec<Tag>,
     #[serde(rename = "Genre", default, skip_serializing_if = "Vec::is_empty")]
@@ -1257,10 +1267,10 @@ impl MetaData {
             );
             return None;
         }
-        
-        if guid.starts_with("plex://episode") && self.parent_guid.is_some() {    
-             guid = self.parent_guid.clone().unwrap();
-        //     dbg!(&guid);
+
+        if guid.starts_with("plex://episode") && self.parent_guid.is_some() {
+            guid = self.parent_guid.clone().unwrap();
+            //     dbg!(&guid);
         }
 
         let cache_key = format!("{}:cover_art", guid);
@@ -1292,7 +1302,7 @@ impl MetaData {
                     MediaContainerWrapper::default()
                 }
             };
-            
+
         // let mut container = plex_client.get_provider_data(guid).await.unwrap();
         let metadata = container.media_container.children_mut().get(0);
         let mut image: Option<String> = None;
@@ -1424,6 +1434,34 @@ impl MetaData {
                 .get(0)
                 .unwrap()
                 .has_label("REPLEX_EXCLUDE_WATCHED".to_string()))
+    }
+
+    pub async fn dont_interleave(
+        &self,
+        plex_client: PlexClient,
+    ) -> Result<bool> {
+        if !self.is_collection_hub() {
+            return Ok(false);
+        }
+
+        let config: Config = Config::figment().extract().unwrap();
+        let collection = plex_client
+            .clone()
+            .get_cached(
+                plex_client
+                    .get_collection(get_collection_id_from_hub(self) as i32),
+                format!("collection:{}", get_collection_id_from_hub(self))
+                    .to_string(),
+            )
+            .await?;
+
+        Ok(config.dont_interleave
+            || collection
+                .media_container
+                .metadata
+                .get(0)
+                .unwrap()
+                .has_label("REPLEX_DONT_INTERLEAVE".to_string()))
     }
 
     // TODO: Does not work when using a new instance
@@ -1592,7 +1630,7 @@ pub struct MediaContainer {
     #[serde(
         default,
         skip_serializing_if = "Option::is_none",
-        rename = "directPlayDecisionText",
+        rename = "directPlayDecisionText"
     )]
     pub direct_play_decision_text: Option<String>,
     #[yaserde(attribute, rename = "generalDecisionCode")]
@@ -1607,14 +1645,14 @@ pub struct MediaContainer {
     #[serde(
         default,
         skip_serializing_if = "Option::is_none",
-        rename = "generalDecisionText",
+        rename = "generalDecisionText"
     )]
     pub general_decision_text: Option<String>,
     #[yaserde(attribute, rename = "resourceSession")]
     #[serde(
         default,
         skip_serializing_if = "Option::is_none",
-        rename = "resourceSession",
+        rename = "resourceSession"
     )]
     pub resource_session: Option<String>,
     #[yaserde(attribute, rename = "transcodeDecisionCode")]
@@ -1629,7 +1667,7 @@ pub struct MediaContainer {
     #[serde(
         default,
         skip_serializing_if = "Option::is_none",
-        rename = "transcodeDecisionText",
+        rename = "transcodeDecisionText"
     )]
     pub transcode_decision_text: Option<String>,
 
@@ -1721,6 +1759,17 @@ impl MediaContainer {
                 .get(0)
                 .unwrap()
                 .has_label("REPLEX_EXCLUDE_WATCHED".to_string());
+    }
+
+    pub fn dont_interleave(&self) -> bool {
+        let config: Config = Config::figment().extract().unwrap();
+
+        return config.dont_interleave
+            || self
+                .metadata
+                .get(0)
+                .unwrap()
+                .has_label("REPLEX_DONT_INTERLEAVE".to_string());
     }
 
     pub fn set_type(&mut self, value: String) {
