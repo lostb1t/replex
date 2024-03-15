@@ -1,0 +1,36 @@
+name: 'Rust Build'
+description: 'Builds the Rust project'
+
+inputs: {}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        profile: minimal
+        override: true
+
+    - name: Cache Cargo Registry
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+        
+    - name: Cache Cargo Build Output
+      uses: actions/cache@v2
+      with:
+        path: |
+          target
+        key: ${{ runner.os }}-cargo-build-output-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Build Rust project
+      run: |
+        cargo build --release
+        mkdir -p bin/x86_64-unknown-linux-gnu
+        cp target/release/replex bin/x86_64-unknown-linux-gnu/
+      shell: bash
