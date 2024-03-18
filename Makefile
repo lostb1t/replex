@@ -25,7 +25,7 @@ run:
 	REPLEX_CACHE_ROWS=0 \
 	REPLEX_CACHE_TTL=0 \
 	REPLEX_PORT=80 \
-	RUST_LOG="info" \
+	RUST_LOG="info,replex=info" \
 	cargo watch -x run
 
 fix:
