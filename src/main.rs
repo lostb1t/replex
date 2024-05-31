@@ -8,7 +8,7 @@ use salvo::prelude::*;
 use std::env;
 use std::time::Duration;
 use tokio::{task, time};
-use tonic::metadata::MetadataMap;
+//use tonic::metadata::MetadataMap;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::prelude::*;
 
@@ -31,35 +31,35 @@ async fn main() {
         false => None,
     };
 
-    let otlp_layer = if config.newrelic_api_key.is_some() {
-        let mut map = MetadataMap::with_capacity(3);
-        map.insert(
-            "api-key",
-            config.newrelic_api_key.unwrap().parse().unwrap(),
-        );
-        let tracer = opentelemetry_otlp::new_pipeline()
-            .tracing()
-            .with_exporter(
-                opentelemetry_otlp::new_exporter()
-                    .tonic()
-                    .with_tls_config(Default::default())
-                    .with_endpoint(
-                        "https://otlp.eu01.nr-data.net:443/v1/traces",
-                    )
-                    .with_metadata(map)
-                    .with_timeout(Duration::from_secs(3)),
-            )
-            .install_batch(opentelemetry::runtime::Tokio)
-            .unwrap();
-        Some(tracing_opentelemetry::layer().with_tracer(tracer))
-    } else {
-        None
-    };
+    // let otlp_layer = if config.newrelic_api_key.is_some() {
+    //     let mut map = MetadataMap::with_capacity(3);
+    //     map.insert(
+    //         "api-key",
+    //         config.newrelic_api_key.unwrap().parse().unwrap(),
+    //     );
+    //     let tracer = opentelemetry_otlp::new_pipeline()
+    //         .tracing()
+    //         .with_exporter(
+    //             opentelemetry_otlp::new_exporter()
+    //                 .tonic()
+    //                 .with_tls_config(Default::default())
+    //                 .with_endpoint(
+    //                     "https://otlp.eu01.nr-data.net:443/v1/traces",
+    //                 )
+    //                 .with_metadata(map)
+    //                 .with_timeout(Duration::from_secs(3)),
+    //         )
+    //         .install_batch(opentelemetry::runtime::Tokio)
+    //         .unwrap();
+    //     Some(tracing_opentelemetry::layer().with_tracer(tracer))
+    // } else {
+    //     None
+    // };
 
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::from_default_env())
         .with(console_layer)
-        .with(otlp_layer)
+        // .with(otlp_layer)
         .with(fmt_layer)
         .init();
 

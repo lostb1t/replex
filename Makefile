@@ -24,7 +24,7 @@ run:
 	REPLEX_FORCE_MAXIMUM_QUALITY=1 \
 	REPLEX_CACHE_ROWS=0 \
 	REPLEX_HERO_ROWS="home.movies.recent,movies.recent,movie.recentlyadded,movie.topunwatched,movie.recentlyviewed,hub.movie.recentlyreleased,home.television.recent,tv.inprogress,tv.recentlyaired" \
-	REPLEX_PORT=80 \
+	REPLEX_PORT=8080 \
 	REPLEX_INCLUDE_WATCHED=0 \
 	REPLEX_REDIRECT_STREAMS=0 \
 	REPLEX_DISABLE_RELATED=0 \
