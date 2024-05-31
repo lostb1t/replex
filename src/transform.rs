@@ -550,7 +550,7 @@ impl ClientHeroStyle {
                       Self {
                           style: Some("hero".to_string()),
                           // clip wil make the item info disappear on TV
-                          r#type: "mixed".to_string(),
+                          r#type: "clip".to_string(),
                           // using clip makes it load thumbs instead of art as cover art. So we don't have to touch the background
                           child_type: Some("clip".to_string()),
                           cover_art_as_art: false,
@@ -893,10 +893,7 @@ impl Transform for HubKeyTransform {
         plex_client: PlexClient,
         options: PlexContext,
     ) {
-        // if item.is_hub() {
-        //     dbg!(&item.key);
-        // }
-        // let key = item.key.clone().unwrap();
+
         if item.is_hub()
             && item.key.is_some()
             && !item.key.clone().unwrap().starts_with("/replex")

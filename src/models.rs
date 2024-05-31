@@ -943,6 +943,9 @@ pub struct MetaData {
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub composite: Option<String>,
+    #[yaserde(attribute, rename = "playlistType")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub playlist_type: Option<String>,
     #[yaserde(attribute)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub banner: Option<String>,
@@ -1325,6 +1328,15 @@ impl MetaData {
 
     pub fn is_hub(&self) -> bool {
         self.hub_identifier.is_some()
+    }
+
+    pub fn is_playlist(&self) -> bool {
+        self.context.is_some()
+            && self
+                .context
+                .clone()
+                .unwrap()
+                .starts_with("hub.home.playlists")
     }
 
     pub fn is_media(&self) -> bool {

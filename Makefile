@@ -33,7 +33,7 @@ run:
 	REPLEX_ENABLE_CONSOLE=0 \
 	REPLEX_CACHE_TTL=0 \
 	RUST_LOG="info,replex=debug" \
-	cargo watch -x run
+	cargo run
 
 fix:
 	cargo fix
