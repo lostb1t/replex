@@ -275,5 +275,5 @@ jobs:
       - name: Invoke semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
-        run: npx semantic-release
+        run: npx semantic-release@22
    
