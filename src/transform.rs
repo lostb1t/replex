@@ -547,13 +547,14 @@ impl ClientHeroStyle {
             Platform::Android => {
                 match device_type {
                     DeviceType::Tv => {
+                    //   dbg!(context);
                       Self {
                           style: Some("hero".to_string()),
                           // clip wil make the item info disappear on TV
                           r#type: "clip".to_string(),
                           // using clip makes it load thumbs instead of art as cover art. So we don't have to touch the background
                           child_type: Some("clip".to_string()),
-                          cover_art_as_art: false,
+                          cover_art_as_art: true, // Home doesn't work correctly without.
                           cover_art_as_thumb: true,
                           ..ClientHeroStyle::default()
                       }
