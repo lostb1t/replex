@@ -326,10 +326,9 @@ async fn ntf_watchlist_force(
     
     let params: PlexContext = req.extract().await.unwrap();
     
-    // client id is a actually not needed. notifications settings seem to be global
-    if params.clone().client_identifier.is_some() && params.clone().token.is_some() {
+    if params.clone().token.is_some() {
         tokio::spawn(async move {
-            let url = format!("https://notifications.plex.tv/api/v1/notifications/settings?X-Plex-Client-Identifier={}&X-Plex-Token={}", params.clone().client_identifier.unwrap(),params.clone().token.unwrap());
+            let url = format!("https://notifications.plex.tv/api/v1/notifications/settings?X-Plex-Token={}", params.clone().token.unwrap());
             let json_data = r#"{"enabled": true,"libraries": [],"identifier": "tv.plex.notification.library.new"}"#;
             let client = reqwest::Client::new();
         
@@ -341,9 +340,11 @@ async fn ntf_watchlist_force(
                 .await
                 .unwrap();
         
-            println!("Set watchlist for user: {} platform: {} status: {}", 
+            println!("Set watchlist for user: {} platform: {} product: {} device name: {} status: {}", 
               params.clone().username.unwrap_or_default(),
               params.clone().platform,
+              params.clone().product.unwrap_or_default(),
+              params.clone().device_name.unwrap_or_default(),
               &response.status()
             );
             dbg!(params.clone())
