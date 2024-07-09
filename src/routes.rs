@@ -325,6 +325,8 @@ async fn ntf_watchlist_force(
 ) {
     
     let params: PlexContext = req.extract().await.unwrap();
+    
+    // client id is a actually not needed. notifications settings seem to be global
     if params.clone().client_identifier.is_some() && params.clone().token.is_some() {
         tokio::spawn(async move {
             let url = format!("https://notifications.plex.tv/api/v1/notifications/settings?X-Plex-Client-Identifier={}&X-Plex-Token={}", params.clone().client_identifier.unwrap(),params.clone().token.unwrap());
