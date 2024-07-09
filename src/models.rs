@@ -126,6 +126,8 @@ pub struct PlexContext {
     #[serde(default="default_platform")]
     #[salvo(extract(rename = "X-Plex-Platform"))]
     pub platform: Platform,
+    #[salvo(extract(rename = "X-Plex-Username"))]
+    pub username: Option<String>,
     #[serde(default, deserialize_with = "deserialize_screen_resolution")]
     #[salvo(extract(rename = "X-Plex-Device-Screen-Resolution"))]
     pub screen_resolution: Vec<Resolution>,
@@ -1180,7 +1182,7 @@ pub struct MetaData {
     #[serde(rename = "Guid", default, skip_serializing_if = "Vec::is_empty")]
     #[yaserde(rename = "Guid", default, child)]
     pub guids: Vec<Guid>,
-    #[yaserde(attribute, rename = "userState")]
+    #[yaserde(attribute, rename = "State")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user_state: Option<SpecialBool>,
     #[serde(rename = "Image", default, skip_serializing_if = "Vec::is_empty")]

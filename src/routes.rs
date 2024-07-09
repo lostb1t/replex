@@ -323,22 +323,28 @@ async fn ntf_watchlist_force(
     res: &mut Response,
     ctrl: &mut FlowCtrl,
 ) {
+    
     let params: PlexContext = req.extract().await.unwrap();
-    tokio::spawn(async move {
-        let url = format!("https://notifications.plex.tv/api/v1/notifications/settings?X-Plex-Client-Identifier={}&X-Plex-Token={}", params.clone().client_identifier.unwrap(),params.clone().token.unwrap());
-        let json_data = r#"{"enabled": true,"libraries": [],"identifier": "tv.plex.notification.library.new"}"#;
-        let client = reqwest::Client::new();
-    
-        let response = client
-            .post(url)
-            .header("Content-Type", "application/json")
-            .body(json_data.to_owned())
-            .send()
-            .await
-            .unwrap();
-    
-        //println!("Status: {}", response.status());
-    });
+    if params.clone().client_identifier.is_some() && params.clone().token.is_some() {
+        tokio::spawn(async move {
+            let url = format!("https://notifications.plex.tv/api/v1/notifications/settings?X-Plex-Client-Identifier={}&X-Plex-Token={}", params.clone().client_identifier.unwrap(),params.clone().token.unwrap());
+            let json_data = r#"{"enabled": true,"libraries": [],"identifier": "tv.plex.notification.library.new"}"#;
+            let client = reqwest::Client::new();
+        
+            let response = client
+                .post(url)
+                .header("Content-Type", "application/json")
+                .body(json_data.to_owned())
+                .send()
+                .await
+                .unwrap();
+        
+            println!("Set watchlist for user: {} platform: {}", 
+              params.clone().username.unwrap_or_default(),
+              params.clone().platform
+            );
+        });
+    }
 }
 
 #[handler]
