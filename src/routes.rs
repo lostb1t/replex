@@ -133,6 +133,16 @@ pub fn route() -> Router {
                 .get(empty_handler),
         );
     }
+    
+    if config.ntf_watchlist_force {
+        router = router.push(
+            Router::new()
+                .hoop(ntf_watchlist_force)
+                //.get(ping)
+                .goal(proxy_request)
+                .path("/media/providers"),
+        );
+    }
 
     router = router
         .push(
@@ -147,15 +157,14 @@ pub fn route() -> Router {
                 .hoop(auto_refresh_cache())
                 .get(get_hubs_sections),
         )
-        //.push(
-        //    Router::new()
-        //        .path(format!("{}/<id>", PLEX_LIBRARY_METADATA))
-        //        .get(get_library_item_metadata),
-        //)
+        .push(
+            Router::new()
+                .path("/webhooks/plex")
+                .post(webhook_plex),
+        )
         .push(
             Router::new()
                 .path("/ping")
-                .hoop(force_maximum_quality)
                 .get(ping),
         )
         .push(
@@ -308,6 +317,31 @@ async fn disable_related_query(
 }
 
 #[handler]
+async fn ntf_watchlist_force(
+    req: &mut Request,
+    depot: &mut Depot,
+    res: &mut Response,
+    ctrl: &mut FlowCtrl,
+) {
+    let params: PlexContext = req.extract().await.unwrap();
+    tokio::spawn(async move {
+        let url = format!("https://notifications.plex.tv/api/v1/notifications/settings?X-Plex-Client-Identifier={}&X-Plex-Token={}", params.clone().client_identifier.unwrap(),params.clone().token.unwrap());
+        let json_data = r#"{"enabled": true,"libraries": [],"identifier": "tv.plex.notification.library.new"}"#;
+        let client = reqwest::Client::new();
+    
+        let response = client
+            .post(url)
+            .header("Content-Type", "application/json")
+            .body(json_data.to_owned())
+            .send()
+            .await
+            .unwrap();
+    
+        //println!("Status: {}", response.status());
+    });
+}
+
+#[handler]
 pub async fn empty_handler(
     req: &mut Request,
     res: &mut Response,
@@ -320,6 +354,17 @@ pub async fn empty_handler(
     container.media_container.identifier =
         Some("com.plexapp.plugins.library".to_string());
     res.render(container);
+    return Ok(());
+}
+
+#[handler]
+pub async fn webhook_plex(
+    req: &mut Request,
+    res: &mut Response,
+) -> Result<(), anyhow::Error> {
+    let payload = req.form::<String>("payload").await;
+    dbg!(payload);
+    res.render(());
     return Ok(());
 }
 

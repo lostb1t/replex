@@ -24,7 +24,7 @@ run:
 	REPLEX_FORCE_MAXIMUM_QUALITY=1 \
 	REPLEX_CACHE_ROWS=0 \
 	REPLEX_HERO_ROWS="home.movies.recent,movies.recent,movie.recentlyadded,movie.topunwatched,movie.recentlyviewed,hub.movie.recentlyreleased,home.television.recent,tv.inprogress,tv.recentlyaired" \
-	REPLEX_PORT=8089 \
+	REPLEX_PORT=8000 \
 	REPLEX_INCLUDE_WATCHED=0 \
 	REPLEX_REDIRECT_STREAMS=0 \
 	REPLEX_DISABLE_RELATED=0 \
@@ -32,8 +32,10 @@ run:
 	REPLEX_DISABLE_USER_STATE=0 \
 	REPLEX_ENABLE_CONSOLE=0 \
 	REPLEX_CACHE_TTL=0 \
+  REPLEX_NTF_WATCHLIST_FORCE=1 \
 	RUST_LOG="info,replex=debug" \
-	cargo run
+  RUSTFLAGS=-Awarnings \
+	cargo watch -x run
 
 fix:
 	cargo fix

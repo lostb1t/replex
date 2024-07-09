@@ -89,6 +89,11 @@ pub struct Config {
     #[serde(default, deserialize_with = "deserialize_comma_seperated_string")]
     pub force_direct_play_for: Option<Vec<String>>,
     pub test_script: Option<String>,
+    #[serde(
+        default = "default_as_false",
+        deserialize_with = "figment::util::bool_from_str_or_int"
+    )]
+    pub ntf_watchlist_force: bool,
 }
 
 fn default_cache_ttl() -> u64 {
