@@ -339,10 +339,12 @@ async fn ntf_watchlist_force(
                 .await
                 .unwrap();
         
-            println!("Set watchlist for user: {} platform: {}", 
+            println!("Set watchlist for user: {} platform: {} status: {}", 
               params.clone().username.unwrap_or_default(),
-              params.clone().platform
+              params.clone().platform,
+              &response.status()
             );
+            dbg!(params.clone())
         });
     }
 }
