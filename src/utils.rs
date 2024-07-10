@@ -17,6 +17,7 @@ use strum_macros::EnumString;
 use http_body_util::BodyExt;
 use tracing::error;
 use url::Url;
+use tokio::time::Duration;
 use yaserde::ser::to_string as to_xml_str;
 // use salvo_core::http::response::Response as SalvoResponse;
 use salvo::http::HeaderValue;
@@ -53,7 +54,10 @@ pub fn default_proxy() -> Proxy<String, ReqwestClient> {
   let config: Config = Config::figment().extract().unwrap();
   let mut proxy = Proxy::new(
     config.host.clone().unwrap(),
-    ReqwestClient::default(),
+    ReqwestClient::new(reqwest::Client::builder()
+             .timeout(Duration::from_secs(60 * 200))
+             .build()
+             .unwrap())
   );
   proxy = proxy.url_path_getter(default_url_path_getter);
   proxy = proxy.url_query_getter(default_url_query_getter);
