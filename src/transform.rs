@@ -142,7 +142,7 @@ impl TransformBuilder {
     }
 
     // TODO: join async filters
-    pub async fn apply_to_old(
+    pub async fn apply_to(
         self,
         container: &mut MediaContainerWrapper<MediaContainer>,
     ) {
@@ -190,7 +190,7 @@ impl TransformBuilder {
         }
     }
     
-    pub async fn apply_to(
+    pub async fn apply_to_test(
         self,
         container: &mut MediaContainerWrapper<MediaContainer>,
     ) {
