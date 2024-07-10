@@ -149,13 +149,13 @@ pub fn route() -> Router {
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
-                .hoop(default_cache())
+                //.hoop(default_cache())
                 .get(transform_hubs_home),
         )
         .push(
             Router::new()
                 .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
-                .hoop(default_cache())
+                //.hoop(default_cache())
                 .get(get_hubs_sections),
         )
         .push(
@@ -171,13 +171,13 @@ pub fn route() -> Router {
         .push(
             Router::new()
                 .path("/replex/<style>/library/collections/<ids>/children")
-                .hoop(default_cache())
+                //.hoop(default_cache())
                 .get(get_collections_children),
         )
         .push(
             Router::new()
                 .path("/replex/<style>/<**rest>")
-                .hoop(default_cache())
+                //.hoop(default_cache())
                 .get(default_transform),
         )
         //.push(
