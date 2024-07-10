@@ -372,7 +372,8 @@ impl PlexClient {
         // .build();
         // let res = client.execute(req).await.map_err(Error::other)?;
 
-        let res = Client::new().execute(req).await.map_err(Error::other)?;
+        //let res = Client::new().execute(req).await.map_err(Error::other)?;
+        let res = self.http_client.execute(req).await.map_err(Error::other)?;
         //return Ok(MediaContainerWrapper::default());
         // headers.insert(
         //     "X-Plex-Token",
