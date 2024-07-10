@@ -113,7 +113,7 @@ impl CacheManager {
     /// Clears out the entire cache.
     pub async fn clear(&self) -> anyhow::Result<()> {
         self.inner.invalidate_all();
-        self.inner.sync();
+        //self.inner.sync();
         Ok(())
     }
 
@@ -147,7 +147,7 @@ impl CacheManager {
 
     pub async fn delete(&self, cache_key: &str) -> anyhow::Result<()> {
         self.inner.invalidate(cache_key).await;
-        self.inner.sync();
+        //self.inner.sync();
         Ok(())
     }
 }

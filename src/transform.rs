@@ -142,7 +142,7 @@ impl TransformBuilder {
     }
 
     // TODO: join async filters
-    pub async fn apply_to(
+    pub async fn apply_to_old(
         self,
         container: &mut MediaContainerWrapper<MediaContainer>,
     ) {
@@ -157,8 +157,53 @@ impl TransformBuilder {
                         )
                     },
                 );
-
+             
             future::join_all(futures).await;
+            //for k in container.media_container.children_mut()
+
+            // dont use join as it needs ti be executed in order
+            // let l = std::cell::RefCell::new(&mut container.media_container);
+            container.media_container = t
+                .transform_mediacontainer(
+                    container.media_container.clone(),
+                    self.plex_client.clone(),
+                    self.options.clone(),
+                )
+                .await;
+            // dbg!(container.media_container.size);
+        }
+
+        // filter behind transform as transform can load in additional data
+        let children = container.media_container.children_mut();
+        let new_children = self.apply_to_metadata(children).await;
+        container.media_container.set_children(new_children);
+
+        if container.media_container.size.is_some() {
+            container.media_container.size = Some(
+                container
+                    .media_container
+                    .children_mut()
+                    .len()
+                    .try_into()
+                    .unwrap(),
+            );
+        }
+    }
+    
+    pub async fn apply_to(
+        self,
+        container: &mut MediaContainerWrapper<MediaContainer>,
+    ) {
+        for t in self.transforms.clone() {
+      
+            for child in container.media_container.children_mut() {
+               t.transform_metadata(
+                            child,
+                            self.plex_client.clone(),
+                            self.options.clone(),
+                        ).await;
+            }
+            //future::join_all(futures).await;
 
             // dont use join as it needs ti be executed in order
             // let l = std::cell::RefCell::new(&mut container.media_container);

@@ -415,7 +415,7 @@ impl PlexClient {
         container: MediaContainerWrapper<MediaContainer>,
     ) {
         self.cache.insert(cache_key, container).await;
-        self.cache.sync();
+        //self.cache.sync();
     }
 
     fn generate_cache_key(&self, name: String) -> String {
