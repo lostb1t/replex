@@ -36,6 +36,7 @@ pub fn route() -> Router {
     //         .unwrap(),
     // );
 
+    //let default_cache = default_cache()
     let mut router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
         .hoop(should_skip)
@@ -148,13 +149,13 @@ pub fn route() -> Router {
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
-                .hoop(auto_refresh_cache())
+                .hoop(default_cache())
                 .get(transform_hubs_home),
         )
         .push(
             Router::new()
                 .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
-                .hoop(auto_refresh_cache())
+                .hoop(default_cache())
                 .get(get_hubs_sections),
         )
         .push(
