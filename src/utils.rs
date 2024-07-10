@@ -6,6 +6,9 @@ use itertools::Itertools;
 // use futures_util::StreamExt;
 use mime::Mime;
 use multimap::MultiMap;
+use crate::config::Config;
+use salvo::prelude::*;
+use salvo::proxy::*;
 use salvo::Error;
 use serde::{Deserialize, Serialize};
 use strum_macros::Display as EnumDisplay;
@@ -20,12 +23,42 @@ use salvo::http::HeaderValue;
 
 use salvo::http::HeaderMap;
 use salvo::{
-    http::response::Response as SalvoResponse, test::ResponseExt, Extractible,
+    http::response::Response as SalvoResponse, Extractible,
     Request as SalvoRequest,
 };
 
 use crate::models::*;
 
+pub fn default_url_path_getter(
+    req: &Request,
+    _depot: &Depot,
+) -> Option<String> {
+    //dbg!(&req);
+    Some(req.uri().path().to_string())
+}
+
+pub fn default_url_query_getter(
+    req: &Request,
+    _depot: &Depot,
+) -> Option<String> {
+    //dbg!(&req.uri().query());
+    match req.uri().query() {
+        Some(i) => Some(i.to_string()),
+        _ => None
+    }
+}
+
+
+pub fn default_proxy() -> Proxy<String, ReqwestClient> {
+  let config: Config = Config::figment().extract().unwrap();
+  let mut proxy = Proxy::new(
+    config.host.clone().unwrap(),
+    ReqwestClient::default(),
+  );
+  proxy = proxy.url_path_getter(default_url_path_getter);
+  proxy = proxy.url_query_getter(default_url_query_getter);
+  proxy
+}
 
 
 pub fn get_collection_id_from_child_path(path: String) -> i32 {
@@ -174,12 +207,12 @@ pub async fn from_hyper_response(
     from_bytes(bytes)
 }
 
-pub async fn from_salvo_response(
-    mut res: SalvoResponse,
-) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
-    let bytes = res.take_bytes(None).await.unwrap();
-    from_bytes(bytes)
-}
+//pub async fn from_salvo_response(
+//    mut res: SalvoResponse,
+//) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
+//    let bytes = res.take_bytes(None).await.unwrap();
+//    from_bytes(bytes)
+//}
 
 pub fn from_bytes(
     bytes: bytes::Bytes,

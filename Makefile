@@ -15,14 +15,13 @@ docker-run:
 # push-docker:
 # 	docker push ghcr.io/lostb1t/replex:latest
 
-# release: build-docker push-docker
 
 run:
 	REPLEX_DISABLE_CONTINUE_WATCHING=0 \
 	REPLEX_VIDEO_TRANSCODE_FALLBACK_FOR="4k" \
 	REPLEX_AUTO_SELECT_VERSION=0 \
 	REPLEX_FORCE_MAXIMUM_QUALITY=1 \
-	REPLEX_CACHE_ROWS=1 \
+	REPLEX_CACHE_ROWS=0 \
   REPLEX_CACHE_ROWS_REFRESH=0 \
 	REPLEX_HERO_ROWS="home.movies.recent,movies.recent,movie.recentlyadded,movie.topunwatched,movie.recentlyviewed,hub.movie.recentlyreleased,home.television.recent,tv.inprogress,tv.recentlyaired" \
 	REPLEX_PORT=8000 \
@@ -32,7 +31,7 @@ run:
 	REPLEX_DISABLE_LEAF_COUNT=0 \
 	REPLEX_DISABLE_USER_STATE=0 \
 	REPLEX_ENABLE_CONSOLE=0 \
-	REPLEX_CACHE_TTL=600 \
+	REPLEX_CACHE_TTL=0 \
   REPLEX_NTF_WATCHLIST_FORCE=1 \
 	RUST_LOG="info,replex=info" \
   RUSTFLAGS=-Awarnings \

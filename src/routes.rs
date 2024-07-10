@@ -3,7 +3,8 @@ use crate::config::Config;
 use crate::logging::*;
 use crate::models::*;
 use crate::plex_client::*;
-use crate::proxy::Proxy;
+//use crate::proxy::Proxy;
+//use salvo_proxy::Proxy;
 use crate::timeout::*;
 use crate::transform::*;
 use crate::url::*;
@@ -203,13 +204,14 @@ async fn proxy_request(
     ctrl: &mut FlowCtrl,
 ) {
     let config: Config = Config::dynamic(req).extract().unwrap();
-    let proxy = Proxy::with_client(
-        config.host.clone().unwrap(),
-        reqwest::Client::builder()
-            .timeout(Duration::from_secs(60 * 200))
-            .build()
-            .unwrap(),
-    );
+    //let proxy = Proxy::new(
+    //   config.host.clone().unwrap(),
+    //    reqwest::Client::builder()
+    //        .timeout(Duration::from_secs(60 * 200))
+    //        .build()
+    //        .unwrap(),
+    //);
+    let proxy = default_proxy();
 
     proxy.handle(req, depot, res, ctrl).await;
 }
@@ -240,13 +242,14 @@ async fn should_skip(
     {
 
         let config: Config = Config::dynamic(req).extract().unwrap();
-        let proxy = Proxy::with_client(
-            config.host.clone().unwrap(),
-            reqwest::Client::builder()
-                .timeout(Duration::from_secs(60 * 200))
-                .build()
-                .unwrap(),
-        );
+        //let proxy = Proxy::new(
+        //    config.host.clone().unwrap(),
+        //    reqwest::Client::builder()
+        //        .timeout(Duration::from_secs(60 * 200))
+        //        .build()
+        //        .unwrap(),
+        //);
+        let proxy = default_proxy();
 
         proxy.handle(req, depot, res, ctrl).await;
         ctrl.skip_rest();
@@ -324,7 +327,8 @@ async fn ntf_watchlist_force(
     res: &mut Response,
     ctrl: &mut FlowCtrl,
 ) {
-    
+    use memory_stats::memory_stats;
+    dbg!(memory_stats().unwrap().physical_mem / 1024 / 1000);
     let params: PlexContext = req.extract().await.unwrap();
     
     if params.clone().token.is_some() {
@@ -348,7 +352,7 @@ async fn ntf_watchlist_force(
               params.clone().device_name.unwrap_or_default(),
               &response.status()
             );
-            dbg!(params.clone())
+            //dbg!(params.clone())
         });
     }
 }

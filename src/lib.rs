@@ -14,7 +14,7 @@ pub mod transform;
 pub mod logging;
 pub mod cache;
 pub mod routes;
-pub mod proxy;
+//pub mod proxy;
 pub mod timeout;
 pub mod headers;
 

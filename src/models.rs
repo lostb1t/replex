@@ -20,7 +20,6 @@ use serde_aux::prelude::{
     deserialize_number_from_string, deserialize_string_from_number,
 };
 // use smartstring::alias::String;
-// use hyper::Body;
 use itertools::Itertools;
 use salvo::http::ReqBody;
 use salvo::http::ResBody;
@@ -1253,6 +1252,8 @@ impl MetaData {
         &self,
         plex_client: PlexClient,
     ) -> Option<String> {
+        //return None;
+
         self.guid.as_ref()?;
         let mut guid = self.guid.clone().unwrap();
         if guid.starts_with("local://") {
@@ -1276,6 +1277,7 @@ impl MetaData {
         if cached_result.is_some() {
             return cached_result.unwrap();
         }
+
         let guid = self
             .guid
             .clone()
@@ -1297,7 +1299,8 @@ impl MetaData {
                     MediaContainerWrapper::default()
                 }
             };
-            
+    
+        //let mut container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
         // let mut container = plex_client.get_provider_data(guid).await.unwrap();
         let metadata = container.media_container.children_mut().get(0);
         let mut image: Option<String> = None;
@@ -1309,8 +1312,12 @@ impl MetaData {
                 }
             }
         }
+        //drop(container);
         let mut cache_expiry = crate::cache::Expiration::Month;
         image.as_ref()?; // dont return and dont cache, let us just retry next time.
+        //return image;
+
+        //dbg!("KAKA");
         let _ = GLOBAL_CACHE
             .insert(cache_key, image.clone(), cache_expiry)
             .await;

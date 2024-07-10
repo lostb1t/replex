@@ -86,7 +86,7 @@ async fn main() {
                 .bind()
                 .await;
         Server::new(acceptor)
-            .idle_timeout(Duration::from_secs(60 * 101))
+            //.idle_timeout(Duration::from_secs(60 * 101))
             .serve(router)
             .await;
     } else {
@@ -95,7 +95,7 @@ async fn main() {
                 .bind()
                 .await;
         Server::new(acceptor)
-            .idle_timeout(Duration::from_secs(60 * 101))
+            //.idle_timeout(Duration::from_secs(60 * 101))
             .serve(router)
             .await;
     }

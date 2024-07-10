@@ -371,7 +371,9 @@ impl PlexClient {
         // ))
         // .build();
         // let res = client.execute(req).await.map_err(Error::other)?;
+
         let res = Client::new().execute(req).await.map_err(Error::other)?;
+        //return Ok(MediaContainerWrapper::default());
         // headers.insert(
         //     "X-Plex-Token",
         //     header::HeaderValue::from_str(self.x_plex_token.clone().as_str()).unwrap(),
@@ -393,6 +395,7 @@ impl PlexClient {
         // if res.status() == 500 {
         //     return Err(salvo::http::StatusError::);
         // }
+       
 
         let container: MediaContainerWrapper<MediaContainer> =
             from_reqwest_response(res).await?;

@@ -140,9 +140,8 @@ impl CacheManager {
         V: Serialize,
     {
         let value = (expires, Arc::new(bincode::serialize(&v)?));
-        // let bytes = bincode::serialize(&value)?;
         self.inner.insert(cache_key, value).await;
-        self.inner.sync();
+        //self.inner.sync();
         Ok(())
     }
 
@@ -243,14 +242,12 @@ impl RequestIssuer {
 
 // }
 
-#[async_trait]
+//#[async_trait]
 impl CacheIssuer for RequestIssuer {
     type Key = String;
-    async fn issue(
-        &self,
-        req: &mut Request,
-        _depot: &Depot,
-    ) -> Option<Self::Key> {
+    //async fn issue(&self, req: &mut Request, depot: &Depot) -> Option<Self::Key> {
+    //async fn issue(&self, req: &mut Request, depot: &Depot) -> Option<Self::Key> {
+    async fn issue(&self, req: &mut Request, _depot: &Depot) -> Option<Self::Key> {
         let mut key = String::new();
         // key.push_str("uri::http://"); // always http as we use local addr
         if self.use_scheme {
