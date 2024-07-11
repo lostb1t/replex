@@ -190,6 +190,9 @@ pub struct PlexContext {
     #[serde(default = "default_as_false", deserialize_with = "bool_from_int")]
     #[salvo(extract(rename = "excludeAllLeaves"))]
     pub exclude_all_leaves: bool,
+    // host of the proxy server
+    #[salvo(extract(rename = "host"))]
+    pub host: Option<String>,
     // photo transcode
     pub size: Option<String>,
     pub width: Option<i32>,
@@ -1247,83 +1250,6 @@ where
 }
 
 impl MetaData {
-    // TODO: move to plexclient
-    pub async fn get_hero_art(
-        &self,
-        plex_client: PlexClient,
-    ) -> Option<String> {
-        //return None;
-
-        self.guid.as_ref()?;
-        let mut guid = self.guid.clone().unwrap();
-        if guid.starts_with("local://") {
-            tracing::debug!(
-                "Skipping loading remote metadata for local item: {}",
-                guid,
-            );
-            return None;
-        }
-        
-        if guid.starts_with("plex://episode") && self.parent_guid.is_some() {    
-             guid = self.parent_guid.clone().unwrap();
-        //     dbg!(&guid);
-        }
-
-        let cache_key = format!("{}:cover_art", guid);
-
-        let cached_result: Option<Option<String>> =
-            GLOBAL_CACHE.get(cache_key.as_str()).await;
-
-        if cached_result.is_some() {
-            return cached_result.unwrap();
-        }
-
-        let guid = self
-            .guid
-            .clone()
-            .unwrap()
-            .replace("plex://show/", "")
-            .replace("plex://movie/", "")
-            .replace("plex://season/", "")
-            .replace("plex://episode/", "");
-
-        let mut container: MediaContainerWrapper<MediaContainer> =
-            match plex_client.get_provider_data(guid).await {
-                Ok(r) => r,
-                Err(e) => {
-                    tracing::warn!(
-                        "Problem loading provider metadata for: {} Error: {}",
-                        self.guid.clone().unwrap(),
-                        e
-                    );
-                    MediaContainerWrapper::default()
-                }
-            };
-    
-        //let mut container: MediaContainerWrapper<MediaContainer> = MediaContainerWrapper::default();
-        // let mut container = plex_client.get_provider_data(guid).await.unwrap();
-        let metadata = container.media_container.children_mut().get(0);
-        let mut image: Option<String> = None;
-        if metadata.is_some() {
-            for i in &metadata.unwrap().images {
-                if i.r#type == "coverArt" {
-                    image = Some(i.url.clone());
-                    break;
-                }
-            }
-        }
-        //drop(container);
-        let mut cache_expiry = crate::cache::Expiration::Month;
-        image.as_ref()?; // dont return and dont cache, let us just retry next time.
-        //return image;
-
-        //dbg!("KAKA");
-        let _ = GLOBAL_CACHE
-            .insert(cache_key, image.clone(), cache_expiry)
-            .await;
-        image
-    }
-
     pub fn children_mut(&mut self) -> &mut Vec<MetaData> {
         if !self.metadata.is_empty() {
             return &mut self.metadata;

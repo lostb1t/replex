@@ -65,6 +65,20 @@ pub fn default_proxy() -> Proxy<String, ReqwestClient> {
 }
 
 
+
+pub fn proxy(upstream: String) -> Proxy<String, ReqwestClient> {
+  let mut proxy = Proxy::new(
+    upstream,
+    ReqwestClient::new(reqwest::Client::builder()
+             .build()
+             .unwrap())
+  );
+  proxy = proxy.url_path_getter(default_url_path_getter);
+  proxy = proxy.url_query_getter(default_url_query_getter);
+
+  proxy
+}
+
 pub fn get_collection_id_from_child_path(path: String) -> i32 {
     let mut path = path.replace("/library/collections/", "");
     path = path.replace("/children", "");

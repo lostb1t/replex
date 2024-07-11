@@ -6,6 +6,7 @@ use crate::models::*;
 use crate::utils::*;
 use anyhow::Result;
 
+use crate::cache::GLOBAL_CACHE;
 use async_recursion::async_recursion;
 use futures_util::Future;
 use futures_util::TryStreamExt;
@@ -69,7 +70,7 @@ impl RetryableStrategy for Retry401 {
 #[derive(Debug, Clone)]
 pub struct PlexClient {
     pub http_client: reqwest_middleware::ClientWithMiddleware,
-    pub host: String, // TODO: Dont think this suppsoed to be here. Should be higher up
+    pub host: String, // TODO: Dont think this supposed to be here. Should be higher up
     pub cache: Cache<String, MediaContainerWrapper<MediaContainer>>,
 
     // /// `X-Plex-Platform` header value.
@@ -122,34 +123,6 @@ impl PlexClient {
             http::header::HOST,
             header::HeaderValue::from_str(&target_host).unwrap(),
         );
-
-        // let i = "47.250.115.151".to_string();
-        // headers.insert(
-        //     FORWARDED,
-        //     header::HeaderValue::from_str(i.as_str()).unwrap(),
-        // );
-        // headers.insert(
-        //     "X-Forwarded-For",
-        //     header::HeaderValue::from_str(i.as_str()).unwrap(),
-        // );
-        // headers.insert(
-        //     "X-Real-Ip",
-        //     header::HeaderValue::from_str(i.as_str()).unwrap(),
-        // );
-
-        // let reqq = self
-        //     .http_client
-        //     .get(url.clone());
-        // dbg!(&req);
-
-        // reqwest::Client::builder()
-        // .proxy(reqwest::Proxy::all("http://192.168.2.10:9090".to_string()).unwrap())
-        // .timeout(Duration::from_secs(30))
-        // .build()
-        // .unwrap()
-        // .get("http://nu.nl")
-        // .send()
-        // .await;
 
         let res = self
             .http_client
@@ -324,13 +297,58 @@ impl PlexClient {
         Ok(r)
     }
 
+    pub async fn get_hero_art(
+        self,
+        uuid: String,
+    ) -> Option<String> {
+        let cache_key = format!("{}:cover_art", uuid);
+
+        let cached_result: Option<Option<String>> =
+            GLOBAL_CACHE.get(cache_key.as_str()).await;
+
+        if cached_result.is_some() {
+            return cached_result.unwrap();
+        }
+
+        let mut container: MediaContainerWrapper<MediaContainer> =
+            match self.get_provider_data(&uuid).await {
+                Ok(r) => r,
+                Err(e) => {
+                    tracing::warn!(
+                        "Problem loading provider metadata for: {} Error: {}",
+                        uuid,
+                        e
+                    );
+                    MediaContainerWrapper::default()
+                }
+            };
+    
+        let metadata = container.media_container.children_mut().get(0);
+        let mut image: Option<String> = None;
+        if metadata.is_some() {
+            for i in &metadata.unwrap().images {
+                if i.r#type == "coverArt" {
+                    image = Some(i.url.clone());
+                    break;
+                }
+            }
+        }
+
+        let mut cache_expiry = crate::cache::Expiration::Month;
+        image.as_ref()?; // dont return and dont cache, let us just retry next time.
+        let _ = GLOBAL_CACHE
+            .insert(cache_key, image.clone(), cache_expiry)
+            .await;
+        image
+    }
+
     pub async fn get_provider_data(
         self,
-        guid: String,
+        uuid: &String,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
         let url = format!(
             "https://metadata.provider.plex.tv/library/metadata/{}",
-            guid
+            uuid
         );
         // let url = "https://httpbin.org/status/401".to_string();
         // let wut = reqwest::RequestBuilder::new(http::Method::GET);
