@@ -1325,7 +1325,7 @@ impl MetaData {
                 format!("collection:{}", collection_id),
             )
             .await?;
-        // dbg!(collection_details.media_container.library_section_id);
+
         Ok(collection_details
             .media_container
             .children()
@@ -1340,7 +1340,7 @@ impl MetaData {
             return true;
         }
         if self.viewed_leaf_count.is_some()
-            && self.viewed_leaf_count.unwrap_or_default() > 0
+            && self.leaf_count.unwrap_or_default() == self.viewed_leaf_count.unwrap()
         {
             return true;
         }

@@ -128,7 +128,7 @@ Note: SSL is highly suggested, some clients default to not allowing insecure con
 
 ## Reverse proxy
 
-If you have a reverse proxy running and dont want to proxy streaming through plex then you can route the following paths and it subpaths directly to plex.
+There should be no need for this but if you have a reverse proxy running and dont want to proxy streaming through plex then you can route the following paths and it subpaths directly to plex.
 
 - /video/:/transcode/universal/session
 - /library/parts
@@ -137,6 +137,8 @@ If you have a reverse proxy running and dont want to proxy streaming through ple
 
 If you have for example an appbox it might not be ideal to stream media through replex. As that will take a lot of network resources.
 You can redirect streams by enabling `REPLEX_REDIRECT_STREAMS` and optionally set `REPLEX_REDIRECT_STREAMS_HOST` if it needs to be different from REPLEX_HOST
+
+Note: Plex doesnt handle redirects wel, and will not remeber it. So every chuck of a stream will first hit replex and then gets redirected to actuall download that chuck from the redirect url. So a bit wastefull
 
 ## Known limitations
 
