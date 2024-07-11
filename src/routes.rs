@@ -323,7 +323,7 @@ async fn ntf_watchlist_force(
     // use memory_stats::memory_stats;
     // dbg!(memory_stats().unwrap().physical_mem / 1024 / 1000);
     let params: PlexContext = req.extract().await.unwrap();
-    
+    dbg!(&req);
     if params.clone().token.is_some() {
         tokio::spawn(async move {
             let url = format!("https://notifications.plex.tv/api/v1/notifications/settings?X-Plex-Token={}", params.clone().token.unwrap());
@@ -385,11 +385,11 @@ pub async fn hero_image(
     depot: &mut Depot,
 ) {
     let mut params: PlexContext = req.extract().await.unwrap();
-    // dbg!(&req);
+    
     let t = req.param::<String>("type").unwrap();
     let uuid = req.param::<String>("uuid").unwrap();
     let token = req.param::<String>("token");
-    
+    // dbg!("")
     // some clients do not send token for an image request, so we include it in the urk ourself.
     if token.is_some() {
         params.token = token;
