@@ -193,6 +193,8 @@ pub struct PlexContext {
     // host of the proxy server
     #[salvo(extract(rename = "host"))]
     pub host: Option<String>,
+    // #[salvo(extract(rename = "scheme"))]
+    // pub scheme: Option<String>,
     // photo transcode
     pub size: Option<String>,
     pub width: Option<i32>,
