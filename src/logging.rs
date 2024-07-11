@@ -43,7 +43,7 @@ impl Handler for Logger {
             let status = res.status_code.unwrap_or(StatusCode::OK);
             tracing::debug!(
                 status = %status,
-                //path = %req.uri(),
+                path = %req.uri(),
                 duration = ?duration,
                 "Response"
             );

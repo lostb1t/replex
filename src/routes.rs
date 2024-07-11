@@ -21,6 +21,7 @@ use salvo::routing::PathFilter;
 use std::sync::Arc;
 use tokio::time::Duration;
 use url::Url;
+use http;
 
 pub fn route() -> Router {
     let config: Config = Config::figment().extract().unwrap();
@@ -155,6 +156,13 @@ pub fn route() -> Router {
         )
         .push(
             Router::new()
+                .path("/image/hero/<type>/<uuid>")
+                // .path("/image/hero.jpg")
+                .get(hero_image)
+                //.get(proxy_request),
+        )
+        .push(
+            Router::new()
                 .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
                 //.hoop(default_cache())
                 .get(get_hubs_sections),
@@ -204,15 +212,7 @@ async fn proxy_request(
     ctrl: &mut FlowCtrl,
 ) {
     let config: Config = Config::dynamic(req).extract().unwrap();
-    //let proxy = Proxy::new(
-    //   config.host.clone().unwrap(),
-    //    reqwest::Client::builder()
-    //        .timeout(Duration::from_secs(60 * 200))
-    //        .build()
-    //        .unwrap(),
-    //);
     let proxy = default_proxy();
-
     proxy.handle(req, depot, res, ctrl).await;
 }
 
@@ -242,13 +242,6 @@ async fn should_skip(
     {
 
         let config: Config = Config::dynamic(req).extract().unwrap();
-        //let proxy = Proxy::new(
-        //    config.host.clone().unwrap(),
-        //    reqwest::Client::builder()
-        //        .timeout(Duration::from_secs(60 * 200))
-        //        .build()
-        //        .unwrap(),
-        //);
         let proxy = default_proxy();
 
         proxy.handle(req, depot, res, ctrl).await;
@@ -327,8 +320,8 @@ async fn ntf_watchlist_force(
     res: &mut Response,
     ctrl: &mut FlowCtrl,
 ) {
-    use memory_stats::memory_stats;
-    dbg!(memory_stats().unwrap().physical_mem / 1024 / 1000);
+    // use memory_stats::memory_stats;
+    // dbg!(memory_stats().unwrap().physical_mem / 1024 / 1000);
     let params: PlexContext = req.extract().await.unwrap();
     
     if params.clone().token.is_some() {
@@ -382,6 +375,29 @@ pub async fn webhook_plex(
     dbg!(payload);
     res.render(());
     return Ok(());
+}
+
+#[handler]
+pub async fn hero_image(
+    req: &mut Request,
+    res: &mut Response,
+    ctrl: &mut FlowCtrl,
+    depot: &mut Depot,
+) {
+    let params: PlexContext = req.extract().await.unwrap();
+    let plex_client = PlexClient::from_request(req, params.clone());
+    // dbg!(&req);
+    let t = req.param::<String>("type").unwrap();
+    let uuid = req.param::<String>("uuid").unwrap();
+    let url = plex_client.get_hero_art(uuid).await;
+    if url.is_none() {
+        res.status_code(StatusCode::NOT_FOUND);
+        return
+    }
+    let uri = url.unwrap().parse::<http::Uri>().unwrap();;
+    req.set_uri(uri);
+    let proxy = proxy("https://metadata-static.plex.tv".to_string());
+    proxy.handle(req, depot, res, ctrl).await;
 }
 
 // if directplay fails we remove it.
@@ -439,9 +455,6 @@ pub async fn direct_stream_fallback(
         }
     };
 
-
-
-
     return Ok(());
 }
 
@@ -470,6 +483,7 @@ pub async fn transform_hubs_home(
         res.render(container);
         return Ok(());
     }
+    //dbg!(&req);
 
     if params.clone().pinned_content_directory_id.is_some() {
         // first directory, load everything here because we wanna reemiiiixxx

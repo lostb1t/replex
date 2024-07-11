@@ -792,7 +792,17 @@ impl Transform for MediaStyleTransform {
             if style_def.child_type.clone().is_some() {
                 item.r#type = style_def.child_type.clone().unwrap();
             }
-            let cover_art = item.get_hero_art(plex_client).await;
+
+            let mut guid = item.guid.clone().unwrap();
+            if guid.starts_with("plex://episode") && item.parent_guid.is_some() {    
+                guid = item.parent_guid.clone().unwrap();
+            }
+            guid = guid
+                .replace("plex://", "");
+
+            //let cover_art = item.get_hero_art(plex_client).await;
+            let cover_art = Some(format!("{}/image/hero/{}", options.host.clone().unwrap(), guid));
+            //dbg!(&options);
             if cover_art.is_some() {
                 // c.art = art.clone();
                 item.images = vec![Image {
