@@ -800,7 +800,7 @@ impl Transform for MediaStyleTransform {
             guid = guid.replace("plex://", "");
 
             //let cover_art = item.get_hero_art(plex_client).await;
-            let cover_art = Some(format!("{}://{}/image/hero/{}/{}", 
+            let cover_art = Some(format!("{}://{}/replex/image/hero/{}/{}", 
                 match options.forwarded_proto {
                     Some(v) => v,
                     None => "http".to_string()

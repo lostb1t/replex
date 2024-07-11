@@ -56,6 +56,7 @@ data-encoding = "2.4.0"
 reqwest-retry = "0.6"
 reqwest-middleware = "0.3"
 memory-stats = "1.2.0"
+graphql_client = { version = "0.14", features = ["reqwest"] }
 #format_serde_error = "0.3"
 
 [dev-dependencies]

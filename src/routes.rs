@@ -156,10 +156,9 @@ pub fn route() -> Router {
         )
         .push(
             Router::new()
-                .path("/image/hero/<type>/<uuid>/<token>")
-                // .path("/image/hero.jpg")
+                .path("/replex/image/hero/<type>/<uuid>/<token>")
+                // .hoop(anonymous_cache(60 * 60 * 24 * 30))
                 .get(hero_image)
-                //.get(proxy_request),
         )
         .push(
             Router::new()
@@ -384,7 +383,6 @@ pub async fn hero_image(
     depot: &mut Depot,
 ) {
     let mut params: PlexContext = req.extract().await.unwrap();
-    
     let t = req.param::<String>("type").unwrap();
     let uuid = req.param::<String>("uuid").unwrap();
     let token = req.param::<String>("token");
@@ -861,6 +859,7 @@ pub fn auto_refresh_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
     )
 }
 
+// cache that uses plex identifiers
 pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
     let config: Config = Config::figment().extract().unwrap();
     let ttl = if config.cache_rows {
@@ -876,6 +875,20 @@ pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
                 .build(),
         ),
         RequestIssuer::with_plex_defaults(),
+    )
+}
+
+// simple cache that doesnt use plex identifers
+pub fn anonymous_cache(ttl: u64) -> Cache<MemoryStore<String>, RequestIssuer> {
+    //let config: Config = Config::figment().extract().unwrap();
+
+    Cache::new(
+        MemoryStore::with_moka_cache(
+            MokaCacheSync::builder()
+                .time_to_live(Duration::from_secs(ttl))
+                .build(),
+        ),
+        RequestIssuer::new().use_scheme(false).use_query(false),
     )
 }
 

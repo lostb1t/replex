@@ -7,6 +7,7 @@ use moka::{future::ConcurrentCacheExt, Expiry};
 use crate::headers;
 use once_cell::sync::Lazy;
 use salvo::cache::CachedBody;
+use regex::Regex;
 use salvo::cache::MethodSkipper;
 use salvo::conn::SocketAddr;
 use salvo::handler::Skipper;
@@ -157,6 +158,7 @@ pub struct RequestIssuer {
     use_authority: bool,
     use_local_addr: bool,
     use_path: bool,
+    path_strip_last_segment: bool,
     // TODO: Also make this like headers. So that we can dump unneeded query variables like X-Plex-Client-Identifier and have cross device caching
     use_query: bool,
     use_method: bool,
@@ -176,6 +178,7 @@ impl RequestIssuer {
             use_authority: true,
             use_local_addr: false,
             use_path: true,
+            path_strip_last_segment: false,
             use_query: true,
             use_method: true,
             use_mime: false,
@@ -189,6 +192,7 @@ impl RequestIssuer {
             use_authority: true,
             use_local_addr: false,
             use_path: true,
+            path_strip_last_segment: false,
             use_query: true,
             use_method: true,
             use_mime: false,
@@ -235,6 +239,10 @@ impl RequestIssuer {
         self.use_headers = value;
         self
     }
+    pub fn path_strip_last_segment(mut self, value: bool) -> Self {
+        self.path_strip_last_segment = value;
+        self
+    }
 }
 
 // #[derive(Encode, Decode, PartialEq, Debug)]
@@ -270,7 +278,15 @@ impl CacheIssuer for RequestIssuer {
             );
         }
         if self.use_path {
-            key.push_str(req.uri().path());
+            // strip last segment of an path. Used for paths that include tokens
+            if self.path_strip_last_segment{
+                // let re = Regex::new(format!(r"{}", self.path_regex.clone().unwrap()).as_str()).unwrap();
+                // req.uri().path()
+                //let k = req.uri().path().split('/').iter().join("/");
+                key.push_str(req.uri().path());
+            } else {
+                key.push_str(req.uri().path());
+            }
         }
         // TODO: Clean up query. Not everything needs a cache change.
         if self.use_query {

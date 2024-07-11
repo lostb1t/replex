@@ -301,7 +301,7 @@ impl PlexClient {
         self,
         uuid: String,
     ) -> Option<String> {
-        let cache_key = format!("{}:cover_art", uuid);
+        let cache_key = format!("{}:hero_art", uuid);
 
         let cached_result: Option<Option<String>> =
             GLOBAL_CACHE.get(cache_key.as_str()).await;
@@ -333,12 +333,14 @@ impl PlexClient {
                 }
             }
         }
+        
+        image.as_ref()?; // dont return and dont cache, let us just retry next time.
 
         let mut cache_expiry = crate::cache::Expiration::Month;
-        image.as_ref()?; // dont return and dont cache, let us just retry next time.
         let _ = GLOBAL_CACHE
             .insert(cache_key, image.clone(), cache_expiry)
             .await;
+
         image
     }
 
