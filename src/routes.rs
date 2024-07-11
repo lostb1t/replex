@@ -9,6 +9,7 @@ use crate::timeout::*;
 use crate::transform::*;
 use crate::url::*;
 use crate::utils::*;
+use crate::webhooks;
 use itertools::Itertools;
 use moka::notification::RemovalCause;
 use moka::sync::Cache as MokaCacheSync;
@@ -168,7 +169,7 @@ pub fn route() -> Router {
         )
         .push(
             Router::new()
-                .path("/webhooks/plex")
+                .path("/replex/webhooks")
                 .post(webhook_plex),
         )
         .push(
@@ -369,8 +370,13 @@ pub async fn webhook_plex(
     req: &mut Request,
     res: &mut Response,
 ) -> Result<(), anyhow::Error> {
-    let payload = req.form::<String>("payload").await;
+    dbg!("YOOO");
+    let raw = req.form::<String>("payload").await;
+    let payload: webhooks::Payload = serde_json::from_str(&raw.unwrap())?;
+    dbg!(&req);
     dbg!(payload);
+
+    // watchlist();
     res.render(());
     return Ok(());
 }
