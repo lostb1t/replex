@@ -156,7 +156,7 @@ pub fn route() -> Router {
         )
         .push(
             Router::new()
-                .path("/image/hero/<type>/<uuid>")
+                .path("/image/hero/<type>/<uuid>/<**token>")
                 // .path("/image/hero.jpg")
                 .get(hero_image)
                 //.get(proxy_request),
@@ -384,11 +384,16 @@ pub async fn hero_image(
     ctrl: &mut FlowCtrl,
     depot: &mut Depot,
 ) {
-    let params: PlexContext = req.extract().await.unwrap();
-    let plex_client = PlexClient::from_request(req, params.clone());
+    let mut params: PlexContext = req.extract().await.unwrap();
     // dbg!(&req);
     let t = req.param::<String>("type").unwrap();
     let uuid = req.param::<String>("uuid").unwrap();
+    let token = req.param::<String>("**token");
+    dbg!(&token);
+    if token.is_some() {
+        params.token = token;
+    }
+    let plex_client = PlexClient::from_request(req, params.clone());
     let url = plex_client.get_hero_art(uuid).await;
     if url.is_none() {
         res.status_code(StatusCode::NOT_FOUND);
