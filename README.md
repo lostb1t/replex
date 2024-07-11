@@ -12,7 +12,6 @@ Remix your plex recommendations.
 - Auto load artwork for hero styles.
 - Disable user state: remove unplayed badges from row items.
 - Disable leaf count: remove episode count from artwork.
-- Hot cache: auto refreshed cache for home and library recommended.
 - Force maximum quality.
 - Auto select version based on resolution of the client.
 - Fallback to different version if selected version is video transcoding.
@@ -87,8 +86,6 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_REDIRECT_STREAMS  | false    | Redirect streams to another endpoint.                                      |
 | REPLEX_REDIRECT_STREAMS_HOST  | REPLEX_HOST    | Alternative streams endpoint                                         |
 | REPLEX_CACHE_TTL          | 1800    	 | Time to live for caches in seconds. Set to 0 to disable (not recommended).  |
-| REPLEX_CACHE_ROWS         | true       | Cache rows            	                            |
-| REPLEX_CACHE_ROWS_REFRESH | true     | Auto refresh cached rows           	                 |
 
 ## Mixed rows
 

@@ -399,10 +399,11 @@ pub async fn hero_image(
         res.status_code(StatusCode::NOT_FOUND);
         return
     }
-    let uri = url.unwrap().parse::<http::Uri>().unwrap();;
-    req.set_uri(uri);
-    let proxy = proxy("https://metadata-static.plex.tv".to_string());
-    proxy.handle(req, depot, res, ctrl).await;
+    // let uri = url.unwrap().parse::<http::Uri>().unwrap();;
+    // req.set_uri(uri);
+    // let proxy = proxy("https://metadata-static.plex.tv".to_string());
+    // proxy.handle(req, depot, res, ctrl).await;
+    res.render(Redirect::found(url.unwrap()));
 }
 
 // if directplay fails we remove it.
