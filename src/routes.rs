@@ -156,7 +156,7 @@ pub fn route() -> Router {
         )
         .push(
             Router::new()
-                .path("/image/hero/<type>/<uuid>/<token>.jpg")
+                .path("/image/hero/<type>/<uuid>/<token>")
                 // .path("/image/hero.jpg")
                 .get(hero_image)
                 //.get(proxy_request),

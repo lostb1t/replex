@@ -801,8 +801,8 @@ impl Transform for MediaStyleTransform {
                 .replace("plex://", "");
 
             //let cover_art = item.get_hero_art(plex_client).await;
-            let cover_art = Some(format!("{}/image/hero/{}/{}.jpg", 
-                options.host.clone().unwrap(), 
+            let cover_art = Some(format!("/image/hero/{}/{}", 
+                //options.host.clone().unwrap(), 
                 guid,
                 options.token.clone().unwrap()
             ));
