@@ -156,7 +156,7 @@ pub fn route() -> Router {
         )
         .push(
             Router::new()
-                .path("/image/hero/<type>/<uuid>/<**token>")
+                .path("/image/hero/<type>/<uuid>/<token>.jpg")
                 // .path("/image/hero.jpg")
                 .get(hero_image)
                 //.get(proxy_request),
@@ -388,8 +388,9 @@ pub async fn hero_image(
     // dbg!(&req);
     let t = req.param::<String>("type").unwrap();
     let uuid = req.param::<String>("uuid").unwrap();
-    let token = req.param::<String>("**token");
-    dbg!(&token);
+    let token = req.param::<String>("token");
+    
+    // some clients do not send token for an image request, so we include it in the urk ourself.
     if token.is_some() {
         params.token = token;
     }
