@@ -1333,12 +1333,16 @@ impl MetaData {
             .unwrap()
             .has_label("REPLEXHERO".to_string()))
     }
-
+    
+    // view_count stays for show even when marked unwatched. 
     pub fn is_watched(&self) -> bool {
-        if self.view_count.is_some() && self.view_count.unwrap_or_default() > 0
+        // movie or episode
+        if self.leaf_count.is_none() && self.view_count.is_some() && self.view_count.unwrap_or_default() > 0
         {
             return true;
         }
+        
+        // show
         if self.viewed_leaf_count.is_some()
             && self.leaf_count.unwrap_or_default() == self.viewed_leaf_count.unwrap()
         {
@@ -1346,16 +1350,17 @@ impl MetaData {
         }
         false
     }
-
+    
+    // check if we should excluse watched items for this hub
     pub async fn exclude_watched(
         &self,
         plex_client: PlexClient,
     ) -> Result<bool> {
-        if !self.is_collection_hub() {
-            return Ok(false);
-        }
-
         let config: Config = Config::figment().extract().unwrap();
+        if !self.is_collection_hub() {
+            return Ok(config.exclude_watched);
+        }
+        
         let collection = plex_client
             .clone()
             .get_cached(
