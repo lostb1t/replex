@@ -197,6 +197,7 @@ pub fn route() -> Router {
         .push(
             Router::with_path("/photo/<colon:colon>/transcode")
                 .hoop(fix_photo_transcode_request)
+                // .hoop(debug)
                 .goal(proxy_request),
         )
         .push(Router::with_path("<**rest>").goal(proxy_request));
@@ -314,6 +315,17 @@ async fn disable_related_query(
 }
 
 #[handler]
+async fn debug(
+    req: &mut Request,
+    depot: &mut Depot,
+    res: &mut Response,
+    ctrl: &mut FlowCtrl,
+) {
+    //dbg!("tequested");
+    dbg!(&req);
+}
+
+#[handler]
 async fn ntf_watchlist_force(
     req: &mut Request,
     depot: &mut Depot,
@@ -391,8 +403,6 @@ pub async fn hero_image(
     let mut params: PlexContext = req.extract().await.unwrap();
     let t = req.param::<String>("type").unwrap();
     let uuid = req.param::<String>("uuid").unwrap();
-    //let token = req.param::<String>("token");
-    //dbg!(&req);
 
     let plex_client = PlexClient::from_request(req, params.clone());
     let url = plex_client.get_hero_art(uuid).await;

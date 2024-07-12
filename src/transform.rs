@@ -806,8 +806,7 @@ impl Transform for MediaStyleTransform {
             }
             guid = guid.replace("plex://", "");
 
-            //let cover_art = item.get_hero_art(plex_client).await;
-            let mut cover_art = Some(format!("{}://{}/replex/image/hero/{}?x-plex-token={}", 
+            let mut cover_art = Some(format!("{}://{}/replex/image/hero/{}?X-Plex-Token={}", 
                 match options.forwarded_proto {
                     Some(v) => v,
                     None => "http".to_string()
@@ -820,8 +819,7 @@ impl Transform for MediaStyleTransform {
                 guid,
                 options.token.clone().unwrap()
             ));
-            //cover_art = None;
-            //dbg!(&cover_art);
+    
             if cover_art.is_some() {
                 // c.art = art.clone();
                 item.images = vec![Image {
