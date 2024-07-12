@@ -13,7 +13,12 @@ pub struct Config {
     pub host: Option<String>,
     pub port: Option<u64>,
     #[serde(
-        default = "default_as_false",
+        default = "default_as_true",
+        deserialize_with = "figment::util::bool_from_str_or_int"
+    )]
+    pub interleave: bool,
+    #[serde(
+        default = "default_as_true",
         deserialize_with = "figment::util::bool_from_str_or_int"
     )]
     pub exclude_watched: bool,

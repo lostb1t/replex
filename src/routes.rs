@@ -157,7 +157,7 @@ pub fn route() -> Router {
         )
         .push(
             Router::new()
-                .path("/replex/image/hero/<type>/<uuid>/<token>")
+                .path("/replex/image/hero/<type>/<uuid>")
                 // .hoop(anonymous_cache(60 * 60 * 24 * 30))
                 .get(hero_image)
         )
@@ -391,12 +391,9 @@ pub async fn hero_image(
     let mut params: PlexContext = req.extract().await.unwrap();
     let t = req.param::<String>("type").unwrap();
     let uuid = req.param::<String>("uuid").unwrap();
-    let token = req.param::<String>("token");
-    // dbg!("")
-    // some clients do not send token for an image request, so we include it in the urk ourself.
-    if token.is_some() {
-        params.token = token;
-    }
+    //let token = req.param::<String>("token");
+    //dbg!(&req);
+
     let plex_client = PlexClient::from_request(req, params.clone());
     let url = plex_client.get_hero_art(uuid).await;
     if url.is_none() {
@@ -549,7 +546,7 @@ pub async fn transform_hubs_home(
     TransformBuilder::new(plex_client, params.clone())
         .with_transform(HubStyleTransform { is_home: true })
         .with_transform(HubWatchedTransform)
-        .with_transform(HubMixTransform)
+        .with_transform(HubInterleaveTransform)
         .with_transform(UserStateTransform)
         .with_transform(HubKeyTransform)
         .apply_to(&mut container)
@@ -659,7 +656,7 @@ pub async fn get_collections_children(
 
     // filtering of watched happens in the transform
     TransformBuilder::new(plex_client, params.clone())
-        .with_transform(LibraryMixTransform {
+        .with_transform(LibraryInterleaveTransform {
             collection_ids: collection_ids.clone(),
             offset,
             limit,

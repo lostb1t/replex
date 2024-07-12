@@ -348,10 +348,10 @@ impl Filter for CollectionHubPermissionFilter {
 // }
 
 #[derive(Default, Debug)]
-pub struct HubMixTransform;
+pub struct HubInterleaveTransform;
 
 #[async_trait]
-impl Transform for HubMixTransform {
+impl Transform for HubInterleaveTransform {
     async fn transform_mediacontainer(
         &self,
         mut item: MediaContainer,
@@ -360,8 +360,11 @@ impl Transform for HubMixTransform {
     ) -> MediaContainer {
         let config: Config = Config::figment().extract().unwrap();
         let mut new_hubs: Vec<MetaData> = vec![];
-        //item.identifier = Some("tv.plex.provider.discover".to_string());
-        // let mut library_section_id: Vec<Option<u32>> = vec![]; //librarySectionID
+
+        if !config.interleave {
+            return item;
+        }
+
         for mut hub in item.children_mut() {
             if hub.size.unwrap() == 0 {
                 continue;
@@ -403,7 +406,7 @@ impl Transform for HubMixTransform {
 }
 
 #[derive(Default, Debug, Clone)]
-pub struct LibraryMixTransform {
+pub struct LibraryInterleaveTransform {
     pub collection_ids: Vec<u32>,
     pub offset: i32,
     pub limit: i32,
@@ -455,7 +458,7 @@ pub struct LibraryMixTransform {
 // }
 
 #[async_trait]
-impl Transform for LibraryMixTransform {
+impl Transform for LibraryInterleaveTransform {
     async fn transform_mediacontainer(
         &self,
         mut item: MediaContainer,
@@ -463,6 +466,9 @@ impl Transform for LibraryMixTransform {
         options: PlexContext,
     ) -> MediaContainer {
         let config: Config = Config::figment().extract().unwrap();
+        if !config.interleave {
+            return item;
+        }
         let mut children: Vec<MetaData> = vec![];
         let mut total_size = 0;
 
@@ -800,7 +806,7 @@ impl Transform for MediaStyleTransform {
             guid = guid.replace("plex://", "");
 
             //let cover_art = item.get_hero_art(plex_client).await;
-            let cover_art = Some(format!("{}://{}/replex/image/hero/{}/{}", 
+            let mut cover_art = Some(format!("{}://{}/replex/image/hero/{}?x-plex-token={}", 
                 match options.forwarded_proto {
                     Some(v) => v,
                     None => "http".to_string()
@@ -813,7 +819,8 @@ impl Transform for MediaStyleTransform {
                 guid,
                 options.token.clone().unwrap()
             ));
-            //dbg!(&options);
+            //cover_art = None;
+            //dbg!(&cover_art);
             if cover_art.is_some() {
                 // c.art = art.clone();
                 item.images = vec![Image {

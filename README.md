@@ -73,6 +73,8 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | Setting        	          | Default 	| Description                                                            	  |
 |---------------------------|----------|---------------------------------------------------------------------------|
 | REPLEX_HOST               |        	 | Url of your plex instance. ex: http://0.0.0.0:32400                                             	  |
+| REPLEX_INTERLEAVE         | true      | Interleave home
+recommendations. Rows from sifferent sections are interlewved into one.                                           	  |
 | REPLEX_HERO_ROWS          |        	 | Comma seperated list of hubidentifiers to make hero style, options are: <br />home.movies.recent<br />movies.recent <br />movie.recentlyadded<br />movie.topunwatched<br />movie.recentlyviewed<br />hub.movie.recentlyreleased<br />movie.recentlyreleased<br />home.television.recent<br />tv.recentlyadded<br />tv.toprated<br />tv.inprogress<br />tv.recentlyaired    |
 | REPLEX_EXCLUDE_WATCHED    | false    | If set to true, hide watched items for recommended rows                                     |
 | REPLEX_DISABLE_CONTINUE_WATCHING | false    | Disable/remove the continue watching row |
