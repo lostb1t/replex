@@ -343,7 +343,7 @@ async fn ntf_watchlist_force(
             let json_data = r#"{"enabled": true,"libraries": [],"identifier": "tv.plex.notification.library.new"}"#;
             let client = reqwest::Client::new();
         
-            println!("Bootstrao for request: {} platform: {} product: {} device name: {}", 
+            dbg!("Bootstrao for request: {} platform: {} product: {} device name: {}", 
               params.clone().username.unwrap_or_default(),
               params.clone().platform,
               params.clone().product.unwrap_or_default(),
@@ -351,18 +351,23 @@ async fn ntf_watchlist_force(
             );
         
             let client_base = "https://clients.plex.tv";
-            let user: PlexUser = client
+            let res = client
                     .get(format!("{}/api/v2/user", client_base))
                     .header("Accept", "application/json")
                     .header("X-Plex-Token", &token)
                     .header("X-Plex-Client-Identifier", &client_id)
                     .send()
                     .await
-                    .unwrap()
-                    .json()
-                    .await
                     .unwrap();
+                    
+            if !res.status().is_success() {
+              dbg!("cannot get user");
+              return;
+            }
+            
+            let user: PlexUser = res.json().await.unwrap();
             dbg!(&user);
+
             let response = client
                 .post(url)
                 .header("Content-Type", "application/json")
@@ -395,7 +400,7 @@ async fn ntf_watchlist_force(
                     .await
                     .unwrap();
             
-                println!("Set opt out status: {}", 
+                dbg!("Set opt out status: {}", 
                   &response.status()
                 );
               
