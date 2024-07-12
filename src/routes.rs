@@ -143,6 +143,7 @@ pub fn route() -> Router {
             Router::new()
                 .hoop(ntf_watchlist_force)
                 //.get(ping)
+                //.hoop(debug)
                 .goal(proxy_request)
                 .path("/media/providers"),
         );
@@ -322,7 +323,9 @@ async fn debug(
     ctrl: &mut FlowCtrl,
 ) {
     //dbg!("tequested");
-    dbg!(&req);
+    let params: PlexContext = req.extract().await.unwrap();
+    dbg!(&params.token);
+    //dbg!(&req);
 }
 
 #[handler]
@@ -361,10 +364,14 @@ async fn ntf_watchlist_force(
                     .await
                     .unwrap();
                     
+        
             if !res.status().is_success() {
-              dbg!("cannot get user");
+              tracing::info!(
+                "cannot get user"
+              );
               return;
             }
+            
             
             let user: PlexUser = res.json().await.unwrap();
             tracing::info!(
@@ -373,7 +380,7 @@ async fn ntf_watchlist_force(
                 username = %user.username,
                 "got user"
             );
-
+            
             let response = client
                 .post(url)
                 .header("Content-Type", "application/json")
@@ -392,8 +399,6 @@ async fn ntf_watchlist_force(
               "tv.plex.provider.music",
             ];
             
-
-            ;
             //let 
             //return;
             let u = format!("{}/api/v2/user/{}/settings/opt_outs", client_base, &user.uuid);
