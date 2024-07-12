@@ -59,7 +59,7 @@ services:
     container_name: replex
     environment:
       REPLEX_HOST: http://plex:32400
-      REPLEX_TOKEN: ***** # plex token: https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/
+      REPLEX_TOKEN: ***** # server admin plex token: https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/
     ports:
       - 3001:80
     restart: unless-stopped
@@ -74,7 +74,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | Setting        	          | Default 	| Description                                                            	  |
 |---------------------------|----------|---------------------------------------------------------------------------|
 | REPLEX_HOST               |        	 | Url of your plex instance. ex: http://0.0.0.0:32400                                             	  |
-| REPLEX_TOKEN              |        	 | server admin token, needed for hero images                                            	  |
+| REPLEX_TOKEN              |        	 | server admin plex token, needed for hero images, too find your token see: https://support.plex.tv/articles/204059436-finding-an-authentication                                      	  |
 | REPLEX_INTERLEAVE         | true      | Interleave home recommendations. Collection rows with the same name from different libraries are interleaved (combined) into one.                                           	  |
 | REPLEX_EXCLUDE_WATCHED    | true    | If set to true, hide watched items for recommended rows                                     |
 | REPLEX_DISABLE_CONTINUE_WATCHING | false    | Disable/remove the continue watching row |
