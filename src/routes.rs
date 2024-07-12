@@ -343,11 +343,12 @@ async fn ntf_watchlist_force(
             let json_data = r#"{"enabled": true,"libraries": [],"identifier": "tv.plex.notification.library.new"}"#;
             let client = reqwest::Client::new();
         
-            dbg!("Bootstrao for request: {} platform: {} product: {} device name: {}", 
-              params.clone().username.unwrap_or_default(),
-              params.clone().platform,
-              params.clone().product.unwrap_or_default(),
-              params.clone().device_name.unwrap_or_default()
+            tracing::info!(
+                username = %params.clone().username.unwrap_or_default(),
+                platform = %params.clone().platform,
+                platform = %params.clone().product.unwrap_or_default(),
+                platform = %params.clone().device_name.unwrap_or_default(),
+                "Bootstrao for request"
             );
         
             let client_base = "https://clients.plex.tv";
@@ -366,7 +367,12 @@ async fn ntf_watchlist_force(
             }
             
             let user: PlexUser = res.json().await.unwrap();
-            dbg!(&user);
+            tracing::info!(
+                id = %user.id,
+                uuid = %user.uuid,
+                username = %user.username,
+                "got user"
+            );
 
             let response = client
                 .post(url)
@@ -376,8 +382,9 @@ async fn ntf_watchlist_force(
                 .await
                 .unwrap();
         
-            println!("Set watchlist status: {}", 
-              &response.status()
+            tracing::info!(
+                status = %response.status(),
+                "watchlist status"
             );
             
             let opts = vec![
@@ -399,9 +406,10 @@ async fn ntf_watchlist_force(
                     .send()
                     .await
                     .unwrap();
-            
-                dbg!("Set opt out status: {}", 
-                  &response.status()
+  
+                tracing::info!(
+                status = %response.status(),
+                "opt out status"
                 );
               
             }
