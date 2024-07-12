@@ -76,7 +76,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_INTERLEAVE         | true      | Interleave home
 recommendations. Rows from sifferent sections are interlewved into one.                                           	  |
 | REPLEX_HERO_ROWS          |        	 | Comma seperated list of hubidentifiers to make hero style, options are: <br />home.movies.recent<br />movies.recent <br />movie.recentlyadded<br />movie.topunwatched<br />movie.recentlyviewed<br />hub.movie.recentlyreleased<br />movie.recentlyreleased<br />home.television.recent<br />tv.recentlyadded<br />tv.toprated<br />tv.inprogress<br />tv.recentlyaired    |
-| REPLEX_EXCLUDE_WATCHED    | false    | If set to true, hide watched items for recommended rows                                     |
+| REPLEX_EXCLUDE_WATCHED    | true    | If set to true, hide watched items for recommended rows                                     |
 | REPLEX_DISABLE_CONTINUE_WATCHING | false    | Disable/remove the continue watching row |
 | REPLEX_DISABLE_USER_STATE | false    | Remove unplayed badges from row items |
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
@@ -87,11 +87,11 @@ recommendations. Rows from sifferent sections are interlewved into one.         
 | REPLEX_DISABLE_RELATED  | false | See: https://github.com/lostb1t/replex/issues/26.        |
 | REPLEX_REDIRECT_STREAMS  | false    | Redirect streams to another endpoint.                                      |
 | REPLEX_REDIRECT_STREAMS_HOST  | REPLEX_HOST    | Alternative streams endpoint                                         |
-| REPLEX_CACHE_TTL          | 1800    	 | Time to live for caches in seconds. Set to 0 to disable (not recommended).  |
+| REPLEX_CACHE_TTL          | 1800    	 | Time to live for general caches in seconds. Set to 0 to disable (higly recommended to keep enabled besides testing purposes).  |
 
-## Mixed rows
+## Interleaved rows
 
-Custom collections with the same name from different libraries will be merged into one on the home screen,
+Collections with the same name from different libraries will be merged into one on the home screen.
 So an collection named "Trending" in the Movie library will be merged with an collection named "Trending" from a shows library on home.
 
 Note, this does not work on builtin recommendations. As i personally dont see then need of mixing those. 

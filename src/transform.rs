@@ -369,6 +369,7 @@ impl Transform for HubInterleaveTransform {
             if hub.size.unwrap() == 0 {
                 continue;
             }
+
             // we only process collection hubs
             if !hub.is_collection_hub() {
                 new_hubs.push(hub.to_owned());
