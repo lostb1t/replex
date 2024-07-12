@@ -59,6 +59,7 @@ services:
     container_name: replex
     environment:
       REPLEX_HOST: http://plex:32400
+      REPLEX_TOKEN: ***** # plex token: https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/
     ports:
       - 3001:80
     restart: unless-stopped
