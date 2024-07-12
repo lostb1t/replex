@@ -353,22 +353,20 @@ impl PlexClient {
             "https://metadata.provider.plex.tv/library/metadata/{}",
             uuid
         );
-        // let url = "https://httpbin.org/status/401".to_string();
-        // let wut = reqwest::RequestBuilder::new(http::Method::GET);
 
         let mut req = reqwest::Request::new(
             http::Method::GET,
             url.parse::<url::Url>().unwrap(),
         );
         let mut headers = HeaderMap::new();
+        
+        //endpoint is buggy, if llex has a cached version then it doesnt need a plex token
+        // but if not cached then a server admin token is needed
         let mut token = config.token.clone();
         if token.is_none() {
             token = Some(self.x_plex_token.clone());
         };
-        //token = match token {
-        ///    Some(v) => v.as_str(),
-        //    None => self.x_plex_token.clone().as_str()
-        //};
+
         headers.insert(
             "X-Plex-Token",
             header::HeaderValue::from_str(token.unwrap().as_str()).unwrap(),
