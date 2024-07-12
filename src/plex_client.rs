@@ -348,6 +348,7 @@ impl PlexClient {
         self,
         uuid: &String,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
+        let config: Config = Config::figment().extract().unwrap();
         let url = format!(
             "https://metadata.provider.plex.tv/library/metadata/{}",
             uuid
@@ -360,10 +361,17 @@ impl PlexClient {
             url.parse::<url::Url>().unwrap(),
         );
         let mut headers = HeaderMap::new();
+        let mut token = config.token.clone();
+        if token.is_none() {
+            token = Some(self.x_plex_token.clone());
+        };
+        //token = match token {
+        ///    Some(v) => v.as_str(),
+        //    None => self.x_plex_token.clone().as_str()
+        //};
         headers.insert(
             "X-Plex-Token",
-            header::HeaderValue::from_str(self.x_plex_token.clone().as_str())
-                .unwrap(),
+            header::HeaderValue::from_str(token.unwrap().as_str()).unwrap(),
         );
         headers.insert(
             "Accept",

@@ -11,6 +11,7 @@ fn default_as_false() -> bool {
 pub struct Config {
     #[serde(deserialize_with = "deserialize_host")]
     pub host: Option<String>,
+    pub token: Option<String>,
     pub port: Option<u64>,
     #[serde(
         default = "default_as_true",
