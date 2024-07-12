@@ -337,10 +337,32 @@ async fn ntf_watchlist_force(
     let params: PlexContext = req.extract().await.unwrap();
     if params.clone().token.is_some() {
         tokio::spawn(async move {
-            let url = format!("https://notifications.plex.tv/api/v1/notifications/settings?X-Plex-Token={}", params.clone().token.unwrap());
+            let token = params.clone().token.unwrap();
+            let client_id = params.clone().client_identifier.unwrap();
+            let mut url = format!("https://notifications.plex.tv/api/v1/notifications/settings?X-Plex-Token={}", &token);
             let json_data = r#"{"enabled": true,"libraries": [],"identifier": "tv.plex.notification.library.new"}"#;
             let client = reqwest::Client::new();
         
+            println!("Bootstrao for request: {} platform: {} product: {} device name: {}", 
+              params.clone().username.unwrap_or_default(),
+              params.clone().platform,
+              params.clone().product.unwrap_or_default(),
+              params.clone().device_name.unwrap_or_default()
+            );
+        
+            let client_base = "https://clients.plex.tv";
+            let user: PlexUser = client
+                    .get(format!("{}/api/v2/user", client_base))
+                    .header("Accept", "application/json")
+                    .header("X-Plex-Token", &token)
+                    .header("X-Plex-Client-Identifier", &client_id)
+                    .send()
+                    .await
+                    .unwrap()
+                    .json()
+                    .await
+                    .unwrap();
+            dbg!(&user);
             let response = client
                 .post(url)
                 .header("Content-Type", "application/json")
@@ -349,14 +371,36 @@ async fn ntf_watchlist_force(
                 .await
                 .unwrap();
         
-            println!("Set watchlist for user: {} platform: {} product: {} device name: {} status: {}", 
-              params.clone().username.unwrap_or_default(),
-              params.clone().platform,
-              params.clone().product.unwrap_or_default(),
-              params.clone().device_name.unwrap_or_default(),
+            println!("Set watchlist status: {}", 
               &response.status()
             );
-            //dbg!(params.clone())
+            
+            let opts = vec![
+              "tv.plex.provider.vod",
+              "tv.plex.provider.music",
+            ];
+            
+
+            ;
+            //let 
+            //return;
+            let u = format!("{}/api/v2/user/{}/settings/opt_outs", client_base, &user.uuid);
+            for key in opts {
+                let response = client
+                    .post(format!("{}?key={}&value=opt_out", u.clone(), key))
+                    .header("Accept", "application/json")
+                    .header("X-Plex-Token", &token)
+                    .header("X-Plex-Client-Identifier", &client_id)
+                    .send()
+                    .await
+                    .unwrap();
+            
+                println!("Set opt out status: {}", 
+                  &response.status()
+                );
+              
+            }
+            
         });
     }
 }

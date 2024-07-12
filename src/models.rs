@@ -1770,3 +1770,13 @@ impl MediaContainerWrapper<MediaContainer> {
         self.is_hub() && self.media_container.library_section_id.is_some()
     }
 }
+
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PlexUser {
+    pub id: i64,
+    pub uuid: String,
+    pub username: String,
+    pub email: String,
+}
