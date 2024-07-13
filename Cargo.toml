@@ -37,7 +37,7 @@ salvo = { version = "0.68", features = ["anyhow", "websocket", "proxy", "cors", 
 reqwest = { version = "0.12", features = ["gzip", "json", "blocking"] }
 http-body-util = "0.1.2"
 once_cell = "1.18.0"
-moka = { version = "0.11", features = ["future"] }
+moka = { version = "0.12", features = ["future"] }
 #tonic = {version = "0.8.0", features = ["tls", "tls-roots"]}
 async-recursion = "1.0.4"
 console-subscriber = "0.1.10"

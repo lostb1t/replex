@@ -20,7 +20,7 @@ use http::Uri;
 // use hyper::Body;
 use hyper::body::Body;
 use moka::future::Cache;
-use moka::future::ConcurrentCacheExt;
+//use moka::future::ConcurrentCacheExt;
 use once_cell::sync::Lazy;
 use once_cell::sync::OnceCell;
 use reqwest::header;
@@ -46,6 +46,9 @@ static CACHE: Lazy<Cache<String, MediaContainerWrapper<MediaContainer>>> =
         Cache::builder()
             .max_capacity(10000)
             .time_to_live(Duration::from_secs(c.cache_ttl))
+            .eviction_listener(|key, value, cause| {
+                //println!("Evicted ({key:?},{value:?}) because {cause:?}")
+            })
             .build()
     });
 
@@ -433,7 +436,7 @@ impl PlexClient {
         &self,
         cache_key: &str,
     ) -> Result<Option<MediaContainerWrapper<MediaContainer>>> {
-        Ok(self.cache.get(cache_key))
+        Ok(self.cache.get(cache_key).await)
     }
 
     async fn insert_cache(
@@ -442,7 +445,6 @@ impl PlexClient {
         container: MediaContainerWrapper<MediaContainer>,
     ) {
         self.cache.insert(cache_key, container).await;
-        //self.cache.sync();
     }
 
     fn generate_cache_key(&self, name: String) -> String {

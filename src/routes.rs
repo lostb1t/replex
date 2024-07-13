@@ -11,8 +11,8 @@ use crate::url::*;
 use crate::utils::*;
 use crate::webhooks;
 use itertools::Itertools;
-use moka::notification::RemovalCause;
-use moka::sync::Cache as MokaCacheSync;
+//use moka::notification::RemovalCause;
+//use moka::sync::Cache as MokaCacheSync;
 use salvo::compression::Compression;
 use salvo::cors::Cors;
 use salvo::http::header::CONTENT_TYPE;
@@ -876,93 +876,6 @@ pub async fn get_play_queues(req: &mut Request, res: &mut Response) {
     res.render(container);
 }
 
-pub fn auto_refresh_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
-    let config: Config = Config::figment().extract().unwrap();
-
-    if config.cache_ttl == 0 || !config.cache_rows || !config.cache_rows_refresh
-    {
-        return default_cache();
-    }
-
-    // TODO: Maybe stop after a month? we can add a timestamp header to the key when first cached.
-    let listener = move |k: Arc<String>,
-                         v: CachedEntry,
-                         cause: RemovalCause| {
-        if cause != RemovalCause::Expired {
-            return;
-        }
-
-        let client = reqwest::blocking::Client::new();
-
-        let url = format!(
-            "http://{}{}",
-            v.req_local_addr
-                .to_string()
-                .replace("socket://", "")
-                .as_str(),
-            v.req_uri.path_and_query().unwrap()
-        );
-
-        let mut req = client.get(url).headers(v.req_headers);
-        tracing::trace!(req = ?req, "Refreshing cached route entry");
-        // tracing::trace!("Refreshing cached route entry");
-
-        std::thread::spawn(move || {
-            match req.send() {
-                Ok(res) => {
-                    // dbg!(res);
-                    tracing::debug!("Succesfully refreshed cached route entry");
-                }
-                Err(err) => {
-                    tracing::error!(err = ?err, "Failed to refresh cached route entry");
-                }
-            }
-        });
-    };
-
-    Cache::new(
-        MemoryStore::with_moka_cache(
-            MokaCacheSync::builder()
-                .time_to_live(Duration::from_secs(config.cache_ttl))
-                .eviction_listener(listener)
-                .build(),
-        ),
-        RequestIssuer::with_plex_defaults(),
-    )
-}
-
-// cache that uses plex identifiers
-pub fn default_cache() -> Cache<MemoryStore<String>, RequestIssuer> {
-    let config: Config = Config::figment().extract().unwrap();
-    let ttl = if config.cache_rows {
-        config.cache_ttl
-    } else {
-        0
-    };
-
-    Cache::new(
-        MemoryStore::with_moka_cache(
-            MokaCacheSync::builder()
-                .time_to_live(Duration::from_secs(ttl))
-                .build(),
-        ),
-        RequestIssuer::with_plex_defaults(),
-    )
-}
-
-// simple cache that doesnt use plex identifers
-pub fn anonymous_cache(ttl: u64) -> Cache<MemoryStore<String>, RequestIssuer> {
-    //let config: Config = Config::figment().extract().unwrap();
-
-    Cache::new(
-        MemoryStore::with_moka_cache(
-            MokaCacheSync::builder()
-                .time_to_live(Duration::from_secs(ttl))
-                .build(),
-        ),
-        RequestIssuer::new().use_scheme(false).use_query(false),
-    )
-}
 
 // const RESOLUTIONS: HashMap<&'static str, &'static str> =
 //     HashMap::from([("1080p", "1920x1080"), ("4k", "4096x2160")]);

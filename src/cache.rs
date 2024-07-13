@@ -1,9 +1,9 @@
 use async_trait::async_trait;
 use http::Uri;
 use moka::future::Cache as MokaCache;
-use moka::sync::Cache as MokaCacheSync;
-use moka::sync::CacheBuilder as MokaCacheBuilder;
-use moka::{future::ConcurrentCacheExt, Expiry};
+//use moka::sync::Cache as MokaCacheSync;
+//use moka::sync::CacheBuilder as MokaCacheBuilder;
+use moka::Expiry;
 use crate::headers;
 use once_cell::sync::Lazy;
 use salvo::cache::CachedBody;
@@ -122,7 +122,7 @@ impl CacheManager {
     where
         T: DeserializeOwned,
     {
-        match self.inner.get(cache_key) {
+        match self.inner.get(cache_key).await {
             Some(d) => {
                 let result: T = bincode::deserialize(&d.1).unwrap();
                 Some(result)
@@ -327,24 +327,6 @@ impl CacheIssuer for RequestIssuer {
     }
 }
 
-pub struct MemoryStore<K> {
-    inner: MokaCacheSync<K, CachedEntry>,
-}
-impl<K> MemoryStore<K>
-where
-    K: Hash + Eq + Send + Sync + Clone + 'static,
-{
-    /// Create a new `MemoryStore`.
-    pub fn new(max_capacity: u64) -> Self {
-        Self {
-            inner: MokaCacheSync::new(max_capacity),
-        }
-    }
-
-    pub fn with_moka_cache(cache: MokaCacheSync<K, CachedEntry>) -> Self {
-        Self { inner: cache }
-    }
-}
 
 #[async_trait]
 pub trait CacheStore: Send + Sync + 'static {
@@ -365,38 +347,6 @@ pub trait CacheStore: Send + Sync + 'static {
     ) -> Result<(), Self::Error>;
 }
 
-#[async_trait]
-impl<K> CacheStore for MemoryStore<K>
-where
-    K: Hash + Eq + Send + Sync + Clone + 'static,
-{
-    type Error = Infallible;
-    type Key = K;
-
-    async fn load_entry<Q>(&self, key: &Q) -> Option<CachedEntry>
-    where
-        Self::Key: Borrow<Q>,
-        Q: Hash + Eq + Sync,
-    {
-        let config: Config = Config::figment().extract().unwrap();
-        if config.cache_ttl == 0 {
-            return None;
-        }
-        self.inner.get(key)
-    }
-
-    async fn save_entry(
-        &self,
-        key: Self::Key,
-        entry: CachedEntry,
-    ) -> Result<(), Self::Error> {
-        let config: Config = Config::figment().extract().unwrap();
-        if config.cache_ttl != 0 {
-            self.inner.insert(key, entry);
-        }
-        Ok(())
-    }
-}
 
 #[derive(Clone, Debug)]
 #[non_exhaustive]
