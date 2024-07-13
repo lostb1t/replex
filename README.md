@@ -23,16 +23,6 @@ Remix your plex hubs
 
 ## Installation
 
-Run the docker image with REPLEX_HOST set to your plex instance.
-
-```
-docker run --rm -it -p 3001:80 -e REPLEX_HOST="http://0.0.0.0:32400" -e REPLEX_HERO_ROWS="movies.recent,movie.recentlyadded" ghcr.io/lostb1t/replex:latest
-```
-
-add your proxy url to plex "Custom server access URLs" (ex http://0.0.0.0:3001)
-
-then access your proxy url http://0.0.0.0:3001
-
 Docker compose example including plex:
 
 ```yml
@@ -67,6 +57,12 @@ services:
     depends_on:
       - plex
 ```
+
+Note: DO NOT run the plex container in host mode. It will cause plex to resolve localy for
+local clients and bypass replex.
+
+Add your proxy url to plex "Custom server access URLs" (ex http://0.0.0.0:3001)
+Then access your proxy url http://0.0.0.0:3001
 
 ## Settings
 
