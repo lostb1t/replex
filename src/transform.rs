@@ -235,18 +235,21 @@ impl TransformBuilder {
     }
 }
 
-// const T: usize;
 #[derive(Default)]
-pub struct CollectionHubPermissionFilter;
+pub struct HubRestrictionsFilter;
 
 #[async_trait]
-impl Filter for CollectionHubPermissionFilter {
+impl Filter for HubRestrictionsFilter {
     async fn filter_metadata(
         &self,
         item: &mut MetaData,
         plex_client: PlexClient,
         options: PlexContext,
     ) -> bool {
+        let config: Config = Config::figment().extract().unwrap();
+        if !config.hub_restrictions {
+            return true;
+        }
         tracing::debug!("filter collection permissions");
 
         if item.is_hub() && !item.is_collection_hub() {
@@ -263,8 +266,7 @@ impl Filter for CollectionHubPermissionFilter {
                 .library_section_id
                 .expect("Missing Library section id")
         });
-        // dbg!(section_id);
-        // let mut custom_collections = plex_client.get_section_collections(section_id).await.unwrap();
+
         let mut custom_collections = plex_client
             .clone()
             .get_cached(
@@ -273,7 +275,7 @@ impl Filter for CollectionHubPermissionFilter {
             )
             .await
             .unwrap();
-        // dbg!(&custom_collections);
+
         let custom_collections_ids: Vec<String> = custom_collections
             .media_container
             .children()

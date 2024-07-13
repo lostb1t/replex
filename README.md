@@ -10,6 +10,7 @@ Remix your plex recommendations.
 - Remove watched items from recommendations.
 - Choose between styles, shelf (default) or hero.
 - Auto load artwork for hero styles.
+- Filter hubs by its restrictions (per user hub)
 - Disable user state: remove unplayed badges from row items.
 - Disable leaf count: remove episode count from artwork.
 - Force maximum quality.
@@ -77,6 +78,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_TOKEN              |        	 | server admin plex token, needed for hero images. To find your token see: https://support.plex.tv/articles/204059436-finding-an-authentication                                      	  |
 | REPLEX_INTERLEAVE         | true      | Interleave home recommendations. Collection rows with the same name from different libraries are interleaved (combined) into one.                                           	  |
 | REPLEX_EXCLUDE_WATCHED    | true    | If set to true, hide watched items for recommended rows                                     |
+| REPLEX_HUB_RESTRICTIONS   | true      | Apply collections restrictions to their hub's. Plex does not apply restrictions to hubs, so you cannot have different collection hubs for users. this fixes that.                                       	  |
 | REPLEX_DISABLE_CONTINUE_WATCHING | false    | Disable/remove the continue watching row |
 | REPLEX_DISABLE_USER_STATE | false    | Remove unplayed badges from row items |
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
