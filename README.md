@@ -58,7 +58,7 @@ services:
       - plex
 ```
 
-Note: DO NOT run the plex container in host mode. It will cause plex to resolve localy for
+Note: DO NOT run the plex container in host mode. It will cause plex to connect to the local ip instead of the custom url for
 local clients and bypass replex.
 
 Add your proxy url to plex "Custom server access URLs" (ex http://0.0.0.0:3001)
