@@ -1,12 +1,12 @@
 # Replex
 
-Remix your plex hubs.
+Remix your plex hubs
 
 ![plot](./examplewithhero.png)
 
 ## Features
 
-- Merge hubs on home into one from different libraries. Aka have movies and shows in a single row.
+- Merge hubs on home into one from different libraries. Aka have movies and shows in a single hub.
 - Remove watched items from hubs.
 - Choose between styles, shelf (default) or hero.
 - Auto load artwork for hero styles.
