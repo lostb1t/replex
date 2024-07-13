@@ -1,13 +1,13 @@
 # Replex
 
-Remix your plex recommendations.
+Remix your plex hubs.
 
 ![plot](./examplewithhero.png)
 
 ## Features
 
-- Merge recommendations on home into one from different libraries. Aka have movies and shows in a single row.
-- Remove watched items from recommendations.
+- Merge hubs on home into one from different libraries. Aka have movies and shows in a single row.
+- Remove watched items from hubs.
 - Choose between styles, shelf (default) or hero.
 - Auto load artwork for hero styles.
 - Filter hubs by its restrictions (per user hub)
@@ -76,13 +76,13 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 |---------------------------|----------|---------------------------------------------------------------------------|
 | REPLEX_HOST               |        	 | Url of your plex instance. ex: http://0.0.0.0:32400                                             	  |
 | REPLEX_TOKEN              |        	 | server admin plex token, needed for hero images. To find your token see: https://support.plex.tv/articles/204059436-finding-an-authentication                                      	  |
-| REPLEX_INTERLEAVE         | true      | Interleave home recommendations. Collection rows with the same name from different libraries are interleaved (combined) into one.                                           	  |
-| REPLEX_EXCLUDE_WATCHED    | true    | If set to true, hide watched items for recommended rows                                     |
+| REPLEX_INTERLEAVE         | true      | Interleave home hubs. Collection hubs with the same name from different libraries are interleaved (combined) into one.                                           	  |
+| REPLEX_EXCLUDE_WATCHED    | true    | If set to true, hide watched items for hubs.                                    |
 | REPLEX_HUB_RESTRICTIONS   | true      | Apply collections restrictions to their hub's. Plex does not apply restrictions to hubs, so you cannot have different collection hubs for users. this fixes that.                                       	  |
 | REPLEX_DISABLE_CONTINUE_WATCHING | false    | Disable/remove the continue watching row |
 | REPLEX_DISABLE_USER_STATE | false    | Remove unplayed badges from row items |
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
-| REPLEX_HERO_ROWS          |        	 | Comma seperated list of hubidentifiers to make builtin recommendations hero style, options are: <br />home.movies.recent<br />movies.recent <br />movie.recentlyadded<br />movie.topunwatched<br />movie.recentlyviewed<br />hub.movie.recentlyreleased<br />movie.recentlyreleased<br />home.television.recent<br />tv.recentlyadded<br />tv.toprated<br />tv.inprogress<br />tv.recentlyaired    |
+| REPLEX_HERO_ROWS          |        	 | Comma seperated list of hubidentifiers to make builtin hubs hero style, options are: <br />home.movies.recent<br />movies.recent <br />movie.recentlyadded<br />movie.topunwatched<br />movie.recentlyviewed<br />hub.movie.recentlyreleased<br />movie.recentlyreleased<br />home.television.recent<br />tv.recentlyadded<br />tv.toprated<br />tv.inprogress<br />tv.recentlyaired    |
 | REPLEX_FORCE_MAXIMUM_QUALITY    | false    | This will force clients to use the maximum quality. Meaning that if a client requests anything other then the maximum quality this will be ignored and the maximum quality (direct play/stream when server allows for original) is used instead. This doesn't prevent transcoding. It only sets the bitrate to original quality. So if a client needs a different codec, container or audio it should still transcode. 
 | REPLEX_FORCE_DIRECT_PLAY_FOR    | false    | Force direct play for the given resolutions. Options are "4k", "1080" and "720".  This wil result in an error message if the client does not support directplay. Not recommended      
 | REPLEX_VIDEO_TRANSCODE_FALLBACK_FOR    |     | If the selected media triggers a video transcode. Fallback to another version of the media. Only triggers on video transcoding. Remuxing is still allowed. <br />Options are "4k" and "1080". <br /> <br /> Example if  REPLEX_VIDEO_TRANSCODE_FALLBACK_FOR is set to "4k" then 4k transcodes will fallback to another version if avaiable |
@@ -94,10 +94,10 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 
 ## Interleaved rows
 
-Collections with the same name from different libraries will be merged into one on the home screen.
-So an collection named "Trending" in the Movie library will be merged with an collection named "Trending" from a shows library on home.
+Collections hubs with the same name from different libraries will be merged into one on the home screen.
+So an collection hub named "Trending" in the Movie library will be merged with an collection named "Trending" from a shows library on home.
 
-Note, this does not work on builtin recommendations. As i personally dont see then need of mixing those. 
+Note, this does not work on builtin hubs. As i personally dont see then need of mixing those. 
 You can recreate the builtin rows with smart collections if you wish to have that functionality, or with PMM ofcourse.
 
 ## Row style
@@ -111,7 +111,7 @@ Note: Hero elements are not supported for continue watching by plex. You can rep
 
 ## Exclude watched items
 
-If you want to hide watched items from your rows, you can set `REPLEX_EXCLUDE_WATCHED` to true. Alternatively, you can add the label "REPLEX_EXCLUDE_WATCHED" to a collection to exclude watched items from that collection only.
+If you want to hide watched items from your hubs, you can set `REPLEX_EXCLUDE_WATCHED` to true. Alternatively, you can add the label "REPLEX_EXCLUDE_WATCHED" to a collection to exclude watched items from that collection only.
 
 
 ## Remote access (force clients to use the proxy)
@@ -147,7 +147,7 @@ Note: Plex doesnt handle redirects wel, and will not remeber it. So every chuck 
 
 ## Known limitations
 
-- hero rows on Android devices dont load more content. so hero rows have a maximum of 100 items on Android.
+- hero hubs on Android devices dont load more content. so hero hubs have a maximum of 100 items on Android.
 - On android mobile hero elements in libraries are slightly cutoff. This is plex limitation.
 - when exclude_watched is true a maximum item limit per library is opposed of 250 items. So if you have a mixed row of 2 libraries the max results of that row will be 500 items.
 - disable_user_state: For movies this works in the webapp. Shows work accross clients

@@ -247,17 +247,20 @@ impl Filter for HubRestrictionsFilter {
         options: PlexContext,
     ) -> bool {
         let config: Config = Config::figment().extract().unwrap();
+        
         if !config.hub_restrictions {
             return true;
         }
-        tracing::debug!("filter collection permissions");
+        
 
         if item.is_hub() && !item.is_collection_hub() {
             return true;
         }
+        
         if !item.is_hub() {
             return true;
         }
+
         let section_id: i64 = item.library_section_id.unwrap_or_else(|| {
             item.clone()
                 .children()
@@ -267,6 +270,7 @@ impl Filter for HubRestrictionsFilter {
                 .expect("Missing Library section id")
         });
 
+        //let start = Instant::now();
         let mut custom_collections = plex_client
             .clone()
             .get_cached(
@@ -276,6 +280,7 @@ impl Filter for HubRestrictionsFilter {
             .await
             .unwrap();
 
+        //println!("Elapsed time: {:.2?}", start.elapsed());
         let custom_collections_ids: Vec<String> = custom_collections
             .media_container
             .children()
@@ -821,7 +826,7 @@ impl Transform for MediaStyleTransform {
                 guid,
                 options.token.clone().unwrap()
             ));
-    
+            //dbg!(&cover_art);
             if cover_art.is_some() {
                 // c.art = art.clone();
                 item.images = vec![Image {
