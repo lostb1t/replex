@@ -198,7 +198,7 @@ pub fn route() -> Router {
         .push(
             Router::with_path("/photo/<colon:colon>/transcode")
                 .hoop(fix_photo_transcode_request)
-                // .hoop(debug)
+                .hoop(resolve_local_media_path)
                 .goal(proxy_request),
         )
         .push(Router::with_path("<**rest>").goal(proxy_request));
@@ -302,6 +302,27 @@ async fn fix_photo_transcode_request(
         add_query_param_salvo(req, "height".to_string(), size.clone());
         add_query_param_salvo(req, "width".to_string(), size.clone());
         add_query_param_salvo(req, "quality".to_string(), "80".to_string());
+    }
+}
+
+// resolve a local media path to full url
+#[handler]
+async fn resolve_local_media_path(
+    req: &mut Request,
+    _depot: &mut Depot,
+    res: &mut Response,
+) {
+    let params: PlexContext = req.extract().await.unwrap();
+    let url = req.query::<String>("url");
+    if url.is_some() && url.clone().unwrap().contains("/replex/image/hero")
+    {
+        let parts: Vec<String> = url.unwrap().split("/").map(|x| x.to_string()).collect();
+        let plex_client = PlexClient::from_request(req, params.clone());
+        let uuid = parts[7].clone();
+        let rurl = plex_client.get_hero_art(uuid).await;
+        if rurl.is_some() {
+          add_query_param_salvo(req, "url".to_string(), rurl.unwrap());
+        }
     }
 }
 
