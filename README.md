@@ -19,7 +19,10 @@ Remix your plex hubs
 - Works on every client/app not only plex web!
 - Plays nice with PMM (and without).
 
-!!This does not alter your plex data in anyway. it only alters outgoing api requests. All your collections or rows are kept intact!!
+## How does it work
+
+Replex is an proxy that sits between the plex media server and plex clients and transforms the communication between them.
+This allows replex to change some dials that otherwise wouldnt be possible.
 
 ## Installation
 
@@ -64,6 +67,9 @@ local clients and bypass replex.
 Add your proxy url to plex "Custom server access URLs" (ex http://0.0.0.0:3001)
 Then access your proxy url http://0.0.0.0:3001
 
+Note: Plex clients are a bit broken with custom urls and non secured connections. Most wont work if the custom url is not secure.
+Sonl for testing with web insecure is fine but after that you want to setup SSL. See the "Remote access" section for more info.
+
 ## Settings
 
 Settings are set via [environment variables](https://kinsta.com/knowledgebase/what-is-an-environment-variable/) 
@@ -96,7 +102,7 @@ So an collection hub named "Trending" in the Movie library will be merged with a
 Note, this does not work on builtin hubs. As i personally dont see then need of mixing those. 
 You can recreate the builtin rows with smart collections if you wish to have that functionality, or with PMM ofcourse.
 
-## Row style
+## Hub style
 
 For custom collections you can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection.
 
@@ -108,7 +114,6 @@ Note: Hero elements are not supported for continue watching by plex. You can rep
 ## Exclude watched items
 
 If you want to hide watched items from your hubs, you can set `REPLEX_EXCLUDE_WATCHED` to true. Alternatively, you can add the label "REPLEX_EXCLUDE_WATCHED" to a collection to exclude watched items from that collection only.
-
 
 ## Remote access (force clients to use the proxy)
 
