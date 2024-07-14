@@ -7,8 +7,8 @@ Remix your plex hubs
 ## Features
 
 - Merge hubs (recommended rows) on home into one from different libraries (interleave). Aka have movies and shows in a single row.
-- Remove watched items from hubs.
 - Choose between styles, [shelf](./shelf.png) (default) or [hero](./hero.png).
+- Remove watched items from hubs.
 - Auto load artwork for hero styles.
 - Filter hubs by its restrictions (per user hub)
 - Disable user state: remove watched badges from hub items.
