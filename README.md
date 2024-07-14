@@ -21,7 +21,7 @@ Remix your plex hubs
 
 ## How does it work
 
-Replex is an proxy that sits between the plex media server and plex clients and transforms the communication between them.
+Replex is an proxy that transforms the communication between the plex media server and plex clients. 
 This allows replex to change some dials that otherwise wouldnt be possible.
 
 ## Installation
