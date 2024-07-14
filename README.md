@@ -6,7 +6,7 @@ Remix your plex hubs
 
 ## Features
 
-- Merge hubs (recommended rows) from different libraries into a single one (interleave). Aka have movies and shows in a single row.
+- Merge hubs (recommended rows) from different libraries into a [single hub](./interleave.png) (interleave). Aka have movies and shows in a single row.
 - Choose between styles, [shelf](./shelf.png) (default) or [hero](./hero.png).
 - Remove watched items from hubs.
 - Auto load artwork for hero styles.
