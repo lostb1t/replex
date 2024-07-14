@@ -61,11 +61,11 @@ services:
       - plex
 ```
 
-Note: DO NOT run the plex container in host mode. It will cause plex to connect to the local ip instead of the custom url for
-local clients and bypass replex.
-
 Add your proxy url to plex "Custom server access URLs" (ex http://0.0.0.0:3001)
 Then access your proxy url http://0.0.0.0:3001
+
+Note: DO NOT run the plex container in host mode. It will cause plex to connect to the local ip instead of the custom url for
+local clients and bypass replex.
 
 Note: Plex clients are a bit broken with custom urls and non secured connections. Most wont work if the custom url is not secure.
 Sonl for testing with web insecure is fine but after that you want to setup SSL. See the "Remote access" section for more info.
