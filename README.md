@@ -82,7 +82,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_EXCLUDE_WATCHED    | true    | If set to true, hide watched items for hubs.                                    |
 | REPLEX_HUB_RESTRICTIONS   | true      | Apply collections restrictions to their hub's. Plex does not apply restrictions to hubs, so you cannot have different collection hubs for users. this fixes that.                                       	  |
 | REPLEX_DISABLE_CONTINUE_WATCHING | false    | Disable/remove the continue watching row |
-| REPLEX_DISABLE_USER_STATE | false    | Remove unplayed badges from row items |
+| REPLEX_DISABLE_USER_STATE | true    | Remove unplayed badges from hub items |
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
 | REPLEX_HERO_ROWS          |        	 | Comma seperated list of hubidentifiers to make builtin hubs hero style, options are: <br />home.movies.recent<br />movies.recent <br />movie.recentlyadded<br />movie.topunwatched<br />movie.recentlyviewed<br />hub.movie.recentlyreleased<br />movie.recentlyreleased<br />home.television.recent<br />tv.recentlyadded<br />tv.toprated<br />tv.inprogress<br />tv.recentlyaired    |
 | REPLEX_FORCE_MAXIMUM_QUALITY    | false    | This will force clients to use the maximum quality. Meaning that if a client requests anything other then the maximum quality this will be ignored and the maximum quality (direct play/stream when server allows for original) is used instead. This doesn't prevent transcoding. It only sets the bitrate to original quality. So if a client needs a different codec, container or audio it should still transcode. 

@@ -66,7 +66,7 @@ pub struct Config {
     )]
     pub disable_user_state: bool,
     #[serde(
-        default = "default_as_false",
+        default = "default_as_true",
         deserialize_with = "figment::util::bool_from_str_or_int"
     )]
     pub disable_leaf_count: bool,
