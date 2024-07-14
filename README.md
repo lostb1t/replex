@@ -8,7 +8,7 @@ Remix your plex hubs
 
 - Merge hubs (recommended rows) on home into one from different libraries (interleave). Aka have movies and shows in a single row.
 - Remove watched items from hubs.
-- Choose between styles, shelf (default) or hero.
+- Choose between styles, [shelf](./shelf.png) (default) or [hero](./hero.png).
 - Auto load artwork for hero styles.
 - Filter hubs by its restrictions (per user hub)
 - Disable user state: remove watched badges from hub items.
@@ -67,8 +67,8 @@ Then access your proxy url http://0.0.0.0:3001
 Note: DO NOT run the plex container in host mode. It will cause plex to connect to the local ip instead of the custom url for
 local clients and bypass replex.
 
-Note: Plex clients are a bit broken with custom urls and non secured connections. Most wont work if the custom url is not secure.
-Sonl for testing with web insecure is fine but after that you want to setup SSL. See the "Remote access" section for more info.
+Note: Plex clients are a bit broken with custom urls and unsecured connections. Most wont work if the custom server url is not secure.
+So for testing the direct web client is fine but after that you want to setup SSL. See the "Remote access" section for more info.
 
 ## Settings
 
