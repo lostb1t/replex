@@ -91,12 +91,12 @@ jobs:
          #   name: aarch64-apple-darwin.tar.gz
          #   command: build
 
-         # - release_for: x86_64 Windows
-         #   os: windows-latest
-         #   target: x86_64-pc-windows-msvc
-         #   bin: replex.exe
-         #   name: precious-Windows-x86_64.zip
-         #   command: build
+          - release_for: x86_64 Windows
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            bin: replex.exe
+            name: precious-Windows-x86_64.zip
+            command: build
 
     runs-on: ${{ matrix.platform.os }}
     needs: 

@@ -84,7 +84,7 @@ Settings are set via [environment variables](https://kinsta.com/knowledgebase/wh
 | REPLEX_DISABLE_CONTINUE_WATCHING | false    | Disable/remove the continue watching row |
 | REPLEX_DISABLE_USER_STATE | true    | Remove watched badges from hub items. * does not work on all clients |
 | REPLEX_DISABLE_LEAF_COUNT| false    | Remove episode count label from show artwork.                              |
-| REPLEX_HERO_ROWS          |        	 | Comma seperated list of hubidentifiers to make builtin hubs hero style, options are: <br />home.movies.recent<br />movies.recent <br />movie.recentlyadded<br />movie.topunwatched<br />movie.recentlyviewed<br />hub.movie.recentlyreleased<br />movie.recentlyreleased<br />home.television.recent<br />tv.recentlyadded<br />tv.toprated<br />tv.inprogress<br />tv.recentlyaired    |
+| REPLEX_HERO_ROWS          |        	 | Comma seperated list of hubidentifiers to make builtin hubs hero style. For custom collections see [Hhb style](#-hub-style). Options are: <br />home.movies.recent<br />movies.recent <br />movie.recentlyadded<br />movie.topunwatched<br />movie.recentlyviewed<br />hub.movie.recentlyreleased<br />movie.recentlyreleased<br />home.television.recent<br />tv.recentlyadded<br />tv.toprated<br />tv.inprogress<br />tv.recentlyaired    |
 | REPLEX_FORCE_MAXIMUM_QUALITY    | false    | This will force clients to use the maximum quality. Meaning that if a client requests anything other then the maximum quality this will be ignored and the maximum quality (direct play/stream when server allows for original) is used instead. This doesn't prevent transcoding. It only sets the bitrate to original quality. So if a client needs a different codec, container or audio it should still transcode. 
 | REPLEX_FORCE_DIRECT_PLAY_FOR    | false    | Force direct play for the given resolutions. Options are "4k", "1080" and "720".  This wil result in an error message if the client does not support directplay. Not recommended      
 | REPLEX_VIDEO_TRANSCODE_FALLBACK_FOR    |     | If the selected media triggers a video transcode. Fallback to another version of the media. Only triggers on video transcoding. Remuxing is still allowed. <br />Options are "4k" and "1080". <br /> <br /> Example if  REPLEX_VIDEO_TRANSCODE_FALLBACK_FOR is set to "4k" then 4k transcodes will fallback to another version if avaiable |
@@ -104,7 +104,7 @@ You can recreate the builtin rows with smart collections if you wish to have tha
 
 ## Hub style
 
-For custom collections you can change the hub style to hero elements by setting the label "REPLEXHERO" on an collection.
+For custom collections you can change the hub style to hero by setting the label "REPLEXHERO" on an collection.
 
 For built in rows you can use the hubidentifier in the `REPLEX_HERO_ROWS`. See the setting for available know options.
 
