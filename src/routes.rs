@@ -672,7 +672,6 @@ pub async fn get_hubs_sections(
         count = 50;
     }
 
-    add_query_param_salvo(req, "count".to_string(), count.to_string());
 
     // we want guids for banners
     add_query_param_salvo(req, "includeGuids".to_string(), "1".to_string());
@@ -799,7 +798,14 @@ pub async fn default_transform(
     let mut url = Url::parse(req.uri_mut().to_string().as_str()).unwrap();
     url.set_path(&rest_path);
     req.set_uri(hyper::Uri::try_from(url.as_str()).unwrap());
-
+    
+    
+    // patch, plex seems to pass wrong contentdirid, probaply cause we all load it inti the first
+    let mut queries = req.queries().clone();
+    queries.remove("contentDirectoryID");
+    replace_query(queries, req);
+    
+    //dbg!(&req);
     let upstream_res = plex_client.request(req).await?;
     match upstream_res.status() {
         reqwest::StatusCode::OK => (),
@@ -817,9 +823,11 @@ pub async fn default_transform(
     // container.media_container.meta
 
     TransformBuilder::new(plex_client, params.clone())
+        .with_filter(HubRestrictionsFilter)
         .with_transform(MediaStyleTransform { style: style })
         .with_transform(UserStateTransform)
         .with_transform(HubWatchedTransform)
+        .with_transform(HubKeyTransform)
         .apply_to(&mut container)
         .await;
 

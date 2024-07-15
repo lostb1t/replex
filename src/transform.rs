@@ -358,7 +358,7 @@ impl Transform for HubInterleaveTransform {
     ) -> MediaContainer {
         let config: Config = Config::figment().extract().unwrap();
         let mut new_hubs: Vec<MetaData> = vec![];
-
+        
         if !config.interleave {
             return item;
         }
@@ -965,7 +965,7 @@ impl Transform for HubKeyTransform {
         plex_client: PlexClient,
         options: PlexContext,
     ) {
-        
+
         if item.is_hub()
             && item.key.is_some()
             && !item.key.clone().unwrap().starts_with("/replex")
