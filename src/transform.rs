@@ -113,7 +113,7 @@ impl TransformBuilder {
         'outer: for mut item in metadata {
             for filter in self.filters.clone() {
                 // dbg!("filtering");
-                if !filter
+                if filter
                     .filter_metadata(
                         item,
                         self.plex_client.clone(),
@@ -126,26 +126,24 @@ impl TransformBuilder {
             }
 
             if !item.children().is_empty() {
-                // dbg!(item.test().len());
                 let childs = self.apply_to_metadata(item.children_mut()).await;
-                // dbg!(childs.len());
-                // dbg!(&item.test());
                 item.set_children(childs);
-                // item.set_children(self.apply_to_metadata(item.test()).await);
             }
 
             filtered_childs.push(item.to_owned());
         }
 
         return filtered_childs;
-        // dbg!(&metadata.len());
     }
 
-    // TODO: join async filters
     pub async fn apply_to(
         self,
         container: &mut MediaContainerWrapper<MediaContainer>,
     ) {
+        let children = container.media_container.children_mut();
+        let new_children = self.apply_to_metadata(children).await;
+        container.media_container.set_children(new_children);
+        
         for t in self.transforms.clone() {
             let futures =
                 container.media_container.children_mut().iter_mut().map(
@@ -172,11 +170,6 @@ impl TransformBuilder {
                 .await;
             // dbg!(container.media_container.size);
         }
-
-        // filter behind transform as transform can load in additional data
-        let children = container.media_container.children_mut();
-        let new_children = self.apply_to_metadata(children).await;
-        container.media_container.set_children(new_children);
 
         if container.media_container.size.is_some() {
             container.media_container.size = Some(
@@ -249,33 +242,24 @@ impl Filter for HubRestrictionsFilter {
         let config: Config = Config::figment().extract().unwrap();
         
         if !config.hub_restrictions {
-            return true;
-        }    
+            return false;
+        }
 
         if item.is_hub() && !item.is_collection_hub() {
-            return true;
-        }
-        
-        if !item.is_hub() {
-            return true;
-        }
-        
-        if !item.size.unwrap() == 0 {
             return false;
         }
         
-        let section_id: i64 = item.library_section_id.unwrap_or_else(|| {
-            item.clone()
-                .children()
-                .get(0)
-                .unwrap()
-                .library_section_id
-                .expect("Missing Library section id")
-        });
+        if !item.is_hub() {
+            return false;
+        }
+        
+        if !item.size.unwrap() == 0 {
+            return true;
+        }
 
-        //let section_id: i64 = item.library_section_id.unwrap_or_else(|| {
-        //    item.hub_identifier.clone().unwrap().split('.').unwrap().2.parse().unwrap()
-        //});
+        let section_id: i64 = item.library_section_id.unwrap_or_else(|| {
+            item.hub_identifier.clone().unwrap().split('.').collect::<Vec<&str>>()[2].parse().unwrap()
+        });
 
         //let start = Instant::now();
         let mut custom_collections = plex_client
@@ -295,7 +279,7 @@ impl Filter for HubRestrictionsFilter {
             .map(|c| c.rating_key.clone().unwrap())
             .collect();
 
-        custom_collections_ids.contains(
+        !custom_collections_ids.contains(
             &item
                 .hub_identifier
                 .clone()
@@ -723,6 +707,7 @@ impl Transform for HubStyleTransform {
             // TODO: Check why tries to load non existing collectiin? my guess is no access
             let is_hero =
                 item.is_hero(plex_client.clone()).await.unwrap_or(false);
+            
             if is_hero {
                 let mut style = ClientHeroStyle::from_context(options.clone());
 
@@ -980,21 +965,24 @@ impl Transform for HubKeyTransform {
         plex_client: PlexClient,
         options: PlexContext,
     ) {
-
+        
         if item.is_hub()
             && item.key.is_some()
             && !item.key.clone().unwrap().starts_with("/replex")
         {
             // might already been set by the mixings
             // setting an url argument crashes client. So we use the path
+            let old_key = item.key.clone().unwrap();
             item.key = Some(format!(
                 "/replex/{}{}",
                 item.style
                     .clone()
                     .unwrap_or(Style::Shelf.to_string().to_lowercase()),
-                item.key.clone().unwrap()
+                old_key
             ));
+            tracing::debug!(old_key = old_key, key = &item.key, "Replacing hub key");
         }
+
     }
 }
 
