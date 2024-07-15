@@ -637,7 +637,7 @@ pub async fn transform_hubs_home(
     container.content_type = content_type;
 
     TransformBuilder::new(plex_client, params.clone())
-        .with_filter(HubRestrictionsFilter)
+        .with_filter(HubRestrictionFilter)
         .with_transform(HubStyleTransform { is_home: true })
         .with_transform(HubWatchedTransform)
         .with_transform(HubInterleaveTransform)
@@ -692,7 +692,7 @@ pub async fn get_hubs_sections(
     container.content_type = content_type;
 
     TransformBuilder::new(plex_client, params.clone())
-        .with_filter(HubRestrictionsFilter)
+        .with_filter(HubRestrictionFilter)
         .with_transform(HubSectionDirectoryTransform)
         .with_transform(HubStyleTransform { is_home: false })
         .with_transform(HubWatchedTransform)
@@ -750,7 +750,7 @@ pub async fn get_collections_children(
 
     // filtering of watched happens in the transform
     TransformBuilder::new(plex_client, params.clone())
-        .with_filter(HubRestrictionsFilter)
+        .with_filter(HubRestrictionFilter)
         .with_transform(LibraryInterleaveTransform {
             collection_ids: collection_ids.clone(),
             offset,
@@ -823,7 +823,7 @@ pub async fn default_transform(
     // container.media_container.meta
 
     TransformBuilder::new(plex_client, params.clone())
-        .with_filter(HubRestrictionsFilter)
+        .with_filter(HubRestrictionFilter)
         .with_transform(MediaStyleTransform { style: style })
         .with_transform(UserStateTransform)
         .with_transform(HubWatchedTransform)
@@ -863,7 +863,7 @@ pub async fn get_library_item_metadata(req: &mut Request, res: &mut Response) {
     container.content_type = content_type;
 
     TransformBuilder::new(plex_client, params.clone())
-        .with_transform(MediaContainerScriptingTransform)
+        //.with_transform(MediaContainerScriptingTransform)
         .apply_to(&mut container)
         .await;
     // dbg!(container.media_container.count);
@@ -898,7 +898,7 @@ pub async fn get_play_queues(req: &mut Request, res: &mut Response) {
     container.content_type = content_type;
 
     TransformBuilder::new(plex_client, params.clone())
-        .with_transform(MediaContainerScriptingTransform)
+        //.with_transform(MediaContainerScriptingTransform)
         .apply_to(&mut container)
         .await;
 
