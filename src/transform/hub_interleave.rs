@@ -1,7 +1,7 @@
 use crate::{
     config::Config,
     models::*,
-    plex_client::{self, PlexClient},
+    plex_client::{PlexClient},
     utils::*,
 };
 
@@ -27,7 +27,7 @@ impl Transform for HubInterleaveTransform {
             return item;
         }
 
-        for mut hub in item.children_mut() {
+        for hub in item.children_mut() {
             if hub.size.unwrap() == 0 {
                 continue;
             }

@@ -23,30 +23,17 @@ pub use library_interleave::LibraryInterleaveTransform;
 pub use restriction_filter::HubRestrictionFilter;
 
 use crate::{
-    config::Config,
     models::*,
-    plex_client::{self, PlexClient},
-    utils::*,
+    plex_client::{PlexClient},
 };
 
 use async_trait::async_trait;
 use async_recursion::async_recursion;
 use futures_util::{
-    future::{self, join_all, LocalBoxFuture},
-    stream::{FuturesOrdered, FuturesUnordered},
+    future::{self},
     StreamExt,
 };
-use itertools::Itertools;
-use rhai::serde::{from_dynamic, to_dynamic};
-use rhai::{Dynamic, Engine, EvalAltResult, Scope};
-use serde::{Deserialize, Deserializer, Serialize};
-use std::cell::RefCell;
 use std::sync::Arc;
-use std::{cell::Cell, collections::HashMap};
-use strum_macros::Display as EnumDisplay;
-use strum_macros::EnumString;
-use tokio::task::JoinSet;
-use tokio::time::Instant;
 
 #[async_trait]
 pub trait Transform: Send + Sync + 'static {
@@ -134,7 +121,7 @@ impl TransformBuilder {
         metadata: &mut Vec<MetaData>,
     ) -> Vec<MetaData> {
         let mut filtered_childs: Vec<MetaData> = vec![];
-        'outer: for mut item in metadata {
+        'outer: for item in metadata {
             for filter in self.filters.clone() {
                 // dbg!("filtering");
                 if filter

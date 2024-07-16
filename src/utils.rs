@@ -1,6 +1,5 @@
 extern crate tracing;
 use anyhow::Result;
-use bytes::Bytes;
 extern crate mime;
 use itertools::Itertools;
 // use futures_util::StreamExt;
@@ -15,7 +14,6 @@ use strum_macros::Display as EnumDisplay;
 use strum_macros::EnumString;
 // use http_body::{Limited, Full};
 use http_body_util::BodyExt;
-use tracing::error;
 use url::Url;
 use tokio::time::Duration;
 use yaserde::ser::to_string as to_xml_str;
@@ -24,7 +22,7 @@ use salvo::http::HeaderValue;
 
 use salvo::http::HeaderMap;
 use salvo::{
-    http::response::Response as SalvoResponse, Extractible,
+    Extractible,
     Request as SalvoRequest,
 };
 

@@ -1,4 +1,3 @@
-use std::sync::Arc;
 use std::time::Duration;
 
 use crate::config::Config;
@@ -18,27 +17,18 @@ use http::HeaderMap;
 use http::Uri;
 // use hyper::client::HttpConnector;
 // use hyper::Body;
-use hyper::body::Body;
 use moka::future::Cache;
 //use moka::future::ConcurrentCacheExt;
 use once_cell::sync::Lazy;
-use once_cell::sync::OnceCell;
 use reqwest::header;
-use reqwest::header::HeaderValue;
 use reqwest::header::ACCEPT;
-use reqwest::Client;
 use reqwest_retry::{
-    default_on_request_failure, policies::ExponentialBackoff,
-    RetryTransientMiddleware, Retryable, RetryableStrategy,
+    default_on_request_failure, Retryable, RetryableStrategy,
 };
-use salvo::http::ReqBody;
 use salvo::Error;
 use salvo::Request;
-use salvo::Response;
 // use hyper::client::HttpConnector;
 
-use salvo::http::ResBody;
-use url::Url;
 
 static CACHE: Lazy<Cache<String, MediaContainerWrapper<MediaContainer>>> =
     Lazy::new(|| {
@@ -159,7 +149,7 @@ impl PlexClient {
             .await
             .unwrap();
 
-        let mut container: MediaContainerWrapper<MediaContainer> =
+        let container: MediaContainerWrapper<MediaContainer> =
             from_reqwest_response(res)
                 .await
                 .expect("Cannot get MediaContainerWrapper from response");
@@ -339,7 +329,7 @@ impl PlexClient {
         
         image.as_ref()?; // dont return and dont cache, let us just retry next time.
 
-        let mut cache_expiry = crate::cache::Expiration::Month;
+        let cache_expiry = crate::cache::Expiration::Month;
         let _ = GLOBAL_CACHE
             .insert(cache_key, image.clone(), cache_expiry)
             .await;

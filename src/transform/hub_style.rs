@@ -1,16 +1,14 @@
 use crate::{
     config::Config,
     models::*,
-    plex_client::{self, PlexClient},
-    utils::*,
+    plex_client::{PlexClient},
 };
 use super::MediaStyleTransform;
 use super::Transform;
 use super::hero_meta;
 use async_trait::async_trait;
 use futures_util::{
-    future::{self, join_all, LocalBoxFuture},
-    stream::{FuturesOrdered, FuturesUnordered},
+    stream::{FuturesOrdered},
     StreamExt,
 };
 
@@ -181,7 +179,7 @@ impl Transform for HubStyleTransform {
                 item.is_hero(plex_client.clone()).await.unwrap_or(false);
             
             if is_hero {
-                let mut style = ClientHeroStyle::from_context(options.clone());
+                let style = ClientHeroStyle::from_context(options.clone());
 
                 item.style = style.style;
 

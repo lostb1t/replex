@@ -1,13 +1,10 @@
 #[macro_use]
 extern crate tracing;
 
-use opentelemetry_otlp::WithExportConfig;
 use replex::config::Config;
 use replex::routes::*;
 use salvo::prelude::*;
 use std::env;
-use std::time::Duration;
-use tokio::{task, time};
 //use tonic::metadata::MetadataMap;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::prelude::*;

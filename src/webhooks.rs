@@ -1,6 +1,6 @@
 // use serde_derive::Deserialize;
 // use serde_derive::Serialize;
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Serialize};
 
 pub fn watchlist(payload: Payload) {
 

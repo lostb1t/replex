@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use http::Uri;
 use moka::future::Cache as MokaCache;
 //use moka::sync::Cache as MokaCacheSync;
 //use moka::sync::CacheBuilder as MokaCacheBuilder;
@@ -7,18 +6,15 @@ use moka::Expiry;
 use crate::headers;
 use once_cell::sync::Lazy;
 use salvo::cache::CachedBody;
-use regex::Regex;
 use salvo::cache::MethodSkipper;
-use salvo::conn::SocketAddr;
 use salvo::handler::Skipper;
 use salvo::http::HeaderMap;
 use salvo::http::StatusCode;
 use salvo::Handler;
 use salvo::{cache::CacheIssuer, Depot, Request};
 use serde::de::DeserializeOwned;
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{Serialize};
 use std::borrow::Borrow;
-use std::convert::Infallible;
 use std::error::Error as StdError;
 use std::hash::Hash;
 use std::{

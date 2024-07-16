@@ -1,16 +1,9 @@
-use figment::{providers::Env, Figment};
 use salvo::prelude::*;
-use std::f32::consts::E;
 use std::fmt;
 use std::str::FromStr;
 use std::string::ToString;
-use tmdb_api::movie::images::MovieImages;
-use tmdb_api::prelude::Command;
-use tmdb_api::tvshow::search::TVShowSearch;
-use tmdb_api::Client;
 
 extern crate mime;
-use crate::cache::GLOBAL_CACHE;
 use crate::config::*;
 use crate::plex_client::PlexClient;
 use crate::utils::*;
@@ -25,10 +18,9 @@ use salvo::http::ReqBody;
 use salvo::http::ResBody;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_with::serde_as;
-use std::io::{Read, Write};
+use std::io::{Write};
 use strum_macros::Display as EnumDisplay;
 use strum_macros::EnumString;
-use tracing::debug;
 use xml::writer::XmlEvent;
 use yaserde::YaSerialize as YaSerializeTrait;
 use yaserde_derive::YaDeserialize;

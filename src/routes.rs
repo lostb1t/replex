@@ -1,4 +1,3 @@
-use crate::cache::*;
 use crate::config::Config;
 use crate::logging::*;
 use crate::models::*;
@@ -19,7 +18,6 @@ use salvo::http::header::CONTENT_TYPE;
 use salvo::http::{Request, Response, StatusCode};
 use salvo::prelude::*;
 use salvo::routing::PathFilter;
-use std::sync::Arc;
 use tokio::time::Duration;
 use url::Url;
 use http;
@@ -331,7 +329,7 @@ async fn ntf_watchlist_force(
         tokio::spawn(async move {
             let token = params.clone().token.unwrap();
             let client_id = params.clone().client_identifier.unwrap();
-            let mut url = format!("https://notifications.plex.tv/api/v1/notifications/settings?X-Plex-Token={}", &token);
+            let url = format!("https://notifications.plex.tv/api/v1/notifications/settings?X-Plex-Token={}", &token);
             let json_data = r#"{"enabled": true,"libraries": [],"identifier": "tv.plex.notification.library.new"}"#;
             let client = reqwest::Client::new();
         
@@ -451,7 +449,7 @@ pub async fn hero_image(
     ctrl: &mut FlowCtrl,
     depot: &mut Depot,
 ) {
-    let mut params: PlexContext = req.extract().await.unwrap();
+    let params: PlexContext = req.extract().await.unwrap();
     let t = req.param::<String>("type").unwrap();
     let uuid = req.param::<String>("uuid").unwrap();
 
@@ -478,7 +476,7 @@ pub async fn direct_stream_fallback(
     let config: Config = Config::dynamic(req).extract().unwrap();
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
-    let mut queries = req.queries().clone();
+    let queries = req.queries().clone();
     // dbg!("yo");
     let direct_play = queries
         .get("directPlay")
@@ -494,7 +492,7 @@ pub async fn direct_stream_fallback(
 
     match upstream_res.status() {
         http::StatusCode::OK => {
-            let mut container: MediaContainerWrapper<MediaContainer> =
+            let container: MediaContainerWrapper<MediaContainer> =
             from_reqwest_response(upstream_res).await?;
     
             if container.media_container.general_decision_code.is_some()
@@ -899,8 +897,8 @@ async fn force_maximum_quality(req: &mut Request) -> Result<(), anyhow::Error> {
             .await
             .unwrap();
 
-        let media_index: usize = if (req.queries().get("mediaIndex").is_none()
-            || req.queries().get("mediaIndex").unwrap() == "-1")
+        let media_index: usize = if req.queries().get("mediaIndex").is_none()
+            || req.queries().get("mediaIndex").unwrap() == "-1"
         {
             0
         } else {
@@ -1001,7 +999,7 @@ async fn get_transcoding_for_request(
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let response = plex_client.request(req).await?;
-    let mut transcode: MediaContainerWrapper<MediaContainer> =
+    let transcode: MediaContainerWrapper<MediaContainer> =
         from_reqwest_response(response).await?;
     let mut is_transcoding = false;
 
@@ -1045,9 +1043,9 @@ async fn video_transcode_fallback(
     let plex_client = PlexClient::from_request(req, params.clone());
     let config: Config = Config::dynamic(req).extract().unwrap();
     let mut queries = req.queries().clone();
-    let mut original_queries = req.queries().clone();
-    let media_index: usize = if (req.queries().get("mediaIndex").is_none()
-        || req.queries().get("mediaIndex").unwrap() == "-1")
+    let original_queries = req.queries().clone();
+    let media_index: usize = if req.queries().get("mediaIndex").is_none()
+        || req.queries().get("mediaIndex").unwrap() == "-1"
     {
         0
     } else {

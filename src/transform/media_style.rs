@@ -1,8 +1,6 @@
 use crate::{
-    config::Config,
     models::*,
-    plex_client::{self, PlexClient},
-    utils::*,
+    plex_client::{PlexClient},
 };
 use super::Transform;
 use super::ClientHeroStyle;
@@ -34,7 +32,7 @@ impl Transform for MediaStyleTransform {
         options: PlexContext,
     ) {
         if self.style == Style::Hero {
-            let mut style_def = ClientHeroStyle::from_context(options.clone());
+            let style_def = ClientHeroStyle::from_context(options.clone());
             if style_def.child_type.clone().is_some() {
                 item.r#type = style_def.child_type.clone().unwrap();
             }
@@ -45,7 +43,7 @@ impl Transform for MediaStyleTransform {
             }
             guid = guid.replace("plex://", "");
 
-            let mut cover_art = Some(format!("{}://{}/replex/image/hero/{}?X-Plex-Token={}", 
+            let cover_art = Some(format!("{}://{}/replex/image/hero/{}?X-Plex-Token={}", 
                 match options.forwarded_proto {
                     Some(v) => v,
                     None => "http".to_string()

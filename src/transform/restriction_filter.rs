@@ -2,8 +2,7 @@ use async_trait::async_trait;
 use crate::{
     config::Config,
     models::*,
-    plex_client::{self, PlexClient},
-    utils::*,
+    plex_client::{PlexClient},
 };
 
 use super::Filter;

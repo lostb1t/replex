@@ -1,6 +1,6 @@
 use crate::models::deserialize_comma_seperated_string;
 use figment::{providers::Env, Figment};
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Deserializer};
 // use serde::Deserialize;
 
 fn default_as_false() -> bool {
