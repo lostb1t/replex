@@ -14,6 +14,8 @@ use salvo::http::header::CONTENT_TYPE;
 use salvo::http::{Request, Response, StatusCode};
 use salvo::prelude::*;
 use salvo::routing::PathFilter;
+use salvo::http::HeaderValue;
+use salvo::http::header;
 use tokio::time::Duration;
 use url::Url;
 use http;
@@ -128,7 +130,7 @@ pub fn route() -> Router {
                 .hoop(transform_req_content_directory)
                 .hoop(transform_req_include_guids)
                 .hoop(transform_req_android)
-                .hoop(proxy_request)
+                .hoop(proxy_for_transform)
                 .get(transform_hubs_response),
         )
         .push(
@@ -141,7 +143,7 @@ pub fn route() -> Router {
                 .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
                 .hoop(transform_req_include_guids)
                 .hoop(transform_req_android)
-                .hoop(proxy_request)
+                .hoop(proxy_for_transform)
                 .get(transform_hubs_response)
         )
         .push(
@@ -185,6 +187,23 @@ async fn proxy_request(
     let config: Config = Config::dynamic(req).extract().unwrap();
     let proxy = default_proxy();
     proxy.handle(req, depot, res, ctrl).await;
+}
+
+#[handler]
+async fn proxy_for_transform(
+    req: &mut Request,
+    res: &mut Response,
+    depot: &mut Depot,
+    ctrl: &mut FlowCtrl,
+) -> Result<(), anyhow::Error> {
+    let config: Config = Config::dynamic(req).extract().unwrap();
+    let content_type = get_content_type_from_headers(req.headers_mut());
+    let proxy = default_proxy();
+    let headers_ori = req.headers().clone();
+    req.headers_mut().insert(http::header::ACCEPT, header::HeaderValue::from_static("application/json"));
+    proxy.handle(req, depot, res, ctrl).await;
+    *req.headers_mut() = headers_ori;
+    Ok(())
 }
 
 // skip processing when product is plexamp
@@ -534,11 +553,12 @@ pub async fn transform_hubs_response(
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let content_type = get_content_type_from_headers(req.headers_mut());
-
+    dbg!(&res);
+    dbg!(&req);
     let mut container: MediaContainerWrapper<MediaContainer> =
         from_salvo_response(res).await?;
     container.content_type = content_type;
-
+    dbg!("GO");
     TransformBuilder::new(plex_client, params.clone())
         .with_filter(HubRestrictionFilter)
         .with_transform(HubStyleTransform { is_home: true })
@@ -735,7 +755,6 @@ pub async fn default_transform(
     let mut container: MediaContainerWrapper<MediaContainer> =
         from_reqwest_response(upstream_res).await?;
     container.content_type = content_type;
-    // container.media_container.meta
 
     TransformBuilder::new(plex_client, params.clone())
         .with_filter(HubRestrictionFilter)
