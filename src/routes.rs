@@ -553,12 +553,11 @@ pub async fn transform_hubs_response(
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
     let content_type = get_content_type_from_headers(req.headers_mut());
-    dbg!(&res);
-    dbg!(&req);
+
     let mut container: MediaContainerWrapper<MediaContainer> =
         from_salvo_response(res).await?;
     container.content_type = content_type;
-    dbg!("GO");
+
     TransformBuilder::new(plex_client, params.clone())
         .with_filter(HubRestrictionFilter)
         .with_transform(HubStyleTransform { is_home: true })
