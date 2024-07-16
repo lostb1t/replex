@@ -2,16 +2,12 @@ use crate::config::Config;
 use crate::logging::*;
 use crate::models::*;
 use crate::plex_client::*;
-//use crate::proxy::Proxy;
-//use salvo_proxy::Proxy;
 use crate::timeout::*;
 use crate::transform::*;
 use crate::url::*;
 use crate::utils::*;
 use crate::webhooks;
 use itertools::Itertools;
-//use moka::notification::RemovalCause;
-//use moka::sync::Cache as MokaCacheSync;
 use salvo::compression::Compression;
 use salvo::cors::Cors;
 use salvo::http::header::CONTENT_TYPE;
@@ -129,7 +125,11 @@ pub fn route() -> Router {
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
-                .get(transform_hubs_home),
+                .hoop(transform_req_content_directory)
+                .hoop(transform_req_include_guids)
+                .hoop(transform_req_android)
+                .hoop(proxy_request)
+                .get(transform_hubs_response),
         )
         .push(
             Router::new()
@@ -139,7 +139,10 @@ pub fn route() -> Router {
         .push(
             Router::new()
                 .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
-                .get(get_hubs_sections),
+                .hoop(transform_req_include_guids)
+                .hoop(transform_req_android)
+                .hoop(proxy_request)
+                .get(transform_hubs_response)
         )
         .push(
             Router::new()
@@ -159,7 +162,6 @@ pub fn route() -> Router {
         .push(
             Router::new()
                 .path("/replex/<style>/<**rest>")
-                //.hoop(default_cache())
                 .get(default_transform),
         )
         .push(
@@ -275,7 +277,6 @@ async fn fix_photo_transcode_request(
 #[handler]
 async fn resolve_local_media_path(
     req: &mut Request,
-    _depot: &mut Depot,
     res: &mut Response,
 ) {
     let params: PlexContext = req.extract().await.unwrap();
@@ -526,10 +527,38 @@ pub async fn direct_stream_fallback(
 }
 
 #[handler]
-pub async fn transform_hubs_home(
+pub async fn transform_hubs_response(
     req: &mut Request,
     res: &mut Response,
 ) -> Result<(), anyhow::Error> {
+    let params: PlexContext = req.extract().await.unwrap();
+    let plex_client = PlexClient::from_request(req, params.clone());
+    let content_type = get_content_type_from_headers(req.headers_mut());
+
+    let mut container: MediaContainerWrapper<MediaContainer> =
+        from_salvo_response(res).await?;
+    container.content_type = content_type;
+
+    TransformBuilder::new(plex_client, params.clone())
+        .with_filter(HubRestrictionFilter)
+        .with_transform(HubStyleTransform { is_home: true })
+        .with_transform(HubWatchedTransform)
+        .with_transform(HubInterleaveTransform)
+        .with_transform(UserStateTransform)
+        .with_transform(HubKeyTransform)
+        .apply_to(&mut container)
+        .await;
+
+    res.render(container);
+    Ok(())
+}
+
+#[handler]
+pub async fn transform_req_content_directory(
+    req: &mut Request,
+    res: &mut Response,
+    ctrl: &mut FlowCtrl
+) {
     let config: Config = Config::dynamic(req).extract().unwrap();
     let params: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_request(req, params.clone());
@@ -548,9 +577,9 @@ pub async fn transform_hubs_home(
         container.media_container.identifier =
             Some("com.plexapp.plugins.library".to_string());
         res.render(container);
-        return Ok(());
+        ctrl.skip_rest();
+        return;
     }
-    //dbg!(&req);
 
     if params.clone().pinned_content_directory_id.is_some() {
         // first directory, load everything here because we wanna reemiiiixxx
@@ -567,16 +596,26 @@ pub async fn transform_hubs_home(
                 .to_string(),
         );
     }
+}
 
-    // we want guids for banners
+#[handler]
+pub async fn transform_req_include_guids(
+    req: &mut Request,
+    res: &mut Response,
+) {
     add_query_param_salvo(req, "includeGuids".to_string(), "1".to_string());
+}
 
-    // we want continue watching
-    // add_query_param_salvo(req, "excludeContinueWatching".to_string(), "0".to_string());
-
+// some androids have trouble loading more for hero style. So load more at once
+#[handler]
+pub async fn transform_req_android(
+    req: &mut Request,
+    res: &mut Response,
+) {
+    let config: Config = Config::dynamic(req).extract().unwrap();
+    let params: PlexContext = req.extract().await.unwrap();
+    
     let mut count = params.clone().count.unwrap_or(25);
-
-    // some androids have trouble loading more for hero style. So load more at once
     match params.platform {
         Platform::Android => count = 50,
         _ => (),
@@ -587,89 +626,6 @@ pub async fn transform_hubs_home(
     }
 
     add_query_param_salvo(req, "count".to_string(), count.to_string());
-
-    let upstream_res = plex_client.request(req).await?;
-    match upstream_res.status() {
-        reqwest::StatusCode::OK => (),
-        status => {
-            tracing::error!(status = ?status, res = ?upstream_res, "Failed to get plex response");
-            return Err(
-                salvo::http::StatusError::internal_server_error().into()
-            );
-        }
-    };
-
-    let mut container: MediaContainerWrapper<MediaContainer> =
-        from_reqwest_response(upstream_res).await?;
-    container.content_type = content_type;
-
-    TransformBuilder::new(plex_client, params.clone())
-        .with_filter(HubRestrictionFilter)
-        .with_transform(HubStyleTransform { is_home: true })
-        .with_transform(HubWatchedTransform)
-        .with_transform(HubInterleaveTransform)
-        .with_transform(UserStateTransform)
-        .with_transform(HubKeyTransform)
-        .apply_to(&mut container)
-        .await;
-
-    res.render(container);
-    Ok(())
-}
-
-#[handler]
-pub async fn get_hubs_sections(
-    req: &mut Request,
-    res: &mut Response,
-) -> Result<(), anyhow::Error> {
-    let config: Config = Config::dynamic(req).extract().unwrap();
-    let params: PlexContext = req.extract().await.unwrap();
-    let plex_client = PlexClient::from_request(req, params.clone());
-    let content_type = get_content_type_from_headers(req.headers_mut());
-
-    let mut count = params.clone().count.unwrap_or(25);
-
-    match params.platform {
-        Platform::Android => count = 50,
-        _ => (),
-    }
-
-    // Hack, as the list could be smaller when removing watched items. So we request more.
-    if config.exclude_watched && count < 50 {
-        count = 50;
-    }
-
-
-    // we want guids for banners
-    add_query_param_salvo(req, "includeGuids".to_string(), "1".to_string());
-
-    let upstream_res = plex_client.request(req).await.unwrap();
-    match upstream_res.status() {
-        reqwest::StatusCode::OK => (),
-        status => {
-            tracing::error!(status = ?status, res = ?upstream_res, "Failed to get plex response");
-            return Err(
-                salvo::http::StatusError::internal_server_error().into()
-            );
-        }
-    };
-
-    let mut container: MediaContainerWrapper<MediaContainer> =
-        from_reqwest_response(upstream_res).await?;
-    container.content_type = content_type;
-
-    TransformBuilder::new(plex_client, params.clone())
-        .with_filter(HubRestrictionFilter)
-        .with_transform(HubSectionDirectoryTransform)
-        .with_transform(HubStyleTransform { is_home: false })
-        .with_transform(HubWatchedTransform)
-        .with_transform(UserStateTransform)
-        .with_transform(HubKeyTransform)
-        .apply_to(&mut container)
-        .await;
-    // dbg!(container.media_container.count);
-    res.render(container);
-    Ok(())
 }
 
 
@@ -764,8 +720,7 @@ pub async fn default_transform(
     let mut queries = req.queries().clone();
     queries.remove("contentDirectoryID");
     replace_query(queries, req);
-    
-    //dbg!(&req);
+
     let upstream_res = plex_client.request(req).await?;
     match upstream_res.status() {
         reqwest::StatusCode::OK => (),

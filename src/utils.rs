@@ -24,6 +24,8 @@ use salvo::http::HeaderMap;
 use salvo::{
     Extractible,
     Request as SalvoRequest,
+    Response as SalvoResponse,
+    test::ResponseExt
 };
 
 use crate::models::*;
@@ -216,6 +218,13 @@ pub async fn from_reqwest_response(
     from_bytes(bytes)
 }
 
+pub async fn from_reqwest_response_mut(
+    mut res: reqwest::Response,
+) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
+    let bytes = res.bytes().await.unwrap();
+    from_bytes(bytes)
+}
+
 pub async fn from_hyper_response(
     res: HyperResponse,
 ) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
@@ -223,12 +232,13 @@ pub async fn from_hyper_response(
     from_bytes(bytes)
 }
 
-//pub async fn from_salvo_response(
-//    mut res: SalvoResponse,
-//) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
-//    let bytes = res.take_bytes(None).await.unwrap();
-//    from_bytes(bytes)
-//}
+pub async fn from_salvo_response(
+    res: &mut SalvoResponse,
+) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
+    //let bytes = res.take_body().to_bytes();
+    let bytes = res.take_bytes(None).await.unwrap();
+    from_bytes(bytes)
+}
 
 pub fn from_bytes(
     bytes: bytes::Bytes,

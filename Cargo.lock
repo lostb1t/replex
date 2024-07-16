@@ -3637,9 +3637,12 @@ dependencies = [
  "anyhow",
  "async-trait",
  "base64 0.22.1",
+ "brotli",
  "bytes",
  "cookie",
+ "encoding_rs",
  "enumflags2",
+ "flate2",
  "form_urlencoded",
  "futures-channel",
  "futures-util",
@@ -3668,6 +3671,7 @@ dependencies = [
  "serde",
  "serde-xml-rs",
  "serde_json",
+ "serde_urlencoded",
  "sync_wrapper 1.0.1",
  "tempfile",
  "thiserror",
@@ -3675,7 +3679,9 @@ dependencies = [
  "tokio-rustls 0.26.0",
  "tokio-util",
  "tracing",
+ "url",
  "x509-parser",
+ "zstd",
 ]
 
 [[package]]
