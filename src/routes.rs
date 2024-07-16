@@ -31,15 +31,6 @@ pub fn route() -> Router {
     let guid = regex::Regex::new(":").unwrap();
     PathFilter::register_wisp_regex("colon", guid);
 
-    // let proxy = Proxy::with_client(
-    //     config.host.clone().unwrap(),
-    //     reqwest::Client::builder()
-    //         .timeout(Duration::from_secs(60 * 200))
-    //         .build()
-    //         .unwrap(),
-    // );
-
-    //let default_cache = default_cache()
     let mut router = Router::with_hoop(Cors::permissive().into_handler())
         .hoop(Logger::new())
         .hoop(should_skip)
@@ -49,14 +40,6 @@ pub fn route() -> Router {
 
     if config.redirect_streams {
         router = router
-            // .push(
-            //     Router::with_path("/video/<colon:colon>/transcode/<**rest>")
-            //         .handle(redirect_stream),
-            // )
-            //.push(
-            //    Router::with_path("/<colon:colon>/timeline/<**rest>")
-            //        .handle(redirect_stream),
-            //)
             .push(
                 Router::with_path(
                     "/video/<colon:colon>/transcode/universal/session/<**rest>",
@@ -81,11 +64,6 @@ pub fn route() -> Router {
                     .hoop(Timeout::new(Duration::from_secs(5)))
                     .goal(proxy_request),
             )
-            // .push(
-            //     Router::with_path("/library/metadata/<id>")
-            //         .hoop(disable_related_query)
-            //         .handle(proxy.clone()),
-            // )
             .push(
                 Router::with_path("/playQueues")
                     .hoop(disable_related_query)
@@ -153,19 +131,16 @@ pub fn route() -> Router {
         .push(
             Router::new()
                 .path(PLEX_HUBS_PROMOTED)
-                //.hoop(default_cache())
                 .get(transform_hubs_home),
         )
         .push(
             Router::new()
                 .path("/replex/image/hero/<type>/<uuid>")
-                // .hoop(anonymous_cache(60 * 60 * 24 * 30))
                 .get(hero_image)
         )
         .push(
             Router::new()
                 .path(format!("{}/<id>", PLEX_HUBS_SECTIONS))
-                //.hoop(default_cache())
                 .get(get_hubs_sections),
         )
         .push(
@@ -181,7 +156,6 @@ pub fn route() -> Router {
         .push(
             Router::new()
                 .path("/replex/<style>/library/collections/<ids>/children")
-                //.hoop(default_cache())
                 .get(get_collections_children),
         )
         .push(
@@ -190,11 +164,6 @@ pub fn route() -> Router {
                 //.hoop(default_cache())
                 .get(default_transform),
         )
-        //.push(
-        //    Router::new()
-        //        .path(format!("/playQueues"))
-        //       .post(get_play_queues)
-        //)
         .push(
             Router::with_path("/photo/<colon:colon>/transcode")
                 .hoop(fix_photo_transcode_request)
@@ -218,8 +187,7 @@ async fn proxy_request(
     proxy.handle(req, depot, res, ctrl).await;
 }
 
-
-
+// skip processing when product is plexamp
 #[handler]
 async fn should_skip(
     req: &mut Request,
@@ -497,6 +465,7 @@ pub async fn hero_image(
     // req.set_uri(uri);
     // let proxy = proxy("https://metadata-static.plex.tv".to_string());
     // proxy.handle(req, depot, res, ctrl).await;
+
     res.render(Redirect::found(url.unwrap()));
 }
 
@@ -705,13 +674,6 @@ pub async fn get_hubs_sections(
     Ok(())
 }
 
-// pub async fn transform_section(
-//     req: &mut Request,
-//     _depot: &mut Depot,
-//     res: &mut Response,
-// ) -> Result<(), anyhow::Error> {
-
-// }
 
 #[handler]
 pub async fn get_collections_children(
@@ -869,42 +831,6 @@ pub async fn get_library_item_metadata(req: &mut Request, res: &mut Response) {
     // dbg!(container.media_container.count);
     res.render(container);
 }
-
-#[handler]
-pub async fn get_play_queues(req: &mut Request, res: &mut Response) {
-    let config: Config = Config::dynamic(req).extract().unwrap();
-    let params: PlexContext = req.extract().await.unwrap();
-    let plex_client = PlexClient::from_request(req, params.clone());
-    let content_type = get_content_type_from_headers(req.headers_mut());
-
-    if config.disable_related {
-        add_query_param_salvo(
-            req,
-            "includeRelated".to_string(),
-            "0".to_string(),
-        );
-    }
-
-    let upstream_res = plex_client.request(req).await.unwrap();
-    let mut container: MediaContainerWrapper<MediaContainer> =
-        match from_reqwest_response(upstream_res).await {
-            Ok(r) => r,
-            Err(error) => {
-                tracing::error!(error = ?error, uri = ?req.uri(), "Failed to get plex response");
-                res.status_code(StatusCode::INTERNAL_SERVER_ERROR);
-                return;
-            }
-        };
-    container.content_type = content_type;
-
-    TransformBuilder::new(plex_client, params.clone())
-        //.with_transform(MediaContainerScriptingTransform)
-        .apply_to(&mut container)
-        .await;
-
-    res.render(container);
-}
-
 
 // const RESOLUTIONS: HashMap<&'static str, &'static str> =
 //     HashMap::from([("1080p", "1920x1080"), ("4k", "4096x2160")]);
