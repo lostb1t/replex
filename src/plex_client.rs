@@ -435,6 +435,13 @@ impl PlexClient {
                 header::HeaderValue::from_str(i.as_str()).unwrap(),
             );
         };
+        
+        if let Some(i) = params.clone().real_ip.clone() {
+            headers.insert(
+                "X-Real-Ip",
+                header::HeaderValue::from_str(i.as_str()).unwrap(),
+            );
+        };
 
         if let Some(i) = params.clone().forwarded_proto.clone() {
             headers.insert(
