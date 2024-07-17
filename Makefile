@@ -5,7 +5,7 @@ build:
 	cargo build --release
 
 docker-build:
-	docker build -t ghcr.io/lostb1t/replex:nginx-test --target nginx . -f docker/Dockerfile
+	docker build -t ghcr.io/lostb1t/replex:test . -f docker/Dockerfile
 
 docker-run:
 	docker run --rm -it -p 80:80 \
@@ -24,7 +24,7 @@ run:
 	REPLEX_CACHE_ROWS=0 \
     REPLEX_CACHE_ROWS_REFRESH=0 \
 	REPLEX_HERO_ROWS="home.movies.recent,movies.recent,movie.recentlyadded,movie.topunwatched,movie.recentlyviewed,hub.movie.recentlyreleased,home.television.recent,tv.inprogress,tv.recentlyaired" \
-	REPLEX_PORT=8000 \
+	REPLEX_PORT=26000 \
 	REPLEX_INCLUDE_WATCHED=0 \
 	REPLEX_REDIRECT_STREAMS=0 \
 	REPLEX_DISABLE_RELATED=0 \
@@ -33,7 +33,7 @@ run:
 	REPLEX_ENABLE_CONSOLE=0 \
 	REPLEX_CACHE_TTL=0 \
   REPLEX_HUB_RESTRICTIONS=1 \
-	RUST_LOG="info,replex=info,replex::transform=debug" \
+	RUST_LOG="info,replex=info" \
     REPLEX_NTF_WATCHLIST_FORCE=0 \
     RUSTFLAGS=-Awarnings \
 	cargo watch -w src -x run

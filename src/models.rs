@@ -171,7 +171,7 @@ pub struct PlexContext {
     #[serde(default = "default_as_false", deserialize_with = "bool_from_int")]
     #[salvo(extract(rename = "includeAdvanced"))]
     pub include_advanced: bool,
-    #[salvo(extract(rename = "X-Forwarded-For", alias = "X-Real-Ip"))]
+    #[salvo(extract(rename = "X-Forwarded-For", alias = "x-forwarded-for", alias = "X-Real-Ip"))]
     pub forwarded_for: Option<String>,
     #[salvo(extract(rename = "X-Forwarded-Proto", alias = "x-forwared-proto"))]
     pub forwarded_proto: Option<String>,

@@ -120,7 +120,6 @@ impl PlexClient {
         let res = self
             .http_client
             .request(req.method_mut().to_owned(), url)
-            // .get(url)
             .headers(headers)
             .send()
             .await
@@ -368,43 +367,9 @@ impl PlexClient {
             "Accept",
             header::HeaderValue::from_static("application/json"),
         );
-        // req.add_header("X-Plex-Token", self.x_plex_token.clone().as_str(), true);
-        // *req.method_mut() = http::Method::GET;
-        // req.set_uri(uri.try_into().unwrap());
         *req.headers_mut() = headers;
 
-        // let client = reqwest_middleware::ClientBuilder::new(
-        //     reqwest::Client::builder()
-        //         .timeout(Duration::from_secs(30))
-        //         .build()
-        //         .unwrap(),
-        // )
-        // .with(RetryTransientMiddleware::new_with_policy_and_strategy(
-        //     ExponentialBackoff::builder()
-        //         .retry_bounds(
-        //             Duration::from_millis(100),
-        //             Duration::from_secs(2),
-        //         )
-        //         .build_with_max_retries(3),
-        //     Retry401,
-        // ))
-        // .build();
-        // let res = client.execute(req).await.map_err(Error::other)?;
-
-        //let res = Client::new().execute(req).await.map_err(Error::other)?;
         let res = self.http_client.execute(req).await.map_err(Error::other)?;
-        //return Ok(MediaContainerWrapper::default());
-        // headers.insert(
-        //     "X-Plex-Token",
-        //     header::HeaderValue::from_str(self.x_plex_token.clone().as_str()).unwrap(),
-        // );
-
-        // let res = self
-        //     .http_client
-        //     .get(uri)
-        //     .send()
-        //     .await
-        //     .map_err(Error::other)?;
 
         if res.status() != salvo::http::StatusCode::OK {
             return Err(anyhow::anyhow!(format!(
@@ -412,10 +377,6 @@ impl PlexClient {
                 res.status()
             )));
         }
-        // if res.status() == 500 {
-        //     return Err(salvo::http::StatusError::);
-        // }
-       
 
         let container: MediaContainerWrapper<MediaContainer> =
             from_reqwest_response(res).await?;
@@ -470,41 +431,32 @@ impl PlexClient {
         // params.forwarded_for = Some("182.32.122.20".to_string());
         if let Some(i) = params.clone().forwarded_for.clone() {
             headers.insert(
-                FORWARDED,
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-            headers.insert(
                 "X-Forwarded-For",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-            headers.insert(
-                "X-Real-Ip",
                 header::HeaderValue::from_str(i.as_str()).unwrap(),
             );
         };
 
         if let Some(i) = params.clone().forwarded_proto.clone() {
             headers.insert(
-                "x-forwarded-proto",
+                "X-Forwarded-Proto",
                 header::HeaderValue::from_str(i.as_str()).unwrap(),
             );
         };
 
         if let Some(i) = params.clone().forwarded_port.clone() {
             headers.insert(
-                "x-forwarded-port",
+                "X-Forwarded-Port",
                 header::HeaderValue::from_str(i.as_str()).unwrap(),
             );
         };
 
         if let Some(i) = params.clone().forwarded_host.clone() {
             headers.insert(
-                "x-forwarded-host",
+                "X-Forwarded-Host",
                 header::HeaderValue::from_str(i.as_str()).unwrap(),
             );
         };
 
-        // dbg!(headers.clone());
         if let Some(i) = params.clone().session_id.clone() {
             headers.insert(
                 "X-Plex-Session-Id",
