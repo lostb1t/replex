@@ -91,7 +91,7 @@ impl PlexClient {
         //let mut headers = req.headers_mut().to_owned();
         //let target_uri: url::Url = url::Url::parse(self.host.as_str()).unwrap();
         //let target_host = target_uri.host().unwrap().to_string().clone();
-        dbg!(&req);
+        //dbg!(&req);
         //headers.remove(ACCEPT); // remove accept as we always do json request
         //headers.insert(
         //    http::header::HOST,
@@ -345,19 +345,19 @@ impl PlexClient {
         //endpoint is buggy, if llex has a cached version then it doesnt need a plex token
         // but if not cached then a server admin token is needed
         let mut token = config.token.clone();
-        if token.is_none() {
-            token = Some(self.context.token.clone().unwrap());
+        if token.is_some() {
+            headers.insert(
+                "X-Plex-Token",
+                header::HeaderValue::from_str(token.unwrap().as_str()).unwrap(),
+            );
         };
 
-        headers.insert(
-            "X-Plex-Token",
-            header::HeaderValue::from_str(token.unwrap().as_str()).unwrap(),
-        );
         headers.insert(
             "Accept",
             header::HeaderValue::from_static("application/json"),
         );
         *req.headers_mut() = headers;
+        dbg!(&req);
 
         let res = self.http_client.execute(req).await.map_err(Error::other)?;
 
@@ -438,10 +438,15 @@ impl PlexClient {
             ACCEPT,
             header::HeaderValue::from_static("application/json"),
         );
-        headers.insert(
-            http::header::HOST,
-            header::HeaderValue::from_str(&target_host).unwrap(),
-        );
+ 
+
+        headers.insert(ACCEPT_LANGUAGE, "en-US".parse().unwrap());
+
+
+        //headers.insert(
+         //   http::header::HOST,
+        //    header::HeaderValue::from_str(&target_host).unwrap(),
+        //);
 
         Self {
             http_client: reqwest_middleware::ClientBuilder::new(
