@@ -357,7 +357,6 @@ impl PlexClient {
             header::HeaderValue::from_static("application/json"),
         );
         *req.headers_mut() = headers;
-        dbg!(&req);
 
         let res = self.http_client.execute(req).await.map_err(Error::other)?;
 
