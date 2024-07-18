@@ -290,10 +290,11 @@ impl PlexClient {
                 Ok(r) => r,
                 Err(e) => {
                     tracing::warn!(
-                        "Problem loading provider metadata for: {} Error: {}",
-                        uuid,
-                        e
+                        uuid = uuid,
+                        error = %e,
+                        "Problem loading provider metadata."
                     );
+                    return None;
                     MediaContainerWrapper::default()
                 }
             };
