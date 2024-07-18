@@ -7,6 +7,7 @@ extern crate mime;
 use crate::config::*;
 use crate::plex_client::PlexClient;
 use crate::utils::*;
+use crate::headers;
 use anyhow::Result;
 use async_trait::async_trait;
 use serde_aux::prelude::{
@@ -114,9 +115,9 @@ pub struct PlexContext {
     #[serde(default, deserialize_with = "deserialize_comma_seperated_string")]
     #[salvo(extract(rename = "pinnedContentDirectoryID"))]
     pub pinned_content_directory_id: Option<Vec<String>>,
-    #[serde(default="default_platform")]
+    //#[serde(default="default_platform")]
     #[salvo(extract(rename = "X-Plex-Platform"))]
-    pub platform: Platform,
+    pub platform: Option<Platform>,
     #[salvo(extract(rename = "X-Plex-Username"))]
     pub username: Option<String>,
     #[serde(default, deserialize_with = "deserialize_screen_resolution")]
@@ -141,7 +142,7 @@ pub struct PlexContext {
     pub playback_session_id: Option<String>,
     #[salvo(extract(rename = "X-Plex-Playback-Id"))]
     pub playback_id: Option<String>,
-    #[salvo(extract(rename = "X-Plex-Token", alias = "x-plex-token"))]
+    #[salvo(extract(rename = "X-Plex-Token"))]
     pub token: Option<String>,
     #[salvo(extract(rename = "X-Plex-Platform-Version"))]
     pub platform_version: Option<String>,
@@ -200,8 +201,8 @@ pub struct PlexContext {
     // pub style: Option<Style>,
 }
 
-fn default_platform() -> Platform {
-    Platform::Generic
+fn default_platform() -> Option<Platform> {
+    Some(Platform::Generic)
 }
 
 fn bool_from_int<'de, D>(deserializer: D) -> Result<bool, D::Error>

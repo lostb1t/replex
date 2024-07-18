@@ -303,7 +303,7 @@ async fn resolve_local_media_path(
     if url.is_some() && url.clone().unwrap().contains("/replex/image/hero")
     {
         let parts: Vec<String> = url.unwrap().split("/").map(|x| x.to_string()).collect();
-        let plex_client = PlexClient::from_request(req, params.clone());
+        let plex_client = PlexClient::from_context(&params);
         let uuid = parts[7].clone();
         let rurl = plex_client.get_hero_art(uuid).await;
         if rurl.is_some() {
@@ -355,7 +355,6 @@ async fn ntf_watchlist_force(
         
             tracing::info!(
                 username = %params.clone().username.unwrap_or_default(),
-                platform = %params.clone().platform,
                 platform = %params.clone().product.unwrap_or_default(),
                 platform = %params.clone().device_name.unwrap_or_default(),
                 "Bootstrao for request"
@@ -473,7 +472,7 @@ pub async fn hero_image(
     let t = req.param::<String>("type").unwrap();
     let uuid = req.param::<String>("uuid").unwrap();
 
-    let plex_client = PlexClient::from_request(req, params.clone());
+    let plex_client = PlexClient::from_context(&params);
     let url = plex_client.get_hero_art(uuid).await;
     if url.is_none() {
         res.status_code(StatusCode::NOT_FOUND);
@@ -495,7 +494,7 @@ pub async fn direct_stream_fallback(
 ) -> Result<(), anyhow::Error> {
     let config: Config = Config::dynamic(req).extract().unwrap();
     let params: PlexContext = req.extract().await.unwrap();
-    let plex_client = PlexClient::from_request(req, params.clone());
+    let plex_client = PlexClient::from_context(&params);
     let queries = req.queries().clone();
     // dbg!("yo");
     let direct_play = queries
@@ -551,7 +550,7 @@ pub async fn transform_hubs_response(
     res: &mut Response,
 ) -> Result<(), anyhow::Error> {
     let params: PlexContext = req.extract().await.unwrap();
-    let plex_client = PlexClient::from_request(req, params.clone());
+    let plex_client = PlexClient::from_context(&params);
     let content_type = get_content_type_from_headers(req.headers_mut());
 
     let mut container: MediaContainerWrapper<MediaContainer> =
@@ -580,7 +579,7 @@ pub async fn transform_req_content_directory(
 ) {
     let config: Config = Config::dynamic(req).extract().unwrap();
     let params: PlexContext = req.extract().await.unwrap();
-    let plex_client = PlexClient::from_request(req, params.clone());
+    let plex_client = PlexClient::from_context(&params);
     let content_type = get_content_type_from_headers(req.headers_mut());
 
     if params.clone().pinned_content_directory_id.is_some()
@@ -635,7 +634,7 @@ pub async fn transform_req_android(
     let params: PlexContext = req.extract().await.unwrap();
     
     let mut count = params.clone().count.unwrap_or(25);
-    match params.platform {
+    match params.platform.unwrap() {
         Platform::Android => count = 50,
         _ => (),
     }
@@ -662,7 +661,7 @@ pub async fn get_collections_children(
         .filter(|&v| !v.parse::<u32>().is_err())
         .map(|v| v.parse().unwrap())
         .collect();
-    let plex_client = PlexClient::from_request(req, params.clone());
+    let plex_client = PlexClient::from_context(&params);
     let content_type = get_content_type_from_headers(req.headers_mut());
 
     // We dont listen to pagination. We have a hard max of 250 per collection
@@ -715,7 +714,7 @@ pub async fn default_transform(
 ) -> Result<(), anyhow::Error> {
     let config: Config = Config::dynamic(req).extract().unwrap();
     let params: PlexContext = req.extract().await.unwrap();
-    let plex_client = PlexClient::from_request(req, params.clone());
+    let plex_client = PlexClient::from_context(&params);
     let content_type = get_content_type_from_headers(req.headers_mut());
     let style = req.param::<Style>("style").unwrap();
     let rest_path = req.param::<String>("**rest").unwrap();
@@ -772,7 +771,7 @@ pub async fn default_transform(
 pub async fn get_library_item_metadata(req: &mut Request, res: &mut Response) {
     let config: Config = Config::dynamic(req).extract().unwrap();
     let params: PlexContext = req.extract().await.unwrap();
-    let plex_client = PlexClient::from_request(req, params.clone());
+    let plex_client = PlexClient::from_context(&params);
     let content_type = get_content_type_from_headers(req.headers_mut());
 
     if config.disable_related {
@@ -809,7 +808,7 @@ pub async fn get_library_item_metadata(req: &mut Request, res: &mut Response) {
 #[handler]
 async fn force_maximum_quality(req: &mut Request) -> Result<(), anyhow::Error> {
     let params: PlexContext = req.extract().await.unwrap();
-    let plex_client = PlexClient::from_request(req, params.clone());
+    let plex_client = PlexClient::from_context(&params);
     let config: Config = Config::dynamic(req).extract().unwrap();
     let mut queries = req.queries().clone();
 
@@ -911,7 +910,7 @@ async fn force_maximum_quality(req: &mut Request) -> Result<(), anyhow::Error> {
 //     media_index: usize,
 // ) -> Result<(), anyhow::Error> {
 //     let params: PlexContext = req.extract().await.unwrap();
-//     let plex_client = PlexClient::from_request(req, params.clone());
+//     let plex_client = PlexClient::from_context(&params);
 //     let mut queries = req.queries().clone();
 //     let mut original_queries = req.queries().clone();
 
@@ -970,7 +969,7 @@ async fn get_transcoding_for_request(
     req: &mut Request,
 ) -> Result<TranscodingStatus, anyhow::Error> {
     let params: PlexContext = req.extract().await.unwrap();
-    let plex_client = PlexClient::from_request(req, params.clone());
+    let plex_client = PlexClient::from_context(&params);
     let response = plex_client.request(req).await?;
     let transcode: MediaContainerWrapper<MediaContainer> =
         from_reqwest_response(response).await?;
@@ -1013,7 +1012,7 @@ async fn video_transcode_fallback(
     ctrl: &mut FlowCtrl,
 ) -> Result<(), anyhow::Error> {
     let params: PlexContext = req.extract().await.unwrap();
-    let plex_client = PlexClient::from_request(req, params.clone());
+    let plex_client = PlexClient::from_context(&params);
     let config: Config = Config::dynamic(req).extract().unwrap();
     let mut queries = req.queries().clone();
     let original_queries = req.queries().clone();
@@ -1201,7 +1200,7 @@ async fn video_transcode_fallback(
 #[handler]
 async fn auto_select_version(req: &mut Request) {
     let params: PlexContext = req.extract().await.unwrap();
-    let plex_client = PlexClient::from_request(req, params.clone());
+    let plex_client = PlexClient::from_context(&params);
     let mut queries = req.queries().clone();
     let media_index = queries.get("mediaIndex");
 

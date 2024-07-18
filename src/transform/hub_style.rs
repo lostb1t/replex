@@ -59,7 +59,7 @@ impl ClientHeroStyle {
         // pub fn android(product: String, platform_version: String) -> Self {
         let product = context.product.clone().unwrap_or_default();
         let device_type = DeviceType::from_product(product);
-        let platform = context.platform.clone();
+        let platform = context.platform.clone().unwrap_or_default();
         let platform_version =
             context.platform_version.clone().unwrap_or_default();
 

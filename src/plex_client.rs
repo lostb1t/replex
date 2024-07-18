@@ -4,6 +4,7 @@ use crate::config::Config;
 use crate::models::*;
 use crate::utils::*;
 use anyhow::Result;
+use std::collections::HashMap;
 
 use crate::cache::GLOBAL_CACHE;
 use async_recursion::async_recursion;
@@ -63,29 +64,9 @@ impl RetryableStrategy for Retry401 {
 #[derive(Debug, Clone)]
 pub struct PlexClient {
     pub http_client: reqwest_middleware::ClientWithMiddleware,
+    pub context: PlexContext,
     pub host: String, // TODO: Dont think this supposed to be here. Should be higher up
     pub cache: Cache<String, MediaContainerWrapper<MediaContainer>>,
-
-    // /// `X-Plex-Platform` header value.
-    // ///
-    // /// Platform name, e.g. iOS, macOS, etc.
-    pub x_plex_platform: Platform,
-
-    // /// `X-Plex-Device-Name` header value.
-    // ///
-    // /// Primary name for the device, e.g. "Plex Web (Chrome)".
-    // pub x_plex_device_name: String,
-    /// `X-Plex-Client-Identifier` header value.
-    ///
-    /// UUID, serial number, or other number unique per device.
-    ///
-    /// **N.B.** Should be unique for each of your devices.
-    pub x_plex_client_identifier: Option<String>,
-
-    /// `X-Plex-Token` header value.
-    ///
-    /// Auth token for Plex.
-    pub x_plex_token: String,
 }
 
 impl PlexClient {
@@ -107,20 +88,20 @@ impl PlexClient {
             self.host,
             &req.uri_mut().path_and_query().unwrap()
         );
-        let mut headers = req.headers_mut().to_owned();
-        let target_uri: url::Url = url::Url::parse(self.host.as_str()).unwrap();
-        let target_host = target_uri.host().unwrap().to_string().clone();
+        //let mut headers = req.headers_mut().to_owned();
+        //let target_uri: url::Url = url::Url::parse(self.host.as_str()).unwrap();
+        //let target_host = target_uri.host().unwrap().to_string().clone();
 
-        headers.remove(ACCEPT); // remove accept as we always do json request
-        headers.insert(
-            http::header::HOST,
-            header::HeaderValue::from_str(&target_host).unwrap(),
-        );
+        //headers.remove(ACCEPT); // remove accept as we always do json request
+        //headers.insert(
+        //    http::header::HOST,
+        //    header::HeaderValue::from_str(&target_host).unwrap(),
+        //);
 
         let res = self
             .http_client
             .request(req.method_mut().to_owned(), url)
-            .headers(headers)
+            //.headers(headers)
             .send()
             .await
             .map_err(Error::other)?;
@@ -356,7 +337,7 @@ impl PlexClient {
         // but if not cached then a server admin token is needed
         let mut token = config.token.clone();
         if token.is_none() {
-            token = Some(self.x_plex_token.clone());
+            token = Some(self.context.token.clone().unwrap());
         };
 
         headers.insert(
@@ -399,212 +380,60 @@ impl PlexClient {
     }
 
     fn generate_cache_key(&self, name: String) -> String {
-        format!("{}:{}", name, self.x_plex_token)
+        format!("{}:{}", name, self.context.token.clone().unwrap())
     }
 
-    pub fn from_request(req: &Request, params: PlexContext) -> Self {
-        // dbg!(&req);
-        //let config: Config = Config::figment().extract().unwrap();
-        let config: Config = Config::dynamic(req).extract().unwrap();
-        let token = params
+    pub fn from_context(context: &PlexContext) -> Self {
+        let config: Config = Config::figment().extract().unwrap();
+        let token = context
             .clone()
             .token
             .expect("Expected to have an token in header or query");
-        let client_identifier = params.clone().client_identifier;
-        let platform = params.clone().platform;
+        let client_identifier = context.clone().client_identifier;
+        let platform = context.platform.clone().unwrap_or_default();
 
-        let req_headers = req.headers().clone();
+        //let req_headers = req.headers().clone();
         let mut headers = header::HeaderMap::new();
-
-        headers.insert(
-            "X-Plex-Token",
-            header::HeaderValue::from_str(token.clone().as_str()).unwrap(),
-        );
-        if let Some(i) = client_identifier.clone() {
-            headers.insert(
-                "X-Plex-Client-Identifier",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-
-        // let mut params = params.clone();
-        // params.forwarded_for = Some("182.32.122.20".to_string());
-        if let Some(i) = params.clone().forwarded_for.clone() {
-            headers.insert(
-                "X-Forwarded-For",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        };
+        let plex_headers_map = HashMap::from([
+            ("X-Plex-Token", context.token.clone()),
+            ("X-Plex-Platform", Some(platform.clone().to_string())),
+            ("X-Plex-Client-Identifier", context.client_identifier.clone()),
+            ("X-Plex-Session-Id", context.session_id.clone()),
+            ("X-Plex-Playback-Session-Id", context.playback_session_id.clone()),
+            ("X-Plex-Product", context.product.clone()),
+            ("X-Plex-Playback-Id", context.playback_id.clone()),
+            ("X-Plex-Platform-Version", context.platform_version.clone()),
+            ("X-Plex-Version", context.version.clone()),
+            ("X-Plex-Features", context.features.clone()),
+            ("X-Plex-Model", context.model.clone()),
+            ("X-Plex-Device", context.device.clone()),
+            ("X-Plex-Device-Name", context.device_name.clone()),
+            ("X-Plex-Drm", context.drm.clone()),
+            ("X-Plex-Text-Format", context.text_format.clone()),
+            ("X-Plex-Http-Pipeline", context.http_pipeline.clone()),
+            ("X-Plex-Provider-Version", context.provider_version.clone()),
+            ("X-Plex-Device-Screen-Resolution", context.screen_resolution_original.clone()),
+            ("X-Plex-Client-Capabilities", context.client_capabilities.clone()),
+        ]);
         
-        if let Some(i) = params.clone().real_ip.clone() {
-            headers.insert(
-                "X-Real-Ip",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        };
-
-        if let Some(i) = params.clone().forwarded_proto.clone() {
-            headers.insert(
-                "X-Forwarded-Proto",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        };
-
-        if let Some(i) = params.clone().forwarded_port.clone() {
-            headers.insert(
-                "X-Forwarded-Port",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        };
-
-        if let Some(i) = params.clone().forwarded_host.clone() {
-            headers.insert(
-                "X-Forwarded-Host",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        };
-
-        if let Some(i) = params.clone().session_id.clone() {
-            headers.insert(
-                "X-Plex-Session-Id",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
+        for (key, val) in plex_headers_map {
+            if val.is_some() {
+              headers.insert(key.clone(), val.unwrap().as_str().parse().unwrap());
+            }
         }
+        
+       let target_uri: url::Url = url::Url::parse(config.host.clone().unwrap().as_str()).unwrap();
+       let target_host = target_uri.host().unwrap().to_string().clone();
 
-        if let Some(i) = params.clone().session_identifier.clone() {
-            headers.insert(
-                "X-Plex-Client-Identifier",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-
-        if let Some(i) = params.clone().playback_session_id.clone() {
-            headers.insert(
-                "X-Plex-Playback-Session-Id",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-
-        if let Some(i) = params.clone().playback_id.clone() {
-            headers.insert(
-                "X-Plex-Playback-Id",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-
-        if let Some(i) = params.clone().product.clone() {
-            headers.insert(
-                "X-Plex-Product",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-
-        if let Some(i) = params.clone().version.clone() {
-            headers.insert(
-                "X-Plex-Version",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-
-        if let Some(i) = params.clone().platform_version.clone() {
-            headers.insert(
-                "X-Plex-Platform-Version",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-
-        if let Some(i) = params.clone().features.clone() {
-            headers.insert(
-                "X-Plex-Features",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-
-        if let Some(i) = params.clone().model.clone() {
-            headers.insert(
-                "X-Plex-Model",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-
-        if let Some(i) = params.clone().device.clone() {
-            headers.insert(
-                "X-Plex-Device",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-
-        if let Some(i) = params.clone().device_name.clone() {
-            headers.insert(
-                "X-Plex-Device-Name",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-
-        if let Some(i) = params.clone().drm.clone() {
-            headers.insert(
-                "X-Plex-Drm",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-
-        if let Some(i) = params.clone().text_format.clone() {
-            headers.insert(
-                "X-Plex-Text-Format",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-
-        if let Some(i) = params.clone().http_pipeline.clone() {
-            headers.insert(
-                "x-plex-http-pipeline",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-
-        if let Some(i) = params.clone().provider_version.clone() {
-            headers.insert(
-                "X-Plex-Provider-Version",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-
-        if let Some(i) = params.clone().screen_resolution_original.clone() {
-            headers.insert(
-                "X-Plex-Device-Screen-Resolution",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-
-        if let Some(i) = params.clone().client_capabilities.clone() {
-            headers.insert(
-                "x-plex-client-capabilities",
-                header::HeaderValue::from_str(i.as_str()).unwrap(),
-            );
-        }
-
-        if let Some(i) = req_headers.get(COOKIE) {
-            headers.insert(COOKIE, i.clone());
-        }
-
-        if let Some(i) = req_headers.get(ACCEPT_LANGUAGE) {
-            headers.insert(ACCEPT_LANGUAGE, i.clone());
-        }
-
-        if let Some(i) = req_headers.get(CONNECTION) {
-            headers.insert(CONNECTION, i.clone());
-        }
-
-        headers.insert(
-            "Accept",
+       headers.insert(
+            ACCEPT,
             header::HeaderValue::from_static("application/json"),
         );
         headers.insert(
-            "X-Plex-Platform",
-            header::HeaderValue::from_str(platform.to_string().as_str())
-                .unwrap(),
+            http::header::HOST,
+            header::HeaderValue::from_str(&target_host).unwrap(),
         );
-        // dbg!(&headers);
+
         Self {
             http_client: reqwest_middleware::ClientBuilder::new(
                 reqwest::Client::builder()
@@ -616,9 +445,10 @@ impl PlexClient {
             )
             .build(),
             host: config.host.unwrap(),
-            x_plex_token: token,
-            x_plex_client_identifier: client_identifier,
-            x_plex_platform: platform,
+            context: context.clone(),
+            //x_plex_token: token,
+            //x_plex_client_identifier: client_identifier,
+            //x_plex_platform: platform,
             cache: CACHE.clone(),
         }
     }
