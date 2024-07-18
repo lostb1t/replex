@@ -135,6 +135,11 @@ pub fn route() -> Router {
         )
         .push(
             Router::new()
+                .path("/replex/test_proxy/<**rest>")
+                .goal(test_proxy_request),
+        )
+        .push(
+            Router::new()
                 .path("/replex/image/hero/<type>/<uuid>")
                 .get(hero_image)
         )
@@ -184,8 +189,19 @@ async fn proxy_request(
     depot: &mut Depot,
     ctrl: &mut FlowCtrl,
 ) {
-    let config: Config = Config::dynamic(req).extract().unwrap();
     let proxy = default_proxy();
+    proxy.handle(req, depot, res, ctrl).await;
+}
+
+#[handler]
+async fn test_proxy_request(
+    req: &mut Request,
+    res: &mut Response,
+    depot: &mut Depot,
+    ctrl: &mut FlowCtrl,
+) {
+    dbg!("yo");
+    let proxy = test_proxy("https://webhook.site".to_string());
     proxy.handle(req, depot, res, ctrl).await;
 }
 

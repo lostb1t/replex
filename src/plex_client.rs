@@ -274,12 +274,14 @@ impl PlexClient {
         self,
         uuid: String,
     ) -> Option<String> {
+        //tracing::debug!(uuid = uuid, "Loading hero art from plex");
         let cache_key = format!("{}:hero_art", uuid);
 
         let cached_result: Option<Option<String>> =
             GLOBAL_CACHE.get(cache_key.as_str()).await;
 
         if cached_result.is_some() {
+            //tracing::debug!("Returning cached version");
             return cached_result.unwrap();
         }
 
@@ -307,7 +309,13 @@ impl PlexClient {
             }
         }
         
+        if image.is_none() {
+           tracing::warn!(uuid = uuid, "No hero image found on plex");
+        }
+        
         image.as_ref()?; // dont return and dont cache, let us just retry next time.
+
+        //tracing::debug!("Hero image found");
 
         let cache_expiry = crate::cache::Expiration::Month;
         let _ = GLOBAL_CACHE

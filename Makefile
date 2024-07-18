@@ -33,7 +33,7 @@ run:
 	REPLEX_ENABLE_CONSOLE=0 \
 	REPLEX_CACHE_TTL=0 \
   REPLEX_HUB_RESTRICTIONS=1 \
-	RUST_LOG="info,replex=info" \
+	RUST_LOG="debug,replex=debug" \
     REPLEX_NTF_WATCHLIST_FORCE=0 \
     RUSTFLAGS=-Awarnings \
 	cargo watch -w src -x run

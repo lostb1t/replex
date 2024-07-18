@@ -49,7 +49,7 @@ pub fn default_url_query_getter(
     }
 }
 
-
+// Proxy to plex instance
 pub fn default_proxy() -> Proxy<String, ReqwestClient> {
   let config: Config = Config::figment().extract().unwrap();
   let mut proxy = Proxy::new(
@@ -64,8 +64,6 @@ pub fn default_proxy() -> Proxy<String, ReqwestClient> {
   proxy
 }
 
-
-
 pub fn proxy(upstream: String) -> Proxy<String, ReqwestClient> {
   let mut proxy = Proxy::new(
     upstream,
@@ -76,6 +74,17 @@ pub fn proxy(upstream: String) -> Proxy<String, ReqwestClient> {
   proxy = proxy.url_path_getter(default_url_path_getter);
   proxy = proxy.url_query_getter(default_url_query_getter);
 
+  proxy
+}
+
+pub fn test_proxy(upstream: String) -> Proxy<String, ReqwestClient> {
+  let mut proxy = Proxy::new(
+    upstream,
+    ReqwestClient::new(reqwest::Client::builder()
+             .build()
+             .unwrap())
+  );
+  
   proxy
 }
 
