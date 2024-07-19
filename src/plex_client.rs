@@ -88,20 +88,11 @@ impl PlexClient {
             self.host,
             &req.uri_mut().path_and_query().unwrap()
         );
-        //let mut headers = req.headers_mut().to_owned();
-        //let target_uri: url::Url = url::Url::parse(self.host.as_str()).unwrap();
-        //let target_host = target_uri.host().unwrap().to_string().clone();
-        //dbg!(&req);
-        //headers.remove(ACCEPT); // remove accept as we always do json request
-        //headers.insert(
-        //    http::header::HOST,
-        //    header::HeaderValue::from_str(&target_host).unwrap(),
-        //);
 
         let res = self
             .http_client
             .request(req.method_mut().to_owned(), url)
-            .headers(req.headers().clone())
+            .headers(req.headers_mut().clone())
             .send()
             .await
             .map_err(Error::other)?;
@@ -402,7 +393,7 @@ impl PlexClient {
 
         //let req_headers = req.headers().clone();
         let mut headers = header::HeaderMap::new();
-        let plex_headers_map = HashMap::from([
+        let headers_map = HashMap::from([
             ("X-Plex-Token", context.token.clone()),
             ("X-Plex-Platform", Some(platform.clone().to_string())),
             ("X-Plex-Client-Identifier", context.client_identifier.clone()),
@@ -422,28 +413,23 @@ impl PlexClient {
             ("X-Plex-Provider-Version", context.provider_version.clone()),
             ("X-Plex-Device-Screen-Resolution", context.screen_resolution_original.clone()),
             ("X-Plex-Client-Capabilities", context.client_capabilities.clone()),
+            ("X-Forwarded-For", context.forwarded_for.clone()),
+            ("X-Real-Ip", context.real_ip.clone()),
+            ("ACCEPT", Some("application/json".to_string())),
+            ("ACCEPT_LANGUAGE", Some("en-US".to_string())),
         ]);
         
-        for (key, val) in plex_headers_map {
+        for (key, val) in headers_map {
             if val.is_some() {
               headers.insert(key.clone(), val.unwrap().as_str().parse().unwrap());
             }
         }
         
-       let target_uri: url::Url = url::Url::parse(config.host.clone().unwrap().as_str()).unwrap();
-       let target_host = target_uri.host().unwrap().to_string().clone();
-
-       headers.insert(
-            ACCEPT,
-            header::HeaderValue::from_static("application/json"),
-        );
- 
-
-        headers.insert(ACCEPT_LANGUAGE, "en-US".parse().unwrap());
-
+       //let target_uri: url::Url = url::Url::parse(config.host.clone().unwrap().as_str()).unwrap();
+       //let target_host = target_uri.host().unwrap().to_string().clone();
 
         //headers.insert(
-         //   http::header::HOST,
+        //    http::header::HOST,
         //    header::HeaderValue::from_str(&target_host).unwrap(),
         //);
 

@@ -200,7 +200,6 @@ async fn test_proxy_request(
     depot: &mut Depot,
     ctrl: &mut FlowCtrl,
 ) {
-    dbg!("yo");
     let proxy = test_proxy("https://webhook.site".to_string());
     proxy.handle(req, depot, res, ctrl).await;
 }
@@ -212,6 +211,7 @@ async fn proxy_for_transform(
     depot: &mut Depot,
     ctrl: &mut FlowCtrl,
 ) -> Result<(), anyhow::Error> {
+    dbg!(&req);
     let config: Config = Config::dynamic(req).extract().unwrap();
     let content_type = get_content_type_from_headers(req.headers_mut());
     let proxy = default_proxy();
@@ -507,12 +507,14 @@ pub async fn hero_image(
 pub async fn direct_stream_fallback(
     req: &mut Request,
     res: &mut Response,
+    ctrl: &mut FlowCtrl,
+    depot: &mut Depot,
 ) -> Result<(), anyhow::Error> {
     let config: Config = Config::dynamic(req).extract().unwrap();
     let context: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_context(&context);
     let queries = req.queries().clone();
-    // dbg!("yo");
+
     let direct_play = queries
         .get("directPlay")
         .unwrap_or(&"1".to_string())
@@ -521,14 +523,14 @@ pub async fn direct_stream_fallback(
     if direct_play != "1" {
         return Ok(());
     }
+    
+    proxy_for_transform.handle(req, depot, res, ctrl).await;
 
-    let upstream_res = plex_client.request(req).await?;
-    // dbg!(&upstream_res);
-
-    match upstream_res.status() {
+    match res.status_code.unwrap() {
         http::StatusCode::OK => {
             let container: MediaContainerWrapper<MediaContainer> =
-            from_reqwest_response(upstream_res).await?;
+            //from_reqwest_response(upstream_res).await?;
+            from_salvo_response(res).await?;
     
             if container.media_container.general_decision_code.is_some()
                 && container.media_container.general_decision_code.unwrap() == 2000
@@ -539,7 +541,7 @@ pub async fn direct_stream_fallback(
                 add_query_param_salvo(req, "directPlay".to_string(), "0".to_string());
                 add_query_param_salvo(req, "directStream".to_string(), "1".to_string());
             };
-            return Ok(());
+            //return Ok(());
         },
         http::StatusCode::BAD_REQUEST => {
             tracing::debug!(
@@ -547,10 +549,10 @@ pub async fn direct_stream_fallback(
             );
             add_query_param_salvo(req, "directPlay".to_string(), "0".to_string());
             add_query_param_salvo(req, "directStream".to_string(), "1".to_string());   
-            return Ok(());   
+            //return Ok(());   
         },
         status => {
-            tracing::error!(status = ?status, res = ?upstream_res, "Failed to get plex response");
+            tracing::error!(status = ?status, res = ?res, "Failed to get plex response");
             return Err(
                 salvo::http::StatusError::internal_server_error().into()
             );
