@@ -88,11 +88,14 @@ impl PlexClient {
             self.host,
             &req.uri_mut().path_and_query().unwrap()
         );
+        
+        let mut headers = req.headers_mut().clone();
+        headers.remove(ACCEPT); // remove accept as we always do json request
 
         let res = self
             .http_client
             .request(req.method_mut().to_owned(), url)
-            .headers(req.headers_mut().clone())
+            .headers(headers)
             .send()
             .await
             .map_err(Error::other)?;
