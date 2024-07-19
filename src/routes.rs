@@ -211,9 +211,6 @@ async fn proxy_for_transform(
     depot: &mut Depot,
     ctrl: &mut FlowCtrl,
 ) -> Result<(), anyhow::Error> {
-    dbg!(&req);
-    let config: Config = Config::dynamic(req).extract().unwrap();
-    let content_type = get_content_type_from_headers(req.headers_mut());
     let proxy = default_proxy();
     let headers_ori = req.headers().clone();
     req.headers_mut().insert(http::header::ACCEPT, header::HeaderValue::from_static("application/json"));
@@ -524,13 +521,14 @@ pub async fn direct_stream_fallback(
         return Ok(());
     }
     
-    proxy_for_transform.handle(req, depot, res, ctrl).await;
+    let mut res_upstream = &mut Response::new();
+    proxy_for_transform.handle(req, depot, res_upstream, ctrl).await;
 
-    match res.status_code.unwrap() {
+    match res_upstream.status_code.unwrap() {
         http::StatusCode::OK => {
             let container: MediaContainerWrapper<MediaContainer> =
             //from_reqwest_response(upstream_res).await?;
-            from_salvo_response(res).await?;
+            from_salvo_response(res_upstream).await?;
     
             if container.media_container.general_decision_code.is_some()
                 && container.media_container.general_decision_code.unwrap() == 2000
@@ -552,13 +550,13 @@ pub async fn direct_stream_fallback(
             //return Ok(());   
         },
         status => {
-            tracing::error!(status = ?status, res = ?res, "Failed to get plex response");
+            tracing::error!(status = ?status, res = ?res_upstream, "Failed to get plex response");
             return Err(
                 salvo::http::StatusError::internal_server_error().into()
             );
         }
     };
-
+    //res = &mut Response::new();
     return Ok(());
 }
 
