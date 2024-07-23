@@ -152,9 +152,16 @@ impl PlexClient {
         path = format!("{}&includeGuids=1", path);
         // dbg!(&path);
 
-        let resp = self.get(path).await.unwrap();
+        let res = self.get(path).await.unwrap();
+        if !res.status().is_success() {
+            return Err(anyhow::anyhow!(format!(
+                "unexpected status code: status = {}",
+                res.status()
+            )));
+        }
+        
         let container: MediaContainerWrapper<MediaContainer> =
-            from_reqwest_response(resp).await.unwrap();
+            from_reqwest_response(res).await.unwrap();
         Ok(container)
     }
 

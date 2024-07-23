@@ -8,7 +8,7 @@ pub mod media_style;
 pub mod hub_section_directory;
 pub mod hub_style;
 pub mod library_interleave;
-pub mod restriction_filter;
+pub mod restrictions;
 
 pub use collection_style::CollectionStyleTransform;
 pub use hub_interleave::HubInterleaveTransform;
@@ -20,7 +20,7 @@ pub use media_style::MediaStyleTransform;
 pub use hub_section_directory::HubSectionDirectoryTransform;
 pub use hub_style::{ClientHeroStyle, HubStyleTransform};
 pub use library_interleave::LibraryInterleaveTransform;
-pub use restriction_filter::HubRestrictionFilter;
+pub use restrictions::HubRestrictionTransform;
 
 use crate::{
     models::*,
@@ -40,8 +40,10 @@ pub trait Transform: Send + Sync + 'static {
     async fn transform_metadata(
         &self,
         item: &mut MetaData,
+        //item: MetaData,
         plex_client: PlexClient,
         options: PlexContext,
+    //) -> Option<MediaContainer> {
     ) {
     }
     async fn transform_mediacontainer(
@@ -52,13 +54,9 @@ pub trait Transform: Send + Sync + 'static {
     ) -> MediaContainer {
         item
     }
-}
-
-#[async_trait]
-pub trait Filter: Send + Sync + 'static {
     async fn filter_metadata(
         &self,
-        item: &mut MetaData,
+        item: MetaData,
         plex_client: PlexClient,
         options: PlexContext,
     ) -> bool {
@@ -74,6 +72,7 @@ pub trait Filter: Send + Sync + 'static {
     }
 }
 
+
 // #[derive(TypedBuilder)]
 // #[derive(Default)]
 #[derive(Clone)]
@@ -82,7 +81,6 @@ pub struct TransformBuilder {
     pub options: PlexContext,
     pub mix: bool,
     pub transforms: Vec<Arc<dyn Transform>>,
-    pub filters: Vec<Arc<dyn Filter>>,
 }
 
 impl TransformBuilder {
@@ -90,7 +88,6 @@ impl TransformBuilder {
     pub fn new(plex_client: PlexClient, options: PlexContext) -> Self {
         Self {
             transforms: Vec::new(),
-            filters: Vec::new(),
             mix: false,
             plex_client,
             options,
@@ -104,56 +101,13 @@ impl TransformBuilder {
         self
     }
 
-    #[inline]
-    pub fn with_filter<T: Filter>(mut self, filter: T) -> Self {
-        self.filters.push(Arc::new(filter));
-        self
-    }
-
-    // pub fn merge(mut self, container_left, container_right) -> Self {
-    //     self.mix = true;
-    //     self
-    // }
-
-    #[async_recursion]
-    pub async fn apply_to_metadata(
-        &self,
-        metadata: &mut Vec<MetaData>,
-    ) -> Vec<MetaData> {
-        let mut filtered_childs: Vec<MetaData> = vec![];
-        'outer: for item in metadata {
-            for filter in self.filters.clone() {
-                // dbg!("filtering");
-                if filter
-                    .filter_metadata(
-                        item,
-                        self.plex_client.clone(),
-                        self.options.clone(),
-                    )
-                    .await
-                {
-                    continue 'outer;
-                }
-            }
-
-            if !item.children().is_empty() {
-                let childs = self.apply_to_metadata(item.children_mut()).await;
-                item.set_children(childs);
-            }
-
-            filtered_childs.push(item.to_owned());
-        }
-
-        return filtered_childs;
-    }
-
-    pub async fn apply_to(
+    pub async fn apply_to_old(
         self,
         container: &mut MediaContainerWrapper<MediaContainer>,
     ) {
         let children = container.media_container.children_mut();
-        let new_children = self.apply_to_metadata(children).await;
-        container.media_container.set_children(new_children);
+        //let new_children = self.apply_to_metadata(children).await;
+        //container.media_container.set_children(new_children);
         
         for t in self.transforms.clone() {
             let futures =
@@ -194,19 +148,42 @@ impl TransformBuilder {
         }
     }
     
-    pub async fn apply_to_test(
+    pub async fn apply_to(
         self,
         container: &mut MediaContainerWrapper<MediaContainer>,
     ) {
+        //let mut childs = container.media_container.children_mut();
+        let mut idx = 0 as usize;
+        let mut filter_childs = vec![];
         for t in self.transforms.clone() {
-      
+            //dbg!(&filter_childs);
             for child in container.media_container.children_mut() {
-               t.transform_metadata(
+                 //if filter_childs.contains(child.key.clone().unwrap()) {
+                 //  continue;
+                 //} 
+                 //dbg!(&child.rating_key);
+                 //dbg!(&child.key);
+                 if !t.filter_metadata(
+                        child.clone(),
+                        self.plex_client.clone(),
+                        self.options.clone(),
+                    )
+                    .await
+                 {
+                    //childs.remove(idx);
+                    filter_childs.push(child.key.clone().unwrap());
+                    continue
+                 }
+                 t.transform_metadata(
                             child,
                             self.plex_client.clone(),
                             self.options.clone(),
                         ).await;
+                //if 
+                //idx = idx + 1;
             }
+            container.media_container.children_mut().retain(|x| !filter_childs.contains(&x.key.clone().unwrap()));
+            //item.children_mut().retain(|x| !x.is_watched());
             //future::join_all(futures).await;
 
             // dont use join as it needs ti be executed in order
@@ -221,10 +198,7 @@ impl TransformBuilder {
             // dbg!(container.media_container.size);
         }
 
-        // filter behind transform as transform can load in additional data
-        let children = container.media_container.children_mut();
-        let new_children = self.apply_to_metadata(children).await;
-        container.media_container.set_children(new_children);
+        //container.media_container.set_children(childs);
 
         if container.media_container.size.is_some() {
             container.media_container.size = Some(

@@ -574,7 +574,7 @@ pub async fn transform_hubs_response(
     container.content_type = content_type;
 
     TransformBuilder::new(plex_client, context.clone())
-        .with_filter(HubRestrictionFilter)
+        .with_transform(HubRestrictionTransform)
         .with_transform(HubStyleTransform { is_home: true })
         .with_transform(HubWatchedTransform)
         .with_transform(HubInterleaveTransform)
@@ -663,6 +663,7 @@ pub async fn transform_req_android(
 }
 
 
+// rhis handles refresh of individual rows or paging and paging if it
 #[handler]
 pub async fn get_collections_children(
     req: &mut Request,
@@ -700,12 +701,12 @@ pub async fn get_collections_children(
 
     // filtering of watched happens in the transform
     TransformBuilder::new(plex_client, context.clone())
-        .with_filter(HubRestrictionFilter)
         .with_transform(LibraryInterleaveTransform {
             collection_ids: collection_ids.clone(),
             offset,
             limit,
         })
+        .with_transform(HubRestrictionTransform)
         .with_transform(CollectionStyleTransform {
             collection_ids: collection_ids.clone(),
             hub: context.content_directory_id.is_some() // its a guessing game
@@ -771,7 +772,7 @@ pub async fn default_transform(
     container.content_type = content_type;
 
     TransformBuilder::new(plex_client, context.clone())
-        .with_filter(HubRestrictionFilter)
+        .with_transform(HubRestrictionTransform)
         .with_transform(MediaStyleTransform { style: style })
         .with_transform(UserStateTransform)
         .with_transform(HubWatchedTransform)

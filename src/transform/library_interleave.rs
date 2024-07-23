@@ -75,6 +75,20 @@ impl Transform for LibraryInterleaveTransform {
         let mut total_size = 0;
 
         for id in self.collection_ids.clone() {
+            let collection = plex_client
+                .clone()
+                .get_cached(
+                    plex_client.get_collection(id as i32),
+                    format!("collection:{}", id.to_string()),
+                )
+                .await
+                .unwrap();
+        
+            //match c {
+            //    Ok(v) =>,
+            //    Err(err) =>
+            //}
+        
             let mut c = plex_client
                 .clone()
                 .get_cached(
@@ -90,15 +104,13 @@ impl Transform for LibraryInterleaveTransform {
                 )
                 .await
                 .unwrap();
+            
+            // should have proper errors but lets assume not found so no access
+            //match c {
+            //    Ok(v) =>,
+            //    Err(err) =>
+            //}
 
-            let collection = plex_client
-                .clone()
-                .get_cached(
-                    plex_client.get_collection(id as i32),
-                    format!("collection:{}", id.to_string()),
-                )
-                .await
-                .unwrap();
 
             if collection.media_container.exclude_watched() {
                 c.media_container.children_mut().retain(|x| !x.is_watched());
