@@ -98,6 +98,7 @@ impl PlexClient {
         //let mut headers = req.headers_mut().clone();
         //headers.remove(ACCEPT); // remove accept as we always do json request
         //dbg!(&headers);
+        //dbg!(&url);
         let res = self
             .http_client
             .request(req.method().clone(), url)
@@ -450,7 +451,7 @@ impl PlexClient {
             ("X-Real-Ip", context.real_ip.clone()),
             (&ACCEPT.as_str(), Some("application/json".to_string())),
             (&ACCEPT_LANGUAGE.as_str(), Some("en-US".to_string())),
-            (http::header::HOST.as_str(), Some(config.host.clone().unwrap())),
+            //(http::header::HOST.as_str(), Some(config.host.clone().unwrap())),
         ]);
         
         for (key, val) in headers_map {
