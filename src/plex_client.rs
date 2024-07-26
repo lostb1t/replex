@@ -67,6 +67,7 @@ pub struct PlexClient {
     pub context: PlexContext,
     pub host: String, // TODO: Dont think this supposed to be here. Should be higher up
     pub cache: Cache<String, MediaContainerWrapper<MediaContainer>>,
+    pub default_headers: header::HeaderMap,
 }
 
 impl PlexClient {
@@ -81,20 +82,25 @@ impl PlexClient {
 
     pub async fn request(
         &self,
-        req: &mut Request,
+        req: &Request,
     ) -> Result<reqwest::Response, Error> {
         let url = format!(
             "{}{}",
             self.host,
-            &req.uri_mut().path_and_query().unwrap()
+            &req.uri().clone().path_and_query().unwrap()
         );
-        
-        let mut headers = req.headers_mut().clone();
-        headers.remove(ACCEPT); // remove accept as we always do json request
-
+        let mut headers = self.default_headers.clone();
+        for (key, value) in req.headers().iter() {
+            if key != ACCEPT {
+              headers.insert(key, value.clone());
+            }
+        }
+        //let mut headers = req.headers_mut().clone();
+        //headers.remove(ACCEPT); // remove accept as we always do json request
+        //dbg!(&headers);
         let res = self
             .http_client
-            .request(req.method_mut().to_owned(), url)
+            .request(req.method().clone(), url)
             .headers(headers)
             .send()
             .await
@@ -103,16 +109,33 @@ impl PlexClient {
         Ok(res)
     }
 
-    // pub async fn proxy_request(
-    //     &self,
-    //     req: &mut Request,
-    // ) -> Result<reqwest::Response, Error> {
-    //     self.request(req)
-    // }
+    pub async fn proxy_request(
+         &self,
+         req: &Request,
+     ) -> Result<reqwest::Response, Error> {
+        let url = format!(
+            "{}{}?{}",
+            self.host,
+            encode_url_path(&url_path_getter(req).unwrap()),
+            url_query_getter(req).unwrap()
+        );
+        //dbg!(&req);
+        //dbg!(&url);
+        //dbg!(&req.uri().clone().query().unwrap().to_string());
+        let mut headers = req.headers().clone();
+        //headers.remove(ACCEPT); // remove accept as we always do json request
 
-    // pub fn request(&self, req) -> hyper::client::ResponseFuture {
-    //     self.http_client.request(req)
-    // }
+        let res = self
+            .http_client
+            .request(req.method().clone(), url)
+            //.execute(req)
+            .headers(headers)
+            .send()
+            .await
+            .map_err(Error::other)?;
+        //dbg!(&res);
+        Ok(res)
+     }
 
     pub async fn get_section_collections(
         &self,
@@ -239,9 +262,9 @@ impl PlexClient {
         &self,
         id: i32,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
-        let resp = self.get("/hubs".to_string()).await.unwrap();
+        let res = self.get("/hubs".to_string()).await.unwrap();
         let container: MediaContainerWrapper<MediaContainer> =
-            from_reqwest_response(resp).await.unwrap();
+            from_reqwest_response(res).await.unwrap();
         Ok(container)
     }
 
@@ -249,9 +272,9 @@ impl PlexClient {
         self,
         key: String,
     ) -> Result<MediaContainerWrapper<MediaContainer>> {
-        let resp = self.get(key).await.unwrap();
+        let res = self.get(key).await.unwrap();
         let container: MediaContainerWrapper<MediaContainer> =
-            from_reqwest_response(resp).await.unwrap();
+            from_reqwest_response(res).await.unwrap();
         Ok(container)
     }
 
@@ -446,13 +469,14 @@ impl PlexClient {
         Self {
             http_client: reqwest_middleware::ClientBuilder::new(
                 reqwest::Client::builder()
-                    .default_headers(headers)
+                    //.default_headers(headers)
                     .gzip(true)
                     .timeout(Duration::from_secs(30))
                     .build()
                     .unwrap(),
             )
             .build(),
+            default_headers: headers,
             host: config.host.unwrap(),
             context: context.clone(),
             //x_plex_token: token,

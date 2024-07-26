@@ -760,7 +760,7 @@ pub async fn default_transform(
     match upstream_res.status() {
         reqwest::StatusCode::OK => (),
         status => {
-            tracing::error!(status = ?status, res = ?upstream_res, "Failed to get plex response");
+            tracing::error!(status = ?status, res = ?upstream_res, req = ?req, "Failed to get plex response");
             return Err(
                 salvo::http::StatusError::internal_server_error().into()
             );
@@ -987,9 +987,19 @@ async fn get_transcoding_for_request(
 ) -> Result<TranscodingStatus, anyhow::Error> {
     let context: PlexContext = req.extract().await.unwrap();
     let plex_client = PlexClient::from_context(&context);
-    let response = plex_client.request(req).await?;
+    
+    let mut res = &mut Response::new();
+    let mut depot = &mut Depot::new();
+    let mut ctrl = &mut FlowCtrl::new(vec![]);
+    proxy_for_transform.handle(req, depot, res, ctrl).await;
+    //dbg!(&res_upstream);
+    
+    //let res = plex_client.proxy_request(&req).await?;
+    //dbg!(&res);
+    //dbg!(&req);
+
     let transcode: MediaContainerWrapper<MediaContainer> =
-        from_reqwest_response(response).await?;
+        from_salvo_response(res).await?;
     let mut is_transcoding = false;
 
     if transcode.media_container.size.is_some()

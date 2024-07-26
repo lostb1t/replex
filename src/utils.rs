@@ -14,6 +14,7 @@ use strum_macros::Display as EnumDisplay;
 use strum_macros::EnumString;
 // use http_body::{Limited, Full};
 use http_body_util::BodyExt;
+use percent_encoding::{utf8_percent_encode, CONTROLS};
 use url::Url;
 use tokio::time::Duration;
 use yaserde::ser::to_string as to_xml_str;
@@ -30,23 +31,30 @@ use salvo::{
 
 use crate::models::*;
 
-pub fn default_url_path_getter(
+pub fn url_path_getter(
     req: &Request,
-    _depot: &Depot,
 ) -> Option<String> {
-    //dbg!(&req);
     Some(req.uri().path().to_string())
 }
 
-pub fn default_url_query_getter(
+pub fn url_query_getter(
+    req: &Request,
+) -> Option<String> {
+    req.uri().query().map(Into::into)
+}
+
+pub fn salvo_url_path_getter(
     req: &Request,
     _depot: &Depot,
 ) -> Option<String> {
-    //dbg!(&req.uri().query());
-    match req.uri().query() {
-        Some(i) => Some(i.to_string()),
-        _ => None
-    }
+    url_path_getter(req)
+}
+
+pub fn salvo_url_query_getter(
+    req: &Request,
+    _depot: &Depot,
+) -> Option<String> {
+    url_query_getter(req)
 }
 
 // Proxy to plex instance
@@ -59,8 +67,8 @@ pub fn default_proxy() -> Proxy<String, ReqwestClient> {
              .build()
              .unwrap())
   );
-  proxy = proxy.url_path_getter(default_url_path_getter);
-  proxy = proxy.url_query_getter(default_url_query_getter);
+  proxy = proxy.url_path_getter(salvo_url_path_getter);
+  proxy = proxy.url_query_getter(salvo_url_query_getter);
   proxy
 }
 
@@ -71,11 +79,13 @@ pub fn proxy(upstream: String) -> Proxy<String, ReqwestClient> {
              .build()
              .unwrap())
   );
-  proxy = proxy.url_path_getter(default_url_path_getter);
-  proxy = proxy.url_query_getter(default_url_query_getter);
+  proxy = proxy.url_path_getter(salvo_url_path_getter);
+  proxy = proxy.url_query_getter(salvo_url_query_getter);
 
   proxy
 }
+
+//pub fn proxy_request()
 
 pub fn test_proxy(upstream: String) -> Proxy<String, ReqwestClient> {
   let mut proxy = Proxy::new(
@@ -86,6 +96,15 @@ pub fn test_proxy(upstream: String) -> Proxy<String, ReqwestClient> {
   );
   
   proxy
+}
+
+/// Encode url path. This can be used when build your custom url path getter.
+#[inline]
+pub fn encode_url_path(path: &str) -> String {
+    path.split('/')
+        .map(|s| utf8_percent_encode(s, CONTROLS).to_string())
+        .collect::<Vec<_>>()
+        .join("/")
 }
 
 pub fn get_collection_id_from_child_path(path: String) -> i32 {
@@ -224,6 +243,7 @@ pub async fn from_reqwest_response(
     res: reqwest::Response,
 ) -> Result<MediaContainerWrapper<MediaContainer>, Error> {
     let bytes = res.bytes().await.unwrap();
+    //dbg!(&bytes);
     from_bytes(bytes)
 }
 
