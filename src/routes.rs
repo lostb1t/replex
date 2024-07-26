@@ -992,10 +992,10 @@ async fn get_transcoding_for_request(
     let mut depot = &mut Depot::new();
     let mut ctrl = &mut FlowCtrl::new(vec![]);
     proxy_for_transform.handle(req, depot, res, ctrl).await;
-    //dbg!(&res_upstream);
+    dbg!(&res);
     
-    //let res = plex_client.proxy_request(&req).await?;
-    //dbg!(&res);
+    let ress = plex_client.proxy_request(&req).await?;
+    dbg!(&ress);
     //dbg!(&req);
 
     let transcode: MediaContainerWrapper<MediaContainer> =

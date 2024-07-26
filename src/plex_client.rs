@@ -91,7 +91,7 @@ impl PlexClient {
         );
         let mut headers = self.default_headers.clone();
         for (key, value) in req.headers().iter() {
-            if key != ACCEPT {
+            if key != ACCEPT && key != http::header::HOST {
               headers.insert(key, value.clone());
             }
         }
@@ -123,8 +123,8 @@ impl PlexClient {
         //dbg!(&url);
         //dbg!(&req.uri().clone().query().unwrap().to_string());
         let mut headers = req.headers().clone();
-        //headers.remove(ACCEPT); // remove accept as we always do json request
-
+        headers.remove(ACCEPT); // remove accept as we always do json request
+        headers.remove(http::header::HOST);
         let res = self
             .http_client
             .request(req.method().clone(), url)
@@ -448,8 +448,9 @@ impl PlexClient {
             ("X-Plex-Client-Capabilities", context.client_capabilities.clone()),
             ("X-Forwarded-For", context.forwarded_for.clone()),
             ("X-Real-Ip", context.real_ip.clone()),
-            ("ACCEPT", Some("application/json".to_string())),
-            ("ACCEPT_LANGUAGE", Some("en-US".to_string())),
+            (&ACCEPT.as_str(), Some("application/json".to_string())),
+            (&ACCEPT_LANGUAGE.as_str(), Some("en-US".to_string())),
+            (http::header::HOST.as_str(), Some(config.host.clone().unwrap())),
         ]);
         
         for (key, val) in headers_map {
