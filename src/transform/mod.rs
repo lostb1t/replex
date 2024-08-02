@@ -182,7 +182,7 @@ impl TransformBuilder {
                 //if 
                 //idx = idx + 1;
             }
-            container.media_container.children_mut().retain(|x| !filter_childs.contains(&x.key.clone().unwrap()));
+            container.media_container.children_mut().retain(|x| !x.key.is_some() || !filter_childs.contains(&x.key.clone().unwrap()));
             //item.children_mut().retain(|x| !x.is_watched());
             //future::join_all(futures).await;
 
