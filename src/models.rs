@@ -1017,7 +1017,7 @@ pub struct MetaData {
     pub parent_year: Option<i32>,
     #[yaserde(attribute, rename = "parentIndex")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub parent_index: Option<u32>,
+    pub parent_index: Option<i32>,
     #[yaserde(attribute, rename = "parentGuid")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_guid: Option<String>,
