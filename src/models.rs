@@ -120,6 +120,8 @@ pub struct PlexContext {
     pub platform: Option<Platform>,
     #[salvo(extract(rename = "X-Plex-Username"))]
     pub username: Option<String>,
+    #[salvo(extract(rename = "path"))]
+    pub path: Option<String>,
     #[serde(default, deserialize_with = "deserialize_screen_resolution")]
     #[salvo(extract(rename = "X-Plex-Device-Screen-Resolution"))]
     pub screen_resolution: Vec<Resolution>,

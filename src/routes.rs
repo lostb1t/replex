@@ -227,20 +227,15 @@ async fn should_skip(
     depot: &mut Depot,
     ctrl: &mut FlowCtrl,
 ) {
-
-    // We do this because of a bug in extract. Which taks the body which is needed for proy
-    let queries: PlexContextProduct = req.parse_queries().unwrap();
-    let headers: PlexContextProduct = req.parse_headers().unwrap();
-    let product: Option<String> = if queries.product.is_some() {
-        queries.product
-    } else if headers.product.is_some() {
-        headers.product
-    } else {
-        None
+    let context: PlexContext = req.extract().await.unwrap();
+    
+    let is_livetv = match context.path.clone() {
+        Some(v) => v.contains("livetv"),
+        None => false
     };
 
-    if product.is_some()
-        && product.clone().unwrap().to_lowercase() == "plexamp"
+    if is_livetv || (context.product.is_some()
+        && context.product.clone().unwrap().to_lowercase() == "plexamp")
     {
 
         let config: Config = Config::dynamic(req).extract().unwrap();
