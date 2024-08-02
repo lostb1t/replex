@@ -233,11 +233,13 @@ async fn should_skip(
         Some(v) => v.contains("livetv"),
         None => false
     };
+    
+    let is_plexamp = match context.product.clone() {
+        Some(v) => v.to_lowercase().contains("plexamp"),
+        None => false
+    };
 
-    if is_livetv || (context.product.is_some()
-        && context.product.clone().unwrap().to_lowercase() == "plexamp")
-    {
-
+    if is_livetv || is_plexamp {
         let config: Config = Config::dynamic(req).extract().unwrap();
         let proxy = default_proxy();
 
