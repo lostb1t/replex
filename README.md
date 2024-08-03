@@ -1,4 +1,4 @@
-# <img style="vertical-align:middle" src="icon.png" width="23"> Replex
+# <img src="icon.png" width="23"> Replex
 
 Remix your plex hubs
 
