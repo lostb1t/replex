@@ -235,7 +235,7 @@ pub fn hero_meta() -> Meta {
                 r#type: Some("show".to_string()),
                 fields: vec![
                     "title".to_string(),
-                    "originallyAvailableAt".to_string(),
+                    "childCount".to_string(),
                 ],
             },
             DisplayField {
