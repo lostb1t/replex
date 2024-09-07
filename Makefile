@@ -36,7 +36,6 @@ run:
   RUST_BACKTRACE=0 \
 	RUST_LOG="info,replex=debug" \
     REPLEX_NTF_WATCHLIST_FORCE=0 \
-    RUSTFLAGS=-Awarnings \
 	cargo watch -w src -x run
 
 fix:

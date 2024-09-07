@@ -43,7 +43,7 @@ impl Transform for MediaStyleTransform {
             }
             guid = guid.replace("plex://", "");
 
-            let cover_art = Some(format!("/replex/image/hero/{}?X-Plex-Token={}", 
+            let cover_art = Some(format!("/replex/image/hero/{}/{}", 
             // let cover_art = Some(format!("{}://{}/replex/image/hero/{}?X-Plex-Token={}", 
                 // match options.forwarded_proto {
                 //     Some(v) => v,

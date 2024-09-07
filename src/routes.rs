@@ -308,14 +308,20 @@ async fn resolve_local_media_path(
     req: &mut Request,
     res: &mut Response,
 ) {
-    let context: PlexContext = req.extract().await.unwrap();
+    let mut context: PlexContext = req.extract().await.unwrap();
     let url = req.query::<String>("url");
     if url.is_some() && url.clone().unwrap().contains("/replex/image/hero")
     {
         let uri: url::Url = url::Url::parse(url.unwrap().as_str()).unwrap();
-        let uuid = uri.path_segments().unwrap().last();
+        let segments = uri.path_segments().unwrap().collect::<Vec<&str>>();
+        
+        let uuid = segments[segments.len() - 2];
+        if context.token.is_none() {
+            context.token = Some(segments.last().unwrap().to_string());
+        }
+
         let plex_client = PlexClient::from_context(&context);
-        let rurl = plex_client.get_hero_art(uuid.unwrap().to_string()).await;
+        let rurl = plex_client.get_hero_art(uuid.to_string()).await;
         if rurl.is_some() {
           add_query_param_salvo(req, "url".to_string(), rurl.unwrap());
         }
