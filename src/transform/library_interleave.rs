@@ -12,52 +12,7 @@ pub struct LibraryInterleaveTransform {
     pub collection_ids: Vec<u32>,
     pub offset: i32,
     pub limit: i32,
-    // pub remove_watched: bool,
 }
-
-// #[async_recursion]
-// pub async fn load_collection_children(
-//     id: u32,
-//     offset: i32,
-//     limit: i32,
-//     original_limit: i32,
-//     client: PlexClient,
-// ) -> anyhow::Result<MediaContainerWrapper<MediaContainer>> {
-//     let config: Config = Config::figment().extract().unwrap();
-//     let mut c = client
-//         .get_collection_children(id, Some(offset), Some(limit))
-//         .await?;
-
-//     if !config.include_watched {
-//         c.media_container.children_mut().retain(|x| !x.is_watched());
-
-//         let children_lenght = c.media_container.children_mut().len() as i32;
-//         // dbg!(children_lenght);
-//         // dbg!(limit);
-//         // dbg!(c.media_container.total_size.unwrap());
-//         // dbg!(offset);
-//         // dbg!(limit);
-//         // dbg!(children_lenght);
-//         // dbg!(c.media_container.total_size);
-//         // dbg!("-------");
-//         let total_size = c.media_container.total_size.unwrap();
-//         if children_lenght < original_limit
-//             && total_size > offset + limit && offset < total_size
-//         {
-//             //dbg!("recursive");
-//             // self.clone().load_collection_children();
-//             // load more
-//             return load_collection_children(
-//                 id,
-//                 offset,
-//                 limit + 10,
-//                 original_limit,
-//                 client.clone(),
-//             ).await;
-//         }
-//     }
-//     Ok(c)
-// }
 
 #[async_trait]
 impl Transform for LibraryInterleaveTransform {
