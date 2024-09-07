@@ -315,10 +315,10 @@ async fn resolve_local_media_path(
         let uri: url::Url = url::Url::parse(url.unwrap().as_str()).unwrap();
         let segments = uri.path_segments().unwrap().collect::<Vec<&str>>();
         
-        let uuid = segments[segments.len() - 2];
-        if context.token.is_none() {
-            context.token = Some(segments.last().unwrap().to_string());
-        }
+        let uuid = segments.last().unwrap().replace(".jpg", "");
+        //if context.token.is_none() {
+        //    context.token = Some(segments.last().unwrap().to_string());
+        //}
 
         let plex_client = PlexClient::from_context(&context);
         let rurl = plex_client.get_hero_art(uuid.to_string()).await;
