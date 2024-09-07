@@ -43,9 +43,9 @@ impl Transform for MediaStyleTransform {
             }
             guid = guid.replace("plex://", "");
 
-            // let cover_art = Some(format!("/replex/image/hero/{}/{}", 
+            //let cover_art = Some(format!("https://metadata-static.plex.tv/7/gracenote/779d16f22ad2f3a002937133f8744e5d.jpg"));
             // let cover_art = Some(format!("/replex/image/hero/{}?X-Plex-Token={}", 
-            let cover_art = Some(format!("{}://{}/replex/image/hero/{}.jpg", 
+            let cover_art = Some(format!("{}://{}/replex/image/hero/{}?X-Plex-Token={}", 
                 match options.forwarded_proto {
                     Some(v) => v,
                     None => "http".to_string()
@@ -55,7 +55,7 @@ impl Transform for MediaStyleTransform {
                     None => options.host.clone().unwrap()
                 },
                 guid,
-                // options.token.clone().unwrap()
+                options.token.clone().unwrap()
             ));
             //dbg!(&cover_art);
             if cover_art.is_some() {
