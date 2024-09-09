@@ -28,7 +28,7 @@ jobs:
 
   build:
     name: Build images
-    if: github.event_name == 'workflow_dispatch' 
+    #if: github.event_name == 'workflow_dispatch' 
     runs-on: ubuntu-22.04
     env:
       HUSKY: 0
