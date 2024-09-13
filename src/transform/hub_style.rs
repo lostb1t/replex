@@ -19,6 +19,7 @@ pub struct HubStyleTransform {
 
 pub struct ClientHeroStyle {
     pub enabled: bool,
+    pub include_meta: bool,
     pub r#type: String,
     pub style: Option<String>,
     pub child_type: Option<String>,
@@ -30,6 +31,7 @@ impl Default for ClientHeroStyle {
     fn default() -> Self {
         Self {
             enabled: true,
+            include_meta: true,
             style: Some("hero".to_string()),
             r#type: "mixed".to_string(),
             child_type: None,
@@ -58,7 +60,7 @@ impl ClientHeroStyle {
     pub fn from_context(context: PlexContext) -> Self {
         // pub fn android(product: String, platform_version: String) -> Self {
         let product = context.product.clone().unwrap_or_default();
-        let device_type = DeviceType::from_product(product);
+        let device_type = DeviceType::from_product(product.clone());
         let platform = context.platform.clone().unwrap_or_default();
         let platform_version =
             context.platform_version.clone().unwrap_or_default();
@@ -92,7 +94,11 @@ impl ClientHeroStyle {
             Platform::Ios => ClientHeroStyle::ios_style(),
             Platform::TvOS => ClientHeroStyle::tvos_style(),
             _ => {
-              ClientHeroStyle::default()
+              if product.clone().to_lowercase() == "plex web" {
+                ClientHeroStyle::web()
+              } else {
+                ClientHeroStyle::default()
+              }
           }
             // _ => {
             //     if product.starts_with("Plex HTPC") {
@@ -114,6 +120,15 @@ impl ClientHeroStyle {
     pub fn roku() -> Self {
         Self {
             style: Some("hero".to_string()),
+            ..ClientHeroStyle::default()
+        }
+    }
+
+   pub fn web() -> Self {
+        Self {
+            include_meta: false,
+            cover_art_as_art: true,
+            cover_art_as_thumb: true,
             ..ClientHeroStyle::default()
         }
     }
@@ -184,7 +199,10 @@ impl Transform for HubStyleTransform {
                 item.style = style.style;
 
                 item.r#type = style.r#type;
-                item.meta = Some(hero_meta());
+                
+                if style.include_meta {
+                  item.meta = Some(hero_meta());
+                }
 
                 let mut futures = FuturesOrdered::new();
                 // let now = Instant::now();

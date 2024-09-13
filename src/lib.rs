@@ -1,3 +1,5 @@
+
+#![allow(warnings)]
 #[macro_use]
 extern crate yaserde;
 extern crate yaserde_derive;
