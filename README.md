@@ -24,8 +24,6 @@ Remix your plex hubs
 Replex is an proxy that transforms the communication between the plex media server and plex clients. 
 This allows replex to change some dials that otherwise wouldnt be possible.
 
-Note: Plex Pass is required.
-
 ## Installation
 
 Docker compose example including plex:
