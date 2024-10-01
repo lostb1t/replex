@@ -106,6 +106,8 @@ pub struct Config {
         deserialize_with = "figment::util::bool_from_str_or_int"
     )]
     pub ntf_watchlist_force: bool,
+    #[serde(default, deserialize_with = "deserialize_comma_seperated_string")]
+    pub custom_sorting: Option<Vec<String>>,
 }
 
 fn default_cache_ttl() -> u64 {

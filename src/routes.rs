@@ -709,6 +709,9 @@ pub async fn get_collections_children(
             offset,
             limit,
         })
+        .with_transform(HubReorderTransform {
+            collection_ids: collection_ids.clone()
+       })
         .with_transform(HubRestrictionTransform)
         .with_transform(CollectionStyleTransform {
             collection_ids: collection_ids.clone(),

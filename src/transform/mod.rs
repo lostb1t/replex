@@ -9,6 +9,7 @@ pub mod hub_section_directory;
 pub mod hub_style;
 pub mod library_interleave;
 pub mod restrictions;
+pub mod hub_reorder;
 
 pub use collection_style::CollectionStyleTransform;
 pub use hub_interleave::HubInterleaveTransform;
@@ -20,6 +21,7 @@ pub use media_style::MediaStyleTransform;
 pub use hub_section_directory::HubSectionDirectoryTransform;
 pub use hub_style::{ClientHeroStyle, HubStyleTransform};
 pub use library_interleave::LibraryInterleaveTransform;
+pub use hub_reorder::HubReorderTransform;
 pub use restrictions::HubRestrictionTransform;
 
 use crate::{
