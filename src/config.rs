@@ -1,7 +1,6 @@
 use crate::models::deserialize_comma_seperated_string;
-use figment::{providers::Env, Figment};
+use figment::{providers::Format, providers::Yaml, providers::Env, Figment};
 use serde::{Deserialize, Deserializer};
-// use serde::Deserialize;
 
 fn default_as_false() -> bool {
     false
@@ -141,7 +140,10 @@ impl Config {
     // Note the `nested` option on both `file` providers. This makes each
     // top-level dictionary act as a profile.
     pub fn figment() -> Figment {
-        Figment::new().merge(Env::prefixed("REPLEX_"))
+        Figment::new()
+          .merge(Yaml::file("replex.yaml"))
+          .merge(Yaml::file("replex.yml"))
+          .merge(Env::prefixed("REPLEX_"))
     }
 
     pub fn dynamic(req: &salvo::Request) -> Figment {

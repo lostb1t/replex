@@ -1,0 +1,34 @@
+plex:
+  # Url of your plex instance
+  host: http://YOURPLEX
+  # server admin plex token, needed for hero images. To find your token see: https://support.plex.tv/articles/204059436-finding-an-authentication
+  token: YOURPLEXTOKE
+  
+server:
+  # Port replex should bind to
+  address: 0.0.0.0:80
+    
+settings:
+  # Time to live for general caches in seconds. Set to 0 to disable (higly recommended to keep enabled besides testing purposes).
+  cache_ttl: 1800
+  exclude_watched: true
+  disable_continue_watching: false
+  disable_user_state: false
+  disable_leaf_count: false
+  disable_related: false
+  disable_transcode: false
+  enable_hub_restrictions: true
+
+streaming:
+  redirect_streams: false
+  force_maximum_quality: false
+  auto_select_version: false
+  
+  # Choices are 1080 or 4k
+  video_transcode_fallback_for: 
+    - 4k
+  
+  # Force direct play for the given resolutions. 
+  # Options are "4k", "1080" and "720".This wil result in an error message if the client does not support directplay. Not recommended  
+  # force_direct_play_for: 
+  #   - "1080"
