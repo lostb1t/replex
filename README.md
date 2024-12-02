@@ -4,6 +4,11 @@ Remix your plex hubs
 
 ![plot](./examplewithhero.png)
 
+### Looking for maintainers
+
+I moved away from Plex and therefore this project is in need of an maintainer.
+The project is fully functional but needs regular small updates to keep in sync with clients.
+
 ## Features
 
 - Merge hubs (recommended rows) from different libraries into a [single hub](./interleave.png) (interleave). Aka have movies and shows in a single row.
