@@ -7,7 +7,6 @@ Remix your plex hubs
 ### Looking for maintainers
 
 I moved away from Plex and therefore this project is in need of an maintainer.
-The project is fully functional but needs regular small updates to keep in sync with clients.
 
 ## Features
 
